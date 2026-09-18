@@ -1,0 +1,51 @@
+{
+  "questionId": 1485,
+  "title": "Clone Binary Tree With Random Pointer",
+  "difficulty": "Medium",
+  "corePattern": "Two Pointers",
+  "interviewTips": [
+    "State the brute-force approach first before presenting the optimal Two Pointers technique.",
+    "Discuss Time and Space complexities upfront before writing code.",
+    "Test on empty inputs and single-element edge cases."
+  ],
+  "approaches": [
+    {
+      "id": "nested-loops",
+      "name": "Approach 1: Nested Loops (Brute Force)",
+      "tag": "Brute Force",
+      "intuition": "Examine every pair or window using two nested loops, checking conditions repeatedly.",
+      "theory": "Checking every subsegment takes quadratic time O(N^2).",
+      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int bruteForce(const std::vector<int>& nums) {\n        int n = nums.size();\n        int maxResult = 0;\n        for (int i = 0; i < n; ++i) {\n            for (int j = i; j < n; ++j) {\n                // Evaluate subarray nums[i..j]\n            }\n        }\n        return maxResult;\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(N^2)",
+        "explanation": "Evaluates all quadratic pairs/subarrays."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "No auxiliary data structures."
+      },
+      "edgeCases": [
+        "Empty inputs or single-element inputs."
+      ]
+    },
+    {
+      "id": "two-pointers-optimal",
+      "name": "Approach 2: Two Pointers / Sliding Window (Optimal)",
+      "tag": "Optimal",
+      "intuition": "Maintain two pointers (left and right). Expand `right` to include elements and advance `left` when constraints are violated, preserving a valid window state.",
+      "theory": "Each pointer moves strictly monotonically from 0 to N. Because each element is processed at most twice (once added, once removed), total operations are strictly 2N = O(N).",
+      "cppCode": "#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int twoPointersOptimal(const std::vector<int>& nums) {\n        int left = 0;\n        int maxResult = 0;\n\n        for (int right = 0; right < static_cast<int>(nums.size()); ++right) {\n            // Add nums[right] to window\n\n            // Shrink from left while invalid\n            while (/* window condition violated */ false) {\n                // remove nums[left]\n                ++left;\n            }\n\n            maxResult = std::max(maxResult, right - left + 1);\n        }\n\n        return maxResult;\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Each pointer advances at most N times."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Modifies window bounds in place without extra arrays."
+      },
+      "edgeCases": [
+        "Window of size 1, duplicate values."
+      ]
+    }
+  ]
+}

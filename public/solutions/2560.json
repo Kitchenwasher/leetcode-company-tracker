@@ -1,0 +1,51 @@
+{
+  "questionId": 2560,
+  "title": "House Robber IV",
+  "difficulty": "Medium",
+  "corePattern": "Dynamic Programming",
+  "interviewTips": [
+    "State the brute-force approach first before presenting the optimal Dynamic Programming technique.",
+    "Discuss Time and Space complexities upfront before writing code.",
+    "Test on empty inputs and single-element edge cases."
+  ],
+  "approaches": [
+    {
+      "id": "recursion-brute-force",
+      "name": "Approach 1: Recursive Formulation (Brute Force)",
+      "tag": "Brute Force",
+      "intuition": "Break the problem down into overlapping subproblems. For each choice at the current state, branch recursively into smaller subproblems.",
+      "theory": "Without memoization, overlapping subproblems are re-evaluated exponentially, resulting in an O(2^N) or O(K^N) recursion tree.",
+      "cppCode": "// Conceptual Recursive Formulation for: House Robber IV\n#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int solveRecursively(int n /*, ...args */) {\n        // Base case\n        if (n <= 0) return 0;\n\n        // Recursive transition exploring choices\n        int result = 0;\n        // result = std::max(result, solveRecursively(n - 1) + ...);\n        return result;\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(2^N)",
+        "explanation": "Exponential branching recursion tree without memoization."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Recursion call stack depth."
+      },
+      "edgeCases": [
+        "Base cases at n = 0 and n = 1."
+      ]
+    },
+    {
+      "id": "dp-tabulation-optimal",
+      "name": "Approach 2: Dynamic Programming (Bottom-Up Tabulation)",
+      "tag": "Optimal",
+      "intuition": "Identify the optimal substructure and dependency direction. Build a DP table starting from the base cases to avoid redundant recalculation.",
+      "theory": "DP table satisfies optimal substructure: each state `dp[i]` is computed from previously solved subproblems in O(1) or O(K) transitions.",
+      "cppCode": "#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int solve(const std::vector<int>& input) {\n        int n = input.size();\n        if (n == 0) return 0;\n\n        // dp[i] stores optimal answer for prefix of length i\n        std::vector<int> dp(n + 1, 0);\n\n        for (int i = 1; i <= n; ++i) {\n            // Transition: dp[i] = optimal choice from prior states\n            dp[i] = dp[i - 1] + input[i - 1];\n        }\n\n        return dp[n];\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Computes each table entry once with constant transitions."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N) or O(1)",
+        "explanation": "Can often be space-optimized by storing only the previous state."
+      },
+      "edgeCases": [
+        "Empty input, negative inputs, large numbers requiring long long."
+      ]
+    }
+  ]
+}

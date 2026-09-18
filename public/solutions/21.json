@@ -1,0 +1,40 @@
+{
+  "questionId": 21,
+  "title": "Merge Two Sorted Lists",
+  "difficulty": "Easy",
+  "corePattern": "Two Pointers with Dummy Head Node",
+  "interviewTips": [
+    "Using a dummy node simplifies pointer logic by eliminating edge cases for the head pointer.",
+    "Once one list is exhausted, directly splice the remainder of the other list in O(1)."
+  ],
+  "approaches": [
+    {
+      "id": "iterative-dummy",
+      "name": "Approach 1: Iterative with Dummy Node (Optimal)",
+      "tag": "Optimal",
+      "intuition": "Create a dummy head node. Compare the current nodes of list1 and list2, attach the smaller node to `curr->next`, and advance that list. When one list ends, splice the remaining nodes.",
+      "theory": "Because both lists are already sorted, the smallest remaining element is always at either `list1` or `list2`. We merge them in a manner identical to the merge step of Merge Sort.",
+      "cppCode": "struct ListNode {\n    int val;\n    ListNode *next;\n    ListNode() : val(0), next(nullptr) {}\n    ListNode(int x) : val(x), next(nullptr) {}\n    ListNode(int x, ListNode *next) : val(x), next(next) {}\n};\n\nclass Solution {\npublic:\n    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {\n        ListNode dummy(0);\n        ListNode* tail = &dummy;\n\n        while (list1 != nullptr && list2 != nullptr) {\n            if (list1->val <= list2->val) {\n                tail->next = list1;\n                list1 = list1->next;\n            } else {\n                tail->next = list2;\n                list2 = list2->next;\n            }\n            tail = tail->next;\n        }\n\n        // Attach whatever is left of either list\n        tail->next = (list1 != nullptr) ? list1 : list2;\n\n        return dummy.next;\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(N + M)",
+        "explanation": "Every iteration advances one of the two list pointers; visits at most N + M nodes."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "No new heap nodes created; only rearranges existing pointers."
+      },
+      "dryRunExample": {
+        "input": "l1 = 1->2->4, l2 = 1->3->4",
+        "steps": [
+          "tail attaches 1 (l1), then 1 (l2), then 2 (l1), then 3 (l2), then 4 (l1), then 4 (l2)",
+          "Returns 1->1->2->3->4->4"
+        ],
+        "output": "1 -> 1 -> 2 -> 3 -> 4 -> 4"
+      },
+      "edgeCases": [
+        "One list is null: returns the other list immediately.",
+        "Both lists null: returns nullptr."
+      ]
+    }
+  ]
+}

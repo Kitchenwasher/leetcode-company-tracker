@@ -1,0 +1,74 @@
+{
+  "questionId": 20,
+  "title": "Valid Parentheses",
+  "difficulty": "Easy",
+  "corePattern": "Stack (Last-In-First-Out Matching)",
+  "interviewTips": [
+    "Explain why a simple counter doesn't work when multiple bracket types are interleaved (e.g. '([)]').",
+    "State how the Stack data structure perfectly models nested balanced structures."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: String Replacement (Naive)",
+      "tag": "Brute Force",
+      "intuition": "Repeatedly scan the string for matching adjacent pairs '()', '[]', and '{}', and delete them. Repeat until no more pairs can be removed. If the string is empty, it is valid.",
+      "theory": "Each string search and substring deletion takes O(N). In the worst case, we do this N / 2 times, resulting in O(N^2) time complexity.",
+      "cppCode": "#include <string>\n\nclass Solution {\npublic:\n    bool isValid(std::string s) {\n        if (s.length() % 2 != 0) return false;\n\n        bool changed = true;\n        while (changed) {\n            changed = false;\n            size_t pos;\n            if ((pos = s.find(\"()\")) != std::string::npos) {\n                s.erase(pos, 2);\n                changed = true;\n            } else if ((pos = s.find(\"[]\")) != std::string::npos) {\n                s.erase(pos, 2);\n                changed = true;\n            } else if ((pos = s.find(\"{}\")) != std::string::npos) {\n                s.erase(pos, 2);\n                changed = true;\n            }\n        }\n        return s.empty();\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(N^2)",
+        "explanation": "Searching and erasing from strings takes linear time, repeated up to N/2 times."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Modifies copy of string."
+      },
+      "dryRunExample": {
+        "input": "s = \"{[]}\"",
+        "steps": [
+          "Found \"[]\" at pos 1 -> erases to \"{}\"",
+          "Found \"{}\" at pos 0 -> erases to \"\"",
+          "s is empty -> true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "Odd length string: immediately false.",
+        "Single character: false."
+      ]
+    },
+    {
+      "id": "stack-optimal",
+      "name": "Approach 2: Stack Matching (Optimal)",
+      "tag": "Optimal",
+      "intuition": "Every opening bracket must match the most recent unmatched opening bracket of the same type. Use a stack to push expected closing brackets when an open bracket is seen, and pop & compare on closing brackets.",
+      "theory": "Pushing the corresponding closing bracket on seeing an opening bracket simplifies matching: on encountering any closing bracket, simply check if `stack.top() == c`. If stack is empty or tops don't match, string is invalid.",
+      "cppCode": "#include <string>\n#include <stack>\n\nclass Solution {\npublic:\n    bool isValid(const std::string& s) {\n        // An odd length string can never be balanced\n        if (s.length() % 2 != 0) return false;\n\n        std::stack<char> st;\n\n        for (char c : s) {\n            if (c == '(') {\n                st.push(')');\n            } else if (c == '[') {\n                st.push(']');\n            } else if (c == '{') {\n                st.push('}');\n            } else {\n                // Closing bracket: stack must not be empty and top must match\n                if (st.empty() || st.top() != c) {\n                    return false;\n                }\n                st.pop();\n            }\n        }\n\n        // Must be completely matched (stack empty)\n        return st.empty();\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Single pass iterating through all N characters, with O(1) stack operations."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N)",
+        "explanation": "In the worst case (e.g. '(((((('), the stack holds all N characters."
+      },
+      "dryRunExample": {
+        "input": "s = \"()[]{}\"",
+        "steps": [
+          "c='(': push ')' -> stack: [')']",
+          "c=')': top is ')' -> pop -> stack: []",
+          "c='[': push ']' -> stack: [']']",
+          "c=']': top is ']' -> pop -> stack: []",
+          "c='{': push '}' -> stack: ['}']",
+          "c='}': top is '}' -> pop -> stack: []",
+          "Stack empty at end -> true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "Closing bracket with empty stack (e.g. ']'): returns false without crashing.",
+        "Unmatched opening brackets remaining at end (e.g. '(()'): returns false."
+      ]
+    }
+  ]
+}

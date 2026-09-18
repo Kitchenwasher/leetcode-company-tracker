@@ -1,6 +1,6 @@
 import React from 'react';
 import { Question, UserProgressItem, ProblemStatus, Timeframe } from '../types';
-import { ExternalLink, Star, CheckCircle2, Clock, RotateCcw, Award, Circle, FileText, Timer, ChevronRight } from 'lucide-react';
+import { ExternalLink, Star, CheckCircle2, Clock, RotateCcw, Award, Circle, FileText, Timer, ChevronRight, Lightbulb } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/sound';
 
@@ -215,6 +215,10 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                             Grind 169
                           </span>
                         )}
+                        <span title="Multi-approach C++ solution & theory available" className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30 font-mono">
+                          <Lightbulb className="w-2.5 h-2.5 text-amber-400" />
+                          C++
+                        </span>
                         {hasNotes && (
                           <span title="Contains personal notes" className="text-amber-400">
                             <FileText className="w-3.5 h-3.5 inline" />

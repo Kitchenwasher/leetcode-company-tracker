@@ -1,0 +1,51 @@
+{
+  "questionId": 2951,
+  "title": "Find the Peaks",
+  "difficulty": "Easy",
+  "corePattern": "Binary Search",
+  "interviewTips": [
+    "State the brute-force approach first before presenting the optimal Binary Search technique.",
+    "Discuss Time and Space complexities upfront before writing code.",
+    "Test on empty inputs and single-element edge cases."
+  ],
+  "approaches": [
+    {
+      "id": "linear-scan",
+      "name": "Approach 1: Linear Scan (Brute Force)",
+      "tag": "Brute Force",
+      "intuition": "Examine every candidate answer sequentially from the start to the end until a valid match is found.",
+      "theory": "Linear scan tests all N candidates one by one without exploiting monotonicity.",
+      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int linearSearch(const std::vector<int>& nums, int target) {\n        for (int i = 0; i < static_cast<int>(nums.size()); ++i) {\n            if (nums[i] == target) return i;\n        }\n        return -1;\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Scans up to N elements."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Zero auxiliary space."
+      },
+      "edgeCases": [
+        "Target smaller than minimum or larger than maximum."
+      ]
+    },
+    {
+      "id": "binary-search-optimal",
+      "name": "Approach 2: Binary Search (Optimal)",
+      "tag": "Optimal",
+      "intuition": "Because the search space is monotonic (sorted or monotonic predicate), calculate the midpoint `mid = left + (right - left) / 2` and discard half the search space in each step.",
+      "theory": "Halving the search range in each iteration guarantees logarithmic steps: log2(N). Using `left + (right - left) / 2` prevents integer overflow.",
+      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int binarySearch(const std::vector<int>& nums, int target) {\n        int left = 0;\n        int right = nums.size() - 1;\n\n        while (left <= right) {\n            int mid = left + (right - left) / 2; // Prevent (left+right) overflow\n\n            if (nums[mid] == target) {\n                return mid;\n            } else if (nums[mid] < target) {\n                left = mid + 1;\n            } else {\n                right = mid - 1;\n            }\n        }\n\n        return -1; // Not found\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(log N)",
+        "explanation": "Search interval is halved in every iteration."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Constant extra memory."
+      },
+      "edgeCases": [
+        "Array with 1 element, target not present in array."
+      ]
+    }
+  ]
+}

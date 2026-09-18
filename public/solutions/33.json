@@ -1,0 +1,43 @@
+{
+  "questionId": 33,
+  "title": "Search in Rotated Sorted Array",
+  "difficulty": "Medium",
+  "corePattern": "Modified Binary Search (Sorted Half Invariant)",
+  "interviewTips": [
+    "Key insight: Any rotated sorted array cut in half will ALWAYS have at least one sorted half.",
+    "Determine which half is sorted first, then check if target falls within that sorted half's bounds."
+  ],
+  "approaches": [
+    {
+      "id": "binary-search-modified",
+      "name": "Approach 1: One-Pass Modified Binary Search (Optimal)",
+      "tag": "Optimal",
+      "intuition": "Divide the array at `mid`. At least one half (`nums[left..mid]` or `nums[mid..right]`) must be strictly sorted. Check if the target falls within that sorted half; if yes, narrow search to that half; otherwise, search the other half.",
+      "theory": "Invariant: If `nums[left] <= nums[mid]`, the left half is sorted. Target is in left half if `nums[left] <= target < nums[mid]`. Otherwise, the right half is sorted, and target is in right if `nums[mid] < target <= nums[right]`.",
+      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int search(const std::vector<int>& nums, int target) {\n        int left = 0;\n        int right = nums.size() - 1;\n\n        while (left <= right) {\n            int mid = left + (right - left) / 2;\n\n            if (nums[mid] == target) {\n                return mid;\n            }\n\n            // Check if left half is normally sorted\n            if (nums[left] <= nums[mid]) {\n                // Target is within left sorted range\n                if (nums[left] <= target && target < nums[mid]) {\n                    right = mid - 1;\n                } else {\n                    left = mid + 1;\n                }\n            } else {\n                // Right half is normally sorted\n                if (nums[mid] < target && target <= nums[right]) {\n                    left = mid + 1;\n                } else {\n                    right = mid - 1;\n                }\n            }\n        }\n\n        return -1;\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(log N)",
+        "explanation": "Search range halved at each step."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only index variables used."
+      },
+      "dryRunExample": {
+        "input": "nums = [4,5,6,7,0,1,2], target = 0",
+        "steps": [
+          "left=0 (4), right=6 (2), mid=3 (7): left half [4..7] is sorted.",
+          "target 0 is not in [4..7], so left = mid + 1 = 4",
+          "left=4 (0), right=6 (2), mid=5 (1): right half [1..2] is sorted.",
+          "target 0 is in left side, right = mid - 1 = 4",
+          "left=4, right=4, mid=4 (0): nums[mid] == 0! Match found at index 4."
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "Array with 1 or 2 elements.",
+        "Target not found: returns -1."
+      ]
+    }
+  ]
+}
