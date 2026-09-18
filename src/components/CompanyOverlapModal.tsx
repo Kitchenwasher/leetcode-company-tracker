@@ -166,9 +166,19 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
                         <span className="font-mono text-xs text-slate-400">#{q.id}</span>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors truncate text-sm">
+                            <a
+                              href={`#/problem/${q.id}`}
+                              onClick={(e) => {
+                                if (!e.ctrlKey && !e.metaKey && e.button === 0) {
+                                  e.preventDefault();
+                                  onSelectQuestion(q);
+                                  onClose();
+                                }
+                              }}
+                              className="font-semibold text-slate-200 group-hover:text-indigo-300 hover:underline transition-colors truncate text-sm"
+                            >
                               {q.title}
-                            </span>
+                            </a>
                             {isSolved && (
                               <span className="text-[10px] px-1.5 py-0.2 bg-emerald-500/15 text-emerald-300 rounded border border-emerald-500/30">
                                 Solved

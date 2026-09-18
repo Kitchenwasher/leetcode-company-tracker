@@ -179,7 +179,18 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {/* Title */}
         <h3 className="font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors text-base line-clamp-2 mb-2.5">
-          {q.title}
+          <a
+            href={`#/problem/${q.id}`}
+            onClick={(e) => {
+              if (!e.ctrlKey && !e.metaKey && e.button === 0) {
+                e.preventDefault();
+                onOpenDetail(q);
+              }
+            }}
+            className="hover:underline"
+          >
+            {q.title}
+          </a>
         </h3>
 
         {/* Topics */}

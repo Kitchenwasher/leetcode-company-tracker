@@ -226,7 +226,15 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
 
               {/* Problem Title */}
               <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-4">
-                {currentQuestion.title}
+                <a
+                  href={`#/problem/${currentQuestion.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-indigo-400 hover:underline transition-colors"
+                  title="Open dedicated Problem Workspace in new tab"
+                >
+                  {currentQuestion.title}
+                </a>
               </h2>
 
               {/* Topics Pills */}

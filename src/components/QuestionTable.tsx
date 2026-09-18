@@ -201,9 +201,18 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                   <td className="py-3 px-4">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-slate-100 dark:text-slate-100 text-slate-900 group-hover:text-indigo-400 transition-colors">
+                        <a
+                          href={`#/problem/${q.id}`}
+                          onClick={(e) => {
+                            if (!e.ctrlKey && !e.metaKey && e.button === 0) {
+                              e.preventDefault();
+                              onOpenDetail(q);
+                            }
+                          }}
+                          className="font-semibold text-slate-100 dark:text-slate-100 text-slate-900 group-hover:text-indigo-400 hover:underline transition-colors"
+                        >
                           {q.title}
-                        </span>
+                        </a>
 
                         {q.isBlind75 && (
                           <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-xs">

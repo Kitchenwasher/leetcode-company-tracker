@@ -18,6 +18,7 @@ import { TimeframeTabs } from './components/TimeframeTabs';
 import { FilterBar } from './components/FilterBar';
 import { QuestionTable } from './components/QuestionTable';
 import { QuestionCard } from './components/QuestionCard';
+import { ProblemWorkspacePage } from './components/ProblemWorkspacePage';
 import { QuestionDetailModal } from './components/QuestionDetailModal';
 import { CompanyOverlapModal } from './components/CompanyOverlapModal';
 import { MockInterviewModal } from './components/MockInterviewModal';
@@ -36,12 +37,22 @@ const TOP_FAANG_PILLS = [
   'google', 'meta', 'amazon', 'microsoft', 'apple', 'netflix', 'uber', 'bloomberg'
 ];
 
+const getProblemIdFromHash = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const hash = window.location.hash;
+  const match = hash.match(/^#\/problem\/([0-9a-zA-Z_-]+)/);
+  return match ? match[1] : null;
+};
+
 export const App: React.FC = () => {
   const { user } = useAuth();
   const [store, setStore] = useState<UserStoreState>(() => loadStoredState(user?.id));
   const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // URL Hash Router State for Dedicated Problem Workspace Page
+  const [activeProblemId, setActiveProblemId] = useState<string | null>(() => getProblemIdFromHash());
 
   // Keyboard navigation focused row
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
@@ -55,6 +66,16 @@ export const App: React.FC = () => {
   const [showPlannerModal, setShowPlannerModal] = useState<boolean>(false);
   const [showFlashcardModal, setShowFlashcardModal] = useState<boolean>(false);
   const [showLeetCodeSyncModal, setShowLeetCodeSyncModal] = useState<boolean>(false);
+
+  // Listen for hash changes (back/forward navigation & direct links)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const pId = getProblemIdFromHash();
+      setActiveProblemId(pId);
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -363,12 +384,28 @@ export const App: React.FC = () => {
     });
   }, []);
 
+  const handleOpenProblem = useCallback((q: Question | number | string) => {
+    const qId = typeof q === 'object' ? q.id : q;
+    window.location.hash = `#/problem/${qId}`;
+    setActiveProblemId(String(qId));
+  }, []);
+
+  const handleBackToDashboard = useCallback(() => {
+    window.location.hash = '';
+    setActiveProblemId(null);
+  }, []);
+
+  const activeProblemQuestion = useMemo(() => {
+    if (!activeProblemId) return null;
+    return allQuestions.find((q) => String(q.id) === String(activeProblemId)) || null;
+  }, [activeProblemId, allQuestions]);
+
   // Random Roulette
   const handleRandomRoulette = () => {
     if (filteredQuestions.length === 0) return;
     const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
     const chosen = filteredQuestions[randomIndex];
-    setDetailQuestion(chosen);
+    handleOpenProblem(chosen);
     sounds.playSuccess();
     confetti({
       particleCount: 45,
@@ -387,6 +424,10 @@ export const App: React.FC = () => {
       }
 
       if (e.key === 'Escape') {
+        if (activeProblemId) {
+          handleBackToDashboard();
+          return;
+        }
         setDetailQuestion(null);
         setShowOverlapModal(false);
         setShowMockModal(false);
@@ -395,8 +436,8 @@ export const App: React.FC = () => {
         return;
       }
 
-      // If a modal is open, let user close it, don't execute background shortcuts
-      if (detailQuestion || showOverlapModal || showMockModal || showAnalyticsModal || showShortcutsModal) {
+      // If in problem page or a modal is open, don't execute background list shortcuts
+      if (activeProblemId || detailQuestion || showOverlapModal || showMockModal || showAnalyticsModal || showShortcutsModal) {
         return;
       }
 
@@ -416,7 +457,7 @@ export const App: React.FC = () => {
         e.preventDefault();
         const activeQ = paginatedQuestions[focusedIndex];
         if (activeQ) {
-          setDetailQuestion(activeQ);
+          handleOpenProblem(activeQ);
         }
         return;
       }
@@ -520,274 +561,311 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#080d1a] dark:bg-[#080d1a] bg-slate-50 text-slate-100 dark:text-slate-100 text-slate-900 flex flex-col font-sans selection:bg-indigo-500/30 bg-ambient-grid transition-colors">
-      {/* Top Navbar */}
-      <Navbar
-        companies={companiesDict}
-        selectedCompanyId={store.selectedCompany}
-        onSelectCompany={(cId) => updateStore({ selectedCompany: cId })}
-        state={store}
-        onUpdateState={updateStore}
-        filteredQuestions={filteredQuestions}
-        totalSolved={totalSolvedCount}
-        currentStreak={currentStreak}
-        onOpenOverlap={() => setShowOverlapModal(true)}
-        onOpenMock={() => setShowMockModal(true)}
-        onOpenAnalytics={() => setShowAnalyticsModal(true)}
-        onOpenShortcuts={() => setShowShortcutsModal(true)}
-        onRandomRoulette={handleRandomRoulette}
-        onOpenPlanner={() => setShowPlannerModal(true)}
-        onOpenFlashcards={() => setShowFlashcardModal(true)}
-        onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-      />
+      {activeProblemId ? (
+        isLoading ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 text-slate-400 min-h-[60vh]">
+            <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-medium">Loading problem workspace #{activeProblemId}...</span>
+          </div>
+        ) : activeProblemQuestion ? (
+          <ProblemWorkspacePage
+            question={activeProblemQuestion}
+            allQuestions={displayQuestions.length > 0 ? displayQuestions : allQuestions}
+            progress={store.progress[String(activeProblemQuestion.id)]}
+            companyId={store.selectedCompany}
+            onBack={handleBackToDashboard}
+            onNavigateToProblem={handleOpenProblem}
+            onSaveProgress={(patch) => handleSaveProgressPatch(activeProblemQuestion.id, patch)}
+          />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-300 min-h-[70vh] space-y-4">
+            <div className="p-4 bg-rose-500/15 border border-rose-500/30 rounded-2xl text-rose-400 shadow-xl">
+              <AlertCircle className="w-10 h-10" />
+            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Problem #{activeProblemId} Not Found</h2>
+            <p className="text-sm text-slate-400 max-w-md">
+              We couldn't locate this problem in the indexed database of 3,399 interview questions.
+            </p>
+            <button
+              onClick={handleBackToDashboard}
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg transition-all"
+            >
+              ← Return to Problem List
+            </button>
+          </div>
+        )
+      ) : (
+        <>
+          {/* Top Navbar */}
+          <Navbar
+            companies={companiesDict}
+            selectedCompanyId={store.selectedCompany}
+            onSelectCompany={(cId) => updateStore({ selectedCompany: cId })}
+            state={store}
+            onUpdateState={updateStore}
+            filteredQuestions={filteredQuestions}
+            totalSolved={totalSolvedCount}
+            currentStreak={currentStreak}
+            onOpenOverlap={() => setShowOverlapModal(true)}
+            onOpenMock={() => setShowMockModal(true)}
+            onOpenAnalytics={() => setShowAnalyticsModal(true)}
+            onOpenShortcuts={() => setShowShortcutsModal(true)}
+            onRandomRoulette={handleRandomRoulette}
+            onOpenPlanner={() => setShowPlannerModal(true)}
+            onOpenFlashcards={() => setShowFlashcardModal(true)}
+            onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+          />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Company Header Banner */}
-        <div className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-indigo-950/40 border border-slate-800 shadow-2xl">
-          <div className="absolute right-0 top-0 bottom-0 w-96 bg-gradient-to-l from-indigo-500/10 to-transparent pointer-events-none" />
+          {/* Main Content Area */}
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+            {/* Company Header Banner */}
+            <div className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-indigo-950/40 border border-slate-800 shadow-2xl">
+              <div className="absolute right-0 top-0 bottom-0 w-96 bg-gradient-to-l from-indigo-500/10 to-transparent pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col gap-5">
-            {/* Top row: Company details + Timeframe selector */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex items-start gap-4">
-                <CompanyLogo companyId={store.selectedCompany} size="xl" className="shadow-lg mt-0.5" />
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                      {activeCompanyMeta?.name || store.selectedCompany}
-                    </h1>
-                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                      {activeCompanyMeta?.tier || 'Tech'}
-                    </span>
-                    {activeCompanyMeta?.thirtyDaysCount > 0 && (
-                      <span className="flex items-center gap-1 px-2.5 py-0.5 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                        <Flame className="w-3.5 h-3.5 text-amber-400" />
-                        {activeCompanyMeta.thirtyDaysCount} Hot in 30 Days
-                      </span>
-                    )}
+              <div className="relative z-10 flex flex-col gap-5">
+                {/* Top row: Company details + Timeframe selector */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex items-start gap-4">
+                    <CompanyLogo companyId={store.selectedCompany} size="xl" className="shadow-lg mt-0.5" />
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                          {activeCompanyMeta?.name || store.selectedCompany}
+                        </h1>
+                        <span className="px-2.5 py-0.5 text-xs font-semibold rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+                          {activeCompanyMeta?.tier || 'Tech'}
+                        </span>
+                        {activeCompanyMeta?.thirtyDaysCount > 0 && (
+                          <span className="flex items-center gap-1 px-2.5 py-0.5 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                            <Flame className="w-3.5 h-3.5 text-amber-400" />
+                            {activeCompanyMeta.thirtyDaysCount} Hot in 30 Days
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                        Track and solve verified LeetCode interview questions curated for {activeCompanyMeta?.name || store.selectedCompany}.
+                      </p>
+
+                      {/* Company stats pills */}
+                      <div className="flex flex-wrap items-center gap-2.5 mt-2.5 text-xs font-mono">
+                        <span className="text-slate-300">
+                          <strong className="text-white">{activeCompanyMeta?.totalQuestions || 0}</strong> total
+                        </span>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-emerald-400">
+                          {activeCompanyMeta?.diffCounts?.Easy || 0} Easy
+                        </span>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-amber-400">
+                          {activeCompanyMeta?.diffCounts?.Medium || 0} Medium
+                        </span>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-rose-400">
+                          {activeCompanyMeta?.diffCounts?.Hard || 0} Hard
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                    Track and solve verified LeetCode interview questions curated for {activeCompanyMeta?.name || store.selectedCompany}.
-                  </p>
+                  {/* Timeframe selector tabs */}
+                  <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      Recency Timeframe
+                    </span>
+                    <TimeframeTabs
+                      selectedTimeframe={store.selectedTimeframe}
+                      onSelectTimeframe={(tf) => updateStore({ selectedTimeframe: tf })}
+                      companyMeta={activeCompanyMeta}
+                    />
+                  </div>
+                </div>
 
-                  {/* Company stats pills */}
-                  <div className="flex flex-wrap items-center gap-2.5 mt-2.5 text-xs font-mono">
+                {/* Quick Switch Pills for Top Companies & Daily Goal Tracker */}
+                <div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+                  {/* Quick switch company buttons */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                    <span className="text-slate-400 mr-1 font-medium hidden lg:inline">Quick Jump:</span>
+                    {TOP_FAANG_PILLS.map((cId) => {
+                      const isCur = store.selectedCompany === cId;
+                      const cMeta = companiesDict[cId];
+                      return (
+                        <button
+                          key={cId}
+                          onClick={() => {
+                            sounds.playClick();
+                            updateStore({ selectedCompany: cId });
+                          }}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all ${
+                            isCur
+                              ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                              : 'bg-slate-800/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                          }`}
+                        >
+                          <CompanyLogo companyId={cId} size="sm" />
+                          <span className="capitalize">{cMeta?.name || cId}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Today's Goal Progress */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/60 border border-slate-800 shrink-0">
+                    <Target className="w-3.5 h-3.5 text-indigo-400" />
                     <span className="text-slate-300">
-                      <strong className="text-white">{activeCompanyMeta?.totalQuestions || 0}</strong> total
+                      Daily Goal: <strong className="text-white">{todaySolvedCount}</strong> / {store.dailyGoal} solved
                     </span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-emerald-400">
-                      {activeCompanyMeta?.diffCounts?.Easy || 0} Easy
-                    </span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-amber-400">
-                      {activeCompanyMeta?.diffCounts?.Medium || 0} Medium
-                    </span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-rose-400">
-                      {activeCompanyMeta?.diffCounts?.Hard || 0} Hard
-                    </span>
+                    <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-indigo-500 rounded-full transition-all"
+                        style={{ width: `${Math.min(100, (todaySolvedCount / store.dailyGoal) * 100)}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Timeframe selector tabs */}
-              <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  Recency Timeframe
-                </span>
-                <TimeframeTabs
-                  selectedTimeframe={store.selectedTimeframe}
-                  onSelectTimeframe={(tf) => updateStore({ selectedTimeframe: tf })}
-                  companyMeta={activeCompanyMeta}
-                />
-              </div>
             </div>
 
-            {/* Quick Switch Pills for Top Companies & Daily Goal Tracker */}
-            <div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-              {/* Quick switch company buttons */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                <span className="text-slate-400 mr-1 font-medium hidden lg:inline">Quick Jump:</span>
-                {TOP_FAANG_PILLS.map((cId) => {
-                  const isCur = store.selectedCompany === cId;
-                  const cMeta = companiesDict[cId];
-                  return (
-                    <button
-                      key={cId}
-                      onClick={() => {
-                        sounds.playClick();
-                        updateStore({ selectedCompany: cId });
-                      }}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all ${
-                        isCur
-                          ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                          : 'bg-slate-800/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                      }`}
-                    >
-                      <CompanyLogo companyId={cId} size="sm" />
-                      <span className="capitalize">{cMeta?.name || cId}</span>
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Filter & Control Bar */}
+            <FilterBar
+              state={store}
+              onChange={updateStore}
+              statusCounts={statusCounts}
+              topicsList={topicsList}
+            />
 
-              {/* Today's Goal Progress */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/60 border border-slate-800 shrink-0">
-                <Target className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-slate-300">
-                  Daily Goal: <strong className="text-white">{todaySolvedCount}</strong> / {store.dailyGoal} solved
-                </span>
-                <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-indigo-500 rounded-full transition-all"
-                    style={{ width: `${Math.min(100, (todaySolvedCount / store.dailyGoal) * 100)}%` }}
-                  />
-                </div>
+            {/* Keyboard navigation helper hint */}
+            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+              <div className="flex items-center gap-2">
+                <span>Tip: Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">j</kbd> / <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">k</kbd> to navigate, <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">Space</kbd> to solve, <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">Enter</kbd> to open.</span>
               </div>
+              <button onClick={() => setShowShortcutsModal(true)} className="hover:text-slate-200 underline">
+                View all shortcuts (?)
+              </button>
             </div>
-          </div>
-        </div>
 
-        {/* Filter & Control Bar */}
-        <FilterBar
-          state={store}
-          onChange={updateStore}
-          statusCounts={statusCounts}
-          topicsList={topicsList}
-        />
+            {/* Loading / Error States */}
+            {isLoading && (
+              <div className="py-24 flex flex-col items-center justify-center gap-3 text-slate-400">
+                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm font-medium">Indexing 3,399 interview questions across 659 companies...</span>
+              </div>
+            )}
 
-        {/* Keyboard navigation helper hint */}
-        <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-          <div className="flex items-center gap-2">
-            <span>Tip: Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">j</kbd> / <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">k</kbd> to navigate, <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">Space</kbd> to solve, <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">Enter</kbd> to open.</span>
-          </div>
-          <button onClick={() => setShowShortcutsModal(true)} className="hover:text-slate-200 underline">
-            View all shortcuts (?)
-          </button>
-        </div>
+            {error && (
+              <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-800/50 text-rose-300 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <span className="text-sm font-medium">Error: {error}</span>
+              </div>
+            )}
 
-        {/* Loading / Error States */}
-        {isLoading && (
-          <div className="py-24 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm font-medium">Indexing 3,399 interview questions across 659 companies...</span>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-800/50 text-rose-300 flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <span className="text-sm font-medium">Error: {error}</span>
-          </div>
-        )}
-
-        {/* Question Content: Table or Grid */}
-        {!isLoading && !error && (
-          <>
-            {store.viewMode === 'table' ? (
-              <QuestionTable
-                questions={paginatedQuestions}
-                progress={store.progress}
-                selectedCompany={store.selectedCompany}
-                selectedTimeframe={store.selectedTimeframe}
-                focusedIndex={focusedIndex}
-                onUpdateStatus={handleUpdateStatus}
-                onToggleFavorite={handleToggleFavorite}
-                onOpenDetail={(q) => setDetailQuestion(q)}
-                onStartTimer={(q) => setDetailQuestion(q)}
-                onSelectRow={(idx) => setFocusedIndex(idx)}
-              />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {paginatedQuestions.map((q, idx) => (
-                  <QuestionCard
-                    key={q.id}
-                    question={q}
-                    progress={store.progress[String(q.id)]}
+            {/* Question Content: Table or Grid */}
+            {!isLoading && !error && (
+              <>
+                {store.viewMode === 'table' ? (
+                  <QuestionTable
+                    questions={paginatedQuestions}
+                    progress={store.progress}
                     selectedCompany={store.selectedCompany}
                     selectedTimeframe={store.selectedTimeframe}
-                    isFocused={idx === focusedIndex}
+                    focusedIndex={focusedIndex}
                     onUpdateStatus={handleUpdateStatus}
                     onToggleFavorite={handleToggleFavorite}
-                    onOpenDetail={(targetQ) => setDetailQuestion(targetQ)}
-                    onStartTimer={(targetQ) => setDetailQuestion(targetQ)}
+                    onOpenDetail={(q) => handleOpenProblem(q)}
+                    onStartTimer={(q) => handleOpenProblem(q)}
+                    onSelectRow={(idx) => setFocusedIndex(idx)}
                   />
-                ))}
-              </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {paginatedQuestions.map((q, idx) => (
+                      <QuestionCard
+                        key={q.id}
+                        question={q}
+                        progress={store.progress[String(q.id)]}
+                        selectedCompany={store.selectedCompany}
+                        selectedTimeframe={store.selectedTimeframe}
+                        isFocused={idx === focusedIndex}
+                        onUpdateStatus={handleUpdateStatus}
+                        onToggleFavorite={handleToggleFavorite}
+                        onOpenDetail={(targetQ) => handleOpenProblem(targetQ)}
+                        onStartTimer={(targetQ) => handleOpenProblem(targetQ)}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Pagination Controls */}
+                {displayQuestions.length > pageSize && (
+                  <div className="flex items-center justify-between py-4 border-t border-slate-800/80 px-2 text-xs">
+                    <span className="text-slate-400">
+                      Showing <strong className="text-white">{(currentPage - 1) * pageSize + 1}</strong> to{' '}
+                      <strong className="text-white">
+                        {Math.min(currentPage * pageSize, displayQuestions.length)}
+                      </strong>{' '}
+                      of <strong className="text-white">{displayQuestions.length}</strong> problems
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          setCurrentPage((p) => Math.max(1, p - 1));
+                          setFocusedIndex(0);
+                        }}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+
+                      <span className="px-3 py-1 font-mono text-slate-300 bg-slate-900 border border-slate-800 rounded-xl">
+                        Page {currentPage} of {totalPages}
+                      </span>
+
+                      <button
+                        onClick={() => {
+                          setCurrentPage((p) => Math.min(totalPages, p + 1));
+                          setFocusedIndex(0);
+                        }}
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
+          </main>
 
-            {/* Pagination Controls */}
-            {displayQuestions.length > pageSize && (
-              <div className="flex items-center justify-between py-4 border-t border-slate-800/80 px-2 text-xs">
-                <span className="text-slate-400">
-                  Showing <strong className="text-white">{(currentPage - 1) * pageSize + 1}</strong> to{' '}
-                  <strong className="text-white">
-                    {Math.min(currentPage * pageSize, displayQuestions.length)}
-                  </strong>{' '}
-                  of <strong className="text-white">{displayQuestions.length}</strong> problems
-                </span>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => {
-                      setCurrentPage((p) => Math.max(1, p - 1));
-                      setFocusedIndex(0);
-                    }}
-                    disabled={currentPage === 1}
-                    className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-
-                  <span className="px-3 py-1 font-mono text-slate-300 bg-slate-900 border border-slate-800 rounded-xl">
-                    Page {currentPage} of {totalPages}
-                  </span>
-
-                  <button
-                    onClick={() => {
-                      setCurrentPage((p) => Math.min(totalPages, p + 1));
-                      setFocusedIndex(0);
-                    }}
-                    disabled={currentPage === totalPages}
-                    className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+          {/* Footer */}
+          <footer className="w-full border-t border-slate-800/80 bg-slate-950/90 py-6 px-4 sm:px-6 text-center text-xs text-slate-500">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-slate-400">LeetTracker Pro</span>
+                <span>•</span>
+                <span>659 Companies • 3,399 Verified Questions</span>
+                <span>•</span>
+                <span className="text-indigo-400">Snapshot: July 2026</span>
               </div>
-            )}
-          </>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="w-full border-t border-slate-800/80 bg-slate-950/90 py-6 px-4 sm:px-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-400">LeetTracker Pro</span>
-            <span>•</span>
-            <span>659 Companies • 3,399 Verified Questions</span>
-            <span>•</span>
-            <span className="text-indigo-400">Snapshot: July 2026</span>
-          </div>
-          <div className="flex items-center gap-3 text-slate-400">
-            <button onClick={() => setShowShortcutsModal(true)} className="hover:text-white transition-colors">
-              Hotkeys (?)
-            </button>
-            <span>•</span>
-            <a
-              href="https://github.com/snehasishroy/leetcode-companywise-interview-questions"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              GitHub Source Repo
-            </a>
-          </div>
-        </div>
-      </footer>
+              <div className="flex items-center gap-3 text-slate-400">
+                <button onClick={() => setShowShortcutsModal(true)} className="hover:text-white transition-colors">
+                  Hotkeys (?)
+                </button>
+                <span>•</span>
+                <a
+                  href="https://github.com/snehasishroy/leetcode-companywise-interview-questions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  GitHub Source Repo
+                </a>
+              </div>
+            </div>
+          </footer>
+        </>
+      )}
 
       {/* Question Workspace Modal */}
       {detailQuestion && (
@@ -807,7 +885,7 @@ export const App: React.FC = () => {
           companies={companiesDict}
           progress={store.progress}
           onClose={() => setShowOverlapModal(false)}
-          onSelectQuestion={(q) => setDetailQuestion(q)}
+          onSelectQuestion={(q) => handleOpenProblem(q)}
         />
       )}
 
