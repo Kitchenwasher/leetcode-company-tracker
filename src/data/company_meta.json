@@ -1,0 +1,9887 @@
+{
+  "1kosmos": {
+    "id": "1kosmos",
+    "name": "1Kosmos",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "6sense": {
+    "id": "6sense",
+    "name": "6Sense",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 6,
+      "Hard": 1
+    }
+  },
+  "accelya": {
+    "id": "accelya",
+    "name": "Accelya",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "accenture": {
+    "id": "accenture",
+    "name": "Accenture",
+    "tier": "Popular (50+)",
+    "totalQuestions": 142,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 6,
+    "sixMonthsCount": 14,
+    "allCount": 142,
+    "diffCounts": {
+      "Easy": 62,
+      "Medium": 68,
+      "Hard": 12
+    }
+  },
+  "accolite": {
+    "id": "accolite",
+    "name": "Accolite",
+    "tier": "Other",
+    "totalQuestions": 19,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 19,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 14,
+      "Hard": 1
+    }
+  },
+  "acko": {
+    "id": "acko",
+    "name": "Acko",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 2
+    }
+  },
+  "acorns": {
+    "id": "acorns",
+    "name": "Acorns",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "activision": {
+    "id": "activision",
+    "name": "Activision",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "adobe": {
+    "id": "adobe",
+    "name": "Adobe",
+    "tier": "Big Tech",
+    "totalQuestions": 147,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 3,
+    "sixMonthsCount": 12,
+    "allCount": 147,
+    "diffCounts": {
+      "Easy": 32,
+      "Medium": 95,
+      "Hard": 20
+    }
+  },
+  "adp": {
+    "id": "adp",
+    "name": "Adp",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "aetion": {
+    "id": "aetion",
+    "name": "Aetion",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "affinity": {
+    "id": "affinity",
+    "name": "Affinity",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "affirm": {
+    "id": "affirm",
+    "name": "Affirm",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 6,
+      "Hard": 3
+    }
+  },
+  "agoda": {
+    "id": "agoda",
+    "name": "Agoda",
+    "tier": "Other",
+    "totalQuestions": 45,
+    "thirtyDaysCount": 3,
+    "threeMonthsCount": 4,
+    "sixMonthsCount": 15,
+    "allCount": 45,
+    "diffCounts": {
+      "Easy": 14,
+      "Medium": 29,
+      "Hard": 2
+    }
+  },
+  "airbnb": {
+    "id": "airbnb",
+    "name": "Airbnb",
+    "tier": "Top Unicorns",
+    "totalQuestions": 64,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 5,
+    "sixMonthsCount": 12,
+    "allCount": 64,
+    "diffCounts": {
+      "Easy": 11,
+      "Medium": 32,
+      "Hard": 21
+    }
+  },
+  "airbus": {
+    "id": "airbus",
+    "name": "Airbus",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "airtel": {
+    "id": "airtel",
+    "name": "Airtel",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 6,
+      "Hard": 0
+    }
+  },
+  "airwallex": {
+    "id": "airwallex",
+    "name": "Airwallex",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "akamai": {
+    "id": "akamai",
+    "name": "Akamai",
+    "tier": "Other",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 7,
+      "Hard": 0
+    }
+  },
+  "akuna-capital": {
+    "id": "akuna-capital",
+    "name": "Akuna Capital",
+    "tier": "Other",
+    "totalQuestions": 16,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 16,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 7,
+      "Hard": 8
+    }
+  },
+  "alibaba": {
+    "id": "alibaba",
+    "name": "Alibaba",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "allincall": {
+    "id": "allincall",
+    "name": "Allincall",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "alphonso": {
+    "id": "alphonso",
+    "name": "Alphonso",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "alten": {
+    "id": "alten",
+    "name": "Alten",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "altimetrik": {
+    "id": "altimetrik",
+    "name": "Altimetrik",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "amadeus": {
+    "id": "amadeus",
+    "name": "Amadeus",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "amazon": {
+    "id": "amazon",
+    "name": "Amazon",
+    "tier": "FAANG",
+    "totalQuestions": 1988,
+    "thirtyDaysCount": 153,
+    "threeMonthsCount": 400,
+    "sixMonthsCount": 716,
+    "allCount": 1988,
+    "diffCounts": {
+      "Easy": 532,
+      "Medium": 1082,
+      "Hard": 374
+    }
+  },
+  "amd": {
+    "id": "amd",
+    "name": "Amd",
+    "tier": "Other",
+    "totalQuestions": 17,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 17,
+    "diffCounts": {
+      "Easy": 8,
+      "Medium": 9,
+      "Hard": 0
+    }
+  },
+  "amdocs": {
+    "id": "amdocs",
+    "name": "Amdocs",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "american-airlines": {
+    "id": "american-airlines",
+    "name": "American Airlines",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "american-express": {
+    "id": "american-express",
+    "name": "American Express",
+    "tier": "Other",
+    "totalQuestions": 23,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 23,
+    "diffCounts": {
+      "Easy": 8,
+      "Medium": 11,
+      "Hard": 4
+    }
+  },
+  "amplitude": {
+    "id": "amplitude",
+    "name": "Amplitude",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "analytics-quotient": {
+    "id": "analytics-quotient",
+    "name": "Analytics Quotient",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "andela": {
+    "id": "andela",
+    "name": "Andela",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "anduril": {
+    "id": "anduril",
+    "name": "Anduril",
+    "tier": "Popular (50+)",
+    "totalQuestions": 56,
+    "thirtyDaysCount": 3,
+    "threeMonthsCount": 13,
+    "sixMonthsCount": 20,
+    "allCount": 56,
+    "diffCounts": {
+      "Easy": 8,
+      "Medium": 40,
+      "Hard": 8
+    }
+  },
+  "anthropic": {
+    "id": "anthropic",
+    "name": "Anthropic",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "anyscale": {
+    "id": "anyscale",
+    "name": "Anyscale",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "aon": {
+    "id": "aon",
+    "name": "Aon",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "apolloio": {
+    "id": "apolloio",
+    "name": "Apolloio",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "appdynamics": {
+    "id": "appdynamics",
+    "name": "Appdynamics",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "appfolio": {
+    "id": "appfolio",
+    "name": "Appfolio",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "apple": {
+    "id": "apple",
+    "name": "Apple",
+    "tier": "FAANG",
+    "totalQuestions": 303,
+    "thirtyDaysCount": 5,
+    "threeMonthsCount": 37,
+    "sixMonthsCount": 77,
+    "allCount": 303,
+    "diffCounts": {
+      "Easy": 77,
+      "Medium": 180,
+      "Hard": 46
+    }
+  },
+  "applied-intuition": {
+    "id": "applied-intuition",
+    "name": "Applied Intuition",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 7,
+      "Hard": 4
+    }
+  },
+  "aqr-capital-management": {
+    "id": "aqr-capital-management",
+    "name": "Aqr Capital Management",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "arcesium": {
+    "id": "arcesium",
+    "name": "Arcesium",
+    "tier": "Other",
+    "totalQuestions": 13,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 13,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 7,
+      "Hard": 6
+    }
+  },
+  "argo-ai": {
+    "id": "argo-ai",
+    "name": "Argo Ai",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 2
+    }
+  },
+  "arista-networks": {
+    "id": "arista-networks",
+    "name": "Arista Networks",
+    "tier": "Other",
+    "totalQuestions": 40,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 40,
+    "diffCounts": {
+      "Easy": 12,
+      "Medium": 27,
+      "Hard": 1
+    }
+  },
+  "asana": {
+    "id": "asana",
+    "name": "Asana",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "ascend": {
+    "id": "ascend",
+    "name": "Ascend",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "athenahealth": {
+    "id": "athenahealth",
+    "name": "Athenahealth",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "atlassian": {
+    "id": "atlassian",
+    "name": "Atlassian",
+    "tier": "Big Tech",
+    "totalQuestions": 62,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 4,
+    "allCount": 62,
+    "diffCounts": {
+      "Easy": 6,
+      "Medium": 42,
+      "Hard": 14
+    }
+  },
+  "att": {
+    "id": "att",
+    "name": "Att",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 0
+    }
+  },
+  "attentive": {
+    "id": "attentive",
+    "name": "Attentive",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 2
+    }
+  },
+  "audible": {
+    "id": "audible",
+    "name": "Audible",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 2,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "auriga": {
+    "id": "auriga",
+    "name": "Auriga",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "aurora": {
+    "id": "aurora",
+    "name": "Aurora",
+    "tier": "Other",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 4,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 8,
+      "Hard": 5
+    }
+  },
+  "autodesk": {
+    "id": "autodesk",
+    "name": "Autodesk",
+    "tier": "Other",
+    "totalQuestions": 32,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 3,
+    "allCount": 32,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 18,
+      "Hard": 7
+    }
+  },
+  "avalara": {
+    "id": "avalara",
+    "name": "Avalara",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "avito": {
+    "id": "avito",
+    "name": "Avito",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 7,
+      "Hard": 0
+    }
+  },
+  "axis-bank": {
+    "id": "axis-bank",
+    "name": "Axis Bank",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "axon": {
+    "id": "axon",
+    "name": "Axon",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 5,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 7,
+      "Hard": 0
+    }
+  },
+  "baidu": {
+    "id": "baidu",
+    "name": "Baidu",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 6,
+      "Hard": 5
+    }
+  },
+  "bank-of-america": {
+    "id": "bank-of-america",
+    "name": "Bank Of America",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "barclays": {
+    "id": "barclays",
+    "name": "Barclays",
+    "tier": "Other",
+    "totalQuestions": 16,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 16,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 9,
+      "Hard": 2
+    }
+  },
+  "bcg": {
+    "id": "bcg",
+    "name": "Bcg",
+    "tier": "Other",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 6,
+      "Hard": 2
+    }
+  },
+  "bending-spoons": {
+    "id": "bending-spoons",
+    "name": "Bending Spoons",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "bill-com": {
+    "id": "bill-com",
+    "name": "Bill Com",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "bitgo": {
+    "id": "bitgo",
+    "name": "Bitgo",
+    "tier": "Other",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 10,
+      "Hard": 5
+    }
+  },
+  "blackbuck": {
+    "id": "blackbuck",
+    "name": "Blackbuck",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "blackrock": {
+    "id": "blackrock",
+    "name": "Blackrock",
+    "tier": "Other",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 6,
+      "Medium": 7,
+      "Hard": 1
+    }
+  },
+  "blackstone": {
+    "id": "blackstone",
+    "name": "Blackstone",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "blend": {
+    "id": "blend",
+    "name": "Blend",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "blinkit": {
+    "id": "blinkit",
+    "name": "Blinkit",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "bloomberg": {
+    "id": "bloomberg",
+    "name": "Bloomberg",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 1213,
+    "thirtyDaysCount": 43,
+    "threeMonthsCount": 199,
+    "sixMonthsCount": 378,
+    "allCount": 1213,
+    "diffCounts": {
+      "Easy": 397,
+      "Medium": 651,
+      "Hard": 165
+    }
+  },
+  "bloomreach": {
+    "id": "bloomreach",
+    "name": "Bloomreach",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "blue-origin": {
+    "id": "blue-origin",
+    "name": "Blue Origin",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "bnp-paribas": {
+    "id": "bnp-paribas",
+    "name": "Bnp Paribas",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "bny-mellon": {
+    "id": "bny-mellon",
+    "name": "Bny Mellon",
+    "tier": "Other",
+    "totalQuestions": 17,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 17,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 11,
+      "Hard": 4
+    }
+  },
+  "boeing": {
+    "id": "boeing",
+    "name": "Boeing",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 2
+    }
+  },
+  "bolt": {
+    "id": "bolt",
+    "name": "Bolt",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "bookingcom": {
+    "id": "bookingcom",
+    "name": "Bookingcom",
+    "tier": "Other",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 8,
+      "Hard": 4
+    }
+  },
+  "box": {
+    "id": "box",
+    "name": "Box",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 3,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 2
+    }
+  },
+  "bp": {
+    "id": "bp",
+    "name": "Bp",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "braze": {
+    "id": "braze",
+    "name": "Braze",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "bridgewater-associates": {
+    "id": "bridgewater-associates",
+    "name": "Bridgewater Associates",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "brillio": {
+    "id": "brillio",
+    "name": "Brillio",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "broadcom": {
+    "id": "broadcom",
+    "name": "Broadcom",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "browserstack": {
+    "id": "browserstack",
+    "name": "Browserstack",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "bt-group": {
+    "id": "bt-group",
+    "name": "Bt Group",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "buyhatke": {
+    "id": "buyhatke",
+    "name": "Buyhatke",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 2
+    }
+  },
+  "bytedance": {
+    "id": "bytedance",
+    "name": "Bytedance",
+    "tier": "Top Unicorns",
+    "totalQuestions": 63,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 4,
+    "allCount": 63,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 50,
+      "Hard": 9
+    }
+  },
+  "c3-ai": {
+    "id": "c3-ai",
+    "name": "C3 Ai",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 8,
+      "Hard": 1
+    }
+  },
+  "cadence": {
+    "id": "cadence",
+    "name": "Cadence",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 2
+    }
+  },
+  "canonical": {
+    "id": "canonical",
+    "name": "Canonical",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "canva": {
+    "id": "canva",
+    "name": "Canva",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "capgemini": {
+    "id": "capgemini",
+    "name": "Capgemini",
+    "tier": "Other",
+    "totalQuestions": 36,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 4,
+    "allCount": 36,
+    "diffCounts": {
+      "Easy": 18,
+      "Medium": 16,
+      "Hard": 2
+    }
+  },
+  "capital-one": {
+    "id": "capital-one",
+    "name": "Capital One",
+    "tier": "Popular (50+)",
+    "totalQuestions": 63,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 8,
+    "sixMonthsCount": 21,
+    "allCount": 63,
+    "diffCounts": {
+      "Easy": 13,
+      "Medium": 39,
+      "Hard": 11
+    }
+  },
+  "careem": {
+    "id": "careem",
+    "name": "Careem",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "cars24": {
+    "id": "cars24",
+    "name": "Cars24",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "carwale": {
+    "id": "carwale",
+    "name": "Carwale",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "cashfree": {
+    "id": "cashfree",
+    "name": "Cashfree",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "caterpillar": {
+    "id": "caterpillar",
+    "name": "Caterpillar",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "cerner": {
+    "id": "cerner",
+    "name": "Cerner",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "chargebee": {
+    "id": "chargebee",
+    "name": "Chargebee",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "chewy": {
+    "id": "chewy",
+    "name": "Chewy",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "chime": {
+    "id": "chime",
+    "name": "Chime",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "chubb": {
+    "id": "chubb",
+    "name": "Chubb",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "ciena": {
+    "id": "ciena",
+    "name": "Ciena",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "circle": {
+    "id": "circle",
+    "name": "Circle",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "cisco": {
+    "id": "cisco",
+    "name": "Cisco",
+    "tier": "Big Tech",
+    "totalQuestions": 84,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 3,
+    "allCount": 84,
+    "diffCounts": {
+      "Easy": 22,
+      "Medium": 47,
+      "Hard": 15
+    }
+  },
+  "citadel": {
+    "id": "citadel",
+    "name": "Citadel",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 89,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 6,
+    "allCount": 89,
+    "diffCounts": {
+      "Easy": 6,
+      "Medium": 54,
+      "Hard": 29
+    }
+  },
+  "citi": {
+    "id": "citi",
+    "name": "Citi",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "citrix": {
+    "id": "citrix",
+    "name": "Citrix",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "clari": {
+    "id": "clari",
+    "name": "Clari",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "cleartrip": {
+    "id": "cleartrip",
+    "name": "Cleartrip",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "clevertap": {
+    "id": "clevertap",
+    "name": "Clevertap",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "cloudera": {
+    "id": "cloudera",
+    "name": "Cloudera",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "cloudflare": {
+    "id": "cloudflare",
+    "name": "Cloudflare",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 3,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 8,
+      "Hard": 2
+    }
+  },
+  "clutter": {
+    "id": "clutter",
+    "name": "Clutter",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "cme-group": {
+    "id": "cme-group",
+    "name": "Cme Group",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "cockroach-labs": {
+    "id": "cockroach-labs",
+    "name": "Cockroach Labs",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "code-studio": {
+    "id": "code-studio",
+    "name": "Code Studio",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "coditas": {
+    "id": "coditas",
+    "name": "Coditas",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "cognizant": {
+    "id": "cognizant",
+    "name": "Cognizant",
+    "tier": "Other",
+    "totalQuestions": 46,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 6,
+    "allCount": 46,
+    "diffCounts": {
+      "Easy": 29,
+      "Medium": 15,
+      "Hard": 2
+    }
+  },
+  "cohesity": {
+    "id": "cohesity",
+    "name": "Cohesity",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 3
+    }
+  },
+  "coinbase": {
+    "id": "coinbase",
+    "name": "Coinbase",
+    "tier": "Top Unicorns",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 8,
+      "Hard": 2
+    }
+  },
+  "coindcx": {
+    "id": "coindcx",
+    "name": "Coindcx",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "coinswitch-kuber": {
+    "id": "coinswitch-kuber",
+    "name": "Coinswitch Kuber",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "comcast": {
+    "id": "comcast",
+    "name": "Comcast",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "commvault": {
+    "id": "commvault",
+    "name": "Commvault",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "compass": {
+    "id": "compass",
+    "name": "Compass",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "confluent": {
+    "id": "confluent",
+    "name": "Confluent",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 3,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 7,
+      "Hard": 2
+    }
+  },
+  "couchbase": {
+    "id": "couchbase",
+    "name": "Couchbase",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "coupa": {
+    "id": "coupa",
+    "name": "Coupa",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "coupang": {
+    "id": "coupang",
+    "name": "Coupang",
+    "tier": "Other",
+    "totalQuestions": 48,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 3,
+    "allCount": 48,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 32,
+      "Hard": 13
+    }
+  },
+  "coursera": {
+    "id": "coursera",
+    "name": "Coursera",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 4
+    }
+  },
+  "cred": {
+    "id": "cred",
+    "name": "Cred",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "criteo": {
+    "id": "criteo",
+    "name": "Criteo",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "crowdstrike": {
+    "id": "crowdstrike",
+    "name": "Crowdstrike",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 7,
+      "Hard": 1
+    }
+  },
+  "cruise-automation": {
+    "id": "cruise-automation",
+    "name": "Cruise Automation",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "ctc": {
+    "id": "ctc",
+    "name": "Ctc",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "curefit": {
+    "id": "curefit",
+    "name": "Curefit",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 0,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "cvent": {
+    "id": "cvent",
+    "name": "Cvent",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "cyntexa": {
+    "id": "cyntexa",
+    "name": "Cyntexa",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 2
+    }
+  },
+  "cyware": {
+    "id": "cyware",
+    "name": "Cyware",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "dailyhunt": {
+    "id": "dailyhunt",
+    "name": "Dailyhunt",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "darwinbox": {
+    "id": "darwinbox",
+    "name": "Darwinbox",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 2
+    }
+  },
+  "dassault-sysetmes": {
+    "id": "dassault-sysetmes",
+    "name": "Dassault Sysetmes",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "dataart": {
+    "id": "dataart",
+    "name": "Dataart",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "databricks": {
+    "id": "databricks",
+    "name": "Databricks",
+    "tier": "Top Unicorns",
+    "totalQuestions": 31,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 10,
+    "allCount": 31,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 22,
+      "Hard": 7
+    }
+  },
+  "datadog": {
+    "id": "datadog",
+    "name": "Datadog",
+    "tier": "Other",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 7,
+      "Hard": 3
+    }
+  },
+  "dataminr": {
+    "id": "dataminr",
+    "name": "Dataminr",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "de-shaw": {
+    "id": "de-shaw",
+    "name": "De Shaw",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 105,
+    "thirtyDaysCount": 3,
+    "threeMonthsCount": 3,
+    "sixMonthsCount": 5,
+    "allCount": 105,
+    "diffCounts": {
+      "Easy": 12,
+      "Medium": 63,
+      "Hard": 30
+    }
+  },
+  "deepmind": {
+    "id": "deepmind",
+    "name": "Deepmind",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "delhivery": {
+    "id": "delhivery",
+    "name": "Delhivery",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "deliveroo": {
+    "id": "deliveroo",
+    "name": "Deliveroo",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 2
+    }
+  },
+  "dell": {
+    "id": "dell",
+    "name": "Dell",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 6,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "deloitte": {
+    "id": "deloitte",
+    "name": "Deloitte",
+    "tier": "Other",
+    "totalQuestions": 43,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 5,
+    "sixMonthsCount": 8,
+    "allCount": 43,
+    "diffCounts": {
+      "Easy": 17,
+      "Medium": 23,
+      "Hard": 3
+    }
+  },
+  "deltax": {
+    "id": "deltax",
+    "name": "Deltax",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "deutsche-bank": {
+    "id": "deutsche-bank",
+    "name": "Deutsche Bank",
+    "tier": "Other",
+    "totalQuestions": 21,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 21,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 7,
+      "Hard": 7
+    }
+  },
+  "devrev": {
+    "id": "devrev",
+    "name": "Devrev",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "devsinc": {
+    "id": "devsinc",
+    "name": "Devsinc",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "dialpad": {
+    "id": "dialpad",
+    "name": "Dialpad",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "directi": {
+    "id": "directi",
+    "name": "Directi",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 5,
+      "Hard": 3
+    }
+  },
+  "discord": {
+    "id": "discord",
+    "name": "Discord",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "discovery": {
+    "id": "discovery",
+    "name": "Discovery",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "disney": {
+    "id": "disney",
+    "name": "Disney",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 7,
+      "Hard": 0
+    }
+  },
+  "dji": {
+    "id": "dji",
+    "name": "Dji",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "docusign": {
+    "id": "docusign",
+    "name": "Docusign",
+    "tier": "Other",
+    "totalQuestions": 36,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 4,
+    "allCount": 36,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 26,
+      "Hard": 7
+    }
+  },
+  "doordash": {
+    "id": "doordash",
+    "name": "Doordash",
+    "tier": "Top Unicorns",
+    "totalQuestions": 77,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 6,
+    "allCount": 77,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 44,
+      "Hard": 26
+    }
+  },
+  "dp-world": {
+    "id": "dp-world",
+    "name": "Dp World",
+    "tier": "Other",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 9,
+      "Hard": 3
+    }
+  },
+  "drawbridge": {
+    "id": "drawbridge",
+    "name": "Drawbridge",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "dream11": {
+    "id": "dream11",
+    "name": "Dream11",
+    "tier": "Other",
+    "totalQuestions": 13,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 13,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 11,
+      "Hard": 1
+    }
+  },
+  "dropbox": {
+    "id": "dropbox",
+    "name": "Dropbox",
+    "tier": "Other",
+    "totalQuestions": 22,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 22,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 10,
+      "Hard": 10
+    }
+  },
+  "druva": {
+    "id": "druva",
+    "name": "Druva",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "drw": {
+    "id": "drw",
+    "name": "Drw",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "dtcc": {
+    "id": "dtcc",
+    "name": "Dtcc",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "dunzo": {
+    "id": "dunzo",
+    "name": "Dunzo",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 3
+    }
+  },
+  "duolingo": {
+    "id": "duolingo",
+    "name": "Duolingo",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 2
+    }
+  },
+  "earnin": {
+    "id": "earnin",
+    "name": "Earnin",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "ebay": {
+    "id": "ebay",
+    "name": "Ebay",
+    "tier": "Big Tech",
+    "totalQuestions": 63,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 5,
+    "sixMonthsCount": 12,
+    "allCount": 63,
+    "diffCounts": {
+      "Easy": 10,
+      "Medium": 40,
+      "Hard": 13
+    }
+  },
+  "edelweiss": {
+    "id": "edelweiss",
+    "name": "Edelweiss",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "elitmus": {
+    "id": "elitmus",
+    "name": "Elitmus",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "envoy": {
+    "id": "envoy",
+    "name": "Envoy",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "epam-systems": {
+    "id": "epam-systems",
+    "name": "Epam Systems",
+    "tier": "Other",
+    "totalQuestions": 46,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 4,
+    "allCount": 46,
+    "diffCounts": {
+      "Easy": 16,
+      "Medium": 27,
+      "Hard": 3
+    }
+  },
+  "epic-games": {
+    "id": "epic-games",
+    "name": "Epic Games",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "epic-systems": {
+    "id": "epic-systems",
+    "name": "Epic Systems",
+    "tier": "Other",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 11,
+      "Hard": 1
+    }
+  },
+  "epifi": {
+    "id": "epifi",
+    "name": "Epifi",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "equinix": {
+    "id": "equinix",
+    "name": "Equinix",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "ericsson": {
+    "id": "ericsson",
+    "name": "Ericsson",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "etsy": {
+    "id": "etsy",
+    "name": "Etsy",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "exl": {
+    "id": "exl",
+    "name": "Exl",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "expedia": {
+    "id": "expedia",
+    "name": "Expedia",
+    "tier": "Popular (50+)",
+    "totalQuestions": 64,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 15,
+    "allCount": 64,
+    "diffCounts": {
+      "Easy": 13,
+      "Medium": 42,
+      "Hard": 9
+    }
+  },
+  "ey": {
+    "id": "ey",
+    "name": "Ey",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "f5-networks": {
+    "id": "f5-networks",
+    "name": "F5 Networks",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "factset": {
+    "id": "factset",
+    "name": "Factset",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "faire": {
+    "id": "faire",
+    "name": "Faire",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 4
+    }
+  },
+  "fallible": {
+    "id": "fallible",
+    "name": "Fallible",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "fanatics": {
+    "id": "fanatics",
+    "name": "Fanatics",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "fast": {
+    "id": "fast",
+    "name": "Fast",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "fastenal": {
+    "id": "fastenal",
+    "name": "Fastenal",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "fico": {
+    "id": "fico",
+    "name": "Fico",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "fidelity": {
+    "id": "fidelity",
+    "name": "Fidelity",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "fidessa": {
+    "id": "fidessa",
+    "name": "Fidessa",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "figma": {
+    "id": "figma",
+    "name": "Figma",
+    "tier": "Top Unicorns",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "fiverr": {
+    "id": "fiverr",
+    "name": "Fiverr",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "fivetran": {
+    "id": "fivetran",
+    "name": "Fivetran",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "flatiron-health": {
+    "id": "flatiron-health",
+    "name": "Flatiron Health",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "fleetx": {
+    "id": "fleetx",
+    "name": "Fleetx",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "flexera": {
+    "id": "flexera",
+    "name": "Flexera",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "flexport": {
+    "id": "flexport",
+    "name": "Flexport",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 10,
+      "Hard": 0
+    }
+  },
+  "flipkart": {
+    "id": "flipkart",
+    "name": "Flipkart",
+    "tier": "Popular (50+)",
+    "totalQuestions": 106,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 3,
+    "allCount": 106,
+    "diffCounts": {
+      "Easy": 8,
+      "Medium": 68,
+      "Hard": 30
+    }
+  },
+  "fortinet": {
+    "id": "fortinet",
+    "name": "Fortinet",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "forusall": {
+    "id": "forusall",
+    "name": "Forusall",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "fourkites": {
+    "id": "fourkites",
+    "name": "Fourkites",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "fpt": {
+    "id": "fpt",
+    "name": "Fpt",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "fractal-analytics": {
+    "id": "fractal-analytics",
+    "name": "Fractal Analytics",
+    "tier": "Other",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 6,
+      "Medium": 6,
+      "Hard": 3
+    }
+  },
+  "freecharge": {
+    "id": "freecharge",
+    "name": "Freecharge",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "freshworks": {
+    "id": "freshworks",
+    "name": "Freshworks",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 7,
+      "Hard": 1
+    }
+  },
+  "fynd": {
+    "id": "fynd",
+    "name": "Fynd",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "gainsight": {
+    "id": "gainsight",
+    "name": "Gainsight",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "gameskraft": {
+    "id": "gameskraft",
+    "name": "Gameskraft",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 4
+    }
+  },
+  "garena": {
+    "id": "garena",
+    "name": "Garena",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "garmin": {
+    "id": "garmin",
+    "name": "Garmin",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "gartner": {
+    "id": "gartner",
+    "name": "Gartner",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "ge-digital": {
+    "id": "ge-digital",
+    "name": "Ge Digital",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "ge-healthcare": {
+    "id": "ge-healthcare",
+    "name": "Ge Healthcare",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "geico": {
+    "id": "geico",
+    "name": "Geico",
+    "tier": "Other",
+    "totalQuestions": 18,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 18,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 16,
+      "Hard": 1
+    }
+  },
+  "general-electric": {
+    "id": "general-electric",
+    "name": "General Electric",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "general-motors": {
+    "id": "general-motors",
+    "name": "General Motors",
+    "tier": "Other",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 3,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 7,
+      "Hard": 4
+    }
+  },
+  "gep": {
+    "id": "gep",
+    "name": "Gep",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "gilt-groupe": {
+    "id": "gilt-groupe",
+    "name": "Gilt Groupe",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "github": {
+    "id": "github",
+    "name": "Github",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "glassdoor": {
+    "id": "glassdoor",
+    "name": "Glassdoor",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "glean": {
+    "id": "glean",
+    "name": "Glean",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "globallogic": {
+    "id": "globallogic",
+    "name": "Globallogic",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "glovo": {
+    "id": "glovo",
+    "name": "Glovo",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "godaddy": {
+    "id": "godaddy",
+    "name": "Godaddy",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "gojek": {
+    "id": "gojek",
+    "name": "Gojek",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "goldman-sachs": {
+    "id": "goldman-sachs",
+    "name": "Goldman Sachs",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 261,
+    "thirtyDaysCount": 5,
+    "threeMonthsCount": 16,
+    "sixMonthsCount": 33,
+    "allCount": 261,
+    "diffCounts": {
+      "Easy": 46,
+      "Medium": 167,
+      "Hard": 48
+    }
+  },
+  "google": {
+    "id": "google",
+    "name": "Google",
+    "tier": "FAANG",
+    "totalQuestions": 2325,
+    "thirtyDaysCount": 201,
+    "threeMonthsCount": 452,
+    "sixMonthsCount": 783,
+    "allCount": 2325,
+    "diffCounts": {
+      "Easy": 610,
+      "Medium": 1213,
+      "Hard": 502
+    }
+  },
+  "gopuff": {
+    "id": "gopuff",
+    "name": "Gopuff",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "goto": {
+    "id": "goto",
+    "name": "Goto",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "grab": {
+    "id": "grab",
+    "name": "Grab",
+    "tier": "Other",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 12,
+      "Hard": 0
+    }
+  },
+  "grammarly": {
+    "id": "grammarly",
+    "name": "Grammarly",
+    "tier": "Other",
+    "totalQuestions": 30,
+    "thirtyDaysCount": 5,
+    "threeMonthsCount": 5,
+    "sixMonthsCount": 8,
+    "allCount": 30,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 19,
+      "Hard": 4
+    }
+  },
+  "graviton": {
+    "id": "graviton",
+    "name": "Graviton",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 5,
+      "Hard": 2
+    }
+  },
+  "groupon": {
+    "id": "groupon",
+    "name": "Groupon",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "groww": {
+    "id": "groww",
+    "name": "Groww",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "grubhub": {
+    "id": "grubhub",
+    "name": "Grubhub",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "gsa-capital": {
+    "id": "gsa-capital",
+    "name": "Gsa Capital",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "gsn-games": {
+    "id": "gsn-games",
+    "name": "Gsn Games",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "guidewire": {
+    "id": "guidewire",
+    "name": "Guidewire",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 5,
+      "Hard": 0
+    }
+  },
+  "gusto": {
+    "id": "gusto",
+    "name": "Gusto",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "harness": {
+    "id": "harness",
+    "name": "Harness",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 3
+    }
+  },
+  "hashedin": {
+    "id": "hashedin",
+    "name": "Hashedin",
+    "tier": "Other",
+    "totalQuestions": 30,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 3,
+    "allCount": 30,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 18,
+      "Hard": 8
+    }
+  },
+  "hbo": {
+    "id": "hbo",
+    "name": "Hbo",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "hcl": {
+    "id": "hcl",
+    "name": "Hcl",
+    "tier": "Other",
+    "totalQuestions": 16,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 16,
+    "diffCounts": {
+      "Easy": 8,
+      "Medium": 7,
+      "Hard": 1
+    }
+  },
+  "helix": {
+    "id": "helix",
+    "name": "Helix",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "hexaware": {
+    "id": "hexaware",
+    "name": "Hexaware",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "highspot": {
+    "id": "highspot",
+    "name": "Highspot",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "hilabs": {
+    "id": "hilabs",
+    "name": "Hilabs",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 2
+    }
+  },
+  "hive": {
+    "id": "hive",
+    "name": "Hive",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 4,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 3
+    }
+  },
+  "honey": {
+    "id": "honey",
+    "name": "Honey",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "honeywell": {
+    "id": "honeywell",
+    "name": "Honeywell",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "hopper": {
+    "id": "hopper",
+    "name": "Hopper",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "hotstar": {
+    "id": "hotstar",
+    "name": "Hotstar",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "houzz": {
+    "id": "houzz",
+    "name": "Houzz",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 2
+    }
+  },
+  "hp": {
+    "id": "hp",
+    "name": "Hp",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "hpe": {
+    "id": "hpe",
+    "name": "Hpe",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "hrt": {
+    "id": "hrt",
+    "name": "Hrt",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 1,
+      "Hard": 3
+    }
+  },
+  "hsbc": {
+    "id": "hsbc",
+    "name": "Hsbc",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "htc": {
+    "id": "htc",
+    "name": "Htc",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "huawei": {
+    "id": "huawei",
+    "name": "Huawei",
+    "tier": "Other",
+    "totalQuestions": 17,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 17,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 9,
+      "Hard": 3
+    }
+  },
+  "hubspot": {
+    "id": "hubspot",
+    "name": "Hubspot",
+    "tier": "Other",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 7,
+      "Hard": 2
+    }
+  },
+  "hulu": {
+    "id": "hulu",
+    "name": "Hulu",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 3
+    }
+  },
+  "ibm": {
+    "id": "ibm",
+    "name": "Ibm",
+    "tier": "Big Tech",
+    "totalQuestions": 178,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 6,
+    "sixMonthsCount": 30,
+    "allCount": 178,
+    "diffCounts": {
+      "Easy": 55,
+      "Medium": 105,
+      "Hard": 18
+    }
+  },
+  "iit-bombay": {
+    "id": "iit-bombay",
+    "name": "Iit Bombay",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "imc": {
+    "id": "imc",
+    "name": "Imc",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 4
+    }
+  },
+  "impact-analytics": {
+    "id": "impact-analytics",
+    "name": "Impact Analytics",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "impetus": {
+    "id": "impetus",
+    "name": "Impetus",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "increff": {
+    "id": "increff",
+    "name": "Increff",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "indeed": {
+    "id": "indeed",
+    "name": "Indeed",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "info-edge": {
+    "id": "info-edge",
+    "name": "Info Edge",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 6,
+      "Hard": 1
+    }
+  },
+  "informatica": {
+    "id": "informatica",
+    "name": "Informatica",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "infosys": {
+    "id": "infosys",
+    "name": "Infosys",
+    "tier": "Popular (50+)",
+    "totalQuestions": 185,
+    "thirtyDaysCount": 3,
+    "threeMonthsCount": 29,
+    "sixMonthsCount": 51,
+    "allCount": 185,
+    "diffCounts": {
+      "Easy": 48,
+      "Medium": 97,
+      "Hard": 40
+    }
+  },
+  "inmobi": {
+    "id": "inmobi",
+    "name": "Inmobi",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 7
+    }
+  },
+  "innovaccer": {
+    "id": "innovaccer",
+    "name": "Innovaccer",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "instabase": {
+    "id": "instabase",
+    "name": "Instabase",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "instacart": {
+    "id": "instacart",
+    "name": "Instacart",
+    "tier": "Top Unicorns",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 5,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 6,
+      "Hard": 1
+    }
+  },
+  "intel": {
+    "id": "intel",
+    "name": "Intel",
+    "tier": "Big Tech",
+    "totalQuestions": 21,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 21,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 13,
+      "Hard": 1
+    }
+  },
+  "interactive-brokers": {
+    "id": "interactive-brokers",
+    "name": "Interactive Brokers",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "intercom": {
+    "id": "intercom",
+    "name": "Intercom",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "intuit": {
+    "id": "intuit",
+    "name": "Intuit",
+    "tier": "Big Tech",
+    "totalQuestions": 64,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 3,
+    "sixMonthsCount": 9,
+    "allCount": 64,
+    "diffCounts": {
+      "Easy": 9,
+      "Medium": 37,
+      "Hard": 18
+    }
+  },
+  "ivp": {
+    "id": "ivp",
+    "name": "Ivp",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "ixl": {
+    "id": "ixl",
+    "name": "Ixl",
+    "tier": "Other",
+    "totalQuestions": 17,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 17,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 11,
+      "Hard": 3
+    }
+  },
+  "jane-street": {
+    "id": "jane-street",
+    "name": "Jane Street",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 5,
+      "Hard": 3
+    }
+  },
+  "jd": {
+    "id": "jd",
+    "name": "Jd",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "jeavio": {
+    "id": "jeavio",
+    "name": "Jeavio",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "jingchi": {
+    "id": "jingchi",
+    "name": "Jingchi",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "jio": {
+    "id": "jio",
+    "name": "Jio",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 2
+    }
+  },
+  "josh-technology": {
+    "id": "josh-technology",
+    "name": "Josh Technology",
+    "tier": "Other",
+    "totalQuestions": 37,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 3,
+    "allCount": 37,
+    "diffCounts": {
+      "Easy": 8,
+      "Medium": 26,
+      "Hard": 3
+    }
+  },
+  "jpmorgan": {
+    "id": "jpmorgan",
+    "name": "Jpmorgan",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 74,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 4,
+    "sixMonthsCount": 14,
+    "allCount": 74,
+    "diffCounts": {
+      "Easy": 24,
+      "Medium": 43,
+      "Hard": 7
+    }
+  },
+  "jtg": {
+    "id": "jtg",
+    "name": "Jtg",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "jump-trading": {
+    "id": "jump-trading",
+    "name": "Jump Trading",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "juspay": {
+    "id": "juspay",
+    "name": "Juspay",
+    "tier": "Other",
+    "totalQuestions": 18,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 3,
+    "allCount": 18,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 11,
+      "Hard": 5
+    }
+  },
+  "kakao": {
+    "id": "kakao",
+    "name": "Kakao",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "karat": {
+    "id": "karat",
+    "name": "Karat",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 7,
+      "Hard": 1
+    }
+  },
+  "kickdrum": {
+    "id": "kickdrum",
+    "name": "Kickdrum",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "kla": {
+    "id": "kla",
+    "name": "Kla",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 4
+    }
+  },
+  "kla-tencor": {
+    "id": "kla-tencor",
+    "name": "Kla Tencor",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 3
+    }
+  },
+  "kotak-mahindra-bank": {
+    "id": "kotak-mahindra-bank",
+    "name": "Kotak Mahindra Bank",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "kpmg": {
+    "id": "kpmg",
+    "name": "Kpmg",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "larsen-toubro": {
+    "id": "larsen-toubro",
+    "name": "Larsen Toubro",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "leap-motion": {
+    "id": "leap-motion",
+    "name": "Leap Motion",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "lendingkart": {
+    "id": "lendingkart",
+    "name": "Lendingkart",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "lg-electronics": {
+    "id": "lg-electronics",
+    "name": "Lg Electronics",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "liberty-mutual": {
+    "id": "liberty-mutual",
+    "name": "Liberty Mutual",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "liftoff": {
+    "id": "liftoff",
+    "name": "Liftoff",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "lime": {
+    "id": "lime",
+    "name": "Lime",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "line": {
+    "id": "line",
+    "name": "Line",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 2
+    }
+  },
+  "linkedin": {
+    "id": "linkedin",
+    "name": "Linkedin",
+    "tier": "Big Tech",
+    "totalQuestions": 176,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 41,
+    "allCount": 176,
+    "diffCounts": {
+      "Easy": 27,
+      "Medium": 114,
+      "Hard": 35
+    }
+  },
+  "liveramp": {
+    "id": "liveramp",
+    "name": "Liveramp",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "livspace": {
+    "id": "livspace",
+    "name": "Livspace",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "lowe": {
+    "id": "lowe",
+    "name": "Lowe",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 0,
+      "Hard": 2
+    }
+  },
+  "lti": {
+    "id": "lti",
+    "name": "Lti",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "lucid": {
+    "id": "lucid",
+    "name": "Lucid",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "luxoft": {
+    "id": "luxoft",
+    "name": "Luxoft",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "lyft": {
+    "id": "lyft",
+    "name": "Lyft",
+    "tier": "Top Unicorns",
+    "totalQuestions": 24,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 3,
+    "sixMonthsCount": 5,
+    "allCount": 24,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 18,
+      "Hard": 6
+    }
+  },
+  "machine-zone": {
+    "id": "machine-zone",
+    "name": "Machine Zone",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 2
+    }
+  },
+  "machinezone": {
+    "id": "machinezone",
+    "name": "Machinezone",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "maersk": {
+    "id": "maersk",
+    "name": "Maersk",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "makemytrip": {
+    "id": "makemytrip",
+    "name": "Makemytrip",
+    "tier": "Other",
+    "totalQuestions": 20,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 20,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 15,
+      "Hard": 5
+    }
+  },
+  "mapbox": {
+    "id": "mapbox",
+    "name": "Mapbox",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "maq-software": {
+    "id": "maq-software",
+    "name": "Maq Software",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "marqeta": {
+    "id": "marqeta",
+    "name": "Marqeta",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "mastercard": {
+    "id": "mastercard",
+    "name": "Mastercard",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 6,
+      "Hard": 1
+    }
+  },
+  "mathworks": {
+    "id": "mathworks",
+    "name": "Mathworks",
+    "tier": "Other",
+    "totalQuestions": 31,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 31,
+    "diffCounts": {
+      "Easy": 6,
+      "Medium": 15,
+      "Hard": 10
+    }
+  },
+  "mcafee": {
+    "id": "mcafee",
+    "name": "Mcafee",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "mcdonalds": {
+    "id": "mcdonalds",
+    "name": "Mcdonalds",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "mckinsey": {
+    "id": "mckinsey",
+    "name": "Mckinsey",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "medianet": {
+    "id": "medianet",
+    "name": "Medianet",
+    "tier": "Other",
+    "totalQuestions": 31,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 31,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 14,
+      "Hard": 14
+    }
+  },
+  "meesho": {
+    "id": "meesho",
+    "name": "Meesho",
+    "tier": "Other",
+    "totalQuestions": 45,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 3,
+    "allCount": 45,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 23,
+      "Hard": 18
+    }
+  },
+  "meituan": {
+    "id": "meituan",
+    "name": "Meituan",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "mercari": {
+    "id": "mercari",
+    "name": "Mercari",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "meta": {
+    "id": "meta",
+    "name": "Meta",
+    "tier": "FAANG",
+    "totalQuestions": 1381,
+    "thirtyDaysCount": 44,
+    "threeMonthsCount": 177,
+    "sixMonthsCount": 366,
+    "allCount": 1381,
+    "diffCounts": {
+      "Easy": 417,
+      "Medium": 759,
+      "Hard": 205
+    }
+  },
+  "micro1": {
+    "id": "micro1",
+    "name": "Micro1",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 4,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "microsoft": {
+    "id": "microsoft",
+    "name": "Microsoft",
+    "tier": "FAANG",
+    "totalQuestions": 1386,
+    "thirtyDaysCount": 49,
+    "threeMonthsCount": 166,
+    "sixMonthsCount": 421,
+    "allCount": 1386,
+    "diffCounts": {
+      "Easy": 392,
+      "Medium": 764,
+      "Hard": 230
+    }
+  },
+  "microstrategy": {
+    "id": "microstrategy",
+    "name": "Microstrategy",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 7,
+      "Hard": 0
+    }
+  },
+  "millennium": {
+    "id": "millennium",
+    "name": "Millennium",
+    "tier": "Other",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 7,
+      "Hard": 3
+    }
+  },
+  "mindtickle": {
+    "id": "mindtickle",
+    "name": "Mindtickle",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 3
+    }
+  },
+  "mindtree": {
+    "id": "mindtree",
+    "name": "Mindtree",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "mishipay": {
+    "id": "mishipay",
+    "name": "Mishipay",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "mitsogo": {
+    "id": "mitsogo",
+    "name": "Mitsogo",
+    "tier": "Other",
+    "totalQuestions": 16,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 16,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 10,
+      "Hard": 2
+    }
+  },
+  "mixpanel": {
+    "id": "mixpanel",
+    "name": "Mixpanel",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "mobileye": {
+    "id": "mobileye",
+    "name": "Mobileye",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "mobisy": {
+    "id": "mobisy",
+    "name": "Mobisy",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "moengage": {
+    "id": "moengage",
+    "name": "Moengage",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "moloco": {
+    "id": "moloco",
+    "name": "Moloco",
+    "tier": "Other",
+    "totalQuestions": 16,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 3,
+    "allCount": 16,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 11,
+      "Hard": 5
+    }
+  },
+  "moneylion": {
+    "id": "moneylion",
+    "name": "Moneylion",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "mongodb": {
+    "id": "mongodb",
+    "name": "Mongodb",
+    "tier": "Other",
+    "totalQuestions": 25,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 4,
+    "allCount": 25,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 16,
+      "Hard": 6
+    }
+  },
+  "morgan-stanley": {
+    "id": "morgan-stanley",
+    "name": "Morgan Stanley",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 62,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 5,
+    "allCount": 62,
+    "diffCounts": {
+      "Easy": 13,
+      "Medium": 40,
+      "Hard": 9
+    }
+  },
+  "motive": {
+    "id": "motive",
+    "name": "Motive",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 7,
+      "Hard": 1
+    }
+  },
+  "moveworks": {
+    "id": "moveworks",
+    "name": "Moveworks",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 2,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 3
+    }
+  },
+  "mphasis": {
+    "id": "mphasis",
+    "name": "Mphasis",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "msci": {
+    "id": "msci",
+    "name": "Msci",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "murex": {
+    "id": "murex",
+    "name": "Murex",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "mykaarma": {
+    "id": "mykaarma",
+    "name": "Mykaarma",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "myntra": {
+    "id": "myntra",
+    "name": "Myntra",
+    "tier": "Other",
+    "totalQuestions": 20,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 20,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 14,
+      "Hard": 2
+    }
+  },
+  "nagarro": {
+    "id": "nagarro",
+    "name": "Nagarro",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "nasdaq": {
+    "id": "nasdaq",
+    "name": "Nasdaq",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "national-instruments": {
+    "id": "national-instruments",
+    "name": "National Instruments",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "national-payments-coorperation-india": {
+    "id": "national-payments-coorperation-india",
+    "name": "National Payments Coorperation India",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "natwest": {
+    "id": "natwest",
+    "name": "Natwest",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "navan": {
+    "id": "navan",
+    "name": "Navan",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "naver": {
+    "id": "naver",
+    "name": "Naver",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "navi": {
+    "id": "navi",
+    "name": "Navi",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "ncr": {
+    "id": "ncr",
+    "name": "Ncr",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "nebius": {
+    "id": "nebius",
+    "name": "Nebius",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "nerdwallet": {
+    "id": "nerdwallet",
+    "name": "Nerdwallet",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "netapp": {
+    "id": "netapp",
+    "name": "Netapp",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 8,
+      "Hard": 0
+    }
+  },
+  "netcracker-technology": {
+    "id": "netcracker-technology",
+    "name": "Netcracker Technology",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "netease": {
+    "id": "netease",
+    "name": "Netease",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "netflix": {
+    "id": "netflix",
+    "name": "Netflix",
+    "tier": "FAANG",
+    "totalQuestions": 29,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 8,
+    "allCount": 29,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 19,
+      "Hard": 5
+    }
+  },
+  "netskope": {
+    "id": "netskope",
+    "name": "Netskope",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 5
+    }
+  },
+  "netsuite": {
+    "id": "netsuite",
+    "name": "Netsuite",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "newsbreak": {
+    "id": "newsbreak",
+    "name": "Newsbreak",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "nextdoor": {
+    "id": "nextdoor",
+    "name": "Nextdoor",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "nextjump": {
+    "id": "nextjump",
+    "name": "Nextjump",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "niantic": {
+    "id": "niantic",
+    "name": "Niantic",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "nielsen": {
+    "id": "nielsen",
+    "name": "Nielsen",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "nike": {
+    "id": "nike",
+    "name": "Nike",
+    "tier": "Other",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 9,
+      "Hard": 2
+    }
+  },
+  "nokia": {
+    "id": "nokia",
+    "name": "Nokia",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 3,
+      "Hard": 2
+    }
+  },
+  "noon": {
+    "id": "noon",
+    "name": "Noon",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "nordstrom": {
+    "id": "nordstrom",
+    "name": "Nordstrom",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "notion": {
+    "id": "notion",
+    "name": "Notion",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "nuro": {
+    "id": "nuro",
+    "name": "Nuro",
+    "tier": "Other",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 11,
+      "Hard": 3
+    }
+  },
+  "nutanix": {
+    "id": "nutanix",
+    "name": "Nutanix",
+    "tier": "Popular (50+)",
+    "totalQuestions": 64,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 3,
+    "allCount": 64,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 44,
+      "Hard": 17
+    }
+  },
+  "nvidia": {
+    "id": "nvidia",
+    "name": "Nvidia",
+    "tier": "Big Tech",
+    "totalQuestions": 139,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 4,
+    "sixMonthsCount": 23,
+    "allCount": 139,
+    "diffCounts": {
+      "Easy": 32,
+      "Medium": 91,
+      "Hard": 16
+    }
+  },
+  "nykaa": {
+    "id": "nykaa",
+    "name": "Nykaa",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "observeai": {
+    "id": "observeai",
+    "name": "Observeai",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "odoo": {
+    "id": "odoo",
+    "name": "Odoo",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "okta": {
+    "id": "okta",
+    "name": "Okta",
+    "tier": "Other",
+    "totalQuestions": 21,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 0,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "okx": {
+    "id": "okx",
+    "name": "Okx",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "ola": {
+    "id": "ola",
+    "name": "Ola",
+    "tier": "Other",
+    "totalQuestions": 24,
+    "thirtyDaysCount": 24,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 0,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "olx": {
+    "id": "olx",
+    "name": "Olx",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "openai": {
+    "id": "openai",
+    "name": "Openai",
+    "tier": "Other",
+    "totalQuestions": 17,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 5,
+    "allCount": 17,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 14,
+      "Hard": 2
+    }
+  },
+  "opentext": {
+    "id": "opentext",
+    "name": "Opentext",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "oppo": {
+    "id": "oppo",
+    "name": "Oppo",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "optiver": {
+    "id": "optiver",
+    "name": "Optiver",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 3,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "optum": {
+    "id": "optum",
+    "name": "Optum",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "oracle": {
+    "id": "oracle",
+    "name": "Oracle",
+    "tier": "Big Tech",
+    "totalQuestions": 313,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 28,
+    "allCount": 313,
+    "diffCounts": {
+      "Easy": 61,
+      "Medium": 193,
+      "Hard": 59
+    }
+  },
+  "oscar-health": {
+    "id": "oscar-health",
+    "name": "Oscar Health",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "otterai": {
+    "id": "otterai",
+    "name": "Otterai",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 2
+    }
+  },
+  "oyo": {
+    "id": "oyo",
+    "name": "Oyo",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 6,
+      "Hard": 1
+    }
+  },
+  "ozon": {
+    "id": "ozon",
+    "name": "Ozon",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 6,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "palantir": {
+    "id": "palantir",
+    "name": "Palantir",
+    "tier": "Other",
+    "totalQuestions": 29,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 3,
+    "sixMonthsCount": 4,
+    "allCount": 29,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 19,
+      "Hard": 5
+    }
+  },
+  "palo-alto-networks": {
+    "id": "palo-alto-networks",
+    "name": "Palo Alto Networks",
+    "tier": "Other",
+    "totalQuestions": 47,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 5,
+    "sixMonthsCount": 11,
+    "allCount": 47,
+    "diffCounts": {
+      "Easy": 12,
+      "Medium": 29,
+      "Hard": 6
+    }
+  },
+  "park": {
+    "id": "park",
+    "name": "Park",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "patreon": {
+    "id": "patreon",
+    "name": "Patreon",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "paycom": {
+    "id": "paycom",
+    "name": "Paycom",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "paypal": {
+    "id": "paypal",
+    "name": "Paypal",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 103,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 4,
+    "allCount": 103,
+    "diffCounts": {
+      "Easy": 18,
+      "Medium": 68,
+      "Hard": 17
+    }
+  },
+  "paypay": {
+    "id": "paypay",
+    "name": "Paypay",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "paytm": {
+    "id": "paytm",
+    "name": "Paytm",
+    "tier": "Other",
+    "totalQuestions": 29,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 29,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 19,
+      "Hard": 3
+    }
+  },
+  "payu": {
+    "id": "payu",
+    "name": "Payu",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "peak6": {
+    "id": "peak6",
+    "name": "Peak6",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "pega": {
+    "id": "pega",
+    "name": "Pega",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "peloton": {
+    "id": "peloton",
+    "name": "Peloton",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "persistent-systems": {
+    "id": "persistent-systems",
+    "name": "Persistent Systems",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "philips": {
+    "id": "philips",
+    "name": "Philips",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "phonepe": {
+    "id": "phonepe",
+    "name": "Phonepe",
+    "tier": "Popular (50+)",
+    "totalQuestions": 100,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 4,
+    "allCount": 100,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 57,
+      "Hard": 39
+    }
+  },
+  "pickrr": {
+    "id": "pickrr",
+    "name": "Pickrr",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "pinterest": {
+    "id": "pinterest",
+    "name": "Pinterest",
+    "tier": "Top Unicorns",
+    "totalQuestions": 46,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 7,
+    "sixMonthsCount": 15,
+    "allCount": 46,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 29,
+      "Hard": 16
+    }
+  },
+  "plaid": {
+    "id": "plaid",
+    "name": "Plaid",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "playsimple": {
+    "id": "playsimple",
+    "name": "Playsimple",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "pocket-gems": {
+    "id": "pocket-gems",
+    "name": "Pocket Gems",
+    "tier": "Other",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 10,
+      "Hard": 4
+    }
+  },
+  "point72": {
+    "id": "point72",
+    "name": "Point72",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "polar": {
+    "id": "polar",
+    "name": "Polar",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "ponyai": {
+    "id": "ponyai",
+    "name": "Ponyai",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "pornhub": {
+    "id": "pornhub",
+    "name": "Pornhub",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 8,
+      "Hard": 0
+    }
+  },
+  "porter": {
+    "id": "porter",
+    "name": "Porter",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "poshmark": {
+    "id": "poshmark",
+    "name": "Poshmark",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "postman": {
+    "id": "postman",
+    "name": "Postman",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "postmates": {
+    "id": "postmates",
+    "name": "Postmates",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "poynt": {
+    "id": "poynt",
+    "name": "Poynt",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "publicis-sapient": {
+    "id": "publicis-sapient",
+    "name": "Publicis Sapient",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "pubmatic": {
+    "id": "pubmatic",
+    "name": "Pubmatic",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "pure": {
+    "id": "pure",
+    "name": "Pure",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "pure-storage": {
+    "id": "pure-storage",
+    "name": "Pure Storage",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "purplle": {
+    "id": "purplle",
+    "name": "Purplle",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "pwc": {
+    "id": "pwc",
+    "name": "Pwc",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "qualcomm": {
+    "id": "qualcomm",
+    "name": "Qualcomm",
+    "tier": "Big Tech",
+    "totalQuestions": 60,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 11,
+    "allCount": 60,
+    "diffCounts": {
+      "Easy": 28,
+      "Medium": 23,
+      "Hard": 9
+    }
+  },
+  "qualtrics": {
+    "id": "qualtrics",
+    "name": "Qualtrics",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "qualys": {
+    "id": "qualys",
+    "name": "Qualys",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "quantcast": {
+    "id": "quantcast",
+    "name": "Quantcast",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "quantiphi": {
+    "id": "quantiphi",
+    "name": "Quantiphi",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "quince": {
+    "id": "quince",
+    "name": "Quince",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 2,
+    "sixMonthsCount": 2,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 5,
+      "Hard": 0
+    }
+  },
+  "quora": {
+    "id": "quora",
+    "name": "Quora",
+    "tier": "Other",
+    "totalQuestions": 19,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 19,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 9,
+      "Hard": 3
+    }
+  },
+  "rackspace": {
+    "id": "rackspace",
+    "name": "Rackspace",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "radius": {
+    "id": "radius",
+    "name": "Radius",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "rakuten": {
+    "id": "rakuten",
+    "name": "Rakuten",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "rally-health": {
+    "id": "rally-health",
+    "name": "Rally Health",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "ramp-2": {
+    "id": "ramp-2",
+    "name": "Ramp 2",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "razorpay": {
+    "id": "razorpay",
+    "name": "Razorpay",
+    "tier": "Other",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 9,
+      "Hard": 1
+    }
+  },
+  "rbc": {
+    "id": "rbc",
+    "name": "Rbc",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "redbus": {
+    "id": "redbus",
+    "name": "Redbus",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "reddit": {
+    "id": "reddit",
+    "name": "Reddit",
+    "tier": "Top Unicorns",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "redfin": {
+    "id": "redfin",
+    "name": "Redfin",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "reliance-retails": {
+    "id": "reliance-retails",
+    "name": "Reliance Retails",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "remitly": {
+    "id": "remitly",
+    "name": "Remitly",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "remotestate": {
+    "id": "remotestate",
+    "name": "Remotestate",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "retailmenot": {
+    "id": "retailmenot",
+    "name": "Retailmenot",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "revolut": {
+    "id": "revolut",
+    "name": "Revolut",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 7,
+      "Hard": 0
+    }
+  },
+  "riot-games": {
+    "id": "riot-games",
+    "name": "Riot Games",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "ripple": {
+    "id": "ripple",
+    "name": "Ripple",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 6,
+      "Hard": 1
+    }
+  },
+  "rippling": {
+    "id": "rippling",
+    "name": "Rippling",
+    "tier": "Other",
+    "totalQuestions": 23,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 23,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 13,
+      "Hard": 8
+    }
+  },
+  "rivian": {
+    "id": "rivian",
+    "name": "Rivian",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 6,
+      "Hard": 1
+    }
+  },
+  "robinhood": {
+    "id": "robinhood",
+    "name": "Robinhood",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 11,
+      "Hard": 1
+    }
+  },
+  "roblox": {
+    "id": "roblox",
+    "name": "Roblox",
+    "tier": "Top Unicorns",
+    "totalQuestions": 56,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 3,
+    "sixMonthsCount": 6,
+    "allCount": 56,
+    "diffCounts": {
+      "Easy": 8,
+      "Medium": 35,
+      "Hard": 13
+    }
+  },
+  "rokt": {
+    "id": "rokt",
+    "name": "Rokt",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 2
+    }
+  },
+  "roku": {
+    "id": "roku",
+    "name": "Roku",
+    "tier": "Other",
+    "totalQuestions": 18,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 18,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 10,
+      "Hard": 5
+    }
+  },
+  "rubrik": {
+    "id": "rubrik",
+    "name": "Rubrik",
+    "tier": "Other",
+    "totalQuestions": 35,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 35,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 22,
+      "Hard": 11
+    }
+  },
+  "rupeek": {
+    "id": "rupeek",
+    "name": "Rupeek",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "salesforce": {
+    "id": "salesforce",
+    "name": "Salesforce",
+    "tier": "Big Tech",
+    "totalQuestions": 191,
+    "thirtyDaysCount": 6,
+    "threeMonthsCount": 15,
+    "sixMonthsCount": 26,
+    "allCount": 191,
+    "diffCounts": {
+      "Easy": 25,
+      "Medium": 114,
+      "Hard": 52
+    }
+  },
+  "sambanova": {
+    "id": "sambanova",
+    "name": "Sambanova",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "samsara": {
+    "id": "samsara",
+    "name": "Samsara",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "samsung": {
+    "id": "samsung",
+    "name": "Samsung",
+    "tier": "Popular (50+)",
+    "totalQuestions": 63,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 63,
+    "diffCounts": {
+      "Easy": 11,
+      "Medium": 34,
+      "Hard": 18
+    }
+  },
+  "sap": {
+    "id": "sap",
+    "name": "Sap",
+    "tier": "Other",
+    "totalQuestions": 41,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 41,
+    "diffCounts": {
+      "Easy": 14,
+      "Medium": 20,
+      "Hard": 7
+    }
+  },
+  "scale-ai": {
+    "id": "scale-ai",
+    "name": "Scale Ai",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "scaler": {
+    "id": "scaler",
+    "name": "Scaler",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 3,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "schlumberger": {
+    "id": "schlumberger",
+    "name": "Schlumberger",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "schneider-electric": {
+    "id": "schneider-electric",
+    "name": "Schneider Electric",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "schrodinger": {
+    "id": "schrodinger",
+    "name": "Schrodinger",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "sentry": {
+    "id": "sentry",
+    "name": "Sentry",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "servicenow": {
+    "id": "servicenow",
+    "name": "Servicenow",
+    "tier": "Popular (50+)",
+    "totalQuestions": 72,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 72,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 52,
+      "Hard": 13
+    }
+  },
+  "sharechat": {
+    "id": "sharechat",
+    "name": "Sharechat",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "shift-technology": {
+    "id": "shift-technology",
+    "name": "Shift Technology",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "shipsy": {
+    "id": "shipsy",
+    "name": "Shipsy",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "shopback": {
+    "id": "shopback",
+    "name": "Shopback",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "shopee": {
+    "id": "shopee",
+    "name": "Shopee",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 6,
+      "Hard": 1
+    }
+  },
+  "shopify": {
+    "id": "shopify",
+    "name": "Shopify",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 2
+    }
+  },
+  "shopup": {
+    "id": "shopup",
+    "name": "Shopup",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "siemens": {
+    "id": "siemens",
+    "name": "Siemens",
+    "tier": "Other",
+    "totalQuestions": 23,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 23,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 13,
+      "Hard": 3
+    }
+  },
+  "sig": {
+    "id": "sig",
+    "name": "Sig",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 8,
+      "Hard": 3
+    }
+  },
+  "sigmoid": {
+    "id": "sigmoid",
+    "name": "Sigmoid",
+    "tier": "Other",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 9,
+      "Hard": 1
+    }
+  },
+  "singlestore": {
+    "id": "singlestore",
+    "name": "Singlestore",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "sixt": {
+    "id": "sixt",
+    "name": "Sixt",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "slice": {
+    "id": "slice",
+    "name": "Slice",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "smartnews": {
+    "id": "smartnews",
+    "name": "Smartnews",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "smartsheet": {
+    "id": "smartsheet",
+    "name": "Smartsheet",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "snapchat": {
+    "id": "snapchat",
+    "name": "Snapchat",
+    "tier": "Top Unicorns",
+    "totalQuestions": 84,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 7,
+    "allCount": 84,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 52,
+      "Hard": 27
+    }
+  },
+  "snapdeal": {
+    "id": "snapdeal",
+    "name": "Snapdeal",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "snowflake": {
+    "id": "snowflake",
+    "name": "Snowflake",
+    "tier": "Top Unicorns",
+    "totalQuestions": 102,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 13,
+    "sixMonthsCount": 29,
+    "allCount": 102,
+    "diffCounts": {
+      "Easy": 13,
+      "Medium": 69,
+      "Hard": 20
+    }
+  },
+  "societe-generale": {
+    "id": "societe-generale",
+    "name": "Societe Generale",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "sofi": {
+    "id": "sofi",
+    "name": "Sofi",
+    "tier": "Other",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 4,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 9,
+      "Hard": 5
+    }
+  },
+  "softwire": {
+    "id": "softwire",
+    "name": "Softwire",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "sonatus": {
+    "id": "sonatus",
+    "name": "Sonatus",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "sony": {
+    "id": "sony",
+    "name": "Sony",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "soti": {
+    "id": "soti",
+    "name": "Soti",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "soundhound": {
+    "id": "soundhound",
+    "name": "Soundhound",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "spacex": {
+    "id": "spacex",
+    "name": "Spacex",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "spinny": {
+    "id": "spinny",
+    "name": "Spinny",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 7,
+      "Hard": 0
+    }
+  },
+  "splunk": {
+    "id": "splunk",
+    "name": "Splunk",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 8,
+      "Hard": 1
+    }
+  },
+  "spotify": {
+    "id": "spotify",
+    "name": "Spotify",
+    "tier": "Top Unicorns",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 4,
+    "sixMonthsCount": 4,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 3,
+      "Hard": 4
+    }
+  },
+  "sprinklr": {
+    "id": "sprinklr",
+    "name": "Sprinklr",
+    "tier": "Other",
+    "totalQuestions": 41,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 41,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 18,
+      "Hard": 22
+    }
+  },
+  "square": {
+    "id": "square",
+    "name": "Square",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 9,
+      "Hard": 1
+    }
+  },
+  "squarepoint-capital": {
+    "id": "squarepoint-capital",
+    "name": "Squarepoint Capital",
+    "tier": "Other",
+    "totalQuestions": 27,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 3,
+    "allCount": 27,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 19,
+      "Hard": 6
+    }
+  },
+  "squarespace": {
+    "id": "squarespace",
+    "name": "Squarespace",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "stackadapt": {
+    "id": "stackadapt",
+    "name": "Stackadapt",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "stackline": {
+    "id": "stackline",
+    "name": "Stackline",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "starbucks": {
+    "id": "starbucks",
+    "name": "Starbucks",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "state-farm": {
+    "id": "state-farm",
+    "name": "State Farm",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "strava": {
+    "id": "strava",
+    "name": "Strava",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "stripe": {
+    "id": "stripe",
+    "name": "Stripe",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 12,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 12,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 10,
+      "Hard": 1
+    }
+  },
+  "sumologic": {
+    "id": "sumologic",
+    "name": "Sumologic",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "swiggy": {
+    "id": "swiggy",
+    "name": "Swiggy",
+    "tier": "Other",
+    "totalQuestions": 36,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 36,
+    "diffCounts": {
+      "Easy": 6,
+      "Medium": 24,
+      "Hard": 6
+    }
+  },
+  "syfe": {
+    "id": "syfe",
+    "name": "Syfe",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "symantec": {
+    "id": "symantec",
+    "name": "Symantec",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "synopsys": {
+    "id": "synopsys",
+    "name": "Synopsys",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "ta-digital": {
+    "id": "ta-digital",
+    "name": "Ta Digital",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "tableau": {
+    "id": "tableau",
+    "name": "Tableau",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "tanium": {
+    "id": "tanium",
+    "name": "Tanium",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "target": {
+    "id": "target",
+    "name": "Target",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "tcs": {
+    "id": "tcs",
+    "name": "Tcs",
+    "tier": "Popular (50+)",
+    "totalQuestions": 240,
+    "thirtyDaysCount": 20,
+    "threeMonthsCount": 42,
+    "sixMonthsCount": 75,
+    "allCount": 240,
+    "diffCounts": {
+      "Easy": 105,
+      "Medium": 113,
+      "Hard": 22
+    }
+  },
+  "tech-mahindra": {
+    "id": "tech-mahindra",
+    "name": "Tech Mahindra",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "techolution": {
+    "id": "techolution",
+    "name": "Techolution",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "tekion": {
+    "id": "tekion",
+    "name": "Tekion",
+    "tier": "Other",
+    "totalQuestions": 24,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 2,
+    "allCount": 24,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 16,
+      "Hard": 7
+    }
+  },
+  "tencent": {
+    "id": "tencent",
+    "name": "Tencent",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "teradata": {
+    "id": "teradata",
+    "name": "Teradata",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "tesco": {
+    "id": "tesco",
+    "name": "Tesco",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "tesla": {
+    "id": "tesla",
+    "name": "Tesla",
+    "tier": "Other",
+    "totalQuestions": 42,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 10,
+    "allCount": 42,
+    "diffCounts": {
+      "Easy": 10,
+      "Medium": 26,
+      "Hard": 6
+    }
+  },
+  "texas-instruments": {
+    "id": "texas-instruments",
+    "name": "Texas Instruments",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 2
+    }
+  },
+  "the-trade-desk": {
+    "id": "the-trade-desk",
+    "name": "The Trade Desk",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "thomson-reuters": {
+    "id": "thomson-reuters",
+    "name": "Thomson Reuters",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "thoughtspot": {
+    "id": "thoughtspot",
+    "name": "Thoughtspot",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 3
+    }
+  },
+  "thoughtworks": {
+    "id": "thoughtworks",
+    "name": "Thoughtworks",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 2
+    }
+  },
+  "thousandeyes": {
+    "id": "thousandeyes",
+    "name": "Thousandeyes",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "thumbtack": {
+    "id": "thumbtack",
+    "name": "Thumbtack",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "tiaa": {
+    "id": "tiaa",
+    "name": "Tiaa",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "tiger-analytics": {
+    "id": "tiger-analytics",
+    "name": "Tiger Analytics",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "tiktok": {
+    "id": "tiktok",
+    "name": "Tiktok",
+    "tier": "Top Unicorns",
+    "totalQuestions": 349,
+    "thirtyDaysCount": 6,
+    "threeMonthsCount": 17,
+    "sixMonthsCount": 41,
+    "allCount": 349,
+    "diffCounts": {
+      "Easy": 33,
+      "Medium": 244,
+      "Hard": 72
+    }
+  },
+  "tinder": {
+    "id": "tinder",
+    "name": "Tinder",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 2
+    }
+  },
+  "tinkoff": {
+    "id": "tinkoff",
+    "name": "Tinkoff",
+    "tier": "Other",
+    "totalQuestions": 20,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 20,
+    "diffCounts": {
+      "Easy": 9,
+      "Medium": 11,
+      "Hard": 0
+    }
+  },
+  "toast": {
+    "id": "toast",
+    "name": "Toast",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "tokopedia": {
+    "id": "tokopedia",
+    "name": "Tokopedia",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "tomtom": {
+    "id": "tomtom",
+    "name": "Tomtom",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "toptal": {
+    "id": "toptal",
+    "name": "Toptal",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "tower-research": {
+    "id": "tower-research",
+    "name": "Tower Research",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "toyota": {
+    "id": "toyota",
+    "name": "Toyota",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "tracxn": {
+    "id": "tracxn",
+    "name": "Tracxn",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "traveloka": {
+    "id": "traveloka",
+    "name": "Traveloka",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "trend-micro": {
+    "id": "trend-micro",
+    "name": "Trend Micro",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "trexquant": {
+    "id": "trexquant",
+    "name": "Trexquant",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "trilogy": {
+    "id": "trilogy",
+    "name": "Trilogy",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 3
+    }
+  },
+  "tripactions": {
+    "id": "tripactions",
+    "name": "Tripactions",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "tripadvisor": {
+    "id": "tripadvisor",
+    "name": "Tripadvisor",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "triplebyte": {
+    "id": "triplebyte",
+    "name": "Triplebyte",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "turing": {
+    "id": "turing",
+    "name": "Turing",
+    "tier": "Other",
+    "totalQuestions": 37,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 4,
+    "allCount": 37,
+    "diffCounts": {
+      "Easy": 10,
+      "Medium": 23,
+      "Hard": 4
+    }
+  },
+  "turvo": {
+    "id": "turvo",
+    "name": "Turvo",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "tusimple": {
+    "id": "tusimple",
+    "name": "Tusimple",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 2
+    }
+  },
+  "twilio": {
+    "id": "twilio",
+    "name": "Twilio",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 8,
+      "Hard": 0
+    }
+  },
+  "twitch": {
+    "id": "twitch",
+    "name": "Twitch",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "twitter": {
+    "id": "twitter",
+    "name": "Twitter",
+    "tier": "Big Tech",
+    "totalQuestions": 51,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 51,
+    "diffCounts": {
+      "Easy": 8,
+      "Medium": 31,
+      "Hard": 12
+    }
+  },
+  "two-sigma": {
+    "id": "two-sigma",
+    "name": "Two Sigma",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 19,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 5,
+    "allCount": 19,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 11,
+      "Hard": 5
+    }
+  },
+  "uber": {
+    "id": "uber",
+    "name": "Uber",
+    "tier": "Top Unicorns",
+    "totalQuestions": 362,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 29,
+    "sixMonthsCount": 68,
+    "allCount": 362,
+    "diffCounts": {
+      "Easy": 45,
+      "Medium": 215,
+      "Hard": 102
+    }
+  },
+  "ubisoft": {
+    "id": "ubisoft",
+    "name": "Ubisoft",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "ubs": {
+    "id": "ubs",
+    "name": "Ubs",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "udemy": {
+    "id": "udemy",
+    "name": "Udemy",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 2,
+      "Hard": 1
+    }
+  },
+  "uipath": {
+    "id": "uipath",
+    "name": "Uipath",
+    "tier": "Other",
+    "totalQuestions": 14,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 14,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 9,
+      "Hard": 5
+    }
+  },
+  "ukg": {
+    "id": "ukg",
+    "name": "Ukg",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 5,
+      "Hard": 2
+    }
+  },
+  "unbxd": {
+    "id": "unbxd",
+    "name": "Unbxd",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "unifyapps": {
+    "id": "unifyapps",
+    "name": "Unifyapps",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "unity": {
+    "id": "unity",
+    "name": "Unity",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "unstop": {
+    "id": "unstop",
+    "name": "Unstop",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "upstart": {
+    "id": "upstart",
+    "name": "Upstart",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 6,
+      "Hard": 0
+    }
+  },
+  "urban-company": {
+    "id": "urban-company",
+    "name": "Urban Company",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 5,
+      "Hard": 2
+    }
+  },
+  "usaa": {
+    "id": "usaa",
+    "name": "Usaa",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "ust": {
+    "id": "ust",
+    "name": "Ust",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "valve": {
+    "id": "valve",
+    "name": "Valve",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "veeva": {
+    "id": "veeva",
+    "name": "Veeva",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "verily": {
+    "id": "verily",
+    "name": "Verily",
+    "tier": "Other",
+    "totalQuestions": 11,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 11,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 8,
+      "Hard": 2
+    }
+  },
+  "veritas": {
+    "id": "veritas",
+    "name": "Veritas",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "verizon": {
+    "id": "verizon",
+    "name": "Verizon",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "verkada": {
+    "id": "verkada",
+    "name": "Verkada",
+    "tier": "Other",
+    "totalQuestions": 19,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 3,
+    "allCount": 19,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 10,
+      "Hard": 5
+    }
+  },
+  "viasat": {
+    "id": "viasat",
+    "name": "Viasat",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "vimeo": {
+    "id": "vimeo",
+    "name": "Vimeo",
+    "tier": "Other",
+    "totalQuestions": 7,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 7,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 1
+    }
+  },
+  "virtu": {
+    "id": "virtu",
+    "name": "Virtu",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "virtusa": {
+    "id": "virtusa",
+    "name": "Virtusa",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 3,
+      "Hard": 0
+    }
+  },
+  "visa": {
+    "id": "visa",
+    "name": "Visa",
+    "tier": "FinTech & Quant",
+    "totalQuestions": 145,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 11,
+    "sixMonthsCount": 30,
+    "allCount": 145,
+    "diffCounts": {
+      "Easy": 32,
+      "Medium": 92,
+      "Hard": 21
+    }
+  },
+  "vk": {
+    "id": "vk",
+    "name": "Vk",
+    "tier": "Other",
+    "totalQuestions": 13,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 13,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 6,
+      "Hard": 0
+    }
+  },
+  "vmware": {
+    "id": "vmware",
+    "name": "Vmware",
+    "tier": "Big Tech",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 6,
+      "Hard": 2
+    }
+  },
+  "walmart-labs": {
+    "id": "walmart-labs",
+    "name": "Walmart Labs",
+    "tier": "Big Tech",
+    "totalQuestions": 143,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 5,
+    "sixMonthsCount": 19,
+    "allCount": 143,
+    "diffCounts": {
+      "Easy": 22,
+      "Medium": 95,
+      "Hard": 26
+    }
+  },
+  "warnermedia": {
+    "id": "warnermedia",
+    "name": "Warnermedia",
+    "tier": "Other",
+    "totalQuestions": 8,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 8,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 4,
+      "Hard": 2
+    }
+  },
+  "wayfair": {
+    "id": "wayfair",
+    "name": "Wayfair",
+    "tier": "Other",
+    "totalQuestions": 20,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 20,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 12,
+      "Hard": 3
+    }
+  },
+  "waymo": {
+    "id": "waymo",
+    "name": "Waymo",
+    "tier": "Other",
+    "totalQuestions": 26,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 4,
+    "sixMonthsCount": 8,
+    "allCount": 26,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 14,
+      "Hard": 11
+    }
+  },
+  "wayve": {
+    "id": "wayve",
+    "name": "Wayve",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "wealthfront": {
+    "id": "wealthfront",
+    "name": "Wealthfront",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "wells-fargo": {
+    "id": "wells-fargo",
+    "name": "Wells Fargo",
+    "tier": "Other",
+    "totalQuestions": 23,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 23,
+    "diffCounts": {
+      "Easy": 10,
+      "Medium": 11,
+      "Hard": 2
+    }
+  },
+  "weride": {
+    "id": "weride",
+    "name": "Weride",
+    "tier": "Other",
+    "totalQuestions": 10,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 10,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 3,
+      "Hard": 6
+    }
+  },
+  "western-digital": {
+    "id": "western-digital",
+    "name": "Western Digital",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "whatfix": {
+    "id": "whatfix",
+    "name": "Whatfix",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "whatnot": {
+    "id": "whatnot",
+    "name": "Whatnot",
+    "tier": "Other",
+    "totalQuestions": 13,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 3,
+    "allCount": 13,
+    "diffCounts": {
+      "Easy": 4,
+      "Medium": 9,
+      "Hard": 0
+    }
+  },
+  "winzo": {
+    "id": "winzo",
+    "name": "Winzo",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "wipro": {
+    "id": "wipro",
+    "name": "Wipro",
+    "tier": "Other",
+    "totalQuestions": 19,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 19,
+    "diffCounts": {
+      "Easy": 13,
+      "Medium": 6,
+      "Hard": 0
+    }
+  },
+  "wise": {
+    "id": "wise",
+    "name": "Wise",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 4,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 5,
+      "Hard": 0
+    }
+  },
+  "wish": {
+    "id": "wish",
+    "name": "Wish",
+    "tier": "Other",
+    "totalQuestions": 5,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 5,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "wissen": {
+    "id": "wissen",
+    "name": "Wissen",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "wix": {
+    "id": "wix",
+    "name": "Wix",
+    "tier": "Popular (50+)",
+    "totalQuestions": 55,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 55,
+    "diffCounts": {
+      "Easy": 16,
+      "Medium": 31,
+      "Hard": 8
+    }
+  },
+  "workday": {
+    "id": "workday",
+    "name": "Workday",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 6,
+      "Hard": 0
+    }
+  },
+  "works-applications": {
+    "id": "works-applications",
+    "name": "Works Applications",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 2
+    }
+  },
+  "worldquant": {
+    "id": "worldquant",
+    "name": "Worldquant",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 3
+    }
+  },
+  "woven-by-toyota": {
+    "id": "woven-by-toyota",
+    "name": "Woven By Toyota",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "xing": {
+    "id": "xing",
+    "name": "Xing",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "yahoo": {
+    "id": "yahoo",
+    "name": "Yahoo",
+    "tier": "Big Tech",
+    "totalQuestions": 33,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 33,
+    "diffCounts": {
+      "Easy": 11,
+      "Medium": 19,
+      "Hard": 3
+    }
+  },
+  "yandex": {
+    "id": "yandex",
+    "name": "Yandex",
+    "tier": "Big Tech",
+    "totalQuestions": 130,
+    "thirtyDaysCount": 2,
+    "threeMonthsCount": 12,
+    "sixMonthsCount": 22,
+    "allCount": 130,
+    "diffCounts": {
+      "Easy": 51,
+      "Medium": 69,
+      "Hard": 10
+    }
+  },
+  "yatra": {
+    "id": "yatra",
+    "name": "Yatra",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "yelp": {
+    "id": "yelp",
+    "name": "Yelp",
+    "tier": "Other",
+    "totalQuestions": 27,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 27,
+    "diffCounts": {
+      "Easy": 7,
+      "Medium": 15,
+      "Hard": 5
+    }
+  },
+  "yugabyte": {
+    "id": "yugabyte",
+    "name": "Yugabyte",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 1,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 1
+    }
+  },
+  "zalando": {
+    "id": "zalando",
+    "name": "Zalando",
+    "tier": "Other",
+    "totalQuestions": 3,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 3,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "zappos": {
+    "id": "zappos",
+    "name": "Zappos",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "zemoso": {
+    "id": "zemoso",
+    "name": "Zemoso",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "zendesk": {
+    "id": "zendesk",
+    "name": "Zendesk",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "zenefits": {
+    "id": "zenefits",
+    "name": "Zenefits",
+    "tier": "Other",
+    "totalQuestions": 21,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 21,
+    "diffCounts": {
+      "Easy": 5,
+      "Medium": 11,
+      "Hard": 5
+    }
+  },
+  "zepto": {
+    "id": "zepto",
+    "name": "Zepto",
+    "tier": "Other",
+    "totalQuestions": 22,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 22,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 19,
+      "Hard": 2
+    }
+  },
+  "zeta": {
+    "id": "zeta",
+    "name": "Zeta",
+    "tier": "Other",
+    "totalQuestions": 30,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 30,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 20,
+      "Hard": 10
+    }
+  },
+  "zeta-suite": {
+    "id": "zeta-suite",
+    "name": "Zeta Suite",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 0,
+      "Hard": 0
+    }
+  },
+  "zillow": {
+    "id": "zillow",
+    "name": "Zillow",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "zip": {
+    "id": "zip",
+    "name": "Zip",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 3,
+      "Hard": 1
+    }
+  },
+  "ziprecruiter": {
+    "id": "ziprecruiter",
+    "name": "Ziprecruiter",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 0
+    }
+  },
+  "zluri": {
+    "id": "zluri",
+    "name": "Zluri",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 0
+    }
+  },
+  "zocdoc": {
+    "id": "zocdoc",
+    "name": "Zocdoc",
+    "tier": "Other",
+    "totalQuestions": 1,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 1,
+    "diffCounts": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "zoho": {
+    "id": "zoho",
+    "name": "Zoho",
+    "tier": "Popular (50+)",
+    "totalQuestions": 169,
+    "thirtyDaysCount": 1,
+    "threeMonthsCount": 1,
+    "sixMonthsCount": 9,
+    "allCount": 169,
+    "diffCounts": {
+      "Easy": 55,
+      "Medium": 94,
+      "Hard": 20
+    }
+  },
+  "zomato": {
+    "id": "zomato",
+    "name": "Zomato",
+    "tier": "Other",
+    "totalQuestions": 28,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 28,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 17,
+      "Hard": 9
+    }
+  },
+  "zoom": {
+    "id": "zoom",
+    "name": "Zoom",
+    "tier": "Other",
+    "totalQuestions": 4,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 1,
+    "allCount": 4,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 1,
+      "Hard": 1
+    }
+  },
+  "zoox": {
+    "id": "zoox",
+    "name": "Zoox",
+    "tier": "Other",
+    "totalQuestions": 6,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 6,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 4,
+      "Hard": 1
+    }
+  },
+  "zopsmart": {
+    "id": "zopsmart",
+    "name": "Zopsmart",
+    "tier": "Other",
+    "totalQuestions": 16,
+    "thirtyDaysCount": 3,
+    "threeMonthsCount": 4,
+    "sixMonthsCount": 4,
+    "allCount": 16,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 12,
+      "Hard": 2
+    }
+  },
+  "zs-associates": {
+    "id": "zs-associates",
+    "name": "Zs Associates",
+    "tier": "Other",
+    "totalQuestions": 9,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 9,
+    "diffCounts": {
+      "Easy": 2,
+      "Medium": 7,
+      "Hard": 0
+    }
+  },
+  "zscaler": {
+    "id": "zscaler",
+    "name": "Zscaler",
+    "tier": "Other",
+    "totalQuestions": 15,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 2,
+    "allCount": 15,
+    "diffCounts": {
+      "Easy": 3,
+      "Medium": 6,
+      "Hard": 6
+    }
+  },
+  "zulily": {
+    "id": "zulily",
+    "name": "Zulily",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  },
+  "zynga": {
+    "id": "zynga",
+    "name": "Zynga",
+    "tier": "Other",
+    "totalQuestions": 2,
+    "thirtyDaysCount": 0,
+    "threeMonthsCount": 0,
+    "sixMonthsCount": 0,
+    "allCount": 2,
+    "diffCounts": {
+      "Easy": 1,
+      "Medium": 1,
+      "Hard": 0
+    }
+  }
+}
