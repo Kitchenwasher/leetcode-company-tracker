@@ -5,6 +5,13 @@ import {
   loadStoredState, saveStoredState, getTodayKey, calculateStreaks,
   isDueForReview, generateDemoProgress
 } from './services/storage';
+import { useAuth } from './context/AuthContext';
+import { AuthModal } from './components/AuthModal';
+import { SubscriptionModal } from './components/SubscriptionModal';
+import { PrepPlannerModal } from './components/PrepPlannerModal';
+import { FlashcardModal } from './components/FlashcardModal';
+import { LeetCodeSyncModal } from './components/LeetCodeSyncModal';
+import { isQuestionInTrack } from './data/curatedLists';
 import { sounds } from './utils/sound';
 import { Navbar } from './components/Navbar';
 import { TimeframeTabs } from './components/TimeframeTabs';
@@ -30,7 +37,8 @@ const TOP_FAANG_PILLS = [
 ];
 
 export const App: React.FC = () => {
-  const [store, setStore] = useState<UserStoreState>(() => loadStoredState());
+  const { user } = useAuth();
+  const [store, setStore] = useState<UserStoreState>(() => loadStoredState(user?.id));
   const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,15 +52,27 @@ export const App: React.FC = () => {
   const [showMockModal, setShowMockModal] = useState<boolean>(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState<boolean>(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState<boolean>(false);
+  const [showPlannerModal, setShowPlannerModal] = useState<boolean>(false);
+  const [showFlashcardModal, setShowFlashcardModal] = useState<boolean>(false);
+  const [showLeetCodeSyncModal, setShowLeetCodeSyncModal] = useState<boolean>(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 50;
 
-  // Save to local storage whenever store changes
+  // Reload store when user changes (switch account or login)
   useEffect(() => {
-    saveStoredState(store);
-  }, [store]);
+    if (user?.id) {
+      setStore(loadStoredState(user.id));
+    }
+  }, [user?.id]);
+
+  // Save to user-scoped local storage whenever store changes
+  useEffect(() => {
+    if (user?.id) {
+      saveStoredState(store, user.id);
+    }
+  }, [store, user?.id]);
 
   // Load complete questions dataset asynchronously
   useEffect(() => {
@@ -150,8 +170,16 @@ export const App: React.FC = () => {
       if (tf !== 'all' && !compData[tf]) return false;
 
       // 3. Curated list filter
-      if (store.curatedList === 'blind75' && !q.isBlind75) return false;
+      if (store.curatedList === 'blind75' && !isQuestionInTrack(q.id, 'blind75')) return false;
+      if (store.curatedList === 'neetcode150' && !isQuestionInTrack(q.id, 'neetcode150')) return false;
+      if (store.curatedList === 'striver180' && !isQuestionInTrack(q.id, 'striver180')) return false;
       if (store.curatedList === 'grind169' && !q.isGrind169) return false;
+
+      // Tag filter
+      if (store.selectedTag) {
+        const itemProg = store.progress[String(q.id)];
+        if (!itemProg?.tags?.includes(store.selectedTag)) return false;
+      }
 
       // 4. Difficulty filter
       if (store.selectedDifficulty !== 'all' && q.difficulty !== store.selectedDifficulty) {
@@ -318,6 +346,22 @@ export const App: React.FC = () => {
       },
     }));
   };
+
+  const handleBatchUpdateStatus = useCallback((questionIds: (number | string)[], newStatus: ProblemStatus) => {
+    setStore((prev) => {
+      const nextProg = { ...prev.progress };
+      const now = new Date().toISOString();
+      questionIds.forEach((qid) => {
+        const idStr = String(qid);
+        nextProg[idStr] = {
+          ...(nextProg[idStr] || { questionId: qid, isFavorite: false }),
+          status: newStatus,
+          lastSolvedAt: now,
+        };
+      });
+      return { ...prev, progress: nextProg };
+    });
+  }, []);
 
   // Random Roulette
   const handleRandomRoulette = () => {
@@ -491,6 +535,9 @@ export const App: React.FC = () => {
         onOpenAnalytics={() => setShowAnalyticsModal(true)}
         onOpenShortcuts={() => setShowShortcutsModal(true)}
         onRandomRoulette={handleRandomRoulette}
+        onOpenPlanner={() => setShowPlannerModal(true)}
+        onOpenFlashcards={() => setShowFlashcardModal(true)}
+        onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
       />
 
       {/* Main Content Area */}
@@ -810,6 +857,37 @@ export const App: React.FC = () => {
       {showShortcutsModal && (
         <KeyboardHelpModal onClose={() => setShowShortcutsModal(false)} />
       )}
+
+      {/* SaaS Authentication & Subscription Modals */}
+      <AuthModal />
+      <SubscriptionModal />
+
+      {/* Company Prep Milestone Planner Modal */}
+      <PrepPlannerModal
+        isOpen={showPlannerModal}
+        onClose={() => setShowPlannerModal(false)}
+        companies={companiesDict}
+        allQuestions={allQuestions}
+        progress={store.progress}
+        onSelectCompany={(cId) => updateStore({ selectedCompany: cId })}
+      />
+
+      {/* Anki Flashcard Active Recall Trainer Modal */}
+      <FlashcardModal
+        isOpen={showFlashcardModal}
+        onClose={() => setShowFlashcardModal(false)}
+        questions={allQuestions}
+        progress={store.progress}
+        onUpdateStatus={handleUpdateStatus}
+      />
+
+      {/* LeetCode Public Profile Auto-Sync Modal */}
+      <LeetCodeSyncModal
+        isOpen={showLeetCodeSyncModal}
+        onClose={() => setShowLeetCodeSyncModal(false)}
+        allQuestions={allQuestions}
+        onBatchUpdateStatus={handleBatchUpdateStatus}
+      />
     </div>
   );
 };

@@ -60,6 +60,26 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             Blind 75
           </button>
           <button
+            onClick={() => onChange({ curatedList: 'neetcode150' })}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              state.curatedList === 'neetcode150'
+                ? 'bg-emerald-600 text-white font-semibold shadow-sm'
+                : 'text-slate-400 hover:text-emerald-300'
+            }`}
+          >
+            NeetCode 150
+          </button>
+          <button
+            onClick={() => onChange({ curatedList: 'striver180' })}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              state.curatedList === 'striver180'
+                ? 'bg-rose-600 text-white font-semibold shadow-sm'
+                : 'text-slate-400 hover:text-rose-300'
+            }`}
+          >
+            Striver 180
+          </button>
+          <button
             onClick={() => onChange({ curatedList: 'grind169' })}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               state.curatedList === 'grind169'

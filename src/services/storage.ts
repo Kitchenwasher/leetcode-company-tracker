@@ -28,9 +28,15 @@ export const getTodayKey = (): string => {
   return `${year}-${month}-${day}`;
 };
 
-export const loadStoredState = (): UserStoreState => {
+export const getUserStorageKey = (userId?: string): string => {
+  if (!userId || userId === 'guest') return STORAGE_KEY;
+  return `leettracker_user_${userId}_data_v1`;
+};
+
+export const loadStoredState = (userId?: string): UserStoreState => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const key = getUserStorageKey(userId);
+    const raw = localStorage.getItem(key);
     if (!raw) return DEFAULT_STATE;
     const parsed = JSON.parse(raw);
     return {
@@ -45,9 +51,10 @@ export const loadStoredState = (): UserStoreState => {
   }
 };
 
-export const saveStoredState = (state: UserStoreState) => {
+export const saveStoredState = (state: UserStoreState, userId?: string) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const key = getUserStorageKey(userId);
+    localStorage.setItem(key, JSON.stringify(state));
   } catch (e) {
     console.error('Failed to save state to localStorage:', e);
   }
@@ -225,3 +232,34 @@ export const generateDemoProgress = (questions: Question[]): { progress: Record<
 
   return { progress, activityLog };
 };
+
+// Whiteboard diagram storage per user
+export const getWhiteboardStorageKey = (userId?: string): string => {
+  const uid = userId || 'guest';
+  return `leettracker_whiteboard_${uid}_v1`;
+};
+
+export const loadWhiteboardDrawing = (questionId: string | number, userId?: string): string | null => {
+  try {
+    const key = getWhiteboardStorageKey(userId);
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const map = JSON.parse(raw);
+    return map[String(questionId)] || null;
+  } catch {
+    return null;
+  }
+};
+
+export const saveWhiteboardDrawing = (questionId: string | number, dataUrl: string, userId?: string) => {
+  try {
+    const key = getWhiteboardStorageKey(userId);
+    const raw = localStorage.getItem(key);
+    const map = raw ? JSON.parse(raw) : {};
+    map[String(questionId)] = dataUrl;
+    localStorage.setItem(key, JSON.stringify(map));
+  } catch (e) {
+    console.error('Failed to save whiteboard drawing:', e);
+  }
+};
+

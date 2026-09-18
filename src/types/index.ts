@@ -67,7 +67,8 @@ export interface UserStoreState {
   searchQuery: string;
   sortBy: 'frequency' | 'acceptance' | 'id' | 'title' | 'difficulty' | 'status';
   sortOrder: 'asc' | 'desc';
-  curatedList: 'all' | 'blind75' | 'grind169' | 'sprint30';
+  curatedList: 'all' | 'blind75' | 'neetcode150' | 'striver180' | 'grind169' | 'sprint30';
+  selectedTag?: string;
   viewMode: 'table' | 'card';
   darkMode: boolean;
   soundEnabled: boolean;

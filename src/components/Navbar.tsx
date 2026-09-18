@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CompanyMeta, UserStoreState, Question } from '../types';
 import { CompanySelector } from './CompanySelector';
+import { UserMenu } from './UserMenu';
 import {
   Flame, BarChart3, Layers, Clock, Dices, Download, Volume2, VolumeX,
-  Sun, Moon, Keyboard, CheckCircle2, Sparkles
+  Sun, Moon, Keyboard, CheckCircle2, Sparkles, Brain, Calendar, FileText, ChevronDown
 } from 'lucide-react';
 import { exportQuestionsCSV } from '../services/storage';
+import { exportToAnkiCSV, exportToObsidianMarkdown } from '../utils/exporters';
+import { useAuth } from '../context/AuthContext';
 import { sounds } from '../utils/sound';
 
 interface NavbarProps {
@@ -22,6 +25,9 @@ interface NavbarProps {
   onOpenAnalytics: () => void;
   onOpenShortcuts: () => void;
   onRandomRoulette: () => void;
+  onOpenPlanner: () => void;
+  onOpenFlashcards: () => void;
+  onOpenLeetCodeSync: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -38,7 +44,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAnalytics,
   onOpenShortcuts,
   onRandomRoulette,
+  onOpenPlanner,
+  onOpenFlashcards,
+  onOpenLeetCodeSync,
 }) => {
+  const { user } = useAuth();
+  const [showExportMenu, setShowExportMenu] = useState(false);
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
@@ -146,17 +157,82 @@ export const Navbar: React.FC<NavbarProps> = ({
             <BarChart3 className="w-4 h-4" />
           </button>
 
-          {/* Export CSV */}
+          {/* Prep Planner Button */}
           <button
             onClick={() => {
               sounds.playClick();
-              exportQuestionsCSV(filteredQuestions, state.progress, selectedCompanyId);
+              onOpenPlanner();
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-blue-400 transition-colors hidden md:flex"
-            title="Export current list to CSV"
+            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-400 transition-colors hidden sm:flex"
+            title="Company Prep Planner"
           >
-            <Download className="w-4 h-4" />
+            <Calendar className="w-4 h-4" />
           </button>
+
+          {/* Flashcard Recall Button */}
+          <button
+            onClick={() => {
+              sounds.playClick();
+              onOpenFlashcards();
+            }}
+            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-indigo-400 transition-colors hidden sm:flex"
+            title="Anki Flashcard Recall Trainer"
+          >
+            <Brain className="w-4 h-4" />
+          </button>
+
+          {/* Export Dropdown */}
+          <div className="relative hidden md:block">
+            <button
+              onClick={() => {
+                sounds.playClick();
+                setShowExportMenu(!showExportMenu);
+              }}
+              className="flex items-center gap-1 p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-blue-400 transition-colors"
+              title="Export Tools (CSV, Anki, Obsidian)"
+            >
+              <Download className="w-4 h-4" />
+              <ChevronDown className="w-3 h-3 text-slate-500" />
+            </button>
+
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-slate-900 border border-slate-800 shadow-xl py-1 z-50 animate-fadeIn divide-y divide-slate-800">
+                <button
+                  onClick={() => {
+                    sounds.playClick();
+                    exportQuestionsCSV(filteredQuestions, state.progress, selectedCompanyId);
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between"
+                >
+                  <span>Export to CSV</span>
+                  <span className="text-[10px] text-slate-500 font-mono">.csv</span>
+                </button>
+                <button
+                  onClick={() => {
+                    sounds.playClick();
+                    exportToAnkiCSV(filteredQuestions, state.progress, `LeetTracker_${selectedCompanyId}`);
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between"
+                >
+                  <span>Export to Anki Deck</span>
+                  <span className="text-[10px] text-amber-400 font-mono">.csv (Anki)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    sounds.playClick();
+                    exportToObsidianMarkdown(filteredQuestions, state.progress, user);
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between"
+                >
+                  <span>Export to Obsidian</span>
+                  <span className="text-[10px] text-indigo-400 font-mono">.md</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Sound Toggle */}
           <button
@@ -199,6 +275,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Keyboard className="w-4 h-4" />
           </button>
+
+          <div className="h-6 w-px bg-slate-800 hidden sm:block" />
+
+          {/* User Menu Dropdown */}
+          <UserMenu
+            onOpenPlanner={onOpenPlanner}
+            onOpenFlashcards={onOpenFlashcards}
+            onOpenLeetCodeSync={onOpenLeetCodeSync}
+          />
         </div>
       </div>
     </header>

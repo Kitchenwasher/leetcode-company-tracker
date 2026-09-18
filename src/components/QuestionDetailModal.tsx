@@ -5,10 +5,12 @@ import {
   X, ExternalLink, Star, CheckCircle2, Clock, RotateCcw, Award, Circle,
   Timer as TimerIcon, Play, Pause, Code2, FileText, Calendar,
   Copy, Check, Sparkles, AlertCircle, Building2, Eye, Edit3, Terminal,
-  Lightbulb, BookOpen, ArrowRight, ShieldAlert, Cpu
+  Lightbulb, BookOpen, ArrowRight, ShieldAlert, Cpu, Palette, Tag, Plus, Zap
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/sound';
+import { WhiteboardCanvas } from './WhiteboardCanvas';
+import { CppPlayground } from './CppPlayground';
 
 interface QuestionDetailModalProps {
   question: Question;
@@ -29,9 +31,11 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
   const [isFavorite, setIsFavorite] = useState<boolean>(!!initialProgress.isFavorite);
   const [notes, setNotes] = useState<string>(initialProgress.notes || '');
   const [notesView, setNotesView] = useState<'edit' | 'preview'>('edit');
+  const [tags, setTags] = useState<string[]>(initialProgress.tags || []);
+  const [tagInput, setTagInput] = useState<string>('');
   const [confidence, setConfidence] = useState<number>(initialProgress.confidence || 0);
   const [personalDiff, setPersonalDiff] = useState<Difficulty | undefined>(initialProgress.personalDifficulty);
-  const [activeTab, setActiveTab] = useState<'notes' | 'solution' | 'code' | 'companies'>('solution');
+  const [activeTab, setActiveTab] = useState<'notes' | 'solution' | 'code' | 'whiteboard' | 'runner' | 'companies'>('solution');
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedSolutionCode, setCopiedSolutionCode] = useState(false);
 
@@ -96,10 +100,27 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
         personalDifficulty: personalDiff,
         codeSnippet: { lang: codeLang, code: codeText },
         timeSpentSeconds: timerSeconds,
+        tags,
       });
     }, 350);
     return () => clearTimeout(handler);
-  }, [status, isFavorite, notes, confidence, personalDiff, codeLang, codeText, timerSeconds]);
+  }, [status, isFavorite, notes, confidence, personalDiff, codeLang, codeText, timerSeconds, tags]);
+
+  const handleAddTag = (e: React.KeyboardEvent | React.MouseEvent) => {
+    if ('key' in e && e.key !== 'Enter' && e.key !== ',') return;
+    if ('preventDefault' in e) e.preventDefault();
+    const clean = tagInput.trim().replace(/^#/, '');
+    if (clean && !tags.includes(clean)) {
+      sounds.playClick();
+      setTags((prev) => [...prev, clean]);
+      setTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    sounds.playClick();
+    setTags((prev) => prev.filter((t) => t !== tagToRemove));
+  };
 
   // Timer Tick
   useEffect(() => {
@@ -530,6 +551,28 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 Code Scratchpad
               </button>
               <button
+                onClick={() => setActiveTab('whiteboard')}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
+                  activeTab === 'whiteboard'
+                    ? 'border-indigo-500 text-indigo-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Palette className="w-3.5 h-3.5 text-pink-400" />
+                <span>Whiteboard Canvas</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('runner')}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
+                  activeTab === 'runner'
+                    ? 'border-indigo-500 text-indigo-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                <span>C++ Runner Sandbox</span>
+              </button>
+              <button
                 onClick={() => setActiveTab('companies')}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
                   activeTab === 'companies'
@@ -770,7 +813,56 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
           {/* TAB CONTENT 2: PERSONAL NOTES EDITOR */}
           {activeTab === 'notes' && (
-            <div className="space-y-2">
+            <div className="space-y-4">
+              {/* Custom Tags Bar */}
+              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
+                  <span className="flex items-center gap-1.5 text-indigo-300">
+                    <Tag className="w-3.5 h-3.5 text-indigo-400" />
+                    Personal Tags
+                  </span>
+                  <span className="text-[11px] text-slate-500">e.g. revisit, dp-pattern, tricky-pointers</span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {tags.map((t) => (
+                    <span
+                      key={t}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-950/40 text-indigo-300 border border-indigo-500/30 text-xs font-mono"
+                    >
+                      <span>#{t}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(t)}
+                        className="text-indigo-400 hover:text-rose-400 p-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  <div className="inline-flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleAddTag}
+                      placeholder="+ Add tag (Enter)"
+                      className="px-2.5 py-1 bg-slate-900 border border-slate-700/60 rounded-lg text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-indigo-500"
+                    />
+                    {tagInput.trim() && (
+                      <button
+                        type="button"
+                        onClick={handleAddTag}
+                        className="p-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {notesView === 'edit' ? (
                 <>
                   <div className="flex items-center justify-between text-xs text-slate-400">
@@ -840,6 +932,28 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 placeholder={`// Optimal Solution in ${codeLang.toUpperCase()} (Press Tab to indent)\nclass Solution {\n    // Solution code...\n}`}
                 rows={10}
                 className="w-full p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-emerald-300 placeholder-slate-600 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-y leading-relaxed"
+              />
+            </div>
+          )}
+
+          {/* TAB CONTENT: WHITEBOARD CANVAS */}
+          {activeTab === 'whiteboard' && (
+            <div className="space-y-2">
+              <WhiteboardCanvas questionId={q.id} height={380} />
+            </div>
+          )}
+
+          {/* TAB CONTENT: IN-BROWSER C++ RUNNER */}
+          {activeTab === 'runner' && (
+            <div className="space-y-2">
+              <CppPlayground
+                initialCode={currentApproach?.cppCode || codeText || undefined}
+                questionTitle={q.title}
+                onSendToNotes={(code) => {
+                  setNotes((prev) => prev + '\n\n```cpp\n' + code + '\n```');
+                  setActiveTab('notes');
+                  sounds.playSuccess();
+                }}
               />
             </div>
           )}

@@ -35,6 +35,25 @@
         "One list is null: returns the other list immediately.",
         "Both lists null: returns nullptr."
       ]
+    },
+    {
+      "id": "recursive-merge",
+      "name": "Approach 2: Recursive Divide & Conquer",
+      "tag": "Alternative",
+      "intuition": "If list1->val < list2->val, list1 becomes head, and list1->next = mergeTwoLists(list1->next, list2).",
+      "theory": "Subproblem induction: The head of the merged list is the smaller head, followed by the result of recursively merging the remainder.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {\n        if (!list1) return list2;\n        if (!list2) return list1;\n        if (list1->val <= list2->val) {\n            list1->next = mergeTwoLists(list1->next, list2);\n            return list1;\n        } else {\n            list2->next = mergeTwoLists(list1, list2->next);\n            return list2;\n        }\n    }\n};",
+      "timeComplexity": {
+        "complexity": "O(N + M)",
+        "explanation": "Recurses once per node until one list terminates."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N + M)",
+        "explanation": "Recursion call stack frames equal to length of combined lists."
+      },
+      "edgeCases": [
+        "Stack overflow for extremely deep linked lists (N > 10,000)."
+      ]
     }
   ]
 }
