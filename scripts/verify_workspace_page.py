@@ -15,12 +15,12 @@ import sys
 def test_workspace_source():
     print("[TEST 1] Verifying source files for Layout 2 Workspace...")
     files_to_check = [
-        "src/components/ProblemWorkspacePage.tsx",
-        "src/components/CppPlayground.tsx",
-        "src/components/WhiteboardCanvas.tsx",
-        "src/App.tsx",
-        "src/components/QuestionTable.tsx",
-        "src/components/QuestionCard.tsx"
+        "frontend/src/components/ProblemWorkspacePage.tsx",
+        "frontend/src/components/CppPlayground.tsx",
+        "frontend/src/components/WhiteboardCanvas.tsx",
+        "frontend/src/App.tsx",
+        "frontend/src/components/QuestionTable.tsx",
+        "frontend/src/components/QuestionCard.tsx"
     ]
     for rel_path in files_to_check:
         full_path = os.path.join(os.getcwd(), rel_path)
@@ -31,7 +31,7 @@ def test_workspace_source():
     print("  [OK] All workspace source files exist and have non-empty content.")
 
     # Check App.tsx has hash routing and ProblemWorkspacePage
-    with open("src/App.tsx", "r", encoding="utf-8") as f:
+    with open("frontend/src/App.tsx", "r", encoding="utf-8") as f:
         app_src = f.read()
     assert "ProblemWorkspacePage" in app_src, "App.tsx missing ProblemWorkspacePage"
     assert "getProblemIdFromHash" in app_src, "App.tsx missing getProblemIdFromHash"
@@ -42,12 +42,12 @@ def test_workspace_source():
 
 def test_anchor_tag_new_tab_support():
     print("[TEST 2] Verifying middle-click / new tab anchor link support...")
-    with open("src/components/QuestionTable.tsx", "r", encoding="utf-8") as f:
+    with open("frontend/src/components/QuestionTable.tsx", "r", encoding="utf-8") as f:
         table_src = f.read()
     assert '#/problem/' in table_src, "QuestionTable missing '#/problem/' anchor link"
     assert '<a' in table_src, "QuestionTable missing <a> wrapper for middle-click/new-tab"
 
-    with open("src/components/QuestionCard.tsx", "r", encoding="utf-8") as f:
+    with open("frontend/src/components/QuestionCard.tsx", "r", encoding="utf-8") as f:
         card_src = f.read()
     assert '#/problem/' in card_src, "QuestionCard missing '#/problem/' anchor link"
     assert '<a' in card_src, "QuestionCard missing <a> wrapper for middle-click/new-tab"
