@@ -1,0 +1,580 @@
+[
+  {
+    "id": "TC001",
+    "title": "Browse company questions with filters and progress tracking",
+    "description": "A user can choose a company, narrow the question list with difficulty, topic, search, and sorting controls, then mark a problem solved and see the progress update.",
+    "category": "Company Explorer and Question Table",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Select a target company from the company selector"
+      },
+      {
+        "type": "action",
+        "description": "Filter the question list by a difficulty level"
+      },
+      {
+        "type": "action",
+        "description": "Filter the question list by a topic tag"
+      },
+      {
+        "type": "action",
+        "description": "Search for a question by name or ID"
+      },
+      {
+        "type": "action",
+        "description": "Sort the table by one of the available columns"
+      },
+      {
+        "type": "action",
+        "description": "Mark a question as solved"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the filtered question list is displayed and the progress state updates"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Browse a company question set with filters and sorting",
+    "description": "This verifies that a candidate can choose a company, narrow the question list with search and filters, sort it, and see the table update accordingly.",
+    "category": "Company Explorer",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Select a company from the company chooser"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a question name or ID"
+      },
+      {
+        "type": "action",
+        "description": "Select a difficulty filter"
+      },
+      {
+        "type": "action",
+        "description": "Select a topic filter"
+      },
+      {
+        "type": "action",
+        "description": "Select a sort option"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the question table reflects the selected filters and sort order"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Mark a problem as solved from the company table",
+    "description": "This verifies that a user can mark a question solved from the catalog and see the solved state update in the tracker.",
+    "category": "Company Explorer",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Select a company from the company chooser"
+      },
+      {
+        "type": "action",
+        "description": "Click a problem's solved toggle in the question table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the problem is shown as solved in the table"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Open a question workspace and return to the catalog with context restored",
+    "description": "A user can open a question from the catalog, review its details and solution approaches, copy code, and return to the dashboard with the prior browsing context preserved.",
+    "category": "Dedicated Dual-Pane Problem Workspace",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Select a target company from the company selector"
+      },
+      {
+        "type": "action",
+        "description": "Open a problem from the question table"
+      },
+      {
+        "type": "action",
+        "description": "Switch between available solution approaches"
+      },
+      {
+        "type": "action",
+        "description": "Copy the displayed code"
+      },
+      {
+        "type": "action",
+        "description": "Return to the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the problem workspace is displayed and the dashboard context is restored after returning"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Open a problem workspace and return with context restored",
+    "description": "This verifies that a user can open a question into the dual-pane workspace, review it, and return to the dashboard with prior context preserved.",
+    "category": "Problem Workspace",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Select a company from the company chooser"
+      },
+      {
+        "type": "action",
+        "description": "Apply a search or filter in the question table"
+      },
+      {
+        "type": "action",
+        "description": "Open a question from the table"
+      },
+      {
+        "type": "action",
+        "description": "Switch between solution approaches in the workspace"
+      },
+      {
+        "type": "action",
+        "description": "Click the control to return to the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard shows the previously applied context and the selected question set"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Sign in and sign out cleanly",
+    "description": "A returning user can sign in, use the tracker while authenticated, and log out to return to the logged-out state.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the sign-in flow"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with a valid email"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with a valid password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "action",
+        "description": "Click the logout control"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the logged-out state is shown in the header"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Review problem details and switch solution approaches",
+    "description": "A user can inspect a problem workspace, see the statement and metadata, and switch between solution approaches to compare implementations.",
+    "category": "Dedicated Dual-Pane Problem Workspace",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open a problem from the question table"
+      },
+      {
+        "type": "action",
+        "description": "Switch to another solution approach"
+      },
+      {
+        "type": "action",
+        "description": "Switch to a different solution approach again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the problem statement and metadata are displayed and the selected solution code changes with the approach"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Review a problem statement, metadata, and code solution",
+    "description": "This verifies that a user can inspect a problem workspace and see the statement, supporting metadata, and at least one solution approach.",
+    "category": "Problem Workspace",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open a problem from the question table"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the problem statement and metadata are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify solution approaches are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Register a new account and see the signed-in state",
+    "description": "A user can switch to registration, create an account, and see their signed-in account state reflected in the header.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the sign-up flow"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the registration tab"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with a valid email"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with a valid username"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with a valid password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the signed-in account state is shown in the header"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Copy a solution snippet from the workspace",
+    "description": "This verifies that a user can copy code from the problem workspace and receive feedback that the copy action succeeded.",
+    "category": "Problem Workspace",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open a problem from the question table"
+      },
+      {
+        "type": "action",
+        "description": "Click the copy code control for a solution approach"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a copy confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected solution code remains displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Open the pricing flow and begin checkout for Pro",
+    "description": "This verifies that a free user can view the plan comparison and start the subscription upgrade process.",
+    "category": "Pro Subscription and Stripe Billing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the pricing or upgrade flow"
+      },
+      {
+        "type": "action",
+        "description": "Review the plan comparison details"
+      },
+      {
+        "type": "action",
+        "description": "Click the subscribe control for the Pro plan"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the checkout handoff is initiated"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the upgrade flow no longer shows the free-only plan state"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Copy problem solution code from the workspace",
+    "description": "A user can copy the displayed solution code from a problem workspace and receive confirmation that the copy action succeeded.",
+    "category": "Dedicated Dual-Pane Problem Workspace",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open a problem from the question table"
+      },
+      {
+        "type": "action",
+        "description": "Click the control to copy the displayed code"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a copy confirmation is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Start a timed mock interview for a company",
+    "description": "This verifies that a user can open the mock interview flow, choose a company and duration, and start a session with generated questions.",
+    "category": "Mock Interview Simulator",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the mock interview tool"
+      },
+      {
+        "type": "action",
+        "description": "Select a company"
+      },
+      {
+        "type": "action",
+        "description": "Select an interview duration"
+      },
+      {
+        "type": "action",
+        "description": "Start the interview session"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the mock interview session is active"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify generated questions are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC014",
+    "title": "View account membership state in the header after signing in",
+    "description": "A signed-in user can see their account details and membership state in the header while continuing to use the tracker.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the sign-in flow"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with a valid email"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with a valid password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign-in form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the account details and membership badge are shown in the header"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC015",
+    "title": "Track progress during a mock interview session",
+    "description": "This verifies that a user can move through generated interview questions while the session timer is running.",
+    "category": "Mock Interview Simulator",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the mock interview tool"
+      },
+      {
+        "type": "action",
+        "description": "Select a company"
+      },
+      {
+        "type": "action",
+        "description": "Select an interview duration"
+      },
+      {
+        "type": "action",
+        "description": "Start the interview session"
+      },
+      {
+        "type": "action",
+        "description": "Move to the next generated question"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the session continues with another generated question displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC016",
+    "title": "Compare overlapping questions across companies",
+    "description": "This verifies that a user can open the overlap tool, choose multiple companies, and view the shared question list.",
+    "category": "Company Question Overlap Analysis",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the company overlap tool"
+      },
+      {
+        "type": "action",
+        "description": "Select the first company"
+      },
+      {
+        "type": "action",
+        "description": "Select the second company"
+      },
+      {
+        "type": "action",
+        "description": "Select an additional company if available"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a list of overlapping questions is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC017",
+    "title": "Open prep progress analytics",
+    "description": "A user can open the analytics view and see progress charts for their interview preparation.",
+    "category": "Analytics Modal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the analytics view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify prep progress analytics are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC018",
+    "title": "View analytics for prep progress",
+    "description": "This verifies that a user can open the analytics view and see preparation progress charts or summaries.",
+    "category": "Analytics",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the analytics view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify prep progress analytics are displayed"
+      }
+    ],
+    "priority": "Medium"
+  }
+]

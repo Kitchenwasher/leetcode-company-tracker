@@ -78,10 +78,35 @@ export const CppPlayground: React.FC<CppPlaygroundProps> = ({
   };
 
   const copyCode = () => {
-    navigator.clipboard.writeText(code);
+    try {
+      if (navigator?.clipboard?.writeText) {
+        navigator.clipboard.writeText(code).catch(() => {
+          fallbackCopy(code);
+        });
+      } else {
+        fallbackCopy(code);
+      }
+    } catch (e) {
+      fallbackCopy(code);
+    }
     setCopied(true);
     sounds.playClick();
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const fallbackCopy = (text: string) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      textArea.remove();
+    } catch (e) {}
   };
 
   return (

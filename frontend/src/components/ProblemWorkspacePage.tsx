@@ -187,8 +187,39 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
     setTags((prev) => prev.filter((t) => t !== tagToRemove));
   };
 
+  const copyToClipboard = (text: string) => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).catch(() => {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    } catch (e) {
+      fallbackCopy(text);
+    }
+  };
+
+  const fallbackCopy = (text: string) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      textArea.remove();
+    } catch (e) {
+      // Ignored in restricted headless environments
+    }
+  };
+
   const handleCopySolutionCode = (code: string) => {
-    navigator.clipboard.writeText(code);
+    copyToClipboard(code);
     setCopiedSolutionCode(true);
     sounds.playClick();
     setTimeout(() => setCopiedSolutionCode(false), 2000);
@@ -196,7 +227,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
 
   const handleCopyScratchpadCode = () => {
     if (!codeText) return;
-    navigator.clipboard.writeText(codeText);
+    copyToClipboard(codeText);
     setCopiedScratchpadCode(true);
     sounds.playClick();
     setTimeout(() => setCopiedScratchpadCode(false), 2000);
