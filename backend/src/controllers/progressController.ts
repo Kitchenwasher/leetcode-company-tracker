@@ -22,7 +22,7 @@ export class ProgressController {
       });
 
       const progressMap: Record<string, any> = {};
-      progressList.forEach((p) => {
+      progressList.forEach((p: any) => {
         let parsedTags: string[] = [];
         try {
           parsedTags = p.tags ? JSON.parse(p.tags) : [];
@@ -230,7 +230,7 @@ export class ProgressController {
       let mediumSolved = 0;
       let hardSolved = 0;
 
-      progressList.forEach((p) => {
+      progressList.forEach((p: any) => {
         if (p.status === 'solved' || p.status === 'mastered') {
           totalSolved++;
           if (p.question.difficulty === 'Easy') easySolved++;
@@ -245,7 +245,7 @@ export class ProgressController {
       });
 
       const activityMap: Record<string, number> = {};
-      activities.forEach((a) => {
+      activities.forEach((a: any) => {
         activityMap[a.date] = a.solveCount;
       });
 

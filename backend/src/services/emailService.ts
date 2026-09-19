@@ -40,7 +40,7 @@ export class EmailService {
           template: templateName,
           status: 'sent',
         },
-      }).catch((e) => console.warn('[EMAIL DB LOG ERROR]', e));
+      }).catch((e: unknown) => console.warn('[EMAIL DB LOG ERROR]', e));
 
       return true;
     } catch (err: unknown) {

@@ -11,8 +11,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@hugeicons/core-free-icons": "^4.3.4",
-    "@hugeicons/react": "^1.1.10",
     "axios": "^1.7.9",
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^1.16.0",

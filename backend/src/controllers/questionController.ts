@@ -93,7 +93,7 @@ export class QuestionController {
       });
 
       // Parse JSON topics & format
-      const formatted = rawQuestions.map((q) => {
+      const formatted = rawQuestions.map((q: any) => {
         let parsedTopics: string[] = [];
         try {
           parsedTopics = JSON.parse(q.topics);
@@ -102,7 +102,7 @@ export class QuestionController {
         }
 
         const compMap: Record<string, any> = {};
-        q.companies.forEach((c) => {
+        q.companies.forEach((c: any) => {
           compMap[c.companyId] = {
             all: c.allFreq || '0.0%',
             'thirty-days': c.thirtyDaysFreq,
@@ -134,7 +134,7 @@ export class QuestionController {
 
       // Sort in memory by frequency if specified
       if (sortBy === 'frequency') {
-        formatted.sort((a, b) => {
+        formatted.sort((a: any, b: any) => {
           const fa = parseFloat(a.companies[String(company)]?.['thirty-days']?.replace('%', '') || a.companies[String(company)]?.all?.replace('%', '') || '0');
           const fb = parseFloat(b.companies[String(company)]?.['thirty-days']?.replace('%', '') || b.companies[String(company)]?.all?.replace('%', '') || '0');
           return sortOrder === 'desc' ? fb - fa : fa - fb;
@@ -178,7 +178,7 @@ export class QuestionController {
       }
 
       const compMap: Record<string, any> = {};
-      question.companies.forEach((c) => {
+      question.companies.forEach((c: any) => {
         compMap[c.companyId] = {
           all: c.allFreq || '0.0%',
           'thirty-days': c.thirtyDaysFreq,
@@ -251,7 +251,7 @@ export class QuestionController {
       });
 
       const result: Record<string, { totalQuestions: number; thirtyDaysCount: number }> = {};
-      companyStats.forEach((c) => {
+      companyStats.forEach((c: any) => {
         result[c.companyId] = {
           totalQuestions: c._count.questionId,
           thirtyDaysCount: 0, // updated dynamically
