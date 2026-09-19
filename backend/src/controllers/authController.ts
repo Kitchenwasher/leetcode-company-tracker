@@ -15,12 +15,13 @@ const generateRefreshToken = (userId: string): string => {
 };
 
 const setRefreshTokenCookie = (res: Response, token: string) => {
+  const isProd = ENV.NODE_ENV === 'production';
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: ENV.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/api/auth',
+    path: '/',
   });
 };
 
@@ -79,6 +80,7 @@ export class AuthController {
         message: 'Account created successfully. A verification email has been dispatched.',
         user,
         accessToken,
+        refreshToken,
       });
     } catch (err) {
       next(err);
@@ -127,6 +129,7 @@ export class AuthController {
           createdAt: user.createdAt,
         },
         accessToken,
+        refreshToken,
       });
     } catch (err) {
       next(err);
@@ -164,14 +167,21 @@ export class AuthController {
       }
 
       const newAccessToken = generateAccessToken(user.id);
-      res.json({ accessToken: newAccessToken, user });
+      const newRefreshToken = generateRefreshToken(user.id);
+      setRefreshTokenCookie(res, newRefreshToken);
+      res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken, user });
     } catch {
       res.status(401).json({ error: 'Invalid or expired refresh token.' });
     }
   }
 
   static async logout(_req: Request, res: Response): Promise<void> {
-    res.clearCookie('refreshToken', { path: '/api/auth' });
+    const isProd = ENV.NODE_ENV === 'production';
+    res.clearCookie('refreshToken', {
+      path: '/',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+    });
     res.json({ message: 'Logged out successfully.' });
   }
 

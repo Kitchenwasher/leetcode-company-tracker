@@ -1,6 +1,6 @@
-// Prisma Schema for LeetTracker Pro (SQLite for local DX, PostgreSQL for production)
+// Prisma Schema for LeetTracker Pro (PostgreSQL for Neon and Production)
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
