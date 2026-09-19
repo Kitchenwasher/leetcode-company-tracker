@@ -100,7 +100,7 @@ export const LeetCodeSyncModal: React.FC<LeetCodeSyncModalProps> = ({
         {/* Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-indigo-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-indigo-500/20 border border-primary/40 flex items-center justify-center text-primary">
               <RefreshCw className="w-5 h-5" />
             </div>
             <div>
@@ -125,14 +125,14 @@ export const LeetCodeSyncModal: React.FC<LeetCodeSyncModalProps> = ({
             <div
               className={`p-3.5 rounded-xl border text-xs font-medium flex items-start gap-2.5 animate-fadeIn ${
                 syncResult.success
-                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
-                  : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+                  ? 'bg-surfaceElevated border-primary/40 text-primary'
+                  : 'bg-error/15 border-error/40 text-error'
               }`}
             >
               {syncResult.success ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               ) : (
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
               )}
               <div>{syncResult.message}</div>
             </div>
@@ -142,7 +142,7 @@ export const LeetCodeSyncModal: React.FC<LeetCodeSyncModalProps> = ({
           <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
                 Sync via Public Username
               </span>
               <span className="text-[10px] text-slate-500">Public API</span>
@@ -154,13 +154,13 @@ export const LeetCodeSyncModal: React.FC<LeetCodeSyncModalProps> = ({
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. neal_wu or your username"
-                className="flex-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                className="flex-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-borderActive"
               />
               <button
                 type="button"
                 onClick={handleSyncUsername}
                 disabled={isSyncing || !username.trim()}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-primary text-black font-bold hover:bg-primary text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
               >
                 {isSyncing ? (
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -176,7 +176,7 @@ export const LeetCodeSyncModal: React.FC<LeetCodeSyncModalProps> = ({
           <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Database className="w-3.5 h-3.5 text-indigo-400" />
+                <Database className="w-3.5 h-3.5 text-primary" />
                 Bulk Import Solved IDs
               </span>
               <span className="text-[10px] text-slate-500">Fast Batch</span>
@@ -186,7 +186,7 @@ export const LeetCodeSyncModal: React.FC<LeetCodeSyncModalProps> = ({
               value={solvedIdsInput}
               onChange={(e) => setSolvedIdsInput(e.target.value)}
               placeholder="Paste comma-separated IDs (e.g. 1, 15, 20, 21, 53, 121, 206) or JSON array"
-              className="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-indigo-500"
+              className="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-borderActive"
             />
             <button
               type="button"

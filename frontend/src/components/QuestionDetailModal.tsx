@@ -161,7 +161,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
         particleCount: 60,
         spread: 70,
         origin: { y: 0.7 },
-        colors: ['#10B981', '#6366F1', '#F59E0B'],
+        colors: ['#FFFF00', '#FFF94D', '#B8B800'],
       });
       onSaveProgress({
         status: newStatus,
@@ -266,32 +266,32 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-surfaceElevated border border-border rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-800/90 bg-slate-950/60 flex items-start justify-between gap-4">
+        <div className="p-4 sm:p-5 border-b border-border/90 bg-surface/60 flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm font-bold text-slate-400">#{q.id}</span>
+              <span className="font-mono text-sm font-bold text-textMuted">#{q.id}</span>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                   q.difficulty === 'Easy'
-                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    ? 'bg-easy/15 text-easy border border-easy/40'
                     : q.difficulty === 'Medium'
-                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                    : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                    ? 'bg-medium/15 text-medium border border-medium/40'
+                    : 'bg-hard/15 text-hard border border-hard/40'
                 }`}
               >
                 {q.difficulty}
               </span>
-              <span className="text-xs font-mono text-slate-400">Acceptance: {q.acceptance}</span>
+              <span className="text-xs font-mono text-textMuted">Acceptance: {q.acceptance}</span>
 
               {q.isBlind75 && (
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-primary/20 text-primary border border-borderActive/40">
                   Blind 75
                 </span>
               )}
               {q.isGrind169 && (
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-surfaceElevated text-primary border border-border">
                   Grind 169
                 </span>
               )}
@@ -304,7 +304,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
             {/* Topic Badges */}
             <div className="flex flex-wrap gap-1 mt-0.5">
               {q.topics.map((t) => (
-                <span key={t} className="px-2 py-0.5 text-[11px] rounded-md bg-slate-800 text-slate-300 border border-slate-700/50 font-mono">
+                <span key={t} className="px-2 py-0.5 text-[11px] rounded-md bg-surfaceElevated text-textSecondary border border-border/50 font-mono">
                   {t}
                 </span>
               ))}
@@ -319,19 +319,19 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 setIsFavorite(!isFavorite);
                 onSaveProgress({ isFavorite: !isFavorite });
               }}
-              className={`p-2 rounded-xl border border-slate-800 transition-colors ${
-                isFavorite ? 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' : 'bg-slate-850 text-slate-400 hover:text-slate-200'
+              className={`p-2 rounded-xl border border-border transition-colors ${
+                isFavorite ? 'bg-[#E5FF00]/10 text-[#E5FF00] border-[#E5FF00]/30' : 'bg-slate-850 text-textMuted hover:text-textPrimary'
               }`}
               title={isFavorite ? 'Remove bookmark' : 'Bookmark question'}
             >
-              <Star className={`w-5 h-5 ${isFavorite ? 'fill-yellow-400' : ''}`} />
+              <Star className={`w-5 h-5 ${isFavorite ? 'fill-[#E5FF00] text-[#E5FF00]' : ''}`} />
             </button>
 
             <a
               href={q.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/15 hover:bg-primary/15 text-primary border border-primary/40 text-xs font-semibold transition-colors"
             >
               <span>Solve on LeetCode</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -339,7 +339,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-xl bg-surfaceElevated/80 hover:bg-slate-700 text-textMuted hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -349,10 +349,10 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
           {/* Status & Self Assessment Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/80">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-surface/40 border border-border/80">
             {/* Status Selector */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</label>
+              <label className="text-xs font-semibold text-textMuted uppercase tracking-wider">Status</label>
               <div className="flex flex-wrap gap-1">
                 {(['todo', 'in-progress', 'solved', 'review', 'mastered'] as ProblemStatus[]).map((st) => (
                   <button
@@ -361,15 +361,15 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                     className={`px-2.5 py-1 text-xs font-medium rounded-lg capitalize transition-all ${
                       status === st
                         ? st === 'solved'
-                          ? 'bg-emerald-600 text-white font-bold shadow-sm'
+                          ? 'bg-primary text-white font-bold shadow-sm'
                           : st === 'mastered'
-                          ? 'bg-purple-600 text-white font-bold shadow-sm'
+                          ? 'bg-primary text-white font-bold shadow-sm'
                           : st === 'in-progress'
-                          ? 'bg-blue-600 text-white font-bold shadow-sm'
+                          ? 'bg-primary text-white font-bold shadow-sm'
                           : st === 'review'
-                          ? 'bg-amber-600 text-white font-bold shadow-sm'
+                          ? 'bg-medium text-white font-bold shadow-sm'
                           : 'bg-slate-700 text-white font-bold'
-                        : 'bg-slate-850 text-slate-400 hover:text-slate-200'
+                        : 'bg-slate-850 text-textMuted hover:text-textPrimary'
                     }`}
                   >
                     {st.replace('-', ' ')}
@@ -380,7 +380,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
             {/* Confidence Rating (1-5 stars) */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confidence</label>
+              <label className="text-xs font-semibold text-textMuted uppercase tracking-wider">Confidence</label>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -397,14 +397,14 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                     <Star
                       className={`w-5 h-5 ${
                         star <= confidence
-                          ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-slate-600 hover:text-slate-400'
+                          ? 'text-[#E5FF00] fill-[#E5FF00]'
+                          : 'text-slate-600 hover:text-textMuted'
                       }`}
                     />
                   </button>
                 ))}
                 {confidence > 0 && (
-                  <span className="text-xs font-mono text-slate-400 ml-1">({confidence}/5)</span>
+                  <span className="text-xs font-mono text-textMuted ml-1">({confidence}/5)</span>
                 )}
               </div>
             </div>
@@ -412,8 +412,8 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
             {/* Built-in Interview Timer */}
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <TimerIcon className="w-3.5 h-3.5 text-indigo-400" />
+                <label className="text-xs font-semibold text-textMuted uppercase tracking-wider flex items-center gap-1">
+                  <TimerIcon className="w-3.5 h-3.5 text-primary" />
                   Interview Timer
                 </label>
                 <button
@@ -427,14 +427,14 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                     }
                     setIsTimerRunning(false);
                   }}
-                  className="text-[10px] text-indigo-400 hover:underline"
+                  className="text-[10px] text-primary hover:underline"
                 >
                   {timerMode === 'stopwatch' ? 'Switch to Countdown' : 'Switch to Stopwatch'}
                 </button>
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="font-mono text-base font-bold text-slate-100 bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+                <div className="font-mono text-base font-bold text-textPrimary bg-surfaceElevated px-3 py-1 rounded-lg border border-border">
                   {formatTime(timerSeconds)}
                 </div>
                 <button
@@ -444,8 +444,8 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                   }}
                   className={`p-1.5 rounded-lg font-medium text-xs flex items-center gap-1 transition-colors ${
                     isTimerRunning
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                      : 'bg-indigo-600 text-white hover:bg-indigo-500'
+                      ? 'bg-hard/15 text-hard border border-hard/40'
+                      : 'bg-primary text-black font-bold hover:bg-primary'
                   }`}
                 >
                   {isTimerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -456,7 +456,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                     setIsTimerRunning(false);
                     setTimerSeconds(timerMode === 'countdown' ? countdownMinutes * 60 : 0);
                   }}
-                  className="p-1.5 rounded-lg bg-slate-850 hover:bg-slate-750 text-slate-400 hover:text-white"
+                  className="p-1.5 rounded-lg bg-slate-850 hover:bg-slate-750 text-textMuted hover:text-white"
                   title="Reset Timer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -466,17 +466,17 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
           </div>
 
           {/* Spaced Repetition (SRS) Quick Scheduler */}
-          <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-indigo-950/20 border border-indigo-900/30">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-surfaceElevated border border-border">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-indigo-400" />
+              <Calendar className="w-4 h-4 text-primary" />
               <div>
-                <span className="text-xs font-semibold text-slate-200">Spaced Repetition Review</span>
+                <span className="text-xs font-semibold text-textPrimary">Spaced Repetition Review</span>
                 {initialProgress.nextReviewAt ? (
-                  <p className="text-[11px] text-indigo-300">
+                  <p className="text-[11px] text-primary">
                     Next due: {new Date(initialProgress.nextReviewAt).toLocaleDateString()} (every {initialProgress.reviewIntervalDays || 1}d)
                   </p>
                 ) : (
-                  <p className="text-[11px] text-slate-400">Schedule periodic revision to retain intuition</p>
+                  <p className="text-[11px] text-textMuted">Schedule periodic revision to retain intuition</p>
                 )}
               </div>
             </div>
@@ -484,25 +484,25 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => handleScheduleReview(1)}
-                className="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white transition-colors"
+                className="px-2.5 py-1 text-xs rounded-lg bg-surfaceElevated hover:bg-primary text-textSecondary hover:text-white transition-colors"
               >
                 Tomorrow (+1d)
               </button>
               <button
                 onClick={() => handleScheduleReview(3)}
-                className="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white transition-colors"
+                className="px-2.5 py-1 text-xs rounded-lg bg-surfaceElevated hover:bg-primary text-textSecondary hover:text-white transition-colors"
               >
                 In 3 Days (+3d)
               </button>
               <button
                 onClick={() => handleScheduleReview(7)}
-                className="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white transition-colors"
+                className="px-2.5 py-1 text-xs rounded-lg bg-surfaceElevated hover:bg-primary text-textSecondary hover:text-white transition-colors"
               >
                 In 1 Week (+7d)
               </button>
               <button
                 onClick={() => handleScheduleReview(30)}
-                className="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white transition-colors"
+                className="px-2.5 py-1 text-xs rounded-lg bg-surfaceElevated hover:bg-primary text-textSecondary hover:text-white transition-colors"
               >
                 In 1 Month (+30d)
               </button>
@@ -510,20 +510,20 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
           </div>
 
           {/* Primary Navigation Tabs */}
-          <div className="border-b border-slate-800 flex items-center justify-between flex-wrap gap-2">
+          <div className="border-b border-border flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               <button
                 onClick={() => setActiveTab('solution')}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
                   activeTab === 'solution'
-                    ? 'border-indigo-500 text-indigo-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-textMuted hover:text-textPrimary'
                 }`}
               >
-                <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                <Lightbulb className="w-3.5 h-3.5 text-primary" />
                 <span>C++ Solutions & Theory</span>
                 {solutionData && (
-                  <span className="text-[10px] px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 rounded font-mono">
+                  <span className="text-[10px] px-1.5 py-0.2 bg-primary/20 text-primary rounded font-mono">
                     {solutionData.approaches.length} ways
                   </span>
                 )}
@@ -532,8 +532,8 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 onClick={() => setActiveTab('notes')}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
                   activeTab === 'notes'
-                    ? 'border-indigo-500 text-indigo-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-textMuted hover:text-textPrimary'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -543,8 +543,8 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 onClick={() => setActiveTab('code')}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
                   activeTab === 'code'
-                    ? 'border-indigo-500 text-indigo-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-textMuted hover:text-textPrimary'
                 }`}
               >
                 <Code2 className="w-3.5 h-3.5" />
@@ -554,30 +554,30 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 onClick={() => setActiveTab('whiteboard')}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
                   activeTab === 'whiteboard'
-                    ? 'border-indigo-500 text-indigo-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-textMuted hover:text-textPrimary'
                 }`}
               >
-                <Palette className="w-3.5 h-3.5 text-pink-400" />
+                <Palette className="w-3.5 h-3.5 text-primary" />
                 <span>Whiteboard Canvas</span>
               </button>
               <button
                 onClick={() => setActiveTab('runner')}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
                   activeTab === 'runner'
-                    ? 'border-indigo-500 text-indigo-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-textMuted hover:text-textPrimary'
                 }`}
               >
-                <Zap className="w-3.5 h-3.5 text-emerald-400" />
-                <span>C++ Runner Sandbox</span>
+                <Zap className="w-3.5 h-3.5 text-primary" />
+                <span>C++ Code Scratchpad</span>
               </button>
               <button
                 onClick={() => setActiveTab('companies')}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
                   activeTab === 'companies'
-                    ? 'border-indigo-500 text-indigo-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-textMuted hover:text-textPrimary'
                 }`}
               >
                 <Building2 className="w-3.5 h-3.5" />
@@ -586,11 +586,11 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
             </div>
 
             {activeTab === 'notes' && (
-              <div className="flex items-center bg-slate-800/80 p-0.5 rounded-lg text-xs">
+              <div className="flex items-center bg-surfaceElevated/80 p-0.5 rounded-lg text-xs">
                 <button
                   onClick={() => setNotesView('edit')}
                   className={`flex items-center gap-1 px-2 py-0.5 rounded-md transition-colors ${
-                    notesView === 'edit' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                    notesView === 'edit' ? 'bg-primary text-black font-bold' : 'text-textMuted hover:text-white'
                   }`}
                 >
                   <Edit3 className="w-3 h-3" /> Edit
@@ -598,7 +598,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 <button
                   onClick={() => setNotesView('preview')}
                   className={`flex items-center gap-1 px-2 py-0.5 rounded-md transition-colors ${
-                    notesView === 'preview' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                    notesView === 'preview' ? 'bg-primary text-black font-bold' : 'text-textMuted hover:text-white'
                   }`}
                 >
                   <Eye className="w-3 h-3" /> Preview
@@ -611,26 +611,26 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
           {activeTab === 'solution' && (
             <div className="space-y-4">
               {isLoadingSolution ? (
-                <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-400">
-                  <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                <div className="py-16 flex flex-col items-center justify-center gap-3 text-textMuted">
+                  <div className="w-7 h-7 border-2 border-borderActive border-t-transparent rounded-full animate-spin" />
                   <span className="text-xs font-medium">Loading C++ solutions and theory...</span>
                 </div>
               ) : solutionError || !solutionData ? (
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-slate-400 text-center py-8">
-                  <Lightbulb className="w-8 h-8 mx-auto text-amber-400 mb-2 opacity-60" />
-                  <p className="text-sm font-medium text-slate-200">Generating C++ solutions guide...</p>
-                  <p className="text-xs text-slate-400 mt-1">Please try refreshing or select another question.</p>
+                <div className="p-4 rounded-xl bg-surface/60 border border-border text-textMuted text-center py-8">
+                  <Lightbulb className="w-8 h-8 mx-auto text-primary mb-2 opacity-60" />
+                  <p className="text-sm font-medium text-textPrimary">Generating C++ solutions guide...</p>
+                  <p className="text-xs text-textMuted mt-1">Please try refreshing or select another question.</p>
                 </div>
               ) : (
                 <>
                   {/* Core Pattern & Approach Switcher Bar */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-surface/60 border border-border">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/40">
+                      <div className="p-1.5 rounded-lg bg-primary/20 text-primary border border-borderActive/40">
                         <Cpu className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Core Pattern</span>
+                        <span className="text-[10px] uppercase font-bold text-textMuted tracking-wider">Core Pattern</span>
                         <h4 className="text-xs sm:text-sm font-bold text-white">{solutionData.corePattern}</h4>
                       </div>
                     </div>
@@ -648,18 +648,18 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                             }}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                               isSelected
-                                ? 'bg-indigo-600 text-white shadow-md border border-indigo-400/40'
-                                : 'bg-slate-850 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-700/40'
+                                ? 'bg-primary text-black font-bold shadow-md border border-primary'
+                                : 'bg-slate-850 text-textMuted hover:text-textPrimary hover:bg-border border border-border/40'
                             }`}
                           >
                             <span>{app.name}</span>
                             <span
                               className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                                 app.tag === 'Optimal'
-                                  ? 'bg-emerald-500/30 text-emerald-300'
+                                  ? 'bg-primary/15 text-primary'
                                   : app.tag === 'Better'
-                                  ? 'bg-blue-500/30 text-blue-300'
-                                  : 'bg-slate-700 text-slate-300'
+                                  ? 'bg-surfaceElevated text-primaryDim'
+                                  : 'bg-slate-700 text-textSecondary'
                               }`}
                             >
                               {app.tag}
@@ -673,23 +673,23 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                   {currentApproach && (
                     <div className="space-y-4">
                       {/* Theory & Intuition Panel */}
-                      <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-3">
+                      <div className="p-4 rounded-xl bg-surface/40 border border-border space-y-3">
                         <div>
-                          <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                          <h4 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5 mb-1">
                             <BookOpen className="w-3.5 h-3.5" />
                             Intuition & How to Think About It
                           </h4>
-                          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                          <p className="text-xs sm:text-sm text-textPrimary leading-relaxed">
                             {currentApproach.intuition}
                           </p>
                         </div>
 
-                        <div className="pt-2 border-t border-slate-800/80">
-                          <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                        <div className="pt-2 border-t border-border/80">
+                          <h4 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5 mb-1">
                             <Sparkles className="w-3.5 h-3.5" />
                             Algorithmic Theory & Invariant Proof
                           </h4>
-                          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                          <p className="text-xs sm:text-sm text-textSecondary leading-relaxed">
                             {currentApproach.theory}
                           </p>
                         </div>
@@ -697,40 +697,40 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
                       {/* Complexity Analysis Cards */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800 flex flex-col justify-between">
+                        <div className="p-3.5 rounded-xl bg-surface/40 border border-border flex flex-col justify-between">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-slate-400 font-semibold uppercase">Time Complexity</span>
-                            <span className="font-mono text-sm font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                            <span className="text-xs text-textMuted font-semibold uppercase">Time Complexity</span>
+                            <span className="font-mono text-sm font-bold text-primary bg-primary/15 px-2 py-0.5 rounded border border-primary/30">
                               {currentApproach.timeComplexity.complexity}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-300">{currentApproach.timeComplexity.explanation}</p>
+                          <p className="text-xs text-textSecondary">{currentApproach.timeComplexity.explanation}</p>
                         </div>
 
-                        <div className="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800 flex flex-col justify-between">
+                        <div className="p-3.5 rounded-xl bg-surface/40 border border-border flex flex-col justify-between">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-slate-400 font-semibold uppercase">Space Complexity</span>
-                            <span className="font-mono text-sm font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/30">
+                            <span className="text-xs text-textMuted font-semibold uppercase">Space Complexity</span>
+                            <span className="font-mono text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded border border-borderActive/30">
                               {currentApproach.spaceComplexity.complexity}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-300">{currentApproach.spaceComplexity.explanation}</p>
+                          <p className="text-xs text-textSecondary">{currentApproach.spaceComplexity.explanation}</p>
                         </div>
                       </div>
 
                       {/* C++ Code Implementation */}
-                      <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-950/90 shadow-xl">
-                        <div className="p-3 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between">
+                      <div className="rounded-2xl border border-border overflow-hidden bg-surface/90 shadow-xl">
+                        <div className="p-3 bg-surface/90 border-b border-border flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono font-bold text-amber-400">C++ (Google Style)</span>
+                            <span className="text-xs font-mono font-bold text-primary">C++ (Google Style)</span>
                             <span className="text-slate-600">•</span>
-                            <span className="text-xs text-slate-400 truncate">{currentApproach.name}</span>
+                            <span className="text-xs text-textMuted truncate">{currentApproach.name}</span>
                           </div>
 
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleSendToScratchpad(currentApproach.cppCode)}
-                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-xs font-mono text-indigo-300 hover:text-white transition-colors"
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/30 hover:bg-primary/50 border border-borderActive/40 text-xs font-mono text-primary hover:text-white transition-colors"
                               title="Send this code into your interactive Scratchpad"
                             >
                               <Terminal className="w-3.5 h-3.5" />
@@ -739,37 +739,37 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
                             <button
                               onClick={() => handleCopySolutionCode(currentApproach.cppCode)}
-                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 transition-colors"
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surfaceElevated hover:bg-slate-700 text-xs font-mono text-textSecondary transition-colors"
                             >
-                              {copiedSolutionCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                              {copiedSolutionCode ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5" />}
                               {copiedSolutionCode ? 'Copied' : 'Copy C++'}
                             </button>
                           </div>
                         </div>
 
-                        <div className="p-4 overflow-x-auto text-xs font-mono text-emerald-300 leading-relaxed bg-[#0a0f1d]">
+                        <div className="p-4 overflow-x-auto text-xs font-mono text-primary leading-relaxed bg-background">
                           <pre>{currentApproach.cppCode}</pre>
                         </div>
                       </div>
 
                       {/* Dry Run Example Trace (if available) */}
                       {currentApproach.dryRunExample && (
-                        <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-2">
-                          <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                        <div className="p-4 rounded-xl bg-surface/40 border border-border space-y-2">
+                          <h4 className="text-xs font-bold text-textSecondary uppercase tracking-wider">
                             🔍 Step-by-Step Example Walkthrough
                           </h4>
-                          <div className="text-xs font-mono text-indigo-300 bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+                          <div className="text-xs font-mono text-primary bg-surfaceElevated/80 p-2 rounded-lg border border-border">
                             Input: {currentApproach.dryRunExample.input}
                           </div>
-                          <ul className="space-y-1 text-xs text-slate-300">
+                          <ul className="space-y-1 text-xs text-textSecondary">
                             {currentApproach.dryRunExample.steps.map((step, idx) => (
                               <li key={idx} className="flex items-start gap-2">
-                                <span className="text-indigo-400 shrink-0 font-mono">•</span>
+                                <span className="text-primary shrink-0 font-mono">•</span>
                                 <span>{step}</span>
                               </li>
                             ))}
                           </ul>
-                          <div className="text-xs font-mono text-emerald-400 bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+                          <div className="text-xs font-mono text-primary bg-surfaceElevated/80 p-2 rounded-lg border border-border">
                             Expected Output: {currentApproach.dryRunExample.output}
                           </div>
                         </div>
@@ -777,15 +777,15 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
                       {/* Edge Cases & C++ Traps */}
                       {currentApproach.edgeCases && currentApproach.edgeCases.length > 0 && (
-                        <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-2">
-                          <h4 className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <div className="p-4 rounded-xl bg-surface/40 border border-border space-y-2">
+                          <h4 className="text-xs font-bold text-hard uppercase tracking-wider flex items-center gap-1.5">
                             <ShieldAlert className="w-3.5 h-3.5" />
                             Edge Cases & C++ Interview Traps
                           </h4>
-                          <ul className="space-y-1 text-xs text-slate-300">
+                          <ul className="space-y-1 text-xs text-textSecondary">
                             {currentApproach.edgeCases.map((ec, idx) => (
                               <li key={idx} className="flex items-start gap-2">
-                                <span className="text-rose-400 shrink-0 font-mono">⚠️</span>
+                                <span className="text-hard shrink-0 font-mono">⚠️</span>
                                 <span>{ec}</span>
                               </li>
                             ))}
@@ -795,9 +795,9 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
                       {/* Interview Tips */}
                       {solutionData.interviewTips && (
-                        <div className="p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-900/40 text-xs text-indigo-300 space-y-1">
+                        <div className="p-3.5 rounded-xl bg-surfaceElevated border border-border text-xs text-primary space-y-1">
                           <span className="font-bold text-white uppercase tracking-wider">🗣️ Interviewer Discussion Advice</span>
-                          <ul className="list-disc pl-4 space-y-0.5 text-slate-300">
+                          <ul className="list-disc pl-4 space-y-0.5 text-textSecondary">
                             {solutionData.interviewTips.map((tip, idx) => (
                               <li key={idx}>{tip}</li>
                             ))}
@@ -815,10 +815,10 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
           {activeTab === 'notes' && (
             <div className="space-y-4">
               {/* Custom Tags Bar */}
-              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
-                  <span className="flex items-center gap-1.5 text-indigo-300">
-                    <Tag className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="p-3 rounded-xl bg-surface/60 border border-border space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-textMuted">
+                  <span className="flex items-center gap-1.5 text-primary">
+                    <Tag className="w-3.5 h-3.5 text-primary" />
                     Personal Tags
                   </span>
                   <span className="text-[11px] text-slate-500">e.g. revisit, dp-pattern, tricky-pointers</span>
@@ -828,13 +828,13 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                   {tags.map((t) => (
                     <span
                       key={t}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-950/40 text-indigo-300 border border-indigo-500/30 text-xs font-mono"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surfaceElevated text-primary border border-borderActive/30 text-xs font-mono"
                     >
                       <span>#{t}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(t)}
-                        className="text-indigo-400 hover:text-rose-400 p-0.5"
+                        className="text-primary hover:text-hard p-0.5"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -848,13 +848,13 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleAddTag}
                       placeholder="+ Add tag (Enter)"
-                      className="px-2.5 py-1 bg-slate-900 border border-slate-700/60 rounded-lg text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-indigo-500"
+                      className="px-2.5 py-1 bg-surfaceElevated border border-border/60 rounded-lg text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-borderActive"
                     />
                     {tagInput.trim() && (
                       <button
                         type="button"
                         onClick={handleAddTag}
-                        className="p-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs"
+                        className="p-1 rounded-lg bg-primary hover:bg-primary text-white text-xs"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -865,7 +865,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
               {notesView === 'edit' ? (
                 <>
-                  <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="flex items-center justify-between text-xs text-textMuted">
                     <span>Markdown supported (# Header, - bullet, `code`, Time/Space O(N))</span>
                     <span className="text-[11px] text-slate-500">Auto-saves continuously</span>
                   </div>
@@ -874,11 +874,11 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="💡 Write your notes here...&#10;• Approach: Two pointer with left/right initialized at bounds&#10;• Time Complexity: O(N)&#10;• Space Complexity: O(1)&#10;• Trap / Gotchas: Handle duplicate elements properly"
                     rows={8}
-                    className="w-full p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-y"
+                    className="w-full p-3.5 rounded-xl bg-surface/80 border border-border text-textPrimary placeholder-slate-500 text-sm font-sans focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary resize-y"
                   />
                 </>
               ) : (
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 min-h-[180px] notes-preview text-sm text-slate-300">
+                <div className="p-4 rounded-xl bg-surface/70 border border-border min-h-[180px] notes-preview text-sm text-textSecondary">
                   {renderMarkdown(notes)}
                 </div>
               )}
@@ -896,8 +896,8 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                       onClick={() => setCodeLang(lang)}
                       className={`px-2.5 py-1 text-xs font-mono font-medium rounded-lg uppercase ${
                         codeLang === lang
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                          ? 'bg-primary text-black font-bold'
+                          : 'bg-surfaceElevated text-textMuted hover:text-textPrimary'
                       }`}
                     >
                       {lang}
@@ -908,7 +908,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleInsertStarter}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surfaceElevated hover:bg-slate-700 text-xs text-primary transition-colors"
                     title="Insert boilerplate solution signature"
                   >
                     <Terminal className="w-3.5 h-3.5" />
@@ -917,9 +917,9 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
 
                   <button
                     onClick={handleCopyCode}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surfaceElevated hover:bg-slate-700 text-xs font-mono text-textSecondary transition-colors"
                   >
-                    {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedCode ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5" />}
                     {copiedCode ? 'Copied' : 'Copy Code'}
                   </button>
                 </div>
@@ -931,7 +931,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 onKeyDown={handleCodeKeyDown}
                 placeholder={`// Optimal Solution in ${codeLang.toUpperCase()} (Press Tab to indent)\nclass Solution {\n    // Solution code...\n}`}
                 rows={10}
-                className="w-full p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-emerald-300 placeholder-slate-600 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-y leading-relaxed"
+                className="w-full p-3.5 rounded-xl bg-surface/90 border border-border text-primary placeholder-slate-600 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary resize-y leading-relaxed"
               />
             </div>
           )}
@@ -961,7 +961,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
           {/* TAB CONTENT 4: COMPANIES BREAKDOWN */}
           {activeTab === 'companies' && (
             <div className="space-y-3">
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-textMuted">
                 This question has been asked by <strong className="text-white">{askingCompanies.length}</strong> companies in recent interview rounds:
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-56 overflow-y-auto p-1">
@@ -973,12 +973,12 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                       key={c}
                       className={`p-2 rounded-xl border text-xs flex items-center justify-between ${
                         isCurrent
-                          ? 'bg-indigo-950/30 border-indigo-500/40 text-indigo-300 font-bold'
-                          : 'bg-slate-850/50 border-slate-800 text-slate-300'
+                          ? 'bg-surfaceElevated border-borderActive/40 text-primary font-bold'
+                          : 'bg-slate-850/50 border-border text-textSecondary'
                       }`}
                     >
                       <span className="capitalize truncate mr-1">{c.replace('-', ' ')}</span>
-                      <span className="font-mono text-[10px] text-slate-400">{freq}</span>
+                      <span className="font-mono text-[10px] text-textMuted">{freq}</span>
                     </div>
                   );
                 })}
@@ -988,13 +988,13 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-slate-800 bg-slate-950/70 flex items-center justify-between px-5">
+        <div className="p-3 border-t border-border bg-surface/70 flex items-center justify-between px-5">
           <span className="text-xs text-slate-500">
             Last revised: {initialProgress.lastSolvedAt ? new Date(initialProgress.lastSolvedAt).toLocaleDateString() : 'Not yet solved'}
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors"
+            className="px-4 py-1.5 rounded-xl bg-primary hover:bg-primary text-white text-xs font-semibold shadow-sm transition-colors"
           >
             Done
           </button>

@@ -54,7 +54,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         particleCount: 40,
         spread: 50,
         origin: { y: 0.8 },
-        colors: ['#10B981', '#3B82F6', '#F59E0B'],
+        colors: ['#FFFF00', '#FFF94D', '#B8B800'],
       });
     } else {
       sounds.playClick();
@@ -67,32 +67,32 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     switch (status) {
       case 'mastered':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">
-            <Award className="w-3 h-3" /> Mastered
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] text-[10px] font-bold font-mono bg-primary/15 text-primary border border-primary/40 shadow-terminal-glow">
+            <Award className="w-3 h-3" /> [MASTERED]
           </span>
         );
       case 'solved':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-            <CheckCircle2 className="w-3 h-3" /> Solved
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] text-[10px] font-bold font-mono bg-primary/15 text-primary border border-primary/40">
+            <CheckCircle2 className="w-3 h-3" /> [SOLVED]
           </span>
         );
       case 'in-progress':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
-            <Clock className="w-3 h-3" /> In Progress
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] text-[10px] font-bold font-mono bg-medium/15 text-medium border border-medium/40">
+            <Clock className="w-3 h-3" /> [IN_PROG]
           </span>
         );
       case 'review':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-            <RotateCcw className="w-3 h-3" /> Review
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] text-[10px] font-bold font-mono bg-surfaceElevated text-textSecondary border border-border">
+            <RotateCcw className="w-3 h-3" /> [REVIEW]
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700/50">
-            <Circle className="w-3 h-3 text-slate-500" /> Todo
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] text-[10px] font-bold font-mono bg-surfaceElevated text-textMuted border border-border/60">
+            <Circle className="w-2.5 h-2.5 text-textMuted" /> [TODO]
           </span>
         );
     }
@@ -101,53 +101,53 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   const getDiffColor = (diff: string) => {
     switch (diff) {
       case 'Easy':
-        return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+        return 'bg-easy/10 text-easy border-easy/40';
       case 'Medium':
-        return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+        return 'bg-medium/10 text-medium border-medium/40';
       case 'Hard':
-        return 'bg-rose-500/15 text-rose-400 border-rose-500/30';
+        return 'bg-hard/10 text-hard border-hard/40';
       default:
-        return 'bg-slate-800 text-slate-300 border-slate-700';
+        return 'bg-surfaceElevated text-textSecondary border-border';
     }
   };
 
   return (
     <div
       onClick={() => onOpenDetail(q)}
-      className={`flex flex-col justify-between p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-850 border transition-all duration-200 shadow-lg cursor-pointer group ${
+      className={`flex flex-col justify-between p-3.5 rounded-[2px] terminal-panel transition-all duration-200 cursor-pointer group font-mono ${
         isFocused
-          ? 'outline-2 outline-indigo-500 border-indigo-500 bg-indigo-950/20'
-          : 'border-slate-800 hover:border-indigo-500/40 hover:shadow-indigo-500/10'
+          ? 'border-borderActive shadow-terminal bg-surfaceElevated'
+          : 'border-border hover:border-borderActive'
       }`}
     >
       <div>
         {/* Top bar: ID, Curated badge, Star */}
-        <div className="flex items-center justify-between gap-2 mb-2.5">
+        <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-1.5">
-            <span className="font-mono text-xs font-semibold text-slate-400 group-hover:text-slate-200">
+            <span className="font-mono text-xs font-bold text-textMuted group-hover:text-primary">
               #{q.id}
             </span>
             {q.isBlind75 && (
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                Blind 75
+              <span className="px-1.5 py-0.2 rounded-[1px] text-[9px] font-bold bg-surfaceElevated text-primary border border-primary/40 font-mono">
+                [BLIND_75]
               </span>
             )}
             {q.isGrind169 && !q.isBlind75 && (
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                Grind 169
+              <span className="px-1.5 py-0.2 rounded-[1px] text-[9px] font-bold bg-surfaceElevated text-primaryDim border border-primaryDim/40 font-mono">
+                [GRIND_169]
               </span>
             )}
-            <span title="Multi-approach C++ solution & theory available" className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30 font-mono">
-              <Lightbulb className="w-2.5 h-2.5 text-amber-400" />
-              C++
+            <span title="Multi-approach C++ solution & theory available" className="inline-flex items-center gap-0.5 text-[9px] px-1 py-0.2 rounded-[1px] bg-surfaceElevated text-textSecondary border border-border font-mono">
+              <Lightbulb className="w-2.5 h-2.5 text-primary" />
+              [C++]
             </span>
             {hasNotes && (
-              <span title="Has personal notes" className="text-amber-400">
-                <FileText className="w-3.5 h-3.5" />
+              <span title="Has personal notes" className="text-primary">
+                <FileText className="w-3 h-3" />
               </span>
             )}
             {prog.confidence && prog.confidence > 0 ? (
-              <span className="text-[10px] text-yellow-400 font-mono">
+              <span className="text-[10px] text-medium font-mono">
                 ★{prog.confidence}
               </span>
             ) : null}
@@ -159,17 +159,17 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                 sounds.playClick();
                 onToggleFavorite(q.id);
               }}
-              className={`p-1 rounded-lg transition-transform active:scale-90 ${
-                isFav ? 'text-yellow-400 fill-yellow-400' : 'text-slate-600 hover:text-slate-400'
+              className={`p-1 rounded-[2px] transition-transform active:scale-90 ${
+                isFav ? 'text-medium fill-medium' : 'text-textMuted hover:text-textSecondary'
               }`}
             >
-              <Star className={`w-4 h-4 ${isFav ? 'fill-yellow-400' : ''}`} />
+              <Star className={`w-3.5 h-3.5 ${isFav ? 'fill-medium' : ''}`} />
             </button>
             <a
               href={q.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1 text-slate-500 hover:text-amber-400 transition-colors"
+              className="p-1 text-textMuted hover:text-primary transition-colors"
               title="Open on LeetCode.com"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -178,9 +178,9 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         </div>
 
         {/* Title */}
-        <h3 className="font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors text-base line-clamp-2 mb-2.5">
+        <h3 className="font-bold text-textPrimary group-hover:text-primary transition-colors text-xs sm:text-sm line-clamp-2 mb-2">
           <a
-            href={`#/problem/${q.id}`}
+            href={`/problem/${q.id}`}
             onClick={(e) => {
               if (!e.ctrlKey && !e.metaKey && e.button === 0) {
                 e.preventDefault();
@@ -194,17 +194,17 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         </h3>
 
         {/* Topics */}
-        <div className="flex flex-wrap gap-1 mb-3">
+        <div className="flex flex-wrap gap-1 mb-2.5">
           {q.topics.slice(0, 3).map((topic) => (
             <span
               key={topic}
-              className="px-2 py-0.5 text-[10px] rounded-md bg-slate-800/80 text-slate-400 border border-slate-700/40 font-mono"
+              className="px-1.5 py-0.2 text-[9px] rounded-[1px] bg-surfaceElevated text-textMuted hover:text-primary hover:border-primaryDim border border-border font-mono transition-colors"
             >
               {topic}
             </span>
           ))}
           {q.topics.length > 3 && (
-            <span className="text-[10px] text-slate-500 self-center">
+            <span className="text-[9px] text-textMuted self-center font-mono">
               +{q.topics.length - 3}
             </span>
           )}
@@ -212,42 +212,40 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       </div>
 
       {/* Footer Details */}
-      <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
+      <div className="pt-2.5 border-t border-border flex flex-col gap-2">
         {/* Frequency & Acceptance */}
-        <div className="flex items-center justify-between text-xs font-mono">
-          <div className="flex items-center gap-1 text-slate-400">
-            <span>Acc:</span>
-            <span className="text-slate-300">{q.acceptance}</span>
+        <div className="flex items-center justify-between text-[11px] font-mono">
+          <div className="flex items-center gap-1 text-textMuted">
+            <span>ACC:</span>
+            <span className="text-textSecondary">{q.acceptance}</span>
           </div>
-          <div className="flex items-center gap-1 text-slate-400">
-            <span>Freq:</span>
-            <span className="text-slate-200 font-bold">{freqNum.toFixed(1)}%</span>
-            {freqNum > 70 && <span>🔥</span>}
+          <div className="flex items-center gap-1 text-textMuted">
+            <span>FREQ:</span>
+            <span className="text-primaryDim font-bold">{freqNum.toFixed(1)}%</span>
+            {freqNum > 70 && <span className="text-medium">⚡</span>}
           </div>
         </div>
 
         {/* Frequency bar */}
-        <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div className="w-full h-1 bg-surfaceElevated overflow-hidden rounded-[1px]">
           <div
-            className={`h-full rounded-full ${
-              freqNum > 70
-                ? 'bg-gradient-to-r from-amber-500 to-rose-500'
-                : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+            className={`h-full ${
+              freqNum > 70 ? 'bg-primary shadow-terminal-glow' : 'bg-textSecondary'
             }`}
             style={{ width: `${Math.min(100, freqNum)}%` }}
           />
         </div>
 
         {/* Difficulty Pill & Status button */}
-        <div className="flex items-center justify-between gap-2 mt-1">
-          <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getDiffColor(q.difficulty)}`}>
-            {q.difficulty}
+        <div className="flex items-center justify-between gap-2 mt-0.5">
+          <span className={`px-2 py-0.2 rounded-[1px] text-[10px] font-mono font-bold border ${getDiffColor(q.difficulty)}`}>
+            [{q.difficulty.toUpperCase()}]
           </span>
 
           <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => onStartTimer(q)}
-              className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-indigo-300 transition-colors"
+              className="p-1 rounded-[2px] bg-surfaceElevated hover:bg-border text-textMuted hover:text-primary transition-colors border border-border"
               title="Practice with Timer"
             >
               <Timer className="w-3.5 h-3.5" />

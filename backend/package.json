@@ -1,5 +1,6 @@
 {
   "name": "leettracker-backend",
+  "description": "Cheat Code Backend API",
   "private": true,
   "version": "1.0.0",
   "type": "module",

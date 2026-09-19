@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Question, CompanyMeta, UserProgressItem, UserStoreState, ProblemStatus } from './types';
+import { Routes, Route, Navigate, useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { Question, CompanyMeta, UserProgressItem, UserStoreState, ProblemStatus, Timeframe, Difficulty } from './types';
 import companyMetaData from './data/company_meta.json';
 import {
   loadStoredState, saveStoredState, getTodayKey, calculateStreaks,
@@ -25,9 +26,19 @@ import { MockInterviewModal } from './components/MockInterviewModal';
 import { AnalyticsModal } from './components/AnalyticsModal';
 import { KeyboardHelpModal } from './components/KeyboardHelpModal';
 import { CompanyLogo } from './components/CompanyLogo';
+import { LandingPage } from './components/LandingPage';
+import { AppSidebarLayout } from './components/AppSidebarLayout';
+import { OverviewPage } from './components/OverviewPage';
+import { QuestionsPage } from './components/QuestionsPage';
+import { PracticePage } from './components/PracticePage';
+import { MockInterviewPage } from './components/MockInterviewPage';
+import { ProgressPage } from './components/ProgressPage';
+import { CommunityPage } from './components/CommunityPage';
+import { BookmarksPage } from './components/BookmarksPage';
+import { CompaniesPage } from './components/CompaniesPage';
+import { SettingsPage } from './components/SettingsPage';
 import {
-  Flame, Sparkles, ChevronLeft, ChevronRight, Layers, Clock, AlertCircle,
-  TrendingUp, CheckCircle2, Bookmark, Target
+  Flame, ChevronLeft, ChevronRight, AlertCircle, Target
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -37,25 +48,680 @@ const TOP_FAANG_PILLS = [
   'google', 'meta', 'amazon', 'microsoft', 'apple', 'netflix', 'uber', 'bloomberg'
 ];
 
-const getProblemIdFromHash = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  const hash = window.location.hash;
-  const match = hash.match(/^#\/problem\/([0-9a-zA-Z_-]+)/);
-  return match ? match[1] : null;
+// ====================================================================
+// Problem Workspace Route View (/problem/:problemId)
+// ====================================================================
+interface ProblemRouteViewProps {
+  allQuestions: Question[];
+  isLoading: boolean;
+  store: UserStoreState;
+  onSaveProgressPatch: (questionId: number | string, patch: Partial<UserProgressItem>) => void;
+}
+
+const ProblemRouteView: React.FC<ProblemRouteViewProps> = ({
+  allQuestions,
+  isLoading,
+  store,
+  onSaveProgressPatch,
+}) => {
+  const { problemId } = useParams<{ problemId: string }>();
+  const navigate = useNavigate();
+
+  const activeProblemQuestion = useMemo(() => {
+    if (!problemId) return null;
+    return allQuestions.find((q) => String(q.id) === String(problemId)) || null;
+  }, [problemId, allQuestions]);
+
+  const handleBack = useCallback(() => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate(`/dashboard/company/${store.selectedCompany || 'google'}`);
+    }
+  }, [navigate, store.selectedCompany]);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 text-textSecondary min-h-[60vh] font-mono">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="text-sm">&gt; Loading problem workspace #{problemId}...</span>
+      </div>
+    );
+  }
+
+  if (!activeProblemQuestion) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-textSecondary min-h-[70vh] space-y-4 font-mono">
+        <div className="p-3 bg-surfaceElevated border border-hard/40 rounded-[2px] text-hard shadow-xl">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold text-textPrimary tracking-tight">&gt; Problem #{problemId} Not Found</h2>
+        <p className="text-xs text-textMuted max-w-md">
+          Unable to locate problem in the indexed dataset of 3,399 interview questions.
+        </p>
+        <button
+          onClick={handleBack}
+          className="px-4 py-2 bg-primary hover:bg-primaryHover text-black text-xs font-bold rounded-[2px] transition-all cursor-pointer"
+        >
+          [ &larr; RETURN_TO_PROBLEM_LIST ]
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <ProblemWorkspacePage
+      question={activeProblemQuestion}
+      allQuestions={allQuestions}
+      progress={store.progress[String(activeProblemQuestion.id)] || { questionId: activeProblemQuestion.id, status: 'todo', isFavorite: false }}
+      companyId={store.selectedCompany || 'google'}
+      onBack={handleBack}
+      onNavigateToProblem={(nextId) => navigate(`/problem/${nextId}`)}
+      onSaveProgress={(patch) => onSaveProgressPatch(activeProblemQuestion.id, patch)}
+    />
+  );
 };
 
+// ====================================================================
+// Dashboard Route View (/dashboard and /dashboard/company/:companySlug)
+// ====================================================================
+interface DashboardViewProps {
+  allQuestions: Question[];
+  isLoading: boolean;
+  error: string | null;
+  store: UserStoreState;
+  updateStore: (patch: Partial<UserStoreState>) => void;
+  handleUpdateStatus: (id: number | string, status: ProblemStatus) => void;
+  handleToggleFavorite: (id: number | string) => void;
+  handleRandomRoulette: (pool: Question[]) => void;
+  setShowOverlapModal: (v: boolean) => void;
+  setShowMockModal: (v: boolean) => void;
+  setShowAnalyticsModal: (v: boolean) => void;
+  setShowShortcutsModal: (v: boolean) => void;
+  setShowPlannerModal: (v: boolean) => void;
+  setShowFlashcardModal: (v: boolean) => void;
+  setShowLeetCodeSyncModal: (v: boolean) => void;
+  focusedIndex: number;
+  setFocusedIndex: React.Dispatch<React.SetStateAction<number>>;
+  setHotkeysQuestions: (qs: Question[]) => void;
+  onNavigateOverview?: () => void;
+}
+
+const DashboardView: React.FC<DashboardViewProps> = ({
+  allQuestions,
+  isLoading,
+  error,
+  store,
+  updateStore,
+  handleUpdateStatus,
+  handleToggleFavorite,
+  handleRandomRoulette,
+  setShowOverlapModal,
+  setShowMockModal,
+  setShowAnalyticsModal,
+  setShowShortcutsModal,
+  setShowPlannerModal,
+  setShowFlashcardModal,
+  setShowLeetCodeSyncModal,
+  focusedIndex,
+  setFocusedIndex,
+  setHotkeysQuestions,
+  onNavigateOverview,
+}) => {
+  const { companySlug } = useParams<{ companySlug?: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  // Active target company: URL slug has precedence
+  const activeCompany = useMemo(() => {
+    if (companySlug && companiesDict[companySlug]) {
+      return companySlug;
+    }
+    return store.selectedCompany || 'google';
+  }, [companySlug, store.selectedCompany]);
+
+  // Sync activeCompany into store state
+  useEffect(() => {
+    if (activeCompany && store.selectedCompany !== activeCompany) {
+      updateStore({ selectedCompany: activeCompany });
+    }
+  }, [activeCompany, store.selectedCompany, updateStore]);
+
+  // Read filter state from searchParams
+  const selectedTimeframe = (searchParams.get('timeframe') as Timeframe) || 'all';
+  const selectedDifficulty = (searchParams.get('difficulty') as Difficulty | 'all') || 'all';
+  const selectedStatus = (searchParams.get('status') as ProblemStatus | 'favorite' | 'due-review' | 'all') || 'all';
+  const selectedTopic = searchParams.get('topic') || 'all';
+  const curatedList = (searchParams.get('curated') || 'all') as UserStoreState['curatedList'];
+  const sortBy = (searchParams.get('sort') as 'frequency' | 'acceptance' | 'id' | 'title' | 'difficulty' | 'status') || 'frequency';
+  const sortOrder = (searchParams.get('order') as 'asc' | 'desc') || 'desc';
+  const searchQuery = searchParams.get('search') || '';
+  const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+  const pageSize = 50;
+
+  // Helper to update URL searchParams (with { replace: true })
+  const updateFilters = useCallback((patch: Record<string, string | number | undefined | null>) => {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(patch).forEach(([key, val]) => {
+      if (val === undefined || val === null || val === '' || val === 'all' || (key === 'page' && val === 1)) {
+        next.delete(key);
+      } else {
+        next.set(key, String(val));
+      }
+    });
+    // Reset page to 1 unless the page itself is being changed
+    if (!('page' in patch)) {
+      next.delete('page');
+    }
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  // Handle switching target company
+  const handleSelectCompany = useCallback((cId: string) => {
+    sounds.playClick();
+    updateStore({ selectedCompany: cId });
+    navigate(`/dashboard/company/${cId}${location.search}`);
+  }, [navigate, location.search, updateStore]);
+
+  // All distinct topics extracted from questions
+  const topicsList = useMemo(() => {
+    const set = new Set<string>();
+    allQuestions.forEach((q) => q.topics.forEach((t) => set.add(t)));
+    return Array.from(set).sort();
+  }, [allQuestions]);
+
+  // Status counts for current company & timeframe
+  const statusCounts = useMemo(() => {
+    const company = activeCompany;
+    const tf = selectedTimeframe;
+    const companyQuestions = allQuestions.filter((q) => {
+      if (!q.companies[company]) return false;
+      if (tf !== 'all' && !q.companies[company][tf]) return false;
+      return true;
+    });
+
+    let todo = 0, inProgress = 0, solved = 0, dueReview = 0, starred = 0;
+    companyQuestions.forEach((q) => {
+      const p = store.progress[String(q.id)];
+      const st = p?.status || 'todo';
+      if (p?.isFavorite) starred++;
+      if (isDueForReview(p)) dueReview++;
+
+      if (st === 'solved' || st === 'mastered') solved++;
+      else if (st === 'in-progress') inProgress++;
+      else todo++;
+    });
+
+    return {
+      total: companyQuestions.length,
+      todo,
+      inProgress,
+      solved,
+      dueReview,
+      starred,
+    };
+  }, [allQuestions, activeCompany, selectedTimeframe, store.progress]);
+
+  // Filtered & Sorted Questions
+  const filteredQuestions = useMemo(() => {
+    const company = activeCompany;
+    const tf = selectedTimeframe;
+    const query = searchQuery.toLowerCase().trim();
+
+    return allQuestions.filter((q) => {
+      // 1. Company filter
+      const compData = q.companies[company];
+      if (!compData) return false;
+
+      // 2. Timeframe filter
+      if (tf !== 'all' && !compData[tf]) return false;
+
+      // 3. Curated list filter
+      if (curatedList === 'blind75' && !isQuestionInTrack(q.id, 'blind75')) return false;
+      if (curatedList === 'neetcode150' && !isQuestionInTrack(q.id, 'neetcode150')) return false;
+      if (curatedList === 'striver180' && !isQuestionInTrack(q.id, 'striver180')) return false;
+      if (curatedList === 'grind169' && !q.isGrind169) return false;
+
+      // Tag filter
+      if (store.selectedTag) {
+        const itemProg = store.progress[String(q.id)];
+        if (!itemProg?.tags?.includes(store.selectedTag)) return false;
+      }
+
+      // 4. Difficulty filter
+      if (selectedDifficulty !== 'all' && q.difficulty !== selectedDifficulty) {
+        return false;
+      }
+
+      // 5. Topic filter
+      if (selectedTopic !== 'all' && !q.topics.includes(selectedTopic)) {
+        return false;
+      }
+
+      // 6. Status filter
+      const p = store.progress[String(q.id)];
+      const st = p?.status || 'todo';
+      if (selectedStatus === 'favorite' && !p?.isFavorite) return false;
+      if (selectedStatus === 'due-review' && !isDueForReview(p)) return false;
+      if (
+        selectedStatus !== 'all' &&
+        selectedStatus !== 'favorite' &&
+        selectedStatus !== 'due-review' &&
+        st !== selectedStatus
+      ) {
+        return false;
+      }
+
+      // 7. Search query filter
+      if (query) {
+        const matchesId = String(q.id) === query || String(q.id).includes(query);
+        const matchesTitle = q.title.toLowerCase().includes(query);
+        const matchesTopic = q.topics.some((t) => t.toLowerCase().includes(query));
+        if (!matchesId && !matchesTitle && !matchesTopic) return false;
+      }
+
+      return true;
+    }).sort((a, b) => {
+      const getFreq = (item: Question) => {
+        const str = item.companies[company]?.[tf] || item.companies[company]?.all || '0.0%';
+        return parseFloat(str.replace('%', '')) || 0;
+      };
+
+      const getAcc = (item: Question) => {
+        return parseFloat(item.acceptance.replace('%', '')) || 0;
+      };
+
+      let comparison = 0;
+      switch (sortBy) {
+        case 'frequency':
+          comparison = getFreq(a) - getFreq(b);
+          break;
+        case 'acceptance':
+          comparison = getAcc(a) - getAcc(b);
+          break;
+        case 'id':
+          comparison = Number(a.id) - Number(b.id);
+          break;
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'difficulty': {
+          const rank: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
+          comparison = rank[a.difficulty] - rank[b.difficulty];
+          break;
+        }
+        case 'status': {
+          const rank: Record<string, number> = { todo: 1, 'in-progress': 2, review: 3, solved: 4, mastered: 5 };
+          const sa = store.progress[String(a.id)]?.status || 'todo';
+          const sb = store.progress[String(b.id)]?.status || 'todo';
+          comparison = rank[sa] - rank[sb];
+          break;
+        }
+        default:
+          comparison = 0;
+      }
+
+      return sortOrder === 'desc' ? -comparison : comparison;
+    });
+  }, [allQuestions, activeCompany, selectedTimeframe, curatedList, store.selectedTag, store.progress, selectedDifficulty, selectedTopic, selectedStatus, searchQuery, sortBy, sortOrder]);
+
+  const displayQuestions = useMemo(() => {
+    if (curatedList === 'sprint30') {
+      return filteredQuestions.slice(0, 30);
+    }
+    return filteredQuestions;
+  }, [filteredQuestions, curatedList]);
+
+  // Paginated Questions
+  const totalPages = Math.ceil(displayQuestions.length / pageSize) || 1;
+  const paginatedQuestions = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return displayQuestions.slice(start, start + pageSize);
+  }, [displayQuestions, currentPage, pageSize]);
+
+  // Synchronize paginated questions for keyboard shortcuts in App
+  useEffect(() => {
+    setHotkeysQuestions(paginatedQuestions);
+  }, [paginatedQuestions, setHotkeysQuestions]);
+
+  // Reset focusedIndex when filter or page changes
+  useEffect(() => {
+    setFocusedIndex(0);
+  }, [activeCompany, selectedTimeframe, selectedDifficulty, selectedStatus, selectedTopic, curatedList, sortBy, sortOrder, searchQuery, currentPage, setFocusedIndex]);
+
+  // Today solved count & streaks
+  const todaySolvedCount = useMemo(() => {
+    const today = getTodayKey();
+    return store.activityLog[today] || 0;
+  }, [store.activityLog]);
+
+  const totalSolvedCount = useMemo(() => {
+    return Object.values(store.progress).filter(
+      (p) => p.status === 'solved' || p.status === 'mastered'
+    ).length;
+  }, [store.progress]);
+
+  const { currentStreak } = useMemo(() => calculateStreaks(store.activityLog), [store.activityLog]);
+  const activeCompanyMeta = companiesDict[activeCompany];
+
+  // Bridge store shape to FilterBar
+  const effectiveFilterState: UserStoreState = useMemo(() => ({
+    ...store,
+    selectedCompany: activeCompany,
+    selectedTimeframe,
+    selectedDifficulty,
+    selectedStatus,
+    selectedTopic,
+    curatedList,
+    sortBy,
+    sortOrder,
+    searchQuery,
+  }), [store, activeCompany, selectedTimeframe, selectedDifficulty, selectedStatus, selectedTopic, curatedList, sortBy, sortOrder, searchQuery]);
+
+  const handleFilterChange = useCallback((patch: Partial<UserStoreState>) => {
+    if (patch.selectedCompany && patch.selectedCompany !== activeCompany) {
+      handleSelectCompany(patch.selectedCompany);
+      return;
+    }
+
+    const filterPatch: Record<string, string | number | undefined | null> = {};
+    if (patch.selectedTimeframe !== undefined) filterPatch.timeframe = patch.selectedTimeframe;
+    if (patch.selectedDifficulty !== undefined) filterPatch.difficulty = patch.selectedDifficulty;
+    if (patch.selectedStatus !== undefined) filterPatch.status = patch.selectedStatus;
+    if (patch.selectedTopic !== undefined) filterPatch.topic = patch.selectedTopic;
+    if (patch.curatedList !== undefined) filterPatch.curated = patch.curatedList;
+    if (patch.sortBy !== undefined) filterPatch.sort = patch.sortBy;
+    if (patch.sortOrder !== undefined) filterPatch.order = patch.sortOrder;
+    if (patch.searchQuery !== undefined) filterPatch.search = patch.searchQuery;
+
+    const storePatch: Partial<UserStoreState> = {};
+    if (patch.viewMode !== undefined) storePatch.viewMode = patch.viewMode;
+    if (patch.soundEnabled !== undefined) storePatch.soundEnabled = patch.soundEnabled;
+    if (patch.dailyGoal !== undefined) storePatch.dailyGoal = patch.dailyGoal;
+    if (Object.keys(storePatch).length > 0) {
+      updateStore(storePatch);
+    }
+
+    if (Object.keys(filterPatch).length > 0) {
+      updateFilters(filterPatch);
+    }
+  }, [activeCompany, handleSelectCompany, updateFilters, updateStore]);
+
+  const handleOpenProblem = (q: Question | number | string) => {
+    const qId = typeof q === 'object' ? q.id : q;
+    navigate(`/problem/${qId}`);
+  };
+
+  return (
+    <>
+      {/* Top Navbar */}
+      <Navbar
+        companies={companiesDict}
+        selectedCompanyId={activeCompany}
+        onSelectCompany={handleSelectCompany}
+        state={effectiveFilterState}
+        onUpdateState={handleFilterChange}
+        filteredQuestions={filteredQuestions}
+        totalSolved={totalSolvedCount}
+        currentStreak={currentStreak}
+        onOpenOverlap={() => setShowOverlapModal(true)}
+        onOpenMock={() => setShowMockModal(true)}
+        onOpenAnalytics={() => setShowAnalyticsModal(true)}
+        onOpenShortcuts={() => setShowShortcutsModal(true)}
+        onRandomRoulette={() => handleRandomRoulette(filteredQuestions)}
+        onOpenPlanner={() => setShowPlannerModal(true)}
+        onOpenFlashcards={() => setShowFlashcardModal(true)}
+        onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+        onGoHome={() => {
+          if (isAuthenticated) {
+            navigate('/dashboard');
+          } else {
+            navigate('/');
+          }
+        }}
+        onNavigateOverview={onNavigateOverview}
+      />
+
+      {/* Main Dashboard Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* Company Header Banner */}
+        <div className="terminal-panel p-5 relative overflow-hidden shadow-xl">
+          <div className="relative z-10 flex flex-col gap-4 font-mono">
+            {/* Top row: Company details + Timeframe selector */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+              <div className="flex items-start gap-4">
+                <CompanyLogo companyId={activeCompany} size="lg" />
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-xl sm:text-2xl font-black tracking-wider text-primary uppercase">
+                      &gt; {activeCompanyMeta?.name?.toUpperCase() || activeCompany.toUpperCase()}
+                    </h2>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-[2px] bg-surfaceElevated text-primaryDim border border-primaryDim/40 font-bold">
+                      [{activeCompanyMeta?.tier || 'TECH'}]
+                    </span>
+                    {activeCompanyMeta?.thirtyDaysCount > 0 && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-[2px] bg-surfaceElevated text-medium border border-medium/40">
+                        <Flame className="w-3.5 h-3.5 text-medium" />
+                        [{activeCompanyMeta.thirtyDaysCount} HOT IN 30D]
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-textMuted mt-1 font-mono">
+                    Verified interview dataset curated for {activeCompanyMeta?.name || activeCompany}.
+                  </p>
+
+                  {/* Company stats pills */}
+                  <div className="flex flex-wrap items-center gap-2 mt-2 text-xs font-mono">
+                    <span className="text-textSecondary">
+                      [TOTAL: <strong className="text-primary">{activeCompanyMeta?.totalQuestions || 0}</strong>]
+                    </span>
+                    <span className="text-easy">
+                      [EASY: {activeCompanyMeta?.diffCounts?.Easy || 0}]
+                    </span>
+                    <span className="text-medium">
+                      [MED: {activeCompanyMeta?.diffCounts?.Medium || 0}]
+                    </span>
+                    <span className="text-hard">
+                      [HARD: {activeCompanyMeta?.diffCounts?.Hard || 0}]
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeframe selector tabs */}
+              <div className="flex flex-col items-start md:items-end gap-1.5 shrink-0">
+                <span className="text-[10px] font-bold text-textMuted uppercase tracking-wider">
+                  &gt; RECENCY_TIMEFRAME
+                </span>
+                <TimeframeTabs
+                  selectedTimeframe={selectedTimeframe}
+                  onSelectTimeframe={(tf) => updateFilters({ timeframe: tf })}
+                  companyMeta={activeCompanyMeta}
+                />
+              </div>
+            </div>
+
+            {/* Quick Switch Pills for Top Companies & Daily Goal Tracker */}
+            <div className="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs">
+              {/* Quick switch company buttons */}
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                <span className="text-textMuted mr-1 font-bold hidden lg:inline">&gt; JUMP:</span>
+                {TOP_FAANG_PILLS.map((cId) => {
+                  const isCur = activeCompany === cId;
+                  const cMeta = companiesDict[cId];
+                  return (
+                    <button
+                      key={cId}
+                      onClick={() => handleSelectCompany(cId)}
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-[2px] font-mono text-xs font-bold transition-all border ${
+                        isCur
+                          ? 'bg-primary text-black border-borderActive shadow-terminal-glow'
+                          : 'bg-surface text-textSecondary border-border hover:border-primary hover:text-primary'
+                      }`}
+                    >
+                      <CompanyLogo companyId={cId} size="sm" />
+                      <span>[{cMeta?.name || cId}]</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Today's Goal Progress */}
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-[2px] bg-surface border border-border shrink-0 font-mono">
+                <Target className="w-3.5 h-3.5 text-primary" />
+                <span className="text-textSecondary">
+                  GOAL: <strong className="text-primary">{todaySolvedCount}</strong>/<span className="text-primaryDim">{store.dailyGoal}</span>
+                </span>
+                <div className="w-14 h-1 bg-surfaceElevated border border-border overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${Math.min(100, (todaySolvedCount / store.dailyGoal) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter & Control Bar */}
+        <FilterBar
+          state={effectiveFilterState}
+          onChange={handleFilterChange}
+          statusCounts={statusCounts}
+          topicsList={topicsList}
+        />
+
+        {/* Problem List or Grid View */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 text-textSecondary gap-3 font-mono">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs">&gt; Loading question index...</span>
+          </div>
+        ) : error ? (
+          <div className="p-4 bg-error/15 border border-error/40 rounded-[2px] text-error text-center font-mono text-xs">
+            [ERROR: {error}]
+          </div>
+        ) : (
+          <>
+            {store.viewMode === 'table' ? (
+              <QuestionTable
+                questions={paginatedQuestions}
+                progress={store.progress}
+                selectedCompany={activeCompany}
+                selectedTimeframe={selectedTimeframe}
+                focusedIndex={focusedIndex}
+                onUpdateStatus={handleUpdateStatus}
+                onToggleFavorite={handleToggleFavorite}
+                onOpenDetail={handleOpenProblem}
+                onStartTimer={handleOpenProblem}
+                onSelectRow={setFocusedIndex}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {paginatedQuestions.map((q, idx) => (
+                  <QuestionCard
+                    key={q.id}
+                    question={q}
+                    progress={store.progress[String(q.id)]}
+                    selectedCompany={activeCompany}
+                    selectedTimeframe={selectedTimeframe}
+                    isFocused={idx === focusedIndex}
+                    onUpdateStatus={handleUpdateStatus}
+                    onToggleFavorite={handleToggleFavorite}
+                    onOpenDetail={handleOpenProblem}
+                    onStartTimer={handleOpenProblem}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {displayQuestions.length > pageSize && (
+              <div className="flex items-center justify-between py-3 border-t border-border px-2 text-xs font-mono">
+                <span className="text-textMuted">
+                  Showing <strong className="text-primary">{(currentPage - 1) * pageSize + 1}</strong> to{' '}
+                  <strong className="text-primary">
+                    {Math.min(currentPage * pageSize, displayQuestions.length)}
+                  </strong>{' '}
+                  of <strong className="text-primary">{displayQuestions.length}</strong> problems
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => updateFilters({ page: Math.max(1, currentPage - 1) })}
+                    disabled={currentPage === 1}
+                    className="px-2.5 py-1 rounded-[2px] bg-surface border border-border text-textSecondary hover:text-primary hover:border-primaryDim disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                  >
+                    [ PREV ]
+                  </button>
+
+                  <span className="px-2.5 py-1 font-mono text-textPrimary bg-surface border border-border rounded-[2px]">
+                    PAGE <span className="text-primary font-bold">{currentPage}</span>/{totalPages}
+                  </span>
+
+                  <button
+                    onClick={() => updateFilters({ page: Math.min(totalPages, currentPage + 1) })}
+                    disabled={currentPage === totalPages}
+                    className="px-2.5 py-1 rounded-[2px] bg-surface border border-border text-textSecondary hover:text-primary hover:border-primaryDim disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                  >
+                    [ NEXT ]
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-border bg-surface py-5 px-4 sm:px-6 text-center text-xs font-mono text-textMuted">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-primary">&gt; CHEAT_CODE</span>
+            <span>•</span>
+            <span>659 Companies • 3,399 Questions</span>
+            <span>•</span>
+            <span className="text-textSecondary">SNAPSHOT: 2026</span>
+          </div>
+          <div className="flex items-center gap-3 text-textSecondary">
+            <button onClick={() => setShowShortcutsModal(true)} className="hover:text-primary transition-colors cursor-pointer">
+              [HOTKEYS (?)]
+            </button>
+            <span>•</span>
+            <a
+              href="https://github.com/Kitchenwasher/leetcode-company-tracker"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+            >
+              [GITHUB_REPO]
+            </a>
+          </div>
+        </div>
+      </footer>
+    </>
+  );
+};
+
+// ====================================================================
+// Root App Component with React Router
+// ====================================================================
 export const App: React.FC = () => {
-  const { user } = useAuth();
+  const { user, showAuthModal, setShowAuthModal, setShowSubscriptionModal } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [store, setStore] = useState<UserStoreState>(() => loadStoredState(user?.id));
   const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // URL Hash Router State for Dedicated Problem Workspace Page
-  const [activeProblemId, setActiveProblemId] = useState<string | null>(() => getProblemIdFromHash());
-
-  // Keyboard navigation focused row
+  // Keyboard navigation focused row & active questions list for hotkeys
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
+  const [hotkeysQuestions, setHotkeysQuestions] = useState<Question[]>([]);
 
   // Active Modals
   const [detailQuestion, setDetailQuestion] = useState<Question | null>(null);
@@ -67,21 +733,13 @@ export const App: React.FC = () => {
   const [showFlashcardModal, setShowFlashcardModal] = useState<boolean>(false);
   const [showLeetCodeSyncModal, setShowLeetCodeSyncModal] = useState<boolean>(false);
 
-  // Listen for hash changes (back/forward navigation & direct links)
   useEffect(() => {
-    const handleHashChange = () => {
-      const pId = getProblemIdFromHash();
-      setActiveProblemId(pId);
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+    (window as any).__openAuthModal = () => setShowAuthModal(true);
+    (window as any).__openSubscriptionModal = () => setShowSubscriptionModal(true);
+    (window as any).__openShortcutsModal = () => setShowShortcutsModal(true);
+  }, [setShowAuthModal, setShowSubscriptionModal]);
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 50;
-
-  // Reload store when user changes (switch account or login)
+  // Reload store when user changes
   useEffect(() => {
     if (user?.id) {
       setStore(loadStoredState(user.id));
@@ -120,180 +778,6 @@ export const App: React.FC = () => {
   const updateStore = useCallback((patch: Partial<UserStoreState>) => {
     setStore((prev) => ({ ...prev, ...patch }));
   }, []);
-
-  // Reset page and focusedIndex on filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-    setFocusedIndex(0);
-  }, [
-    store.selectedCompany,
-    store.selectedTimeframe,
-    store.selectedDifficulty,
-    store.selectedStatus,
-    store.selectedTopic,
-    store.searchQuery,
-    store.curatedList,
-    store.sortBy,
-    store.sortOrder,
-  ]);
-
-  // All distinct topics extracted from questions
-  const topicsList = useMemo(() => {
-    const set = new Set<string>();
-    allQuestions.forEach((q) => q.topics.forEach((t) => set.add(t)));
-    return Array.from(set).sort();
-  }, [allQuestions]);
-
-  // Status counts for current company & timeframe
-  const statusCounts = useMemo(() => {
-    const company = store.selectedCompany;
-    const tf = store.selectedTimeframe;
-    const companyQuestions = allQuestions.filter((q) => {
-      if (!q.companies[company]) return false;
-      if (tf !== 'all' && !q.companies[company][tf]) return false;
-      return true;
-    });
-
-    let todo = 0, inProgress = 0, solved = 0, dueReview = 0, starred = 0;
-    companyQuestions.forEach((q) => {
-      const p = store.progress[String(q.id)];
-      const st = p?.status || 'todo';
-      if (p?.isFavorite) starred++;
-      if (isDueForReview(p)) dueReview++;
-
-      if (st === 'solved' || st === 'mastered') solved++;
-      else if (st === 'in-progress') inProgress++;
-      else todo++;
-    });
-
-    return {
-      total: companyQuestions.length,
-      todo,
-      inProgress,
-      solved,
-      dueReview,
-      starred,
-    };
-  }, [allQuestions, store.selectedCompany, store.selectedTimeframe, store.progress]);
-
-  // Filtered & Sorted Questions
-  const filteredQuestions = useMemo(() => {
-    const company = store.selectedCompany;
-    const tf = store.selectedTimeframe;
-    const query = store.searchQuery.toLowerCase().trim();
-
-    return allQuestions.filter((q) => {
-      // 1. Company filter
-      const compData = q.companies[company];
-      if (!compData) return false;
-
-      // 2. Timeframe filter
-      if (tf !== 'all' && !compData[tf]) return false;
-
-      // 3. Curated list filter
-      if (store.curatedList === 'blind75' && !isQuestionInTrack(q.id, 'blind75')) return false;
-      if (store.curatedList === 'neetcode150' && !isQuestionInTrack(q.id, 'neetcode150')) return false;
-      if (store.curatedList === 'striver180' && !isQuestionInTrack(q.id, 'striver180')) return false;
-      if (store.curatedList === 'grind169' && !q.isGrind169) return false;
-
-      // Tag filter
-      if (store.selectedTag) {
-        const itemProg = store.progress[String(q.id)];
-        if (!itemProg?.tags?.includes(store.selectedTag)) return false;
-      }
-
-      // 4. Difficulty filter
-      if (store.selectedDifficulty !== 'all' && q.difficulty !== store.selectedDifficulty) {
-        return false;
-      }
-
-      // 5. Topic filter
-      if (store.selectedTopic !== 'all' && !q.topics.includes(store.selectedTopic)) {
-        return false;
-      }
-
-      // 6. Status filter
-      const p = store.progress[String(q.id)];
-      const st = p?.status || 'todo';
-      if (store.selectedStatus === 'favorite' && !p?.isFavorite) return false;
-      if (store.selectedStatus === 'due-review' && !isDueForReview(p)) return false;
-      if (
-        store.selectedStatus !== 'all' &&
-        store.selectedStatus !== 'favorite' &&
-        store.selectedStatus !== 'due-review' &&
-        st !== store.selectedStatus
-      ) {
-        return false;
-      }
-
-      // 7. Search query filter
-      if (query) {
-        const matchesId = String(q.id) === query || String(q.id).includes(query);
-        const matchesTitle = q.title.toLowerCase().includes(query);
-        const matchesTopic = q.topics.some((t) => t.toLowerCase().includes(query));
-        if (!matchesId && !matchesTitle && !matchesTopic) return false;
-      }
-
-      return true;
-    }).sort((a, b) => {
-      // Sorting
-      const getFreq = (item: Question) => {
-        const str = item.companies[company]?.[tf] || item.companies[company]?.all || '0.0%';
-        return parseFloat(str.replace('%', '')) || 0;
-      };
-
-      const getAcc = (item: Question) => {
-        return parseFloat(item.acceptance.replace('%', '')) || 0;
-      };
-
-      let comparison = 0;
-      switch (store.sortBy) {
-        case 'frequency':
-          comparison = getFreq(a) - getFreq(b);
-          break;
-        case 'acceptance':
-          comparison = getAcc(a) - getAcc(b);
-          break;
-        case 'id':
-          comparison = Number(a.id) - Number(b.id);
-          break;
-        case 'title':
-          comparison = a.title.localeCompare(b.title);
-          break;
-        case 'difficulty': {
-          const rank = { Easy: 1, Medium: 2, Hard: 3 };
-          comparison = rank[a.difficulty] - rank[b.difficulty];
-          break;
-        }
-        case 'status': {
-          const rank = { todo: 1, 'in-progress': 2, review: 3, solved: 4, mastered: 5 };
-          const sa = store.progress[String(a.id)]?.status || 'todo';
-          const sb = store.progress[String(b.id)]?.status || 'todo';
-          comparison = rank[sa] - rank[sb];
-          break;
-        }
-        default:
-          comparison = 0;
-      }
-
-      return store.sortOrder === 'desc' ? -comparison : comparison;
-    });
-  }, [allQuestions, store]);
-
-  // If Top 30 Sprint is selected, slice top 30 by frequency
-  const displayQuestions = useMemo(() => {
-    if (store.curatedList === 'sprint30') {
-      return filteredQuestions.slice(0, 30);
-    }
-    return filteredQuestions;
-  }, [filteredQuestions, store.curatedList]);
-
-  // Paginated Questions
-  const totalPages = Math.ceil(displayQuestions.length / pageSize) || 1;
-  const paginatedQuestions = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return displayQuestions.slice(start, start + pageSize);
-  }, [displayQuestions, currentPage, pageSize]);
 
   // Progress Update Handlers
   const handleUpdateStatus = (qId: number | string, newStatus: ProblemStatus) => {
@@ -384,38 +868,22 @@ export const App: React.FC = () => {
     });
   }, []);
 
-  const handleOpenProblem = useCallback((q: Question | number | string) => {
-    const qId = typeof q === 'object' ? q.id : q;
-    window.location.hash = `#/problem/${qId}`;
-    setActiveProblemId(String(qId));
-  }, []);
-
-  const handleBackToDashboard = useCallback(() => {
-    window.location.hash = '';
-    setActiveProblemId(null);
-  }, []);
-
-  const activeProblemQuestion = useMemo(() => {
-    if (!activeProblemId) return null;
-    return allQuestions.find((q) => String(q.id) === String(activeProblemId)) || null;
-  }, [activeProblemId, allQuestions]);
-
   // Random Roulette
-  const handleRandomRoulette = () => {
-    if (filteredQuestions.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
-    const chosen = filteredQuestions[randomIndex];
-    handleOpenProblem(chosen);
+  const handleRandomRoulette = (pool: Question[]) => {
+    if (pool.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const chosen = pool[randomIndex];
     sounds.playSuccess();
     confetti({
       particleCount: 45,
       spread: 60,
       origin: { y: 0.6 },
-      colors: ['#6366F1', '#EC4899', '#F59E0B'],
+      colors: ['#FFFF00', '#FFF94D', '#B8B800'],
     });
+    navigate(`/problem/${chosen.id}`);
   };
 
-  // Keyboard Shortcuts Listener with J/K Navigation & Quick Toggle
+  // Keyboard Shortcuts Listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName.toLowerCase();
@@ -423,9 +891,14 @@ export const App: React.FC = () => {
         return;
       }
 
+      // Handle Escape
       if (e.key === 'Escape') {
-        if (activeProblemId) {
-          handleBackToDashboard();
+        if (location.pathname.startsWith('/problem/')) {
+          if (window.history.state && window.history.state.idx > 0) {
+            navigate(-1);
+          } else {
+            navigate(`/dashboard/company/${store.selectedCompany || 'google'}`);
+          }
           return;
         }
         setDetailQuestion(null);
@@ -436,14 +909,26 @@ export const App: React.FC = () => {
         return;
       }
 
-      // If in problem page or a modal is open, don't execute background list shortcuts
-      if (activeProblemId || detailQuestion || showOverlapModal || showMockModal || showAnalyticsModal || showShortcutsModal) {
+      // In problem workspace or if modal open, do not trigger background list hotkeys
+      if (
+        location.pathname.startsWith('/problem/') ||
+        detailQuestion ||
+        showOverlapModal ||
+        showMockModal ||
+        showAnalyticsModal ||
+        showShortcutsModal
+      ) {
+        return;
+      }
+
+      // Only on dashboard routes
+      if (!location.pathname.startsWith('/dashboard')) {
         return;
       }
 
       if (e.key === 'j') {
         e.preventDefault();
-        setFocusedIndex((prev) => Math.min(paginatedQuestions.length - 1, prev + 1));
+        setFocusedIndex((prev) => Math.min(hotkeysQuestions.length - 1, prev + 1));
         return;
       }
 
@@ -455,24 +940,24 @@ export const App: React.FC = () => {
 
       if (e.key === 'Enter') {
         e.preventDefault();
-        const activeQ = paginatedQuestions[focusedIndex];
+        const activeQ = hotkeysQuestions[focusedIndex];
         if (activeQ) {
-          handleOpenProblem(activeQ);
+          navigate(`/problem/${activeQ.id}`);
         }
         return;
       }
 
       if (e.key === ' ' || e.key === 'x') {
         e.preventDefault();
-        const activeQ = paginatedQuestions[focusedIndex];
+        const activeQ = hotkeysQuestions[focusedIndex];
         if (activeQ) {
           const current = store.progress[String(activeQ.id)]?.status || 'todo';
           const nextMap: Record<ProblemStatus, ProblemStatus> = {
-            'todo': 'in-progress',
+            todo: 'in-progress',
             'in-progress': 'solved',
-            'solved': 'review',
-            'review': 'mastered',
-            'mastered': 'todo',
+            solved: 'review',
+            review: 'mastered',
+            mastered: 'todo',
           };
           const nextSt = nextMap[current];
           handleUpdateStatus(activeQ.id, nextSt);
@@ -482,7 +967,7 @@ export const App: React.FC = () => {
               particleCount: 50,
               spread: 60,
               origin: { y: 0.8 },
-              colors: ['#10B981', '#3B82F6', '#F59E0B'],
+              colors: ['#FFFF00', '#FFF94D', '#B8B800'],
             });
           } else {
             sounds.playClick();
@@ -493,7 +978,7 @@ export const App: React.FC = () => {
 
       if (e.key === 'b') {
         e.preventDefault();
-        const activeQ = paginatedQuestions[focusedIndex];
+        const activeQ = hotkeysQuestions[focusedIndex];
         if (activeQ) {
           sounds.playClick();
           handleToggleFavorite(activeQ.id);
@@ -516,7 +1001,7 @@ export const App: React.FC = () => {
 
       if (e.key === 'r') {
         e.preventDefault();
-        handleRandomRoulette();
+        handleRandomRoulette(hotkeysQuestions);
         return;
       }
 
@@ -541,333 +1026,318 @@ export const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [paginatedQuestions, focusedIndex, detailQuestion, showOverlapModal, showMockModal, showAnalyticsModal, showShortcutsModal, store.progress]);
+  }, [location.pathname, hotkeysQuestions, focusedIndex, detailQuestion, showOverlapModal, showMockModal, showAnalyticsModal, showShortcutsModal, store.progress, store.selectedCompany, navigate, handleToggleFavorite, handleUpdateStatus]);
 
-  // Overall Solved count
-  const totalSolvedCount = useMemo(() => {
-    return Object.values(store.progress).filter(
-      (p) => p.status === 'solved' || p.status === 'mastered'
-    ).length;
-  }, [store.progress]);
+  const handleImportBackup = useCallback((imported: UserStoreState) => {
+    setStore(imported);
+    saveStoredState(imported);
+  }, []);
 
-  // Today solved count
-  const todaySolvedCount = useMemo(() => {
-    const today = getTodayKey();
-    return store.activityLog[today] || 0;
-  }, [store.activityLog]);
+  const handleResetProgress = useCallback(() => {
+    setStore((prev) => ({
+      ...prev,
+      progress: {},
+      activityLog: {},
+    }));
+    sounds.playClick();
+  }, []);
 
-  const { currentStreak } = useMemo(() => calculateStreaks(store.activityLog), [store.activityLog]);
-  const activeCompanyMeta = companiesDict[store.selectedCompany];
+  const activeCompanyMeta = companiesDict[store.selectedCompany || 'google'];
 
   return (
-    <div className="min-h-screen bg-[#080d1a] dark:bg-[#080d1a] bg-slate-50 text-slate-100 dark:text-slate-100 text-slate-900 flex flex-col font-sans selection:bg-indigo-500/30 bg-ambient-grid transition-colors">
-      {activeProblemId ? (
-        isLoading ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-4 text-slate-400 min-h-[60vh]">
-            <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm font-medium">Loading problem workspace #{activeProblemId}...</span>
-          </div>
-        ) : activeProblemQuestion ? (
-          <ProblemWorkspacePage
-            question={activeProblemQuestion}
-            allQuestions={displayQuestions.length > 0 ? displayQuestions : allQuestions}
-            progress={store.progress[String(activeProblemQuestion.id)]}
-            companyId={store.selectedCompany}
-            onBack={handleBackToDashboard}
-            onNavigateToProblem={handleOpenProblem}
-            onSaveProgress={(patch) => handleSaveProgressPatch(activeProblemQuestion.id, patch)}
-          />
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-300 min-h-[70vh] space-y-4">
-            <div className="p-4 bg-rose-500/15 border border-rose-500/30 rounded-2xl text-rose-400 shadow-xl">
-              <AlertCircle className="w-10 h-10" />
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">Problem #{activeProblemId} Not Found</h2>
-            <p className="text-sm text-slate-400 max-w-md">
-              We couldn't locate this problem in the indexed database of 3,399 interview questions.
-            </p>
-            <button
-              onClick={handleBackToDashboard}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg transition-all"
-            >
-              ← Return to Problem List
-            </button>
-          </div>
-        )
-      ) : (
-        <>
-          {/* Top Navbar */}
-          <Navbar
-            companies={companiesDict}
-            selectedCompanyId={store.selectedCompany}
-            onSelectCompany={(cId) => updateStore({ selectedCompany: cId })}
-            state={store}
-            onUpdateState={updateStore}
-            filteredQuestions={filteredQuestions}
-            totalSolved={totalSolvedCount}
-            currentStreak={currentStreak}
-            onOpenOverlap={() => setShowOverlapModal(true)}
-            onOpenMock={() => setShowMockModal(true)}
-            onOpenAnalytics={() => setShowAnalyticsModal(true)}
-            onOpenShortcuts={() => setShowShortcutsModal(true)}
-            onRandomRoulette={handleRandomRoulette}
-            onOpenPlanner={() => setShowPlannerModal(true)}
-            onOpenFlashcards={() => setShowFlashcardModal(true)}
-            onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-          />
-
-          {/* Main Content Area */}
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
-            {/* Company Header Banner */}
-            <div className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-indigo-950/40 border border-slate-800 shadow-2xl">
-              <div className="absolute right-0 top-0 bottom-0 w-96 bg-gradient-to-l from-indigo-500/10 to-transparent pointer-events-none" />
-
-              <div className="relative z-10 flex flex-col gap-5">
-                {/* Top row: Company details + Timeframe selector */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="flex items-start gap-4">
-                    <CompanyLogo companyId={store.selectedCompany} size="xl" className="shadow-lg mt-0.5" />
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                          {activeCompanyMeta?.name || store.selectedCompany}
-                        </h1>
-                        <span className="px-2.5 py-0.5 text-xs font-semibold rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                          {activeCompanyMeta?.tier || 'Tech'}
-                        </span>
-                        {activeCompanyMeta?.thirtyDaysCount > 0 && (
-                          <span className="flex items-center gap-1 px-2.5 py-0.5 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                            <Flame className="w-3.5 h-3.5 text-amber-400" />
-                            {activeCompanyMeta.thirtyDaysCount} Hot in 30 Days
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                        Track and solve verified LeetCode interview questions curated for {activeCompanyMeta?.name || store.selectedCompany}.
-                      </p>
-
-                      {/* Company stats pills */}
-                      <div className="flex flex-wrap items-center gap-2.5 mt-2.5 text-xs font-mono">
-                        <span className="text-slate-300">
-                          <strong className="text-white">{activeCompanyMeta?.totalQuestions || 0}</strong> total
-                        </span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-emerald-400">
-                          {activeCompanyMeta?.diffCounts?.Easy || 0} Easy
-                        </span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-amber-400">
-                          {activeCompanyMeta?.diffCounts?.Medium || 0} Medium
-                        </span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-rose-400">
-                          {activeCompanyMeta?.diffCounts?.Hard || 0} Hard
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Timeframe selector tabs */}
-                  <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                      Recency Timeframe
-                    </span>
-                    <TimeframeTabs
-                      selectedTimeframe={store.selectedTimeframe}
-                      onSelectTimeframe={(tf) => updateStore({ selectedTimeframe: tf })}
-                      companyMeta={activeCompanyMeta}
-                    />
-                  </div>
-                </div>
-
-                {/* Quick Switch Pills for Top Companies & Daily Goal Tracker */}
-                <div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-                  {/* Quick switch company buttons */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                    <span className="text-slate-400 mr-1 font-medium hidden lg:inline">Quick Jump:</span>
-                    {TOP_FAANG_PILLS.map((cId) => {
-                      const isCur = store.selectedCompany === cId;
-                      const cMeta = companiesDict[cId];
-                      return (
-                        <button
-                          key={cId}
-                          onClick={() => {
-                            sounds.playClick();
-                            updateStore({ selectedCompany: cId });
-                          }}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all ${
-                            isCur
-                              ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                              : 'bg-slate-800/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                          }`}
-                        >
-                          <CompanyLogo companyId={cId} size="sm" />
-                          <span className="capitalize">{cMeta?.name || cId}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Today's Goal Progress */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/60 border border-slate-800 shrink-0">
-                    <Target className="w-3.5 h-3.5 text-indigo-400" />
-                    <span className="text-slate-300">
-                      Daily Goal: <strong className="text-white">{todaySolvedCount}</strong> / {store.dailyGoal} solved
-                    </span>
-                    <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-indigo-500 rounded-full transition-all"
-                        style={{ width: `${Math.min(100, (todaySolvedCount / store.dailyGoal) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Filter & Control Bar */}
-            <FilterBar
-              state={store}
-              onChange={updateStore}
-              statusCounts={statusCounts}
-              topicsList={topicsList}
+    <div className="min-h-screen bg-background text-textPrimary flex flex-col font-mono selection:bg-primary/30 selection:text-primary bg-ambient-grid transition-colors">
+      <Routes>
+        {/* Landing Page */}
+        <Route
+          path="/"
+          element={
+            <LandingPage
+              onGetStarted={() => {
+                sounds.playClick();
+                navigate('/dashboard');
+              }}
+              onSignIn={() => {
+                sounds.playClick();
+                setShowAuthModal(true);
+              }}
             />
+          }
+        />
 
-            {/* Keyboard navigation helper hint */}
-            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-              <div className="flex items-center gap-2">
-                <span>Tip: Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">j</kbd> / <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">k</kbd> to navigate, <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">Space</kbd> to solve, <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-indigo-300">Enter</kbd> to open.</span>
-              </div>
-              <button onClick={() => setShowShortcutsModal(true)} className="hover:text-slate-200 underline">
-                View all shortcuts (?)
-              </button>
-            </div>
+        {/* Dashboard / Overview Home Page */}
+        <Route
+          path="/dashboard"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => navigate(`/dashboard/company/${store.selectedCompany || 'google'}`)}
+            >
+              <OverviewPage
+                questions={allQuestions}
+                companies={companiesDict}
+                store={store}
+                onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+                onNavigateToCompany={(slug: string) => {
+                  navigate(`/questions?company=${slug}`);
+                }}
+                onNavigateToQuestions={() => navigate('/questions')}
+                onOpenMockModal={() => setShowMockModal(true)}
+              />
+            </AppSidebarLayout>
+          }
+        />
 
-            {/* Loading / Error States */}
-            {isLoading && (
-              <div className="py-24 flex flex-col items-center justify-center gap-3 text-slate-400">
-                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm font-medium">Indexing 3,399 interview questions across 659 companies...</span>
-              </div>
-            )}
+        {/* Overview Alias */}
+        <Route path="/overview" element={<Navigate to="/dashboard" replace />} />
 
-            {error && (
-              <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-800/50 text-rose-300 flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                <span className="text-sm font-medium">Error: {error}</span>
-              </div>
-            )}
+        {/* Unified Questions Explorer */}
+        <Route
+          path="/questions"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => {
+                const searchInput = document.querySelector('input[placeholder*="Search by ID"]') as HTMLInputElement;
+                if (searchInput) searchInput.focus();
+              }}
+            >
+              <QuestionsPage
+                questions={allQuestions}
+                companies={companiesDict}
+                store={store}
+                onUpdateStatus={handleUpdateStatus}
+                onToggleFavorite={handleToggleFavorite}
+                onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+              />
+            </AppSidebarLayout>
+          }
+        />
 
-            {/* Question Content: Table or Grid */}
-            {!isLoading && !error && (
-              <>
-                {store.viewMode === 'table' ? (
-                  <QuestionTable
-                    questions={paginatedQuestions}
-                    progress={store.progress}
-                    selectedCompany={store.selectedCompany}
-                    selectedTimeframe={store.selectedTimeframe}
-                    focusedIndex={focusedIndex}
-                    onUpdateStatus={handleUpdateStatus}
-                    onToggleFavorite={handleToggleFavorite}
-                    onOpenDetail={(q) => handleOpenProblem(q)}
-                    onStartTimer={(q) => handleOpenProblem(q)}
-                    onSelectRow={(idx) => setFocusedIndex(idx)}
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {paginatedQuestions.map((q, idx) => (
-                      <QuestionCard
-                        key={q.id}
-                        question={q}
-                        progress={store.progress[String(q.id)]}
-                        selectedCompany={store.selectedCompany}
-                        selectedTimeframe={store.selectedTimeframe}
-                        isFocused={idx === focusedIndex}
-                        onUpdateStatus={handleUpdateStatus}
-                        onToggleFavorite={handleToggleFavorite}
-                        onOpenDetail={(targetQ) => handleOpenProblem(targetQ)}
-                        onStartTimer={(targetQ) => handleOpenProblem(targetQ)}
-                      />
-                    ))}
-                  </div>
-                )}
+        {/* Companies Directory Page */}
+        <Route
+          path="/companies"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => navigate('/questions')}
+            >
+              <CompaniesPage
+                companies={companiesDict}
+                questions={allQuestions}
+                onSelectCompany={(slug) => {
+                  setStore((prev) => ({ ...prev, selectedCompany: slug }));
+                  navigate(`/dashboard/company/${slug}`);
+                }}
+              />
+            </AppSidebarLayout>
+          }
+        />
 
-                {/* Pagination Controls */}
-                {displayQuestions.length > pageSize && (
-                  <div className="flex items-center justify-between py-4 border-t border-slate-800/80 px-2 text-xs">
-                    <span className="text-slate-400">
-                      Showing <strong className="text-white">{(currentPage - 1) * pageSize + 1}</strong> to{' '}
-                      <strong className="text-white">
-                        {Math.min(currentPage * pageSize, displayQuestions.length)}
-                      </strong>{' '}
-                      of <strong className="text-white">{displayQuestions.length}</strong> problems
-                    </span>
+        {/* Practice Page */}
+        <Route
+          path="/practice"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => navigate('/questions')}
+            >
+              <PracticePage
+                questions={allQuestions}
+                store={store}
+                onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+              />
+            </AppSidebarLayout>
+          }
+        />
 
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => {
-                          setCurrentPage((p) => Math.max(1, p - 1));
-                          setFocusedIndex(0);
-                        }}
-                        disabled={currentPage === 1}
-                        className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
+        {/* Mock Interview Page */}
+        <Route
+          path="/mock-interview"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => navigate('/questions')}
+            >
+              <MockInterviewPage
+                questions={allQuestions}
+                companies={companiesDict}
+                store={store}
+                onOpenMockModal={() => setShowMockModal(true)}
+              />
+            </AppSidebarLayout>
+          }
+        />
 
-                      <span className="px-3 py-1 font-mono text-slate-300 bg-slate-900 border border-slate-800 rounded-xl">
-                        Page {currentPage} of {totalPages}
-                      </span>
+        {/* Progress Page */}
+        <Route
+          path="/progress"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => navigate('/questions')}
+            >
+              <ProgressPage
+                questions={allQuestions}
+                store={store}
+              />
+            </AppSidebarLayout>
+          }
+        />
 
-                      <button
-                        onClick={() => {
-                          setCurrentPage((p) => Math.min(totalPages, p + 1));
-                          setFocusedIndex(0);
-                        }}
-                        disabled={currentPage === totalPages}
-                        className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </main>
+        {/* Community Page */}
+        <Route
+          path="/community"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => navigate('/questions')}
+            >
+              <CommunityPage />
+            </AppSidebarLayout>
+          }
+        />
 
-          {/* Footer */}
-          <footer className="w-full border-t border-slate-800/80 bg-slate-950/90 py-6 px-4 sm:px-6 text-center text-xs text-slate-500">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-400">LeetTracker Pro</span>
-                <span>•</span>
-                <span>659 Companies • 3,399 Verified Questions</span>
-                <span>•</span>
-                <span className="text-indigo-400">Snapshot: July 2026</span>
-              </div>
-              <div className="flex items-center gap-3 text-slate-400">
-                <button onClick={() => setShowShortcutsModal(true)} className="hover:text-white transition-colors">
-                  Hotkeys (?)
-                </button>
-                <span>•</span>
-                <a
-                  href="https://github.com/snehasishroy/leetcode-companywise-interview-questions"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
-                >
-                  GitHub Source Repo
-                </a>
-              </div>
-            </div>
-          </footer>
-        </>
-      )}
+        {/* Bookmarks Page */}
+        <Route
+          path="/bookmarks"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => navigate('/questions')}
+            >
+              <BookmarksPage
+                questions={allQuestions}
+                store={store}
+                onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+                onToggleFavorite={handleToggleFavorite}
+                onUpdateStatus={handleUpdateStatus}
+              />
+            </AppSidebarLayout>
+          }
+        />
 
-      {/* Question Workspace Modal */}
+        {/* Settings Page */}
+        <Route
+          path="/settings"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => navigate(`/dashboard/company/${store.selectedCompany || 'google'}`)}
+            >
+              <SettingsPage
+                store={store}
+                questions={allQuestions}
+                onImportBackup={handleImportBackup}
+                onResetProgress={handleResetProgress}
+              />
+            </AppSidebarLayout>
+          }
+        />
+
+        <Route
+          path="/dashboard/company/:companySlug"
+          element={
+            <AppSidebarLayout
+              store={store}
+              onOpenMockModal={() => setShowMockModal(true)}
+              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+              onOpenPlanner={() => setShowPlannerModal(true)}
+              onOpenFlashcards={() => setShowFlashcardModal(true)}
+              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+              onSearchFocus={() => {
+                const searchInput = document.querySelector('input[placeholder*="filter query"]') as HTMLInputElement;
+                if (searchInput) searchInput.focus();
+              }}
+              hideTopBar={true}
+            >
+              <DashboardView
+                allQuestions={allQuestions}
+                isLoading={isLoading}
+                error={error}
+                store={store}
+                updateStore={updateStore}
+                handleUpdateStatus={handleUpdateStatus}
+                handleToggleFavorite={handleToggleFavorite}
+                handleRandomRoulette={handleRandomRoulette}
+                setShowOverlapModal={setShowOverlapModal}
+                setShowMockModal={setShowMockModal}
+                setShowAnalyticsModal={setShowAnalyticsModal}
+                setShowShortcutsModal={setShowShortcutsModal}
+                setShowPlannerModal={setShowPlannerModal}
+                setShowFlashcardModal={setShowFlashcardModal}
+                setShowLeetCodeSyncModal={setShowLeetCodeSyncModal}
+                focusedIndex={focusedIndex}
+                setFocusedIndex={setFocusedIndex}
+                setHotkeysQuestions={setHotkeysQuestions}
+                onNavigateOverview={() => navigate('/overview')}
+              />
+            </AppSidebarLayout>
+          }
+        />
+
+        {/* Dedicated Problem Workspace */}
+        <Route
+          path="/problem/:problemId"
+          element={
+            <ProblemRouteView
+              allQuestions={allQuestions}
+              isLoading={isLoading}
+              store={store}
+              onSaveProgressPatch={handleSaveProgressPatch}
+            />
+          }
+        />
+
+        {/* Catch-all redirect to Landing */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+
+      {/* Global Modals */}
       {detailQuestion && (
         <QuestionDetailModal
           question={detailQuestion}
@@ -878,18 +1348,16 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* Company Overlap Matrix Modal */}
       {showOverlapModal && (
         <CompanyOverlapModal
           questions={allQuestions}
           companies={companiesDict}
           progress={store.progress}
           onClose={() => setShowOverlapModal(false)}
-          onSelectQuestion={(q) => handleOpenProblem(q)}
+          onSelectQuestion={(q) => navigate(`/problem/${q.id}`)}
         />
       )}
 
-      {/* Mock Interview Simulation Modal */}
       {showMockModal && (
         <MockInterviewModal
           company={store.selectedCompany}
@@ -900,17 +1368,13 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* Analytics & Heatmap Modal */}
       {showAnalyticsModal && (
         <AnalyticsModal
           state={store}
           questions={allQuestions}
           companies={companiesDict}
           onClose={() => setShowAnalyticsModal(false)}
-          onImportBackup={(imported) => {
-            setStore(imported);
-            saveStoredState(imported);
-          }}
+          onImportBackup={handleImportBackup}
           onLoadDemoData={() => {
             const demo = generateDemoProgress(allQuestions);
             setStore((prev) => ({
@@ -920,37 +1384,29 @@ export const App: React.FC = () => {
             }));
             sounds.playSuccess();
           }}
-          onResetProgress={() => {
-            setStore((prev) => ({
-              ...prev,
-              progress: {},
-              activityLog: {},
-            }));
-            sounds.playClick();
-          }}
+          onResetProgress={handleResetProgress}
         />
       )}
 
-      {/* Keyboard Shortcuts Modal */}
       {showShortcutsModal && (
         <KeyboardHelpModal onClose={() => setShowShortcutsModal(false)} />
       )}
 
-      {/* SaaS Authentication & Subscription Modals */}
-      <AuthModal />
+      <AuthModal onSuccess={() => navigate('/overview')} />
       <SubscriptionModal />
 
-      {/* Company Prep Milestone Planner Modal */}
       <PrepPlannerModal
         isOpen={showPlannerModal}
         onClose={() => setShowPlannerModal(false)}
         companies={companiesDict}
         allQuestions={allQuestions}
         progress={store.progress}
-        onSelectCompany={(cId) => updateStore({ selectedCompany: cId })}
+        onSelectCompany={(cId) => {
+          updateStore({ selectedCompany: cId });
+          navigate(`/dashboard/company/${cId}`);
+        }}
       />
 
-      {/* Anki Flashcard Active Recall Trainer Modal */}
       <FlashcardModal
         isOpen={showFlashcardModal}
         onClose={() => setShowFlashcardModal(false)}
@@ -959,7 +1415,6 @@ export const App: React.FC = () => {
         onUpdateStatus={handleUpdateStatus}
       />
 
-      {/* LeetCode Public Profile Auto-Sync Modal */}
       <LeetCodeSyncModal
         isOpen={showLeetCodeSyncModal}
         onClose={() => setShowLeetCodeSyncModal(false)}

@@ -79,13 +79,13 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
         {/* Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500/20 to-indigo-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#E5FF00]/20 to-[#E5FF00]/5 border border-[#E5FF00]/30 flex items-center justify-center text-[#E5FF00]">
               <Target className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-base text-white">Company Interview Pacing Planner</h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/20 text-primary border border-primary/40">
                   FAANG Milestone Engine
                 </span>
               </div>
@@ -115,7 +115,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
               <select
                 value={selectedCompany}
                 onChange={(e) => setSelectedCompany(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white capitalize focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white capitalize focus:outline-none focus:border-borderActive"
               >
                 {Object.keys(companies).slice(0, 50).map((cid) => (
                   <option key={cid} value={cid}>
@@ -134,7 +134,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
                 type="date"
                 value={targetDate}
                 onChange={(e) => setTargetDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-borderActive"
               />
             </div>
 
@@ -150,7 +150,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
                   max={15}
                   value={dailyQuota}
                   onChange={(e) => setDailyQuota(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-borderActive"
                 />
                 <span className="text-xs text-slate-400 shrink-0">q/day</span>
               </div>
@@ -163,7 +163,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Days Remaining
               </span>
-              <span className="text-2xl font-black text-amber-400">
+              <span className="text-2xl font-black text-medium">
                 {diffDays}d
               </span>
             </div>
@@ -171,7 +171,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Total Problems
               </span>
-              <span className="text-2xl font-black text-indigo-400">
+              <span className="text-2xl font-black text-primary">
                 {totalPlannedProblems}
               </span>
             </div>
@@ -179,7 +179,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 Estimated Hours
               </span>
-              <span className="text-2xl font-black text-emerald-400">
+              <span className="text-2xl font-black text-primary">
                 {Math.round(totalPlannedProblems * 0.5)}h
               </span>
             </div>
@@ -188,7 +188,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
           {/* 4-Phase Milestone Timeline */}
           <div>
             <h4 className="text-xs font-extrabold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
               <span>Recommended 4-Phase Preparation Schedule</span>
             </h4>
 
@@ -196,7 +196,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
               {/* Phase 1 */}
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-amber-400">
+                  <span className="text-xs font-bold text-medium">
                     Phase 1: 30-Day Hot Recency Sprint (Days 1–{Math.max(2, Math.round(diffDays * 0.25))})
                   </span>
                   <span className="text-[10px] font-semibold text-slate-400">
@@ -211,7 +211,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
               {/* Phase 2 */}
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-indigo-400">
+                  <span className="text-xs font-bold text-primary">
                     Phase 2: 3-Month Core Foundation & Deep Patterns (Days {Math.max(3, Math.round(diffDays * 0.25) + 1)}–{Math.round(diffDays * 0.6)})
                   </span>
                   <span className="text-[10px] font-semibold text-slate-400">
@@ -226,7 +226,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
               {/* Phase 3 */}
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-emerald-400">
+                  <span className="text-xs font-bold text-primary">
                     Phase 3: Cross-Company Overlap Matrix (Days {Math.round(diffDays * 0.6) + 1}–{Math.round(diffDays * 0.85)})
                   </span>
                   <span className="text-[10px] font-semibold text-slate-400">
@@ -241,7 +241,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
               {/* Phase 4 */}
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-rose-400">
+                  <span className="text-xs font-bold text-hard">
                     Phase 4: Speed Drills & 45-Min Mock Crucible (Days {Math.round(diffDays * 0.85) + 1}–{diffDays})
                   </span>
                   <span className="text-[10px] font-semibold text-slate-400">
@@ -264,11 +264,11 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
 
           <button
             onClick={handleSavePlan}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-black font-bold hover:bg-primary text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
           >
             {savedSuccess ? (
               <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                <CheckCircle2 className="w-4 h-4 text-primary" />
                 <span>Plan Saved to Profile!</span>
               </>
             ) : (

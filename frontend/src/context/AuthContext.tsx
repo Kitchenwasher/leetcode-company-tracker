@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { User, UserTier } from '../types/auth';
 import { authApi } from '../api/authApi';
 import { paymentApi } from '../api/paymentApi';
-import { getStoredAccessToken } from '../api/client';
+import { api, getStoredAccessToken, setStoredAccessToken } from '../api/client';
 
 interface AuthContextType {
   user: User;
@@ -68,23 +68,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState<boolean>(false);
 
-  // Restore session from backend on initial mount
+  // Restore session on initial mount
   useEffect(() => {
     const restoreSession = async () => {
+      // 1. Try stored access token
       const token = getStoredAccessToken();
       if (token) {
         try {
           const res = await authApi.getMe();
           if (res?.user) {
             setCurrentUser(res.user);
+            return;
           }
         } catch {
-          // Token expired or invalid
+          // Token expired or invalid, fall through to refresh
+        }
+      }
+
+      // 2. Attempt silent refresh using HttpOnly cookie
+      try {
+        const { data } = await api.post<{ accessToken: string; user: User }>('/auth/refresh');
+        if (data?.accessToken && data?.user) {
+          setStoredAccessToken(data.accessToken);
+          setCurrentUser(data.user);
+          return;
+        }
+      } catch {
+        // No active refresh session
+      }
+
+      // 3. Fallback for client-side demo account persistence
+      const savedUserId = localStorage.getItem('srmcode_current_user_id');
+      if (savedUserId) {
+        const found = usersList.find((u) => u.id === savedUserId);
+        if (found) {
+          setCurrentUser(found);
         }
       }
     };
     restoreSession();
-  }, []);
+  }, [usersList]);
+
+  // Persist current active user ID for client-side refresh resilience
+  useEffect(() => {
+    if (currentUser && currentUser.id !== 'guest') {
+      localStorage.setItem('srmcode_current_user_id', currentUser.id);
+    } else {
+      localStorage.removeItem('srmcode_current_user_id');
+    }
+  }, [currentUser]);
 
   const login = async (email: string, password: string = 'password123'): Promise<boolean> => {
     try {
@@ -139,6 +171,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginAsGuest = () => {
+    localStorage.removeItem('srmcode_current_user_id');
+    setStoredAccessToken(null);
     setCurrentUser(GUEST_USER);
     setShowAuthModal(false);
   };
@@ -147,6 +181,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authApi.logout();
     } catch {}
+    localStorage.removeItem('srmcode_current_user_id');
+    setStoredAccessToken(null);
     setCurrentUser(GUEST_USER);
   };
 
@@ -154,6 +190,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const target = usersList.find((u) => u.id === userId);
     if (target) {
       setCurrentUser(target);
+      localStorage.setItem('srmcode_current_user_id', target.id);
       // Attempt backend login for demo accounts
       authApi.login(target.email, 'password123').catch(() => {});
     }

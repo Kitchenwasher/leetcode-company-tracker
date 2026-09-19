@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Question, UserProgressItem, CompanyMeta, UserStoreState } from '../types';
-import { X, BarChart3, Flame, Award, Calendar, CheckCircle2, Download, Upload, RefreshCw, Trash2 } from 'lucide-react';
-import { calculateStreaks, exportBackupJSON, generateDemoProgress } from '../services/storage';
+import { X, BarChart3, Flame, Award, Calendar, CheckCircle2, Download, Upload, RefreshCw, Trash2, Sparkles, Target } from 'lucide-react';
+import { calculateStreaks, exportBackupJSON } from '../services/storage';
 import { sounds } from '../utils/sound';
 
 interface AnalyticsModalProps {
@@ -61,21 +61,21 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
         solvedInCompany++;
       }
     });
-    const pct = targetQ.length > 0 ? (solvedInCompany / targetQ.length) * 100 : 0;
+    const total = targetQ.length || 1;
     return {
-      total: targetQ.length,
       solved: solvedInCompany,
-      percentage: pct.toFixed(1),
+      total: targetQ.length,
+      percentage: Math.round((solvedInCompany / total) * 100),
     };
   }, [questions, progress, selectedCompany]);
 
-  // Generate 52-week activity grid data (364 days)
+  // 52-week activity cells
   const heatmapData = useMemo(() => {
-    const cells = [];
+    const cells: { date: string; count: number }[] = [];
+    const totalDays = 52 * 7;
     const today = new Date();
-    const daysToShow = 52 * 7; // 364 days
 
-    for (let i = daysToShow - 1; i >= 0; i--) {
+    for (let i = totalDays - 1; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const y = d.getFullYear();
@@ -108,114 +108,120 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
   };
 
   const getHeatColor = (count: number) => {
-    if (count === 0) return 'bg-slate-800/80';
-    if (count === 1) return 'bg-emerald-900 border border-emerald-700/50';
-    if (count === 2) return 'bg-emerald-700 border border-emerald-600/60';
-    if (count <= 4) return 'bg-emerald-500 border border-emerald-400/80';
-    return 'bg-emerald-400 border border-white/60';
+    if (count === 0) return 'bg-white/[0.04] border border-white/[0.04]';
+    if (count === 1) return 'bg-primary/20 border border-primary/30';
+    if (count === 2) return 'bg-primary/45 border border-primary/55';
+    if (count <= 4) return 'bg-primary/75 border border-primary';
+    return 'bg-primary border border-primary shadow-sm shadow-primary/30';
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in font-sans">
+      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-[#0E1217] border border-white/[0.1] rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
-              <BarChart3 className="w-5 h-5" />
-            </div>
+        <div className="p-4 sm:p-5 border-b border-white/[0.06] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">Analytics & Preparation Metrics</h2>
-              <p className="text-xs text-slate-400">Track interview readiness, solve velocity, and consistency streaks</p>
+              <h2 className="text-sm sm:text-base font-bold text-white">
+                Analytics &amp; Performance Telemetry
+              </h2>
+              <p className="text-xs text-textSecondary mt-0.5">
+                Interview readiness index, solve velocity, and consistency streaks
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white"
+            className="p-1.5 rounded-lg text-textMuted hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer"
+            title="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* Top Metrics Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
             {/* Total Solved */}
-            <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
-              <span className="text-xs text-slate-400 font-medium">Total Solved</span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-bold font-mono text-emerald-400">{stats.totalSolved}</span>
-                <span className="text-xs text-slate-500">/ {questions.length}</span>
+            <div className="p-4 rounded-xl bg-[#12161E] border border-white/[0.06]">
+              <span className="text-xs text-textMuted font-medium uppercase tracking-wider block">Total Solved</span>
+              <div className="flex items-baseline gap-1.5 mt-1.5">
+                <span className="text-3xl font-bold font-mono text-primary">{stats.totalSolved}</span>
+                <span className="text-xs text-textMuted font-mono">/ {questions.length}</span>
               </div>
-              <div className="text-[11px] text-slate-400 mt-1">
-                {stats.mastered} mastered, {stats.dueReview} due review
+              <div className="text-xs text-textSecondary mt-1">
+                {stats.mastered} mastered • {stats.dueReview} review
               </div>
             </div>
 
             {/* Target Company Readiness */}
-            <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
-              <span className="text-xs text-slate-400 font-medium capitalize">
+            <div className="p-4 rounded-xl bg-[#12161E] border border-white/[0.06]">
+              <span className="text-xs text-textMuted font-medium uppercase tracking-wider truncate block">
                 {companies[selectedCompany]?.name || selectedCompany} Prep
               </span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-bold font-mono text-indigo-400">{companyProgress.percentage}%</span>
-                <span className="text-xs text-slate-500">
+              <div className="flex items-baseline gap-1.5 mt-1.5">
+                <span className="text-3xl font-bold font-mono text-white">{companyProgress.percentage}%</span>
+                <span className="text-xs text-textMuted font-mono">
                   ({companyProgress.solved}/{companyProgress.total})
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+              <div className="w-full h-1.5 bg-white/[0.06] rounded-full mt-2.5 overflow-hidden">
                 <div
-                  className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+                  className="h-full bg-primary rounded-full transition-all duration-500"
                   style={{ width: `${companyProgress.percentage}%` }}
                 />
               </div>
             </div>
 
             {/* Current Streak */}
-            <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
-              <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                Current Streak
+            <div className="p-4 rounded-xl bg-[#12161E] border border-white/[0.06]">
+              <span className="text-xs text-textMuted font-medium uppercase tracking-wider flex items-center gap-1.5">
+                <Flame className="w-3.5 h-3.5 text-primary fill-primary" />
+                <span>Streak</span>
               </span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-bold font-mono text-amber-400">{currentStreak}</span>
-                <span className="text-xs text-slate-500">days</span>
+              <div className="flex items-baseline gap-1.5 mt-1.5">
+                <span className="text-3xl font-bold font-mono text-primary">{currentStreak}</span>
+                <span className="text-xs text-textMuted font-mono">days</span>
               </div>
-              <div className="text-[11px] text-slate-400 mt-1">
-                Longest: {longestStreak} days
+              <div className="text-xs text-textSecondary mt-1 font-mono">
+                Peak: {longestStreak} days
               </div>
             </div>
 
             {/* Daily Goal */}
-            <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
-              <span className="text-xs text-slate-400 font-medium">Daily Target</span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-bold font-mono text-white">{state.dailyGoal}</span>
-                <span className="text-xs text-slate-500">problems / day</span>
+            <div className="p-4 rounded-xl bg-[#12161E] border border-white/[0.06]">
+              <span className="text-xs text-textMuted font-medium uppercase tracking-wider flex items-center gap-1.5">
+                <Target className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Daily Target</span>
+              </span>
+              <div className="flex items-baseline gap-1.5 mt-1.5">
+                <span className="text-3xl font-bold font-mono text-emerald-400">{state.dailyGoal}</span>
+                <span className="text-xs text-textMuted font-mono">problems</span>
               </div>
-              <div className="text-[11px] text-emerald-400 mt-1">
-                Keep the momentum going!
+              <div className="text-xs text-emerald-400/80 mt-1">
+                Cadence Active
               </div>
             </div>
           </div>
 
           {/* Difficulty Breakdown Progress Bars */}
-          <div className="p-5 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-3">
-            <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+          <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06] space-y-3.5">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
               Solved by Difficulty Breakdown
             </h3>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {/* Easy */}
               <div>
-                <div className="flex items-center justify-between text-xs mb-1">
+                <div className="flex items-center justify-between text-xs mb-1.5">
                   <span className="font-semibold text-emerald-400">Easy ({stats.easy})</span>
-                  <span className="font-mono text-slate-400">
+                  <span className="font-mono text-textMuted text-xs">
                     {stats.totalSolved > 0 ? ((stats.easy / stats.totalSolved) * 100).toFixed(0) : 0}% of solved
                   </span>
                 </div>
-                <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
                     className="h-full bg-emerald-500 rounded-full"
                     style={{ width: `${stats.totalSolved > 0 ? (stats.easy / stats.totalSolved) * 100 : 0}%` }}
@@ -225,15 +231,15 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
 
               {/* Medium */}
               <div>
-                <div className="flex items-center justify-between text-xs mb-1">
+                <div className="flex items-center justify-between text-xs mb-1.5">
                   <span className="font-semibold text-amber-400">Medium ({stats.medium})</span>
-                  <span className="font-mono text-slate-400">
+                  <span className="font-mono text-textMuted text-xs">
                     {stats.totalSolved > 0 ? ((stats.medium / stats.totalSolved) * 100).toFixed(0) : 0}% of solved
                   </span>
                 </div>
-                <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
-                    className="h-full bg-amber-500 rounded-full"
+                    className="h-full bg-amber-400 rounded-full"
                     style={{ width: `${stats.totalSolved > 0 ? (stats.medium / stats.totalSolved) * 100 : 0}%` }}
                   />
                 </div>
@@ -241,13 +247,13 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
 
               {/* Hard */}
               <div>
-                <div className="flex items-center justify-between text-xs mb-1">
+                <div className="flex items-center justify-between text-xs mb-1.5">
                   <span className="font-semibold text-rose-400">Hard ({stats.hard})</span>
-                  <span className="font-mono text-slate-400">
+                  <span className="font-mono text-textMuted text-xs">
                     {stats.totalSolved > 0 ? ((stats.hard / stats.totalSolved) * 100).toFixed(0) : 0}% of solved
                   </span>
                 </div>
-                <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
                     className="h-full bg-rose-500 rounded-full"
                     style={{ width: `${stats.totalSolved > 0 ? (stats.hard / stats.totalSolved) * 100 : 0}%` }}
@@ -258,19 +264,19 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
           </div>
 
           {/* Activity Heatmap */}
-          <div className="p-5 rounded-2xl bg-slate-950/40 border border-slate-800">
+          <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06]">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-indigo-400" />
-                Activity Consistency Heatmap (Last 52 Weeks)
+              <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-primary" />
+                <span>Activity Consistency Heatmap (52 Weeks)</span>
               </h3>
-              <div className="flex items-center gap-1 text-[11px] text-slate-400">
+              <div className="flex items-center gap-1 text-[11px] text-textMuted font-mono">
                 <span>Less</span>
-                <span className="w-2.5 h-2.5 rounded-xs bg-slate-800" />
-                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-900" />
-                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-700" />
-                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
-                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-400" />
+                <span className="w-2.5 h-2.5 rounded-xs bg-white/[0.04]" />
+                <span className="w-2.5 h-2.5 rounded-xs bg-primary/20" />
+                <span className="w-2.5 h-2.5 rounded-xs bg-primary/50" />
+                <span className="w-2.5 h-2.5 rounded-xs bg-primary/80" />
+                <span className="w-2.5 h-2.5 rounded-xs bg-primary" />
                 <span>More</span>
               </div>
             </div>
@@ -292,10 +298,10 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
           </div>
 
           {/* Backup, Restore & Demo Data Management */}
-          <div className="p-4 rounded-xl bg-slate-950/30 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-[#12161E]/40 border border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h4 className="text-xs font-semibold text-slate-200">Data Management & Backup</h4>
-              <p className="text-[11px] text-slate-400">Export your solved questions and notes, or restore from a previous JSON backup.</p>
+              <h4 className="text-xs font-semibold text-white">Data Management &amp; Backup</h4>
+              <p className="text-xs text-textMuted mt-0.5">Export progress JSON or load demo telemetry.</p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -306,26 +312,26 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
                     onLoadDemoData();
                   }
                 }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200"
-                title="Populate 35 demo solved problems"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-medium text-textSecondary hover:text-white transition-colors border border-white/[0.06] cursor-pointer"
+                title="Populate demo solved problems"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
-                Load Demo Data
+                <RefreshCw className="w-3.5 h-3.5 text-primary" />
+                <span>Demo Data</span>
               </button>
 
               {/* Export JSON */}
               <button
                 onClick={() => exportBackupJSON(state)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-medium text-textSecondary hover:text-white transition-colors border border-white/[0.06] cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5 text-emerald-400" />
-                Export JSON
+                <Download className="w-3.5 h-3.5 text-primary" />
+                <span>Export JSON</span>
               </button>
 
               {/* Import JSON */}
-              <label className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 cursor-pointer">
-                <Upload className="w-3.5 h-3.5 text-blue-400" />
-                Import JSON
+              <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-medium text-textSecondary hover:text-white transition-colors border border-white/[0.06] cursor-pointer">
+                <Upload className="w-3.5 h-3.5 text-primary" />
+                <span>Restore</span>
                 <input type="file" accept=".json" onChange={handleFileUpload} className="hidden" />
               </label>
 
@@ -336,7 +342,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
                     onResetProgress();
                   }
                 }}
-                className="flex items-center gap-1 p-2 rounded-xl bg-rose-950/30 hover:bg-rose-900/40 text-rose-400 border border-rose-800/40"
+                className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 cursor-pointer"
                 title="Reset All Progress"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -346,15 +352,17 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-slate-800 bg-slate-950/70 flex items-center justify-end px-5">
+        <div className="p-4 border-t border-white/[0.06] bg-[#0E1217] flex items-center justify-end px-5">
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+            className="px-4 py-2 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-semibold cursor-pointer font-sans"
           >
-            Close
+            Close Analytics
           </button>
         </div>
       </div>
     </div>
   );
 };
+
+export default AnalyticsModal;

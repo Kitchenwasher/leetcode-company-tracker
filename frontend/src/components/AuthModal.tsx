@@ -6,7 +6,11 @@ import {
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 
-export const AuthModal: React.FC = () => {
+interface AuthModalProps {
+  onSuccess?: () => void;
+}
+
+export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
   const { showAuthModal, setShowAuthModal, login, signup, loginAsGuest, usersList, switchUser } = useAuth();
   const [tab, setTab] = useState<'signin' | 'signup'>('signin');
   const [name, setName] = useState('');
@@ -39,6 +43,8 @@ export const AuthModal: React.FC = () => {
         await signup(name, email, password, targetCompany);
       }
       sounds.playSuccess();
+      setShowAuthModal(false);
+      onSuccess?.();
     } catch (err) {
       setError('Authentication failed. Please try again.');
     } finally {
@@ -50,59 +56,62 @@ export const AuthModal: React.FC = () => {
     sounds.playSuccess();
     switchUser(userId);
     setShowAuthModal(false);
+    onSuccess?.();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-indigo-950/40 overflow-hidden">
-        {/* Top Gradient Banner */}
-        <div className="h-2 bg-gradient-to-r from-amber-500 via-indigo-600 to-emerald-500" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in font-mono">
+      <div className="relative w-full max-w-md terminal-panel shadow-2xl overflow-hidden">
+        {/* Terminal Header */}
+        <div className="p-3 border-b border-border bg-surface flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <h3 className="font-bold text-primary text-xs uppercase tracking-wider">
+              &gt; AUTH_TERMINAL.sys
+            </h3>
+          </div>
+          <button
+            onClick={() => setShowAuthModal(false)}
+            className="px-2 py-0.5 rounded-[2px] bg-surfaceElevated hover:bg-border text-textMuted hover:text-primary text-xs font-mono"
+          >
+            [ESC]
+          </button>
+        </div>
 
-        {/* Close Button */}
-        <button
-          onClick={() => setShowAuthModal(false)}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="p-6 sm:p-8">
+        <div className="p-5 sm:p-6">
           {/* Header */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 border border-indigo-500/30 text-indigo-400 mb-3 shadow-inner">
-              <Sparkles className="w-6 h-6 text-indigo-400" />
-            </div>
-            <h2 className="text-xl font-bold text-white tracking-tight">
-              {tab === 'signin' ? 'Welcome Back to LeetTracker' : 'Create Your SaaS Account'}
+          <div className="text-center mb-5">
+            <h2 className="text-base font-bold text-primary uppercase tracking-wide">
+              &gt; {tab === 'signin' ? 'AUTHENTICATE_SESSION' : 'REGISTER_NEW_OPERATOR'}
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Sync your progress, notes, whiteboard drawings, and interview roadmap
+            <p className="text-[11px] text-textMuted mt-1">
+              Sync problem states, interview simulations, and prep telemetry
             </p>
           </div>
 
           {/* Quick Demo Logins Banner */}
-          <div className="mb-5 p-3 rounded-xl bg-slate-950/70 border border-indigo-500/20">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-300 mb-2">
-              <span className="flex items-center gap-1.5 text-indigo-300">
-                <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-                Quick 1-Click Demo Accounts:
+          <div className="mb-4 p-2.5 rounded-[2px] bg-surface border border-border">
+            <div className="flex items-center justify-between text-[11px] font-bold text-textMuted uppercase mb-2">
+              <span className="flex items-center gap-1.5 text-textSecondary">
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                &gt; DEMO_ACCOUNTS (1-CLICK):
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleDemoLogin('user_alex_pro')}
-                className="flex items-center gap-2 p-2 rounded-lg bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-500/30 text-left transition-all group"
+                className="flex items-center gap-2 p-2 rounded-[2px] bg-surfaceElevated hover:bg-border border border-border hover:border-primary text-left transition-all group"
               >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-400 to-indigo-500 flex items-center justify-center text-[10px] font-bold text-slate-950">
+                <div className="w-6 h-6 rounded-[2px] bg-primary text-black flex items-center justify-center text-[10px] font-bold font-mono">
                   AC
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-[11px] font-bold text-white group-hover:text-indigo-300 truncate">
+                  <div className="text-[11px] font-bold text-textPrimary group-hover:text-primary truncate">
                     Alex Chen
                   </div>
-                  <div className="text-[9px] text-amber-400 font-semibold uppercase tracking-wider">
-                    PRO Account
+                  <div className="text-[9px] text-primary font-bold uppercase tracking-wider">
+                    [PRO_ACCOUNT]
                   </div>
                 </div>
               </button>
@@ -110,17 +119,17 @@ export const AuthModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleDemoLogin('user_sarah_free')}
-                className="flex items-center gap-2 p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/50 text-left transition-all group"
+                className="flex items-center gap-2 p-2 rounded-[2px] bg-surfaceElevated hover:bg-border border border-border hover:border-textMuted text-left transition-all group"
               >
-                <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-white">
+                <div className="w-6 h-6 rounded-[2px] bg-border text-textSecondary flex items-center justify-center text-[10px] font-bold font-mono">
                   SL
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-[11px] font-bold text-white group-hover:text-indigo-300 truncate">
+                  <div className="text-[11px] font-bold text-textPrimary group-hover:text-textSecondary truncate">
                     Sarah Lin
                   </div>
-                  <div className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">
-                    Free Account
+                  <div className="text-[9px] text-textMuted font-bold uppercase tracking-wider">
+                    [FREE_TIER]
                   </div>
                 </div>
               </button>
@@ -128,117 +137,117 @@ export const AuthModal: React.FC = () => {
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex rounded-xl bg-slate-950/80 p-1 border border-slate-800 mb-5">
+          <div className="flex rounded-[2px] bg-surface p-1 border border-border mb-4">
             <button
               type="button"
               onClick={() => { setTab('signin'); setError(null); }}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-1 text-xs font-bold rounded-[2px] transition-all flex items-center justify-center gap-1.5 ${
                 tab === 'signin'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-primary text-black shadow-terminal-glow'
+                  : 'text-textMuted hover:text-textPrimary'
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
-              Sign In
+              [ SIGN_IN ]
             </button>
             <button
               type="button"
               onClick={() => { setTab('signup'); setError(null); }}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-1 text-xs font-bold rounded-[2px] transition-all flex items-center justify-center gap-1.5 ${
                 tab === 'signup'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-primary text-black shadow-terminal-glow'
+                  : 'text-textMuted hover:text-textPrimary'
               }`}
             >
               <UserPlus className="w-3.5 h-3.5" />
-              Sign Up
+              [ REGISTER ]
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {error && (
-              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
-                {error}
+              <div className="p-2 rounded-[2px] bg-error/15 border border-error/40 text-error text-xs font-mono font-bold">
+                &gt; ERROR: {error}
               </div>
             )}
 
             {tab === 'signup' && (
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+                <label className="block text-[11px] font-bold text-textMuted uppercase mb-1">&gt; OPERATOR_NAME</label>
                 <div className="relative">
-                  <UserIcon className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                  <UserIcon className="w-3.5 h-3.5 text-textMuted absolute left-2.5 top-2.5" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. David Miller"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    className="w-full pl-8 pr-3 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary placeholder-textMuted focus:outline-none focus:border-borderActive focus:ring-1 focus:ring-borderActive"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+              <label className="block text-[11px] font-bold text-textMuted uppercase mb-1">&gt; EMAIL_ADDRESS</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                <Mail className="w-3.5 h-3.5 text-textMuted absolute left-2.5 top-2.5" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your.email@company.com"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  placeholder="operator@company.com"
+                  className="w-full pl-8 pr-3 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary placeholder-textMuted focus:outline-none focus:border-borderActive focus:ring-1 focus:ring-borderActive"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-medium text-slate-300">Password</label>
+                <label className="text-[11px] font-bold text-textMuted uppercase">&gt; PASSWORD</label>
                 {tab === 'signin' && (
-                  <span className="text-[11px] text-indigo-400 hover:underline cursor-pointer">
-                    Forgot?
+                  <span className="text-[10px] text-primaryDim hover:underline cursor-pointer">
+                    [RECOVER]
                   </span>
                 )}
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                <Lock className="w-3.5 h-3.5 text-textMuted absolute left-2.5 top-2.5" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-10 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full pl-8 pr-12 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary placeholder-textMuted focus:outline-none focus:border-borderActive focus:ring-1 focus:ring-borderActive"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-[10px] text-slate-400 hover:text-slate-200"
+                  className="absolute right-2.5 top-2 text-[10px] font-mono text-textMuted hover:text-primary"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? '[HIDE]' : '[SHOW]'}
                 </button>
               </div>
             </div>
 
             {tab === 'signup' && (
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Target Dream Company</label>
+                <label className="block text-[11px] font-bold text-textMuted uppercase mb-1">&gt; TARGET_COMPANY</label>
                 <select
                   value={targetCompany}
                   onChange={(e) => setTargetCompany(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full px-2.5 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary focus:outline-none focus:border-borderActive"
                 >
-                  <option value="google">Google</option>
-                  <option value="meta">Meta</option>
-                  <option value="amazon">Amazon</option>
-                  <option value="microsoft">Microsoft</option>
-                  <option value="apple">Apple</option>
-                  <option value="uber">Uber</option>
-                  <option value="bloomberg">Bloomberg</option>
+                  <option value="google">GOOGLE</option>
+                  <option value="meta">META</option>
+                  <option value="amazon">AMAZON</option>
+                  <option value="microsoft">MICROSOFT</option>
+                  <option value="apple">APPLE</option>
+                  <option value="uber">UBER</option>
+                  <option value="bloomberg">BLOOMBERG</option>
                 </select>
               </div>
             )}
@@ -246,58 +255,62 @@ export const AuthModal: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full mt-2 py-2 px-4 rounded-[2px] bg-primary hover:bg-primaryHover text-black text-xs font-bold font-mono shadow-terminal-glow flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
             >
-              <span>{tab === 'signin' ? 'Sign In' : 'Create Account'}</span>
+              <span>{tab === 'signin' ? '[ EXECUTE_LOGIN ]' : '[ EXECUTE_REGISTRATION ]'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>
 
           {/* Social Logins */}
-          <div className="relative my-5">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-800" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-[10px] uppercase">
-              <span className="bg-slate-900 px-2 text-slate-500 font-semibold tracking-wider">
-                Or continue with
+              <span className="bg-surface px-2 text-textMuted font-mono">
+                // OAUTH_BRIDGES
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 sounds.playSuccess();
-                login('google.user@gmail.com');
+                await login('google.user@gmail.com');
+                setShowAuthModal(false);
+                onSuccess?.();
               }}
-              className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-medium text-slate-300 hover:text-white transition-colors"
+              className="flex items-center justify-center gap-2 py-1.5 px-3 rounded-[2px] bg-surfaceElevated hover:bg-border border border-border hover:border-primaryDim text-xs font-bold font-mono text-textPrimary hover:text-primary transition-colors"
             >
-              <Globe className="w-3.5 h-3.5 text-rose-400" />
-              <span>Google</span>
+              <Globe className="w-3.5 h-3.5 text-medium" />
+              <span>[ GOOGLE ]</span>
             </button>
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 sounds.playSuccess();
-                login('github.coder@github.com');
+                await login('github.coder@github.com');
+                setShowAuthModal(false);
+                onSuccess?.();
               }}
-              className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-medium text-slate-300 hover:text-white transition-colors"
+              className="flex items-center justify-center gap-2 py-1.5 px-3 rounded-[2px] bg-surfaceElevated hover:bg-border border border-border hover:border-primaryDim text-xs font-bold font-mono text-textPrimary hover:text-primary transition-colors"
             >
-              <Code2 className="w-3.5 h-3.5 text-white" />
-              <span>GitHub</span>
+              <Code2 className="w-3.5 h-3.5 text-textPrimary" />
+              <span>[ GITHUB ]</span>
             </button>
           </div>
 
           {/* Guest Explorer */}
-          <div className="mt-5 text-center">
+          <div className="mt-4 text-center">
             <button
               type="button"
               onClick={loginAsGuest}
-              className="text-xs text-slate-400 hover:text-indigo-400 font-medium transition-colors"
+              className="text-xs text-textMuted hover:text-primary font-mono transition-colors"
             >
-              Continue as Guest Explorer →
+              &gt; CONTINUE_AS_GUEST_EXPLORER →
             </button>
           </div>
         </div>

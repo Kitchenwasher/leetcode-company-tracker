@@ -137,13 +137,13 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
         {/* Top Header */}
         <div className="p-4 sm:px-6 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-950/60">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-amber-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-[#E5FF00]/20 border border-border flex items-center justify-center text-primary">
               <Brain className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-sm text-white">Anki Flashcard Recall Trainer</h3>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-medium/20 text-medium border border-medium/40">
                   SRS Engine
                 </span>
               </div>
@@ -158,19 +158,19 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
             <div className="hidden sm:flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-xs font-semibold">
               <button
                 onClick={() => { setFilterMode('due'); setCurrentIndex(0); }}
-                className={`px-2 py-1 rounded-md ${filterMode === 'due' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-1 rounded-md ${filterMode === 'due' ? 'bg-primary text-black font-bold text-white' : 'text-slate-400 hover:text-white'}`}
               >
                 Due for Review
               </button>
               <button
                 onClick={() => { setFilterMode('solved'); setCurrentIndex(0); }}
-                className={`px-2 py-1 rounded-md ${filterMode === 'solved' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-1 rounded-md ${filterMode === 'solved' ? 'bg-primary text-black font-bold text-white' : 'text-slate-400 hover:text-white'}`}
               >
                 Solved Problems
               </button>
               <button
                 onClick={() => { setFilterMode('all'); setCurrentIndex(0); }}
-                className={`px-2 py-1 rounded-md ${filterMode === 'all' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-1 rounded-md ${filterMode === 'all' ? 'bg-primary text-black font-bold text-white' : 'text-slate-400 hover:text-white'}`}
               >
                 All Deck
               </button>
@@ -189,7 +189,7 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 flex flex-col justify-between">
           {flashcardQuestions.length === 0 ? (
             <div className="text-center py-16">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3 opacity-80" />
+              <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-3 opacity-80" />
               <h4 className="text-lg font-bold text-white">All Caught Up!</h4>
               <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
                 No questions are currently due for review under this filter. Try switching to "Solved Problems" or "All Deck".
@@ -200,16 +200,16 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
               {/* Question Meta Banner */}
               <div className="flex items-center justify-between gap-2 mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-indigo-400">
+                  <span className="font-mono text-xs font-bold text-primary">
                     #{currentQuestion.id}
                   </span>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
                       currentQuestion.difficulty === 'Easy'
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        ? 'bg-easy/10 text-easy border-easy/40'
                         : currentQuestion.difficulty === 'Medium'
-                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                        : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                        ? 'bg-medium/10 text-medium border-medium/40'
+                        : 'bg-hard/10 text-hard border-hard/40'
                     }`}
                   >
                     {currentQuestion.difficulty}
@@ -227,10 +227,10 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
               {/* Problem Title */}
               <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-4">
                 <a
-                  href={`#/problem/${currentQuestion.id}`}
+                  href={`/problem/${currentQuestion.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-indigo-400 hover:underline transition-colors"
+                  className="hover:text-primary hover:underline transition-colors"
                   title="Open dedicated Problem Workspace in new tab"
                 >
                   {currentQuestion.title}
@@ -253,7 +253,7 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
               {!isFlipped ? (
                 /* Card Front */
                 <div className="rounded-2xl bg-gradient-to-b from-slate-950/80 to-slate-900/90 border border-slate-800 p-6 sm:p-8 text-center flex flex-col items-center justify-center min-h-[260px] shadow-inner">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4 animate-pulse">
+                  <div className="w-12 h-12 rounded-2xl bg-surfaceElevated border border-border flex items-center justify-center text-primary mb-4 animate-pulse">
                     <Brain className="w-6 h-6" />
                   </div>
 
@@ -263,10 +263,10 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
                   <p className="text-xs text-slate-300 max-w-md leading-relaxed mb-6">
                     Before revealing the solution, ask yourself:
                     <br />
-                    <span className="text-amber-300 font-semibold block mt-1.5">
+                    <span className="text-medium font-semibold block mt-1.5">
                       1. What is the optimal algorithmic paradigm & invariant?
                     </span>
-                    <span className="text-indigo-300 font-semibold block">
+                    <span className="text-primary font-semibold block">
                       2. What are the tightest Time and Space complexity bounds?
                     </span>
                   </p>
@@ -276,7 +276,7 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
                       sounds.playClick();
                       setIsFlipped(true);
                     }}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-black font-bold hover:bg-primary text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
                   >
                     <Eye className="w-4 h-4" />
                     <span>Reveal Optimal C++ Solution & Theory</span>
@@ -285,11 +285,11 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
                 </div>
               ) : (
                 /* Card Back (Revealed) */
-                <div className="rounded-2xl bg-slate-950 border border-indigo-500/30 p-5 sm:p-6 shadow-2xl animate-fadeIn space-y-4">
+                <div className="rounded-2xl bg-slate-950 border border-border p-5 sm:p-6 shadow-2xl animate-fadeIn space-y-4">
                   {/* Theory & Invariant Banner */}
-                  <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/20">
-                    <div className="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                  <div className="p-3.5 rounded-xl bg-surfaceElevated border border-border">
+                    <div className="flex items-center gap-2 text-xs font-bold text-primary mb-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-primary" />
                       <span>Optimal Pattern & Invariant ({solution?.corePattern || 'Algorithm'})</span>
                     </div>
                     <p className="text-xs text-slate-300 leading-relaxed">
@@ -306,7 +306,7 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                           Time Complexity
                         </span>
-                        <span className="font-mono text-xs font-bold text-emerald-400">
+                        <span className="font-mono text-xs font-bold text-primary">
                           {optimalApproach.timeComplexity.complexity}
                         </span>
                       </div>
@@ -314,7 +314,7 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                           Space Complexity
                         </span>
-                        <span className="font-mono text-xs font-bold text-indigo-400">
+                        <span className="font-mono text-xs font-bold text-primary">
                           {optimalApproach.spaceComplexity.complexity}
                         </span>
                       </div>
@@ -326,14 +326,14 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
                     <div className="relative rounded-xl bg-slate-900/90 border border-slate-800 overflow-hidden">
                       <div className="px-3 py-1.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
                         <span className="flex items-center gap-1.5 text-slate-300 font-semibold">
-                          <Code2 className="w-3.5 h-3.5 text-indigo-400" />
+                          <Code2 className="w-3.5 h-3.5 text-primary" />
                           {optimalApproach.name}
                         </span>
                         <button
                           onClick={() => copyCode(optimalApproach.cppCode)}
-                          className="flex items-center gap-1 text-[11px] text-indigo-300 hover:text-white"
+                          className="flex items-center gap-1 text-[11px] text-primary hover:text-white"
                         >
-                          {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          {copied ? <Check className="w-3 h-3 text-primary" /> : <Copy className="w-3 h-3" />}
                           <span>{copied ? 'Copied' : 'Copy'}</span>
                         </button>
                       </div>
@@ -377,28 +377,28 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
               </span>
               <button
                 onClick={() => handleRate(1, 'review')}
-                className="px-2.5 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 text-xs font-bold transition-all shadow-xs"
+                className="px-2.5 py-1.5 rounded-xl bg-surfaceElevated hover:bg-surfaceElevated border border-hard/40 text-hard text-xs font-bold transition-all shadow-xs"
                 title="Forgot or struggled (+1 day)"
               >
                 🔴 Again (+1d) <span className="text-[10px] opacity-70">(1)</span>
               </button>
               <button
                 onClick={() => handleRate(3, 'in-progress')}
-                className="px-2.5 py-1.5 rounded-xl bg-amber-950/40 hover:bg-amber-900/60 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all shadow-xs"
+                className="px-2.5 py-1.5 rounded-xl bg-surfaceElevated hover:bg-surfaceElevated border border-medium/40 text-medium text-xs font-bold transition-all shadow-xs"
                 title="Recalled with effort (+3 days)"
               >
                 🟡 Hard (+3d) <span className="text-[10px] opacity-70">(2)</span>
               </button>
               <button
                 onClick={() => handleRate(7, 'solved')}
-                className="px-2.5 py-1.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition-all shadow-xs"
+                className="px-2.5 py-1.5 rounded-xl bg-surfaceElevated hover:bg-surfaceElevated border border-primary/40 text-primary text-xs font-bold transition-all shadow-xs"
                 title="Good recall (+7 days)"
               >
                 🟢 Good (+7d) <span className="text-[10px] opacity-70">(3)</span>
               </button>
               <button
                 onClick={() => handleRate(14, 'mastered')}
-                className="px-2.5 py-1.5 rounded-xl bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/40 text-indigo-300 text-xs font-bold transition-all shadow-xs"
+                className="px-2.5 py-1.5 rounded-xl bg-surfaceElevated hover:bg-surfaceElevated border border-border text-primary text-xs font-bold transition-all shadow-xs"
                 title="Instant mastery (+14 days)"
               >
                 🔵 Easy (+14d) <span className="text-[10px] opacity-70">(4)</span>

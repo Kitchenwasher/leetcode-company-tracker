@@ -16,7 +16,7 @@ export const TRACK_META: Record<CuratedTrack, TrackMeta> = {
     shortName: 'All',
     badge: 'ALL',
     description: 'All questions asked by the selected company',
-    color: 'indigo',
+    color: 'primary',
   },
   blind75: {
     id: 'blind75',
@@ -24,7 +24,7 @@ export const TRACK_META: Record<CuratedTrack, TrackMeta> = {
     shortName: 'Blind 75',
     badge: 'B75',
     description: 'The definitive 75 high-yield coding interview patterns',
-    color: 'amber',
+    color: 'primaryDim',
   },
   neetcode150: {
     id: 'neetcode150',
@@ -32,7 +32,7 @@ export const TRACK_META: Record<CuratedTrack, TrackMeta> = {
     shortName: 'NeetCode 150',
     badge: 'NC150',
     description: '150 topic-organized foundational and advanced problems',
-    color: 'emerald',
+    color: 'primary',
   },
   striver180: {
     id: 'striver180',
@@ -40,7 +40,7 @@ export const TRACK_META: Record<CuratedTrack, TrackMeta> = {
     shortName: 'Striver 180',
     badge: 'SDE180',
     description: 'Top Indian & Global Big Tech interview syllabus',
-    color: 'rose',
+    color: 'primaryDim',
   },
   grind75: {
     id: 'grind75',
@@ -48,7 +48,7 @@ export const TRACK_META: Record<CuratedTrack, TrackMeta> = {
     shortName: 'Grind 75',
     badge: 'G75',
     description: 'Time-optimized high ROI problem sequence',
-    color: 'cyan',
+    color: 'primaryHover',
   },
   sprint30: {
     id: 'sprint30',
@@ -56,7 +56,7 @@ export const TRACK_META: Record<CuratedTrack, TrackMeta> = {
     shortName: 'Hot 30',
     badge: 'HOT30',
     description: 'Top 30 most frequent recent interview questions',
-    color: 'amber',
+    color: 'primary',
   },
 };
 

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   User as UserIcon, Crown, LogOut, Settings, RefreshCw, ChevronDown,
-  Sparkles, ShieldCheck, Target, Calendar, CheckCircle2, UserPlus, LogIn
+  Sparkles, ShieldCheck, Target, Calendar, CheckCircle2, UserPlus, LogIn,
+  LayoutDashboard
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 
@@ -17,6 +19,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   onOpenFlashcards,
   onOpenLeetCodeSync,
 }) => {
+  const navigate = useNavigate();
   const {
     user,
     isAuthenticated,
@@ -55,23 +58,23 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           sounds.playClick();
           setShowAuthModal(true);
         }}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all cursor-pointer"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[2px] bg-primary hover:bg-primaryHover text-black text-xs font-mono font-bold shadow-terminal-glow transition-all cursor-pointer"
       >
         <LogIn className="w-3.5 h-3.5" />
-        <span>Sign In</span>
+        <span>[SIGN_IN]</span>
       </button>
     );
   }
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative font-mono" ref={menuRef}>
       {/* Trigger Button */}
       <button
         onClick={() => {
           sounds.playClick();
           setIsOpen(!isOpen);
         }}
-        className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-200 transition-all cursor-pointer shadow-xs group"
+        className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-[2px] bg-surface hover:bg-surfaceElevated border border-border text-textPrimary transition-all cursor-pointer shadow-xs group"
       >
         {/* Avatar */}
         <div className="relative">
@@ -79,43 +82,43 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             <img
               src={user.avatarUrl}
               alt={user.name}
-              className="w-7 h-7 rounded-lg object-cover ring-1 ring-slate-700"
+              className="w-6 h-6 rounded-[2px] object-cover ring-1 ring-border"
             />
           ) : (
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-amber-500 flex items-center justify-center text-xs font-bold text-white shadow-inner">
+            <div className="w-6 h-6 rounded-[2px] bg-surfaceElevated border border-primary/40 flex items-center justify-center text-[10px] font-bold text-primary font-mono">
               {getInitials(user.name)}
             </div>
           )}
 
           {isPro && (
-            <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-amber-400 flex items-center justify-center text-slate-950 ring-1 ring-slate-900" title="Pro Account">
-              <Crown className="w-2 h-2 fill-slate-950" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-[1px] bg-medium flex items-center justify-center text-black" title="Pro Account">
+              <Crown className="w-2 h-2 fill-black" />
             </div>
           )}
         </div>
 
         {/* Name and Tier */}
-        <div className="hidden xl:flex flex-col text-left">
-          <span className="text-xs font-bold text-white leading-tight truncate max-w-[90px]">
+        <div className="hidden xl:flex flex-col text-left font-mono">
+          <span className="text-xs font-bold text-textPrimary leading-tight truncate max-w-[90px]">
             {user.name}
           </span>
-          <span className="text-[9px] font-semibold text-amber-400 uppercase tracking-wider">
-            {isPro ? 'PRO Plan' : 'Free Tier'}
+          <span className="text-[9px] font-bold text-primary uppercase tracking-wider">
+            {isPro ? '[PRO]' : '[FREE]'}
           </span>
         </div>
 
-        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 text-textMuted transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-indigo-950/50 py-2 z-50 animate-fadeIn divide-y divide-slate-800/80">
+        <div className="absolute right-0 mt-2 w-64 rounded-[2px] terminal-panel shadow-2xl py-1 z-50 animate-fadeIn divide-y divide-border">
           {/* User Info Header */}
-          <div className="px-4 py-3">
+          <div className="px-3 py-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white truncate">{user.name}</span>
+              <span className="text-xs font-bold text-textPrimary truncate">{user.name}</span>
               {isPro ? (
-                <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-[1px] bg-surface text-medium border border-medium/40 flex items-center gap-1">
                   <Crown className="w-2.5 h-2.5" />
                   PRO
                 </span>
@@ -125,36 +128,60 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                     setIsOpen(false);
                     setShowSubscriptionModal(true);
                   }}
-                  className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/40 cursor-pointer"
+                  className="text-[10px] font-bold px-1.5 py-0.2 rounded-[1px] bg-primary text-black cursor-pointer"
                 >
-                  Upgrade
+                  [UPGRADE]
                 </button>
               )}
             </div>
-            <div className="text-[11px] text-slate-400 truncate mt-0.5">{user.email}</div>
+            <div className="text-[11px] text-textMuted truncate mt-0.5">&gt; {user.email}</div>
 
             {user.targetCompany && (
-              <div className="mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-300">
-                <span className="flex items-center gap-1 text-slate-400">
-                  <Target className="w-3 h-3 text-indigo-400" />
+              <div className="mt-2 pt-2 border-t border-border flex items-center justify-between text-[11px] text-textSecondary">
+                <span className="flex items-center gap-1 text-textMuted">
+                  <Target className="w-3 h-3 text-primary" />
                   Target:
                 </span>
-                <span className="font-semibold text-indigo-300 capitalize">{user.targetCompany}</span>
+                <span className="font-bold text-primary capitalize">[{user.targetCompany}]</span>
               </div>
             )}
           </div>
 
           {/* Quick SaaS Tool Links */}
-          <div className="p-1.5 space-y-0.5">
+          <div className="p-1 space-y-0.5">
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                sounds.playClick();
+                navigate('/overview');
+              }}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[2px] text-xs font-mono text-primary font-bold hover:bg-surfaceElevated transition-colors text-left"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-primary" />
+              <span>&gt; Overview Dashboard</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                sounds.playClick();
+                navigate('/settings');
+              }}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[2px] text-xs font-mono text-textSecondary hover:text-primary hover:bg-surfaceElevated transition-colors text-left"
+            >
+              <Settings className="w-3.5 h-3.5 text-textMuted" />
+              <span>&gt; Account Settings</span>
+            </button>
+
             <button
               onClick={() => {
                 setIsOpen(false);
                 onOpenPlanner();
               }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[2px] text-xs font-mono text-textSecondary hover:text-textPrimary hover:bg-surfaceElevated transition-colors text-left"
             >
-              <Calendar className="w-3.5 h-3.5 text-amber-400" />
-              <span>Company Prep Planner</span>
+              <Calendar className="w-3.5 h-3.5 text-medium" />
+              <span>&gt; Prep Planner</span>
             </button>
 
             <button
@@ -162,10 +189,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 setIsOpen(false);
                 onOpenFlashcards();
               }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[2px] text-xs font-mono text-textSecondary hover:text-textPrimary hover:bg-surfaceElevated transition-colors text-left"
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Anki Flashcard Recall</span>
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <span>&gt; Anki Flashcards</span>
             </button>
 
             <button
@@ -173,17 +200,17 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 setIsOpen(false);
                 onOpenLeetCodeSync();
               }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[2px] text-xs font-mono text-textSecondary hover:text-textPrimary hover:bg-surfaceElevated transition-colors text-left"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Sync LeetCode Profile</span>
+              <RefreshCw className="w-3.5 h-3.5 text-primary" />
+              <span>&gt; Sync Profile</span>
             </button>
           </div>
 
           {/* Switch Accounts Submenu */}
-          <div className="p-1.5">
-            <div className="px-3 py-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-              Switch Account
+          <div className="p-1">
+            <div className="px-2.5 py-1 text-[10px] font-bold text-textMuted uppercase tracking-wider">
+              &gt; SWITCH_USER
             </div>
             {usersList.map((u) => (
               <button
@@ -193,32 +220,32 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                   switchUser(u.id);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition-colors ${
+                className={`w-full flex items-center justify-between px-2.5 py-1 rounded-[2px] text-xs font-mono transition-colors ${
                   u.id === user.id
-                    ? 'bg-indigo-950/40 text-indigo-300 font-semibold border border-indigo-500/20'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-surfaceElevated text-primary font-bold border border-primary/30'
+                    : 'text-textMuted hover:text-textPrimary hover:bg-surfaceElevated'
                 }`}
               >
                 <span className="truncate">{u.name}</span>
-                <span className="text-[10px] uppercase font-bold text-slate-500">
-                  {u.tier}
+                <span className="text-[10px] uppercase font-mono text-textMuted">
+                  [{u.tier}]
                 </span>
               </button>
             ))}
           </div>
 
           {/* Footer Actions */}
-          <div className="p-1.5">
+          <div className="p-1">
             <button
               onClick={() => {
                 sounds.playClick();
                 logout();
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[2px] text-xs font-mono text-error hover:bg-surfaceElevated transition-colors text-left"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
+              <span>&gt; LOGOUT</span>
             </button>
           </div>
         </div>

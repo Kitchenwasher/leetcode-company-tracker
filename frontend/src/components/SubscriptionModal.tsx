@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  X, Check, Sparkles, Shield, Zap, Flame, Crown, CreditCard,
-  Gift, Award, ArrowRight
+  X, Check, Sparkles, Shield, Zap, Crown, CreditCard,
+  ArrowRight
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/sound';
 
 export const SubscriptionModal: React.FC = () => {
-  const { showSubscriptionModal, setShowSubscriptionModal, isPro, upgradeToPro, user } = useAuth();
+  const { showSubscriptionModal, setShowSubscriptionModal, isPro, upgradeToPro } = useAuth();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly' | 'lifetime'>('yearly');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -23,70 +23,77 @@ export const SubscriptionModal: React.FC = () => {
       confetti({
         particleCount: 100,
         spread: 70,
-        origin: { y: 0.6 }
+        origin: { y: 0.6 },
+        colors: ['#E5FF00', '#FFFFFF', '#D4ED00', '#F3F4F6']
       });
     }, 600);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-2xl rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-indigo-950/60 overflow-hidden">
-        {/* Top Glow Ribbon */}
-        <div className="h-2 bg-gradient-to-r from-amber-400 via-indigo-500 to-emerald-400" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in font-sans">
+      <div className="relative w-full max-w-2xl bg-[#0E1217] border border-white/[0.1] rounded-2xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="p-4 sm:p-5 border-b border-white/[0.06] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-primary" />
+            <h3 className="font-semibold text-white text-sm">
+              Upgrade to Cheat Code Pro
+            </h3>
+          </div>
+          <button
+            onClick={() => setShowSubscriptionModal(false)}
+            className="p-1.5 rounded-lg text-textMuted hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer"
+            title="Close modal"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
-        {/* Close Button */}
-        <button
-          onClick={() => setShowSubscriptionModal(false)}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="p-6 sm:p-8">
-          {/* Header */}
+        <div className="p-5 sm:p-7">
+          {/* Header Description */}
           <div className="text-center max-w-lg mx-auto mb-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-              <Crown className="w-3.5 h-3.5" />
-              LeetTracker Pro SaaS
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-2.5">
+              <Crown className="w-3.5 h-3.5 text-primary" />
+              <span>Full Platform Access</span>
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tight">
-              Supercharge Your FAANG Interview Prep
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              Supercharge Your Interview Readiness
             </h2>
-            <p className="text-xs text-slate-400 mt-1.5">
-              Unlock unlimited mock interviews, Anki active recall exports, interactive whiteboard canvas, and AI-optimized C++ sandbox execution.
+            <p className="text-xs sm:text-sm text-textSecondary mt-1.5">
+              Unlimited mock simulations, real company pacing roadmaps, exportable study cards, and live telemetry.
             </p>
 
             {/* Billing Cycle Switcher */}
-            <div className="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800 mt-5">
+            <div className="inline-flex rounded-xl bg-[#12161E] p-1 border border-white/[0.08] mt-4">
               <button
                 type="button"
                 onClick={() => setBillingCycle('monthly')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  billingCycle === 'monthly' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  billingCycle === 'monthly' ? 'bg-primary text-black shadow-md shadow-primary/20' : 'text-textSecondary hover:text-white'
                 }`}
               >
-                Monthly ($9/mo)
+                Monthly: $9/mo
               </button>
               <button
                 type="button"
                 onClick={() => setBillingCycle('yearly')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                  billingCycle === 'yearly' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  billingCycle === 'yearly' ? 'bg-primary text-black shadow-md shadow-primary/20' : 'text-textSecondary hover:text-white'
                 }`}
               >
-                <span>Yearly ($4.90/mo)</span>
-                <span className="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                  SAVE 45%
+                <span>Yearly: $4.90/mo</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${billingCycle === 'yearly' ? 'bg-black text-primary' : 'bg-primary/20 text-primary'}`}>
+                  Save 45%
                 </span>
               </button>
               <button
                 type="button"
                 onClick={() => setBillingCycle('lifetime')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  billingCycle === 'lifetime' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  billingCycle === 'lifetime' ? 'bg-primary text-black shadow-md shadow-primary/20' : 'text-textSecondary hover:text-white'
                 }`}
               >
-                Lifetime ($79)
+                Lifetime: $79
               </button>
             </div>
           </div>
@@ -94,53 +101,49 @@ export const SubscriptionModal: React.FC = () => {
           {/* Pricing Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Free Plan */}
-            <div className="rounded-xl bg-slate-950/60 border border-slate-800 p-5 flex flex-col justify-between">
+            <div className="rounded-xl bg-[#12161E]/60 border border-white/[0.06] p-5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-slate-300">Free Explorer</span>
+                  <span className="text-xs font-semibold text-textSecondary uppercase tracking-wider">Free Explorer</span>
                   {!isPro && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-slate-700">
-                      CURRENT PLAN
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/[0.04] text-textMuted border border-white/[0.06]">
+                      Current
                     </span>
                   )}
                 </div>
-                <div className="text-2xl font-black text-white mb-4">
-                  $0 <span className="text-xs font-normal text-slate-400">/ forever</span>
+                <div className="text-2xl font-bold font-mono text-white mb-4">
+                  $0 <span className="text-xs font-normal text-textMuted">/ forever</span>
                 </div>
 
-                <ul className="space-y-2.5 text-xs text-slate-300">
+                <ul className="space-y-2.5 text-xs text-textSecondary">
                   <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <span>Access all 659 companies & 3,399 questions</span>
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span>All 659 companies & 3,399 questions</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <span>Full C++ multi-approach solutions</span>
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span>Full algorithmic hints & approaches</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <span>Core Spaced Repetition (SRS) tracking</span>
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span>Local progress tracking</span>
                   </li>
-                  <li className="flex items-center gap-2 text-slate-500">
-                    <X className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                  <li className="flex items-center gap-2 text-textMuted">
+                    <X className="w-3.5 h-3.5 text-textMuted shrink-0" />
                     <span>Limited to 1 Mock Interview / day</span>
                   </li>
-                  <li className="flex items-center gap-2 text-slate-500">
-                    <X className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                    <span>No Anki Deck or Obsidian Export</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-slate-500">
-                    <X className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                    <span>No Whiteboard Canvas</span>
+                  <li className="flex items-center gap-2 text-textMuted">
+                    <X className="w-3.5 h-3.5 text-textMuted shrink-0" />
+                    <span>No Anki / Obsidian Exporters</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-800/80">
+              <div className="mt-6 pt-4 border-t border-white/[0.06]">
                 <button
                   type="button"
                   disabled
-                  className="w-full py-2 rounded-lg bg-slate-800/50 text-slate-500 text-xs font-semibold cursor-not-allowed text-center"
+                  className="w-full py-2 rounded-xl bg-white/[0.04] text-textMuted text-xs font-medium cursor-not-allowed text-center"
                 >
                   Included Free
                 </button>
@@ -148,82 +151,78 @@ export const SubscriptionModal: React.FC = () => {
             </div>
 
             {/* Pro Plan */}
-            <div className="relative rounded-xl bg-gradient-to-b from-indigo-950/60 to-slate-950/80 border-2 border-indigo-500/50 p-5 flex flex-col justify-between shadow-lg shadow-indigo-950/40">
-              <div className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-indigo-600 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-sm flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5" />
-                RECOMMENDED
+            <div className="relative rounded-xl bg-[#12161E] border-2 border-primary/50 p-5 flex flex-col justify-between shadow-lg shadow-primary/5">
+              <div className="absolute -top-2.5 right-4 px-2.5 py-0.5 rounded-full bg-primary text-black text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+                <Sparkles className="w-3 h-3" />
+                <span>Recommended</span>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-white flex items-center gap-1.5">
-                    <Crown className="w-4 h-4 text-amber-400" />
-                    Pro Candidate
+                  <span className="text-xs font-semibold text-primary flex items-center gap-1.5 uppercase tracking-wider">
+                    <Crown className="w-3.5 h-3.5 text-primary" />
+                    <span>Pro Candidate</span>
                   </span>
                   {isPro && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/40">
-                      ACTIVE
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-black">
+                      Active
                     </span>
                   )}
                 </div>
 
-                <div className="text-2xl font-black text-white mb-4">
+                <div className="text-2xl font-bold font-mono text-primary mb-4">
                   {billingCycle === 'monthly' && '$9 '}
                   {billingCycle === 'yearly' && '$4.90 '}
                   {billingCycle === 'lifetime' && '$79 '}
-                  <span className="text-xs font-normal text-slate-400">
+                  <span className="text-xs font-normal text-textMuted">
                     {billingCycle === 'monthly' && '/ month'}
-                    {billingCycle === 'yearly' && '/ mo ($59/yr)'}
-                    {billingCycle === 'lifetime' && '/ lifetime access'}
+                    {billingCycle === 'yearly' && '/ mo (billed $59/yr)'}
+                    {billingCycle === 'lifetime' && 'one-time'}
                   </span>
                 </div>
 
-                <ul className="space-y-2.5 text-xs text-slate-200">
+                <ul className="space-y-2.5 text-xs text-textPrimary">
                   <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span className="font-semibold text-white">Unlimited Timed Mock Interviews</span>
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="font-medium">Unlimited Timed Mock Interviews</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span className="font-semibold text-white">Anki Deck (.csv) & Obsidian (.md) Exporters</span>
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="font-medium">Anki Deck & CSV Exporters</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span className="font-semibold text-white">Interactive In-Browser Whiteboard Canvas</span>
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="font-medium">Interactive Whiteboard Workspace</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span className="font-semibold text-white">Company Prep Milestone Pacing Planner</span>
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="font-medium">Curated Tracks (Blind 75, NeetCode 150)</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span className="font-semibold text-white">Curated Roadmaps (Blind 75, NeetCode 150)</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>In-Browser C++ Code Runner Sandbox</span>
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span>Priority recency question indexing</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-indigo-900/60">
+              <div className="mt-6 pt-4 border-t border-white/[0.06]">
                 {isPro ? (
-                  <div className="text-center py-2 text-xs font-bold text-emerald-400 flex items-center justify-center gap-1.5">
+                  <div className="text-center py-2 text-xs font-bold text-primary flex items-center justify-center gap-1.5">
                     <Check className="w-4 h-4" />
-                    You are currently enjoying Pro benefits!
+                    <span>Pro Plan Active</span>
                   </div>
                 ) : (
                   <button
                     type="button"
                     onClick={handleUpgrade}
                     disabled={isProcessing}
-                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-indigo-700 hover:from-amber-400 hover:via-indigo-500 hover:to-indigo-600 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                    className="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 font-sans shadow-md shadow-primary/20"
                   >
                     {isProcessing ? (
                       <span>Activating Pro Plan...</span>
                     ) : (
                       <>
-                        <Crown className="w-3.5 h-3.5 text-amber-300" />
+                        <Crown className="w-3.5 h-3.5" />
                         <span>Upgrade to Pro Now</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </>
@@ -235,20 +234,20 @@ export const SubscriptionModal: React.FC = () => {
           </div>
 
           {/* Guarantee Footer */}
-          <div className="mt-6 flex items-center justify-center gap-4 text-[11px] text-slate-400">
-            <span className="flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5 text-indigo-400" />
-              14-Day Money Back Guarantee
+          <div className="mt-6 flex items-center justify-center gap-4 text-xs text-textMuted">
+            <span className="flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-primary" />
+              14-Day Money-Back Guarantee
             </span>
             <span>•</span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-amber-400" />
-              Instant Activation
+              Instant Access
             </span>
             <span>•</span>
-            <span className="flex items-center gap-1">
-              <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
-              Secure 256-Bit Checkout
+            <span className="flex items-center gap-1.5">
+              <CreditCard className="w-3.5 h-3.5 text-primary" />
+              Encrypted Checkout
             </span>
           </div>
         </div>
@@ -256,3 +255,5 @@ export const SubscriptionModal: React.FC = () => {
     </div>
   );
 };
+
+export default SubscriptionModal;

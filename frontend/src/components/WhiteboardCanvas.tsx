@@ -21,7 +21,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
   const { user } = useAuth();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tool, setTool] = useState<ToolMode>('pen');
-  const [color, setColor] = useState<string>('#818cf8'); // default indigo
+  const [color, setColor] = useState<string>('#E5FF00'); // default yellow
   const [lineWidth, setLineWidth] = useState<number>(3);
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [startX, setStartX] = useState<number>(0);
@@ -31,12 +31,13 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
   const [savedToast, setSavedToast] = useState<boolean>(false);
 
   const colors = [
-    { name: 'Indigo', value: '#818cf8' },
-    { name: 'Emerald', value: '#34d399' },
-    { name: 'Amber', value: '#fbbf24' },
-    { name: 'Rose', value: '#f87171' },
-    { name: 'White', value: '#f8fafc' },
-    { name: 'Cyan', value: '#38bdf8' },
+    { name: 'Cyber Yellow', value: '#E5FF00' },
+    { name: 'Neon Lime', value: '#D4ED00' },
+    { name: 'Amber Gold', value: '#F59E0B' },
+    { name: 'White', value: '#f0f0f0' },
+    { name: 'Light Grey', value: '#a0a0a0' },
+    { name: 'Dark Grey', value: '#666666' },
+    { name: 'Red', value: '#ff4757' },
   ];
 
   // Initialize and load stored sketch
@@ -52,11 +53,11 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
     canvas.height = height;
 
     // Fill background
-    ctx.fillStyle = '#080d1a';
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw subtle dot grid for diagramming
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = '#2a2a2a';
     for (let x = 20; x < canvas.width; x += 24) {
       for (let y = 20; y < canvas.height; y += 24) {
         ctx.beginPath();
@@ -115,7 +116,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
     if (tool === 'pen' || tool === 'eraser') {
       ctx.beginPath();
       ctx.moveTo(x, y);
-      ctx.strokeStyle = tool === 'eraser' ? '#080d1a' : color;
+      ctx.strokeStyle = tool === 'eraser' ? '#0a0a0a' : color;
       ctx.lineWidth = tool === 'eraser' ? lineWidth * 4 : lineWidth;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -203,11 +204,11 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#080d1a';
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Re-draw subtle grid
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = '#2a2a2a';
     for (let x = 20; x < canvas.width; x += 24) {
       for (let y = 20; y < canvas.height; y += 24) {
         ctx.beginPath();
@@ -241,7 +242,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
             type="button"
             onClick={() => setTool('pen')}
             className={`p-1.5 rounded-lg transition-colors ${
-              tool === 'pen' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
+              tool === 'pen' ? 'bg-primary text-black font-bold text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
             title="Pen / Freehand"
           >
@@ -251,7 +252,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
             type="button"
             onClick={() => setTool('circle')}
             className={`p-1.5 rounded-lg transition-colors ${
-              tool === 'circle' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
+              tool === 'circle' ? 'bg-primary text-black font-bold text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
             title="Tree / Graph Node (Circle)"
           >
@@ -261,7 +262,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
             type="button"
             onClick={() => setTool('rect')}
             className={`p-1.5 rounded-lg transition-colors ${
-              tool === 'rect' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
+              tool === 'rect' ? 'bg-primary text-black font-bold text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
             title="Array / DP Cell (Box)"
           >
@@ -271,7 +272,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
             type="button"
             onClick={() => setTool('arrow')}
             className={`p-1.5 rounded-lg transition-colors ${
-              tool === 'arrow' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
+              tool === 'arrow' ? 'bg-primary text-black font-bold text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
             title="Pointer / Edge (Arrow)"
           >
@@ -281,7 +282,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
             type="button"
             onClick={() => setTool('eraser')}
             className={`p-1.5 rounded-lg transition-colors ${
-              tool === 'eraser' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
+              tool === 'eraser' ? 'bg-primary text-black font-bold text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
             title="Eraser"
           >
@@ -297,7 +298,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
               type="button"
               onClick={() => setColor(c.value)}
               className={`w-5 h-5 rounded-full transition-transform ${
-                color === c.value ? 'scale-125 ring-2 ring-indigo-400' : 'hover:scale-110'
+                color === c.value ? 'scale-125 ring-2 ring-primary' : 'hover:scale-110'
               }`}
               style={{ backgroundColor: c.value }}
               title={c.name}
@@ -314,7 +315,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
               type="button"
               onClick={() => setLineWidth(w)}
               className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${
-                lineWidth === w ? 'bg-indigo-600 text-white' : 'hover:text-white'
+                lineWidth === w ? 'bg-primary text-black font-bold text-white' : 'hover:text-white'
               }`}
             >
               {w}px
@@ -325,7 +326,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
         {/* Actions: Undo, Clear, Save Status, Download */}
         <div className="flex items-center gap-1.5">
           {savedToast && (
-            <span className="text-[10px] font-semibold text-emerald-400 flex items-center gap-1 animate-fadeIn">
+            <span className="text-[10px] font-semibold text-primary flex items-center gap-1 animate-fadeIn">
               <Check className="w-3 h-3" />
               Auto-Saved
             </span>
@@ -344,7 +345,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
           <button
             type="button"
             onClick={handleClear}
-            className="p-1.5 rounded-lg bg-slate-950 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-500/40 text-rose-400 transition-colors"
+            className="p-1.5 rounded-lg bg-slate-950 hover:bg-error/15 border border-slate-800 hover:border-error/40 text-error transition-colors"
             title="Clear Board"
           >
             <Trash2 className="w-4 h-4" />
@@ -353,7 +354,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
           <button
             type="button"
             onClick={handleDownload}
-            className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-indigo-300 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-primary hover:text-white transition-colors"
             title="Download PNG Diagram"
           >
             <Download className="w-4 h-4" />
@@ -362,7 +363,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
       </div>
 
       {/* HTML5 Canvas Area */}
-      <div className="relative w-full bg-[#080d1a] cursor-crosshair">
+      <div className="relative w-full bg-background cursor-crosshair">
         <canvas
           ref={canvasRef}
           onMouseDown={handleMouseDown}

@@ -38,7 +38,7 @@ export const TimeframeTabs: React.FC<TimeframeTabsProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 border border-slate-800 rounded-xl overflow-x-auto no-scrollbar shadow-inner">
+    <div className="flex items-center gap-1 p-1 bg-surface border border-border rounded-[2px] overflow-x-auto no-scrollbar font-mono">
       {TIMEFRAMES.map(({ id, label, shortLabel, icon: Icon }) => {
         const isSelected = selectedTimeframe === id;
         const count = getCount(id);
@@ -47,19 +47,19 @@ export const TimeframeTabs: React.FC<TimeframeTabsProps> = ({
           <button
             key={id}
             onClick={() => onSelectTimeframe(id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] text-xs font-bold transition-all whitespace-nowrap border ${
               isSelected
-                ? 'bg-indigo-600 text-white shadow-md font-semibold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                ? 'bg-primary text-black border-borderActive shadow-terminal-glow'
+                : 'border-transparent text-textSecondary hover:text-primaryDim hover:bg-surfaceElevated'
             }`}
           >
-            <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : id === 'thirty-days' ? 'text-amber-400' : 'text-slate-400'}`} />
-            <span className="hidden sm:inline">{label}</span>
-            <span className="sm:hidden">{shortLabel}</span>
+            <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-black' : id === 'thirty-days' ? 'text-medium' : 'text-textMuted'}`} />
+            <span className="hidden sm:inline">[{label.toUpperCase()}]</span>
+            <span className="sm:hidden">[{shortLabel.toUpperCase()}]</span>
             {count !== null && count > 0 && (
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-medium ${
-                  isSelected ? 'bg-indigo-700/80 text-white' : 'bg-slate-800 text-slate-400'
+                className={`text-[10px] px-1 py-0.2 rounded-[1px] font-mono font-bold ${
+                  isSelected ? 'bg-black text-primary' : 'bg-surfaceElevated text-textMuted'
                 }`}
               >
                 {count}

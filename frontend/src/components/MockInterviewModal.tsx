@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, CompanyMeta, ProblemStatus } from '../types';
-import { X, Play, Pause, RotateCcw, ExternalLink, CheckCircle2, Award, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, ExternalLink, CheckCircle2, Award, Clock, AlertTriangle, ShieldCheck, Check, Sparkles } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import confetti from 'canvas-confetti';
+import { DifficultyBadge } from './ui/DifficultyBadge';
 
 interface MockInterviewModalProps {
   company: string;
@@ -100,7 +101,7 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
       particleCount: 50,
       spread: 60,
       origin: { y: 0.7 },
-      colors: ['#10B981', '#6366F1', '#F59E0B'],
+      colors: ['#E5FF00', '#FFFFFF', '#D4ED00', '#F3F4F6'],
     });
     onUpdateStatus(activeQ.id, 'solved');
   };
@@ -115,35 +116,34 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
   const progressPercent = ((totalSeconds - secondsRemaining) / totalSeconds) * 100;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in font-sans">
+      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-[#0E1217] border border-white/[0.1] rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30">
-              <Clock className="w-5 h-5" />
-            </div>
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">
-                Mock Interview Simulation • {companyMeta?.name || company}
+              <h2 className="text-sm sm:text-base font-bold text-white">
+                Mock Interview • {companyMeta?.name || company}
               </h2>
-              <p className="text-xs text-slate-400">
-                45-minute timed interview simulation with company-frequent questions
+              <p className="text-xs text-textSecondary mt-0.5">
+                45-minute timed simulation with verified interview questions
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white"
+            className="p-1.5 rounded-lg text-textMuted hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer"
+            title="Close session"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Timer Bar */}
-        <div className="p-4 bg-slate-950/40 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4">
+        <div className="p-4 bg-[#12161E] border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="font-mono text-2xl font-black text-white bg-slate-900 px-4 py-1.5 rounded-xl border border-slate-700/80 shadow-inner">
+            <div className="text-2xl sm:text-3xl font-bold font-mono tracking-wider text-primary bg-[#080B0F] px-4 py-1 rounded-xl border border-white/[0.08]">
               {formatTime(secondsRemaining)}
             </div>
 
@@ -152,14 +152,14 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
                 sounds.playClick();
                 setIsRunning(!isRunning);
               }}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 isRunning
-                  ? 'bg-rose-600 hover:bg-rose-500 text-white'
-                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                  ? 'bg-rose-500 text-white hover:bg-rose-600'
+                  : 'bg-primary text-black hover:bg-[#D4ED00] shadow-md shadow-primary/20'
               }`}
             >
-              {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              {isRunning ? 'Pause Interview' : 'Start Timer'}
+              {isRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+              <span>{isRunning ? 'Pause' : 'Start Timer'}</span>
             </button>
 
             <button
@@ -167,17 +167,17 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
                 setIsRunning(false);
                 setSecondsRemaining(totalSeconds);
               }}
-              className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+              className="p-2 rounded-xl bg-white/[0.04] text-textSecondary hover:text-white hover:bg-white/[0.08] border border-white/[0.06] transition-colors cursor-pointer"
               title="Reset Timer"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={pickQuestions}
-              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-textSecondary hover:text-white text-xs font-medium transition-colors border border-white/[0.06] cursor-pointer"
             >
               Reroll Questions 🎲
             </button>
@@ -185,14 +185,14 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-1.5 bg-slate-800">
+        <div className="w-full h-1 bg-white/[0.06]">
           <div
             className={`h-full transition-all duration-300 ${
               secondsRemaining < 300
                 ? 'bg-rose-500'
                 : secondsRemaining < 900
-                ? 'bg-amber-500'
-                : 'bg-indigo-500'
+                ? 'bg-amber-400'
+                : 'bg-primary'
             }`}
             style={{ width: `${progressPercent}%` }}
           />
@@ -201,62 +201,52 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
         {/* Body Content */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* Question Selector Tabs */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {selectedQuestions.map((q, idx) => (
               <button
                 key={q.id}
                 onClick={() => setActiveQuestionIndex(idx)}
-                className={`flex-1 p-3 rounded-xl border text-left transition-all ${
+                className={`flex-1 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                   activeQuestionIndex === idx
-                    ? 'bg-indigo-950/30 border-indigo-500/50 shadow-sm'
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 text-slate-400'
+                    ? 'bg-[#12161E] border-primary/50 text-white shadow-md shadow-primary/5'
+                    : 'bg-[#12161E]/40 border-white/[0.06] hover:border-white/15 text-textSecondary'
                 }`}
               >
                 <div className="flex items-center justify-between text-xs font-medium mb-1">
-                  <span>Problem #{idx + 1}</span>
-                  <span
-                    className={`px-2 py-0.2 rounded-full text-[10px] font-semibold ${
-                      q.difficulty === 'Easy'
-                        ? 'bg-emerald-500/15 text-emerald-400'
-                        : q.difficulty === 'Medium'
-                        ? 'bg-amber-500/15 text-amber-400'
-                        : 'bg-rose-500/15 text-rose-400'
-                    }`}
-                  >
-                    {q.difficulty}
-                  </span>
+                  <span className="text-textMuted font-mono">Problem #{idx + 1}</span>
+                  <DifficultyBadge difficulty={q.difficulty} />
                 </div>
-                <h4 className="font-semibold text-white truncate text-sm">{q.title}</h4>
+                <h4 className="font-semibold text-white truncate text-xs sm:text-sm">{q.title}</h4>
               </button>
             ))}
           </div>
 
           {/* Active Question Display */}
           {activeQ && (
-            <div className="p-5 rounded-2xl bg-slate-950/50 border border-slate-800 space-y-4">
+            <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06] space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <span className="text-xs font-mono text-slate-400">LeetCode #{activeQ.id}</span>
-                  <h3 className="text-lg font-bold text-white">{activeQ.title}</h3>
+                  <span className="text-xs font-mono text-textMuted">LeetCode #{activeQ.id}</span>
+                  <h3 className="text-base sm:text-lg font-bold text-white mt-0.5">{activeQ.title}</h3>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <button
                     onClick={handleSolveActive}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition-colors"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-semibold shadow-sm transition-all cursor-pointer"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    Mark Solved
+                    <span>Mark Solved</span>
                   </button>
 
                   <a
                     href={activeQ.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/[0.08] text-xs font-medium transition-colors"
                   >
-                    <span>Open in LeetCode</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>LeetCode</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-textMuted" />
                   </a>
                 </div>
               </div>
@@ -266,7 +256,7 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
                 {activeQ.topics.map((t) => (
                   <span
                     key={t}
-                    className="px-2.5 py-0.5 text-xs rounded-md bg-slate-800 text-slate-300 border border-slate-700/50 font-mono"
+                    className="px-2.5 py-0.5 text-xs rounded-md bg-white/[0.03] text-textSecondary border border-white/[0.05]"
                   >
                     {t}
                   </span>
@@ -276,38 +266,36 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
           )}
 
           {/* Interview Evaluation Checklist */}
-          <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
-            <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              Interview Evaluation Rubric (Check as you go)
+          <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06] space-y-3">
+            <h4 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span>Interview Evaluation Rubric</span>
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               {[
-                { id: 'clarify', label: 'Asked clarifying questions & constraints' },
-                { id: 'bruteForce', label: 'Explained brute-force approach first' },
-                { id: 'optimal', label: 'Proposed and explained optimal data structure' },
+                { id: 'clarify', label: 'Asked clarifying questions & input boundaries' },
+                { id: 'bruteForce', label: 'Explained naive brute-force baseline' },
+                { id: 'optimal', label: 'Proposed optimal algorithm & data structure' },
                 { id: 'complexities', label: 'Analyzed Time O(...) and Space O(...) upfront' },
-                { id: 'edgeCases', label: 'Identified null, empty, or boundary edge cases' },
-                { id: 'dryRun', label: 'Dry-ran with an example walkthrough before submission' },
+                { id: 'edgeCases', label: 'Tested null, empty, or boundary edge cases' },
+                { id: 'dryRun', label: 'Walked through code with an example trace' },
               ].map(({ id, label }) => (
                 <button
                   key={id}
                   onClick={() => toggleChecklist(id)}
-                  className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all ${
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 text-left transition-all cursor-pointer ${
                     checklist[id]
-                      ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-300'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-primary/10 border-primary/40 text-primary font-medium'
+                      : 'bg-[#12161E] border-white/[0.06] text-textSecondary hover:text-white'
                   }`}
                 >
-                  <div
-                    className={`w-4 h-4 rounded flex items-center justify-center border ${
-                      checklist[id] ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-700'
-                    }`}
-                  >
-                    {checklist[id] && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                  <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
+                    checklist[id] ? 'bg-primary border-primary text-black' : 'border-zinc-600'
+                  }`}>
+                    {checklist[id] && <Check className="w-3 h-3 stroke-[3]" />}
                   </div>
-                  <span>{label}</span>
+                  <span className="text-xs">{label}</span>
                 </button>
               ))}
             </div>
@@ -315,13 +303,13 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-slate-800 bg-slate-950/70 flex items-center justify-between px-5">
-          <span className="text-xs text-slate-400">
-            Simulation tip: Keep talking out loud while coding to simulate real interview feedback.
+        <div className="p-4 border-t border-white/[0.06] bg-[#0E1217] flex items-center justify-between px-5">
+          <span className="text-xs text-textSecondary">
+            Tip: State your thought process aloud before writing code.
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+            className="px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-white text-xs font-medium transition-colors cursor-pointer"
           >
             End Interview
           </button>
@@ -330,3 +318,5 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
     </div>
   );
 };
+
+export default MockInterviewModal;

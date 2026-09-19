@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: leettracker_postgres
+    container_name: cheatcode_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-leetadmin}
@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: leettracker_backend
+    container_name: cheatcode_backend
     restart: unless-stopped
     depends_on:
       postgres:
@@ -42,7 +42,7 @@ services:
       SMTP_SECURE: "false"
       SMTP_USER: ""
       SMTP_PASS: ""
-      EMAIL_FROM: "LeetTracker Pro <no-reply@leettracker.io>"
+      EMAIL_FROM: "Cheat Code <no-reply@cheatcode.dev>"
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_mock_stripe_key_leettracker}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_mock_stripe_webhook_key}
       STRIPE_MOCK_MODE: ${STRIPE_MOCK_MODE:-true}
@@ -53,7 +53,7 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    container_name: leettracker_frontend
+    container_name: cheatcode_frontend
     restart: unless-stopped
     depends_on:
       - backend
@@ -62,7 +62,7 @@ services:
 
   mailpit:
     image: axllent/mailpit:latest
-    container_name: leettracker_mailpit
+    container_name: cheatcode_mailpit
     restart: unless-stopped
     ports:
       - "1025:1025" # SMTP server

@@ -1,11 +1,11 @@
-# LeetTracker Pro • Company-Wise LeetCode Interview Tracker
+# Cheat Code • Company-Wise LeetCode Interview Tracker
 
 > A high-aesthetic, feature-rich web application to track, practice, and master company-wise LeetCode interview questions across 659 companies.
 
-![LeetTracker Pro](https://img.shields.io/badge/LeetCode-659_Companies-FFA116?style=for-the-badge&logo=leetcode&logoColor=white)
+![Cheat Code](https://img.shields.io/badge/LeetCode-659_Companies-ff2d92?style=for-the-badge&logo=leetcode&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4-ff2d92?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
 ---
 

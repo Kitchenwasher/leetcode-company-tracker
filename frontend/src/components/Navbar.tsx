@@ -4,7 +4,8 @@ import { CompanySelector } from './CompanySelector';
 import { UserMenu } from './UserMenu';
 import {
   Flame, BarChart3, Layers, Clock, Dices, Download, Volume2, VolumeX,
-  Sun, Moon, Keyboard, CheckCircle2, Sparkles, Brain, Calendar, FileText, ChevronDown
+  Sun, Moon, Keyboard, CheckCircle2, Sparkles, Brain, Calendar, FileText, ChevronDown,
+  LayoutDashboard, Menu
 } from 'lucide-react';
 import { exportQuestionsCSV } from '../services/storage';
 import { exportToAnkiCSV, exportToObsidianMarkdown } from '../utils/exporters';
@@ -28,6 +29,8 @@ interface NavbarProps {
   onOpenPlanner: () => void;
   onOpenFlashcards: () => void;
   onOpenLeetCodeSync: () => void;
+  onGoHome?: () => void;
+  onNavigateOverview?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -47,35 +50,51 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenPlanner,
   onOpenFlashcards,
   onOpenLeetCodeSync,
+  onGoHome,
+  onNavigateOverview,
 }) => {
   const { user } = useAuth();
   const [showExportMenu, setShowExportMenu] = useState(false);
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#080B0F]/90 backdrop-blur-md transition-colors font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         {/* Left Side: Brand & Company Selector */}
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-indigo-600 to-emerald-500 p-0.5 shadow-glow-brand flex items-center justify-center">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <span className="font-mono font-black text-sm bg-gradient-to-r from-amber-400 to-indigo-400 bg-clip-text text-transparent">
-                  LT
-                </span>
-              </div>
+          <button
+            onClick={onGoHome}
+            className="flex items-center gap-2.5 text-left group focus:outline-none"
+            title="Return to Home"
+          >
+            <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center font-bold text-xs text-primary group-hover:bg-primary group-hover:text-black transition-colors">
+              CC
             </div>
 
-            <div className="hidden sm:flex flex-col">
+            <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm tracking-tight text-white">LeetTracker</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/40">
-                  PRO
+                <span className="font-bold text-sm tracking-tight text-white group-hover:text-primary transition-colors">
+                  Cheat Code
+                </span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-primary/20 text-primary border border-primary/30 font-semibold">
+                  Beta
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-medium">Company-Wise Interview Prep</span>
+              <span className="text-[10px] text-textMuted hidden sm:inline">Company Tracker</span>
             </div>
-          </div>
+          </button>
 
-          <div className="h-6 w-px bg-slate-800 hidden sm:block" />
+          {/* Mobile Sidebar Drawer Toggle */}
+          <button
+            onClick={() => {
+              sounds.playClick();
+              window.dispatchEvent(new CustomEvent('cheatcode_open_sidebar'));
+            }}
+            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-textSecondary hover:text-white lg:hidden cursor-pointer"
+            title="Open Navigation Menu"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
 
           {/* Company Selector */}
           <CompanySelector
@@ -83,6 +102,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             selectedCompanyId={selectedCompanyId}
             onSelectCompany={onSelectCompany}
           />
+
+          {onNavigateOverview && (
+            <button
+              onClick={() => {
+                sounds.playClick();
+                onNavigateOverview();
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-black font-semibold text-xs shadow-md shadow-primary/20 hover:bg-[#D4ED00] transition-all cursor-pointer"
+              title="Personalized Overview Dashboard"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Overview</span>
+            </button>
+          )}
         </div>
 
         {/* Right Side: Solved Stats, Flame Streak, Feature Buttons */}
@@ -90,22 +123,22 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Solved Stat Pill */}
           <button
             onClick={onOpenAnalytics}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 text-xs font-semibold transition-colors shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-primary/40 text-primary text-xs font-semibold transition-colors cursor-pointer"
             title="Total Solved (Click to view Analytics)"
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{totalSolved}</span>
-            <span className="text-emerald-500/70 hidden md:inline">solved</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            <span className="font-mono font-bold text-white">{totalSolved}</span>
+            <span className="text-textSecondary hidden md:inline text-[11px]">Solved</span>
           </button>
 
           {/* Streak Flame Pill */}
           <button
             onClick={onOpenAnalytics}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-950/30 hover:bg-amber-950/50 border border-amber-500/30 text-amber-400 text-xs font-semibold transition-colors shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-amber-400/40 text-amber-400 text-xs font-semibold transition-colors cursor-pointer"
             title="Current Solved Streak"
           >
-            <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-            <span>{currentStreak}d</span>
+            <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span className="font-mono font-bold text-white">{currentStreak}d</span>
           </button>
 
           {/* Random Roulette */}
@@ -114,10 +147,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playClick();
               onRandomRoulette();
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold transition-all shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-primary/40 text-textSecondary hover:text-white text-xs font-medium transition-all cursor-pointer"
             title="Random Problem Roulette (Press 'r')"
           >
-            <Dices className="w-4 h-4 text-indigo-400" />
+            <Dices className="w-4 h-4 text-primary" />
             <span className="hidden lg:inline">Roulette</span>
           </button>
 
@@ -127,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playClick();
               onOpenOverlap();
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-indigo-400 transition-colors"
+            className="p-2 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-white/20 text-textSecondary hover:text-white transition-colors cursor-pointer"
             title="Company Overlap Matrix (Press 'o')"
           >
             <Layers className="w-4 h-4" />
@@ -139,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playClick();
               onOpenMock();
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-400 transition-colors"
+            className="p-2 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-white/20 text-textSecondary hover:text-white transition-colors cursor-pointer"
             title="Mock Interview Simulator (Press 'm')"
           >
             <Clock className="w-4 h-4" />
@@ -151,7 +184,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playClick();
               onOpenAnalytics();
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-emerald-400 transition-colors"
+            className="p-2 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-primary/40 text-textSecondary hover:text-white transition-colors cursor-pointer"
             title="Analytics & Heatmap (Press 'a')"
           >
             <BarChart3 className="w-4 h-4" />
@@ -163,7 +196,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playClick();
               onOpenPlanner();
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-amber-400 transition-colors hidden sm:flex"
+            className="p-2 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-white/20 text-textSecondary hover:text-white transition-colors hidden sm:flex cursor-pointer"
             title="Company Prep Planner"
           >
             <Calendar className="w-4 h-4" />
@@ -175,7 +208,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playClick();
               onOpenFlashcards();
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-indigo-400 transition-colors hidden sm:flex"
+            className="p-2 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-primary/40 text-textSecondary hover:text-white transition-colors hidden sm:flex cursor-pointer"
             title="Anki Flashcard Recall Trainer"
           >
             <Brain className="w-4 h-4" />
@@ -188,36 +221,36 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sounds.playClick();
                 setShowExportMenu(!showExportMenu);
               }}
-              className="flex items-center gap-1 p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-blue-400 transition-colors"
+              className="flex items-center gap-1 p-2 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-white/20 text-textSecondary hover:text-white transition-colors cursor-pointer"
               title="Export Tools (CSV, Anki, Obsidian)"
             >
               <Download className="w-4 h-4" />
-              <ChevronDown className="w-3 h-3 text-slate-500" />
+              <ChevronDown className="w-3 h-3 text-textMuted" />
             </button>
 
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-slate-900 border border-slate-800 shadow-xl py-1 z-50 animate-fadeIn divide-y divide-slate-800">
+              <div className="absolute right-0 mt-2 w-52 rounded-xl bg-[#0E1217] border border-white/[0.1] shadow-2xl py-1 z-50 animate-fadeIn divide-y divide-white/[0.06]">
                 <button
                   onClick={() => {
                     sounds.playClick();
                     exportQuestionsCSV(filteredQuestions, state.progress, selectedCompanyId);
                     setShowExportMenu(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between"
+                  className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-white hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
                 >
-                  <span>Export to CSV</span>
-                  <span className="text-[10px] text-slate-500 font-mono">.csv</span>
+                  <span>Export CSV</span>
+                  <span className="text-[10px] text-textMuted font-mono">.csv</span>
                 </button>
                 <button
                   onClick={() => {
                     sounds.playClick();
-                    exportToAnkiCSV(filteredQuestions, state.progress, `LeetTracker_${selectedCompanyId}`);
+                    exportToAnkiCSV(filteredQuestions, state.progress, `Cheat_Code_${selectedCompanyId}`);
                     setShowExportMenu(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between"
+                  className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-white hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
                 >
-                  <span>Export to Anki Deck</span>
-                  <span className="text-[10px] text-amber-400 font-mono">.csv (Anki)</span>
+                  <span>Export Anki Deck</span>
+                  <span className="text-[10px] text-primary font-mono">.csv</span>
                 </button>
                 <button
                   onClick={() => {
@@ -225,10 +258,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                     exportToObsidianMarkdown(filteredQuestions, state.progress, user);
                     setShowExportMenu(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-between"
+                  className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-white hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
                 >
-                  <span>Export to Obsidian</span>
-                  <span className="text-[10px] text-indigo-400 font-mono">.md</span>
+                  <span>Export Obsidian</span>
+                  <span className="text-[10px] text-primary font-mono">.md</span>
                 </button>
               </div>
             )}
@@ -241,27 +274,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.setEnabled(next);
               onUpdateState({ soundEnabled: next });
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
-            title={state.soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
+            className="p-2 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] text-textMuted hover:text-white transition-colors cursor-pointer"
+            title={state.soundEnabled ? 'Mute audio feedback' : 'Enable audio feedback'}
           >
-            {state.soundEnabled ? <Volume2 className="w-4 h-4 text-slate-300" /> : <VolumeX className="w-4 h-4 text-slate-600" />}
-          </button>
-
-          {/* Theme Toggle (Dark / Light) */}
-          <button
-            onClick={() => {
-              const nextDark = !state.darkMode;
-              onUpdateState({ darkMode: nextDark });
-              if (nextDark) {
-                document.documentElement.classList.add('dark');
-              } else {
-                document.documentElement.classList.remove('dark');
-              }
-            }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
-            title={state.darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {state.darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+            {state.soundEnabled ? <Volume2 className="w-4 h-4 text-textSecondary" /> : <VolumeX className="w-4 h-4 text-textMuted" />}
           </button>
 
           {/* Keyboard Shortcuts Help */}
@@ -270,13 +286,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playClick();
               onOpenShortcuts();
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+            className="p-2 rounded-xl bg-[#0E1217] hover:bg-[#12161E] border border-white/[0.08] hover:border-white/20 text-textMuted hover:text-white transition-colors cursor-pointer"
             title="Keyboard Shortcuts ('?')"
           >
             <Keyboard className="w-4 h-4" />
           </button>
 
-          <div className="h-6 w-px bg-slate-800 hidden sm:block" />
+          <div className="h-6 w-px bg-white/[0.08] hidden sm:block" />
 
           {/* User Menu Dropdown */}
           <UserMenu
@@ -289,3 +305,5 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+
+export default Navbar;

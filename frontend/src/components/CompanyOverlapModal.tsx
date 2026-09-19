@@ -64,37 +64,37 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
   }, [overlappingQuestions]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in font-mono">
+      <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col terminal-panel shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
-              <Layers className="w-5 h-5" />
-            </div>
+        <div className="p-3.5 border-b border-border bg-surface flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">Company Overlap Matrix</h2>
-              <p className="text-xs text-slate-400">
-                Discover high-yield interview questions shared across multiple dream companies
+              <h2 className="text-xs sm:text-sm font-bold text-primary tracking-wide uppercase">
+                &gt; COMPANY_OVERLAP_MATRIX.sh
+              </h2>
+              <p className="text-[11px] text-textMuted">
+                Discover high-yield interview questions shared across multiple target companies
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white"
+            className="px-2.5 py-1 rounded-[2px] bg-surfaceElevated hover:bg-border text-textMuted hover:text-primary text-xs font-mono"
           >
-            <X className="w-5 h-5" />
+            [ESC]
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Target Company Selector Chips */}
           <div>
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
-              Select Target Companies to Intersect (Selected: {selectedCompanies.length})
+            <label className="text-[11px] font-bold text-textMuted uppercase tracking-wider block mb-2">
+              &gt; SELECT_TARGET_COMPANIES (SELECTED: {selectedCompanies.length})
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {POPULAR_COMPANIES.map((cId) => {
                 const isSelected = selectedCompanies.includes(cId);
                 const meta = companies[cId];
@@ -102,15 +102,15 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
                   <button
                     key={cId}
                     onClick={() => toggleCompany(cId)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] text-xs font-bold transition-all border ${
                       isSelected
-                        ? 'bg-indigo-600 text-white shadow-md border border-indigo-400/40'
-                        : 'bg-slate-800/70 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/40'
+                        ? 'bg-surfaceElevated text-primary border-borderActive shadow-terminal-glow'
+                        : 'bg-surface text-textMuted hover:text-primary hover:border-primaryDim border border-border'
                     }`}
                   >
                     <CompanyLogo companyId={cId} size="sm" />
-                    <span>{meta?.name || cId}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5" />}
+                    <span>[{meta?.name || cId}]</span>
+                    {isSelected && <Check className="w-3 h-3 text-primary" />}
                   </button>
                 );
               })}
@@ -118,35 +118,35 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
           </div>
 
           {/* Overlap Summary Card */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-950/40 border border-slate-800">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 rounded-[2px] bg-surface border border-border">
             <div>
-              <span className="text-xs text-slate-400 font-medium">Overlapping Questions</span>
-              <p className="text-2xl font-bold font-mono text-indigo-400">{overlappingQuestions.length}</p>
+              <span className="text-[10px] text-textMuted font-bold uppercase">&gt; OVERLAPPING_QS</span>
+              <p className="text-2xl font-bold font-mono text-primary">{overlappingQuestions.length}</p>
             </div>
             <div>
-              <span className="text-xs text-emerald-400 font-medium">Easy Problems</span>
-              <p className="text-xl font-bold font-mono text-emerald-400">{diffCounts.easy}</p>
+              <span className="text-[10px] text-easy font-bold uppercase">&gt; EASY_PROBLEMS</span>
+              <p className="text-xl font-bold font-mono text-easy">{diffCounts.easy}</p>
             </div>
             <div>
-              <span className="text-xs text-amber-400 font-medium">Medium Problems</span>
-              <p className="text-xl font-bold font-mono text-amber-400">{diffCounts.med}</p>
+              <span className="text-[10px] text-medium font-bold uppercase">&gt; MEDIUM_PROBLEMS</span>
+              <p className="text-xl font-bold font-mono text-medium">{diffCounts.med}</p>
             </div>
             <div>
-              <span className="text-xs text-rose-400 font-medium">Hard Problems</span>
-              <p className="text-xl font-bold font-mono text-rose-400">{diffCounts.hard}</p>
+              <span className="text-[10px] text-hard font-bold uppercase">&gt; HARD_PROBLEMS</span>
+              <p className="text-xl font-bold font-mono text-hard">{diffCounts.hard}</p>
             </div>
           </div>
 
           {/* Questions Result List */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Matching Problems ({overlappingQuestions.length})
+          <div className="space-y-1.5">
+            <h3 className="text-[11px] font-bold text-textMuted uppercase tracking-wider">
+              &gt; MATCHING_PROBLEMS ({overlappingQuestions.length})
             </h3>
 
-            <div className="divide-y divide-slate-800/60 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/30">
+            <div className="divide-y divide-border border border-border rounded-[2px] overflow-hidden bg-surface">
               {overlappingQuestions.length === 0 ? (
-                <div className="p-8 text-center text-sm text-slate-400">
-                  No overlapping questions found with the selected criteria.
+                <div className="p-8 text-center text-xs text-textMuted">
+                  &gt; No overlapping questions found with the selected company criteria.
                 </div>
               ) : (
                 overlappingQuestions.slice(0, 50).map(({ question: q, matchCount, matches }) => {
@@ -160,14 +160,14 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
                         onSelectQuestion(q);
                         onClose();
                       }}
-                      className="p-3.5 flex items-center justify-between gap-4 hover:bg-slate-800/40 transition-colors cursor-pointer group"
+                      className="p-3 flex items-center justify-between gap-3 hover:bg-surfaceElevated transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="font-mono text-xs text-slate-400">#{q.id}</span>
+                        <span className="font-mono text-xs text-textMuted">#{q.id}</span>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <a
-                              href={`#/problem/${q.id}`}
+                              href={`/problem/${q.id}`}
                               onClick={(e) => {
                                 if (!e.ctrlKey && !e.metaKey && e.button === 0) {
                                   e.preventDefault();
@@ -175,34 +175,34 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
                                   onClose();
                                 }
                               }}
-                              className="font-semibold text-slate-200 group-hover:text-indigo-300 hover:underline transition-colors truncate text-sm"
+                              className="font-bold text-textPrimary group-hover:text-primary hover:text-primary hover:underline transition-colors truncate text-xs"
                             >
                               {q.title}
                             </a>
                             {isSolved && (
-                              <span className="text-[10px] px-1.5 py-0.2 bg-emerald-500/15 text-emerald-300 rounded border border-emerald-500/30">
-                                Solved
+                              <span className="text-[10px] px-1 py-0.2 bg-surfaceElevated text-easy rounded-[1px] border border-easy/40 font-mono">
+                                [SOLVED]
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1.5 mt-1">
+                          <div className="flex items-center gap-1.5 mt-1 font-mono">
                             <span
-                              className={`text-[10px] px-2 py-0.2 rounded-full font-semibold ${
+                              className={`text-[10px] font-bold ${
                                 q.difficulty === 'Easy'
-                                  ? 'bg-emerald-500/15 text-emerald-400'
+                                  ? 'text-easy'
                                   : q.difficulty === 'Medium'
-                                  ? 'bg-amber-500/15 text-amber-400'
-                                  : 'bg-rose-500/15 text-rose-400'
+                                  ? 'text-medium'
+                                  : 'text-hard'
                               }`}
                             >
-                              {q.difficulty}
+                              [{q.difficulty.toUpperCase()}]
                             </span>
-                            <span className="text-xs text-slate-500">•</span>
+                            <span className="text-xs text-textMuted">•</span>
                             <div className="flex items-center gap-1">
                               {matches.map((m) => (
                                 <span
                                   key={m}
-                                  className="text-[10px] px-1.5 py-0.2 bg-slate-800 text-slate-300 rounded border border-slate-700/50 capitalize"
+                                  className="text-[10px] px-1.5 py-0.2 bg-surfaceElevated text-textMuted rounded-[1px] border border-border capitalize"
                                 >
                                   {m}
                                 </span>
@@ -213,10 +213,10 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2 py-1 text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 rounded-lg border border-indigo-500/40">
-                          {matchCount}/{selectedCompanies.length} match
+                        <span className="px-2 py-0.5 text-[11px] font-mono font-bold bg-surfaceElevated text-primary rounded-[2px] border border-primary/40">
+                          [{matchCount}/{selectedCompanies.length}_MATCH]
                         </span>
-                        <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
+                        <ArrowRight className="w-3.5 h-3.5 text-textMuted group-hover:text-primary transition-colors" />
                       </div>
                     </div>
                   );
@@ -227,15 +227,15 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-slate-800 bg-slate-950/70 flex items-center justify-between px-5">
-          <span className="text-xs text-slate-400">
-            Tip: Prioritize solving questions with 3+ company overlap for maximum interview coverage.
+        <div className="p-3 border-t border-border bg-surface flex items-center justify-between px-4">
+          <span className="text-[11px] text-textMuted">
+            &gt; TIP: Questions with 3+ overlaps maximize interview prep coverage.
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"
+            className="px-3 py-1 rounded-[2px] bg-primary hover:bg-primaryHover text-black text-xs font-bold font-mono"
           >
-            Close
+            [ CLOSE_SESSION ]
           </button>
         </div>
       </div>
