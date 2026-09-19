@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "get api health returns server and database status",
+    "description": "Verify that GET /api/health returns HTTP 200 with a health status indicating both API server and database connectivity are operational."
+  },
+  {
+    "id": "TC002",
+    "title": "get api companies returns list of companies with frequency counts",
+    "description": "Verify that GET /api/companies returns HTTP 200 with a list of companies including their frequency counts of questions."
+  },
+  {
+    "id": "TC003",
+    "title": "get api questions supports filtering and pagination",
+    "description": "Verify that GET /api/questions supports filtering by company, difficulty, tag, and keyword, and returns paginated results with HTTP 200."
+  },
+  {
+    "id": "TC004",
+    "title": "get api questions id returns question metadata and company breakdown",
+    "description": "Verify that GET /api/questions/:id returns HTTP 200 with detailed question metadata and company breakdown for a valid question ID, and returns 404 for invalid IDs."
+  },
+  {
+    "id": "TC005",
+    "title": "get api questions id solution returns multi approach cpp solutions",
+    "description": "Verify that GET /api/questions/:id/solution returns HTTP 200 with multi-approach C++ solution details including code, invariants, and complexity for a valid question ID."
+  },
+  {
+    "id": "TC006",
+    "title": "get api companies overlap returns cross company question intersection",
+    "description": "Verify that GET /api/companies/overlap returns HTTP 200 with correct cross-company question overlap results for selected companies."
+  },
+  {
+    "id": "TC007",
+    "title": "post api auth register creates new user with valid data",
+    "description": "Verify that POST /api/auth/register with valid email, username, and password returns HTTP 201 indicating successful account creation, and returns 400 for invalid or missing fields."
+  },
+  {
+    "id": "TC008",
+    "title": "post api auth login returns access token and refresh cookie",
+    "description": "Verify that POST /api/auth/login with valid credentials returns HTTP 200 with an access token and sets an HTTP-only refresh cookie, and returns 401 for invalid credentials."
+  },
+  {
+    "id": "TC009",
+    "title": "get api progress returns user solved map and notes with auth",
+    "description": "Verify that GET /api/progress with valid authentication token returns HTTP 200 with the user's solved question map and personal notes, and returns 401 without authentication."
+  },
+  {
+    "id": "TC010",
+    "title": "post api payments create checkout session with valid plan",
+    "description": "Verify that POST /api/payments/create-checkout-session with a valid planId and authentication returns HTTP 200 with a Stripe checkout session or sandbox redirect URL, and returns error for invalid planId."
+  }
+]

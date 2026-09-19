@@ -15,7 +15,22 @@ class TestSpriteClient {
   }
 
   async start() {
-    this.proc = spawn('cmd.exe', ['/c', 'npx', '-y', '@testsprite/testsprite-mcp@latest'], {
+    const mcpDist = path.join(
+      process.env.LOCALAPPDATA || '',
+      'npm-cache',
+      '_npx',
+      '8ddf6bea01b2519d',
+      'node_modules',
+      '@testsprite',
+      'testsprite-mcp',
+      'dist',
+      'index.js'
+    );
+    const useDirect = fs.existsSync(mcpDist);
+    const cmd = useDirect ? 'node' : 'cmd.exe';
+    const args = useDirect ? [mcpDist] : ['/c', 'npx', '-y', '@testsprite/testsprite-mcp@latest'];
+
+    this.proc = spawn(cmd, args, {
       env: {
         ...process.env,
         API_KEY
