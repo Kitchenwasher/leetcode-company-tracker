@@ -2,7 +2,16 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { User, UserTier } from '../types/auth';
 import { authApi } from '../api/authApi';
 import { paymentApi } from '../api/paymentApi';
-import { api, getStoredAccessToken, setStoredAccessToken, setStoredRefreshToken } from '../api/client';
+import {
+  api,
+  getStoredAccessToken,
+  setStoredAccessToken,
+  getStoredRefreshToken,
+  setStoredRefreshToken,
+  getStoredUserProfile,
+  setStoredUserProfile,
+  isTokenValid,
+} from '../api/client';
 
 export const GUEST_USER: User = {
   id: 'guest',
@@ -46,54 +55,90 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User>(GUEST_USER);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Fast Path (Industry Standard Optimistic Boot):
+  // If a valid unexpired token and cached user profile exist in localStorage,
+  // boot immediately into authenticated state with 0ms delay and no loading flash.
+  const initialToken = getStoredAccessToken();
+  const cachedUser = getStoredUserProfile<User>();
+  const hasValidSession = Boolean(
+    initialToken &&
+    isTokenValid(initialToken) &&
+    cachedUser &&
+    cachedUser.id &&
+    cachedUser.id !== 'guest'
+  );
+
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    if (hasValidSession && cachedUser) {
+      return cachedUser;
+    }
+    return GUEST_USER;
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => hasValidSession);
+
+  // Loading is only true if we have stored credentials that need asynchronous resolution (e.g. refresh flow),
+  // NEVER for already-cached valid sessions or unauthenticated guests!
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    if (hasValidSession) return false;
+    const hasAnyToken = Boolean(initialToken || getStoredRefreshToken());
+    return hasAnyToken;
+  });
+
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Restore authenticated session on initial mount from Neon DB
+  // Stale-While-Revalidate (SWR): Silently revalidate credentials against Neon DB in the background
   useEffect(() => {
     let isMounted = true;
 
     const restoreSession = async () => {
       try {
-        // 1. Try stored access token
         const token = getStoredAccessToken();
-        if (token) {
+
+        // 1. If access token is valid, verify against Neon DB in the background
+        if (token && isTokenValid(token)) {
           try {
             const res = await authApi.getMe();
             if (res?.user && isMounted) {
               setCurrentUser(res.user);
+              setStoredUserProfile(res.user);
               setIsAuthenticated(true);
               return;
             }
           } catch {
-            // Token expired or invalid, fall through to refresh
+            // Token rejected by backend or user deleted in DB -> fall through to refresh
           }
         }
 
-        // 2. Attempt silent refresh using HttpOnly cookie or stored refresh token
-        try {
-          const { data } = await api.post<{ accessToken: string; user: User; refreshToken?: string }>('/auth/refresh');
-          if (data?.accessToken && data?.user && isMounted) {
-            setStoredAccessToken(data.accessToken);
-            if (data.refreshToken) {
-              setStoredRefreshToken(data.refreshToken);
+        // 2. Attempt silent refresh using refresh token or cookie
+        const refreshToken = getStoredRefreshToken();
+        if (refreshToken || token) {
+          try {
+            const { data } = await api.post<{ accessToken: string; user: User; refreshToken?: string }>('/auth/refresh', {
+              refreshToken: refreshToken || undefined,
+            });
+            if (data?.accessToken && data?.user && isMounted) {
+              setStoredAccessToken(data.accessToken);
+              if (data.refreshToken) {
+                setStoredRefreshToken(data.refreshToken);
+              }
+              setStoredUserProfile(data.user);
+              setCurrentUser(data.user);
+              setIsAuthenticated(true);
+              return;
             }
-            setCurrentUser(data.user);
-            setIsAuthenticated(true);
-            return;
+          } catch {
+            // Refresh failed or revoked
           }
-        } catch {
-          // No active refresh session
         }
 
         // Clean unauthenticated guest state
         if (isMounted) {
           setStoredAccessToken(null);
           setStoredRefreshToken(null);
+          setStoredUserProfile(null);
           setCurrentUser(GUEST_USER);
           setIsAuthenticated(false);
         }
@@ -116,6 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await authApi.login(email, password);
       if (res?.user) {
+        setStoredUserProfile(res.user);
         setCurrentUser(res.user);
         setIsAuthenticated(true);
         setShowAuthModal(false);
@@ -140,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await authApi.register(name, email, password, targetCompany, leetcodeUsername);
       if (res?.user) {
+        setStoredUserProfile(res.user);
         setCurrentUser(res.user);
         setIsAuthenticated(true);
         setShowAuthModal(false);
@@ -158,6 +205,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await authApi.googleAuth(credential, code);
       if (res?.user) {
+        setStoredUserProfile(res.user);
         setCurrentUser(res.user);
         setIsAuthenticated(true);
         setShowAuthModal(false);
@@ -176,6 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await authApi.githubAuth(code);
       if (res?.user) {
+        setStoredUserProfile(res.user);
         setCurrentUser(res.user);
         setIsAuthenticated(true);
         setShowAuthModal(false);
@@ -192,6 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginAsGuest = () => {
     setStoredAccessToken(null);
     setStoredRefreshToken(null);
+    setStoredUserProfile(null);
     setCurrentUser(GUEST_USER);
     setIsAuthenticated(false);
     setShowAuthModal(false);
@@ -204,6 +254,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {}
     setStoredAccessToken(null);
     setStoredRefreshToken(null);
+    setStoredUserProfile(null);
     setCurrentUser(GUEST_USER);
     setIsAuthenticated(false);
   };
@@ -215,6 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (url.includes('session_id=mock_session_') || url.includes('mock=')) {
           // Mock payment upgraded in Neon DB directly
           const updated: User = { ...currentUser, tier: 'pro' as UserTier };
+          setStoredUserProfile(updated);
           setCurrentUser(updated);
         } else {
           window.location.href = url;
@@ -223,6 +275,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
       // Fallback local update
       const updated: User = { ...currentUser, tier: 'pro' as UserTier };
+      setStoredUserProfile(updated);
       setCurrentUser(updated);
     }
     setShowSubscriptionModal(false);
@@ -233,6 +286,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const res = await authApi.updateProfile(patch);
         if (res?.user) {
+          setStoredUserProfile(res.user);
           setCurrentUser(res.user);
           return;
         }
@@ -241,7 +295,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     // Optimistic / fallback update
-    setCurrentUser((prev) => ({ ...prev, ...patch }));
+    const updated = { ...currentUser, ...patch };
+    setStoredUserProfile(updated);
+    setCurrentUser(updated);
   };
 
   const isPro = currentUser.tier === 'pro' || currentUser.tier === 'enterprise';

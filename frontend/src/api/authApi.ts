@@ -1,4 +1,4 @@
-import { api, setStoredAccessToken, setStoredRefreshToken } from './client';
+import { api, setStoredAccessToken, setStoredRefreshToken, setStoredUserProfile } from './client';
 import { User } from '../types/auth';
 
 export interface AuthResponse {
@@ -21,6 +21,9 @@ export const authApi = {
     }
     if (res.data?.refreshToken) {
       setStoredRefreshToken(res.data.refreshToken);
+    }
+    if (res.data?.user) {
+      setStoredUserProfile(res.data.user);
     }
     return res.data;
   },
@@ -45,6 +48,9 @@ export const authApi = {
     if (res.data?.refreshToken) {
       setStoredRefreshToken(res.data.refreshToken);
     }
+    if (res.data?.user) {
+      setStoredUserProfile(res.data.user);
+    }
     return res.data;
   },
 
@@ -55,6 +61,9 @@ export const authApi = {
     }
     if (res.data?.refreshToken) {
       setStoredRefreshToken(res.data.refreshToken);
+    }
+    if (res.data?.user) {
+      setStoredUserProfile(res.data.user);
     }
     return res.data;
   },
@@ -67,6 +76,9 @@ export const authApi = {
     if (res.data?.refreshToken) {
       setStoredRefreshToken(res.data.refreshToken);
     }
+    if (res.data?.user) {
+      setStoredUserProfile(res.data.user);
+    }
     return res.data;
   },
 
@@ -77,6 +89,9 @@ export const authApi = {
 
   getMe: async (): Promise<{ user: User }> => {
     const res = await api.get<{ user: User }>('/auth/me');
+    if (res.data?.user) {
+      setStoredUserProfile(res.data.user);
+    }
     return res.data;
   },
 
@@ -86,6 +101,7 @@ export const authApi = {
     } finally {
       setStoredAccessToken(null);
       setStoredRefreshToken(null);
+      setStoredUserProfile(null);
     }
   },
 

@@ -27,6 +27,47 @@ export const setStoredRefreshToken = (token: string | null) => {
   }
 };
 
+const USER_PROFILE_KEY = 'leettracker_user_profile_v1';
+
+export const getStoredUserProfile = <T = any>(): T | null => {
+  try {
+    const raw = localStorage.getItem(USER_PROFILE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const setStoredUserProfile = (user: any | null) => {
+  if (user && user.id && user.id !== 'guest') {
+    localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(USER_PROFILE_KEY);
+  }
+};
+
+export const isTokenValid = (token: string | null): boolean => {
+  if (!token) return false;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const parsed = JSON.parse(jsonPayload);
+    if (!parsed.exp) return true;
+    // 15 seconds buffer to prevent edge-case race conditions
+    return Date.now() < parsed.exp * 1000 - 15000;
+  } catch {
+    return false;
+  }
+};
+
 // API Endpoints Configuration
 const formatUrl = (url?: string) => {
   if (!url) return '/api';
