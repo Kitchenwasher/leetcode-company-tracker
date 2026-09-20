@@ -2,72 +2,84 @@
   "questionId": 20,
   "title": "Valid Parentheses",
   "difficulty": "Easy",
-  "corePattern": "Stack (Last-In-First-Out Matching)",
+  "corePattern": "Stack (LIFO) for Bracket Matching",
   "interviewTips": [
-    "Explain why a simple counter doesn't work when multiple bracket types are interleaved (e.g. '([)]').",
-    "State how the Stack data structure perfectly models nested balanced structures."
+    "Ask if input contains only '()[]{}' and what to return for empty string (LeetCode: true).",
+    "Trade-off: repeated string replacement is simple but O(n^2); stack with hash map is O(n) and is the expected optimal.",
+    "Edge cases: empty string, single bracket, wrong order like '([)]', and unclosed opens like '(((' - always check stack empty before pop."
   ],
   "approaches": [
     {
       "id": "brute-force",
-      "name": "Approach 1: String Replacement (Naive)",
+      "name": "Approach 1: Repeated Pair Elimination",
       "tag": "Brute Force",
-      "intuition": "Repeatedly scan the string for matching adjacent pairs '()', '[]', and '{}', and delete them. Repeat until no more pairs can be removed. If the string is empty, it is valid.",
-      "theory": "Each string search and substring deletion takes O(N). In the worst case, we do this N / 2 times, resulting in O(N^2) time complexity.",
-      "cppCode": "#include <string>\n\nclass Solution {\npublic:\n    bool isValid(std::string s) {\n        if (s.length() % 2 != 0) return false;\n\n        bool changed = true;\n        while (changed) {\n            changed = false;\n            size_t pos;\n            if ((pos = s.find(\"()\")) != std::string::npos) {\n                s.erase(pos, 2);\n                changed = true;\n            } else if ((pos = s.find(\"[]\")) != std::string::npos) {\n                s.erase(pos, 2);\n                changed = true;\n            } else if ((pos = s.find(\"{}\")) != std::string::npos) {\n                s.erase(pos, 2);\n                changed = true;\n            }\n        }\n        return s.empty();\n    }\n};",
+      "intuition": "A valid string can be fully reduced by repeatedly deleting adjacent matching pairs '()', '[]', '{}'. If after no more deletions anything remains, it is invalid.",
+      "theory": "This simulates reduction to empty. Each pass scans the string and removes innermost pairs. Correct because any valid sequence must contain at least one adjacent matching pair unless empty, and removing it preserves validity of the remainder. Repeating until fixpoint decides validity.",
+      "cppCode": "class Solution {\npublic:\n    bool isValid(string s) {\n        int prev = -1;\n        while (prev != (int)s.size()) {\n            prev = s.size();\n            size_t pos;\n            while ((pos = s.find(\"()\")) != string::npos) s.erase(pos, 2);\n            while ((pos = s.find(\"[]\")) != string::npos) s.erase(pos, 2);\n            while ((pos = s.find(\"{}\")) != string::npos) s.erase(pos, 2);\n        }\n        return s.empty();\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isValid(string s) {\n        int prev = -1;\n        while (prev != (int)s.size()) {\n            prev = s.size();\n            size_t pos;\n            while ((pos = s.find(\"()\")) != string::npos) s.erase(pos, 2);\n            while ((pos = s.find(\"[]\")) != string::npos) s.erase(pos, 2);\n            while ((pos = s.find(\"{}\")) != string::npos) s.erase(pos, 2);\n        }\n        return s.empty();\n    }\n};",
+        "python": "class Solution:\n    def isValid(self, s: str) -> bool:\n        prev_len = -1\n        while prev_len != len(s):\n            prev_len = len(s)\n            s = s.replace('()', '').replace('[]', '').replace('{}', '')\n        return len(s) == 0",
+        "java": "class Solution {\n    public boolean isValid(String s) {\n        int prev = -1;\n        while (prev != s.length()) {\n            prev = s.length();\n            s = s.replace(\"()\", \"\").replace(\"[]\", \"\").replace(\"{}\", \"\");\n        }\n        return s.isEmpty();\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N^2)",
-        "explanation": "Searching and erasing from strings takes linear time, repeated up to N/2 times."
+        "complexity": "O(n^2)",
+        "explanation": "Each pass scans O(n) to replace, and up to O(n/2) passes in worst case like '((((...))))', plus string copy/erase cost O(n) per deletion."
       },
       "spaceComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Modifies copy of string."
+        "complexity": "O(n)",
+        "explanation": "Each replace/erase creates a new string of size up to n."
       },
       "dryRunExample": {
-        "input": "s = \"{[]}\"",
+        "input": "s = \"([)]\"",
         "steps": [
-          "Found \"[]\" at pos 1 -> erases to \"{}\"",
-          "Found \"{}\" at pos 0 -> erases to \"\"",
-          "s is empty -> true"
+          "start s='([)]', prev_len=-1",
+          "pass1: no substring '()','[]','{}' found, s unchanged='([)]'",
+          "prev_len == len(s), loop stops",
+          "len(s)!=0 => return false"
         ],
-        "output": "true"
+        "output": "false"
       },
       "edgeCases": [
-        "Odd length string: immediately false.",
-        "Single character: false."
+        "Empty string '' => true (no brackets to mismatch)",
+        "Single char '(' => false (no pair to remove)",
+        "Nested valid '([]{})' => reduces to empty => true"
       ]
     },
     {
-      "id": "stack-optimal",
-      "name": "Approach 2: Stack Matching (Optimal)",
+      "id": "optimal",
+      "name": "Approach 2: Stack with Closing-to-Opening Map",
       "tag": "Optimal",
-      "intuition": "Every opening bracket must match the most recent unmatched opening bracket of the same type. Use a stack to push expected closing brackets when an open bracket is seen, and pop & compare on closing brackets.",
-      "theory": "Pushing the corresponding closing bracket on seeing an opening bracket simplifies matching: on encountering any closing bracket, simply check if `stack.top() == c`. If stack is empty or tops don't match, string is invalid.",
-      "cppCode": "#include <string>\n#include <stack>\n\nclass Solution {\npublic:\n    bool isValid(const std::string& s) {\n        // An odd length string can never be balanced\n        if (s.length() % 2 != 0) return false;\n\n        std::stack<char> st;\n\n        for (char c : s) {\n            if (c == '(') {\n                st.push(')');\n            } else if (c == '[') {\n                st.push(']');\n            } else if (c == '{') {\n                st.push('}');\n            } else {\n                // Closing bracket: stack must not be empty and top must match\n                if (st.empty() || st.top() != c) {\n                    return false;\n                }\n                st.pop();\n            }\n        }\n\n        // Must be completely matched (stack empty)\n        return st.empty();\n    }\n};",
+      "intuition": "Scan left to right: push opens, on close check top of stack matches. LIFO order enforces correct nesting.",
+      "theory": "Brackets form a well-parenthesized language requiring last-opened-first-closed. A stack exactly models this. Use hash map close->open for O(1) match. If close with empty stack or mismatch => invalid. At end stack must be empty (all opens closed). Single pass is sufficient and necessary.",
+      "cppCode": "class Solution {\npublic:\n    bool isValid(string s) {\n        vector<char> st;\n        unordered_map<char, char> mp = {{')', '('}, {']', '['}, {'}', '{'}};\n        for (char c : s) {\n            auto it = mp.find(c);\n            if (it != mp.end()) {\n                if (st.empty() || st.back() != it->second) return false;\n                st.pop_back();\n            } else {\n                st.push_back(c);\n            }\n        }\n        return st.empty();\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isValid(string s) {\n        vector<char> st;\n        unordered_map<char, char> mp = {{')', '('}, {']', '['}, {'}', '{'}};\n        for (char c : s) {\n            auto it = mp.find(c);\n            if (it != mp.end()) {\n                if (st.empty() || st.back() != it->second) return false;\n                st.pop_back();\n            } else {\n                st.push_back(c);\n            }\n        }\n        return st.empty();\n    }\n};",
+        "python": "class Solution:\n    def isValid(self, s: str) -> bool:\n        stack = []\n        mapping = {')': '(', ']': '[', '}': '{'}\n        for c in s:\n            if c in mapping:\n                if not stack or stack.pop() != mapping[c]:\n                    return False\n            else:\n                stack.append(c)\n        return not stack",
+        "java": "class Solution {\n    public boolean isValid(String s) {\n        Deque<Character> st = new ArrayDeque<>();\n        Map<Character, Character> mp = Map.of(')', '(', ']', '[', '}', '{');\n        for (char c : s.toCharArray()) {\n            if (mp.containsKey(c)) {\n                if (st.isEmpty() || st.pop() != mp.get(c)) return false;\n            } else {\n                st.push(c);\n            }\n        }\n        return st.isEmpty();\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Single pass iterating through all N characters, with O(1) stack operations."
+        "complexity": "O(n)",
+        "explanation": "Single left-to-right scan, each char pushed/popped at most once, hash map lookup O(1)."
       },
       "spaceComplexity": {
-        "complexity": "O(N)",
-        "explanation": "In the worst case (e.g. '(((((('), the stack holds all N characters."
+        "complexity": "O(n)",
+        "explanation": "Stack holds at most n opening brackets in worst case like '((((...', plus O(1) map."
       },
       "dryRunExample": {
-        "input": "s = \"()[]{}\"",
+        "input": "s = \"()[]{} -> also test s = \"([)]\"\"",
         "steps": [
-          "c='(': push ')' -> stack: [')']",
-          "c=')': top is ')' -> pop -> stack: []",
-          "c='[': push ']' -> stack: [']']",
-          "c=']': top is ']' -> pop -> stack: []",
-          "c='{': push '}' -> stack: ['}']",
-          "c='}': top is '}' -> pop -> stack: []",
-          "Stack empty at end -> true"
+          "s='()[]{}': push '(' then see ')' matches pop => stack=[]",
+          "push '[' then see ']' matches pop => stack=[]",
+          "push '{' then see '}' matches pop => stack=[] => true",
+          "s='([)]': push '(' push '[' then see ')' top is '[' mismatch => false"
         ],
-        "output": "true"
+        "output": "true for \"()[]{}\", false for \"([)]\""
       },
       "edgeCases": [
-        "Closing bracket with empty stack (e.g. ']'): returns false without crashing.",
-        "Unmatched opening brackets remaining at end (e.g. '(()'): returns false."
+        "'' => true (stack stays empty)",
+        "'(' or ')' alone => false (empty pop or leftover)",
+        "'(]' and '([)]' => false (order matters, stack catches mismatch)",
+        "Long opens '((((...))))' => true, stack depth n/2"
       ]
     }
   ]

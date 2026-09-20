@@ -69,8 +69,25 @@ async function main() {
       const jsonPath = path.join(SOLUTIONS_DIR, `${q.id}.json`);
       fs.writeFileSync(jsonPath, JSON.stringify(solution, null, 2), 'utf8');
 
-      // 2. Cache in Neon PostgreSQL
+      // 2. Cache in Neon PostgreSQL (ensure parent Question exists first)
       try {
+        await prisma.question.upsert({
+          where: { id: q.id },
+          update: {
+            title: q.title,
+            difficulty: q.difficulty,
+            topics: JSON.stringify(q.topics || []),
+          },
+          create: {
+            id: q.id,
+            title: q.title,
+            difficulty: q.difficulty,
+            acceptance: '50.0%',
+            url: `https://leetcode.com/problems/${q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`,
+            topics: JSON.stringify(q.topics || []),
+          },
+        });
+
         await prisma.solution.upsert({
           where: { questionId: q.id },
           update: {

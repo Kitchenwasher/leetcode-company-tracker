@@ -1,0 +1,87 @@
+{
+  "questionId": 56,
+  "title": "Merge Intervals",
+  "difficulty": "Medium",
+  "corePattern": "Sorting with Linear Sweep for Interval Merging",
+  "interviewTips": [
+    "Ask if intervals are inclusive and if touching intervals like [1,4] and [4,5] should merge, they should.",
+    "Trade-off: sorting costs O(n log n) but enables single-pass merge versus O(n^2) brute force without sorting.",
+    "Edge-case tip: always copy interval values in Java and C++ to avoid mutating input unexpectedly, and handle empty and single-interval inputs."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Pairwise Merging",
+      "tag": "Brute Force",
+      "intuition": "An interval belongs in the same merged block if it overlaps any interval already merged. Without sorting, compare each new interval against all merged results so far and fuse overlapping ones into a larger interval.",
+      "theory": "Maintain a list merged. For each input interval cur, scan merged: if max(cur.start, m.start) <= min(cur.end, m.end) they overlap, so expand cur to [min(starts), max(ends)] and drop m. Otherwise keep m. Append expanded cur. This transitively merges chains like [1,3],[2,4],[3,5] because cur grows while scanning. No sorting is used, so order of output follows discovery order.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        vector<vector<int>> merged;\n        for (auto inter : intervals) {\n            vector<int> cur = inter;\n            vector<vector<int>> nxt;\n            for (auto m : merged) {\n                if (max(cur[0], m[0]) <= min(cur[1], m[1])) {\n                    cur = {min(cur[0], m[0]), max(cur[1], m[1])};\n                } else {\n                    nxt.push_back(m);\n                }\n            }\n            nxt.push_back(cur);\n            merged = move(nxt);\n        }\n        return merged;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        vector<vector<int>> merged;\n        for (auto inter : intervals) {\n            vector<int> cur = inter;\n            vector<vector<int>> nxt;\n            for (auto m : merged) {\n                if (max(cur[0], m[0]) <= min(cur[1], m[1])) {\n                    cur = {min(cur[0], m[0]), max(cur[1], m[1])};\n                } else {\n                    nxt.push_back(m);\n                }\n            }\n            nxt.push_back(cur);\n            merged = move(nxt);\n        }\n        return merged;\n    }\n};",
+        "python": "class Solution:\n    def merge(self, intervals: List[List[int]]) -> List[List[int]]:\n        merged: List[List[int]] = []\n        for inter in intervals:\n            cur = [inter[0], inter[1]]\n            nxt: List[List[int]] = []\n            for m in merged:\n                if max(cur[0], m[0]) <= min(cur[1], m[1]):\n                    cur = [min(cur[0], m[0]), max(cur[1], m[1])]\n                else:\n                    nxt.append(m)\n            nxt.append(cur)\n            merged = nxt\n        return merged",
+        "java": "class Solution {\n    public int[][] merge(int[][] intervals) {\n        List<int[]> merged = new ArrayList<>();\n        for (int[] inter : intervals) {\n            int[] cur = new int[]{inter[0], inter[1]};\n            List<int[]> nxt = new ArrayList<>();\n            for (int[] m : merged) {\n                if (Math.max(cur[0], m[0]) <= Math.min(cur[1], m[1])) {\n                    cur = new int[]{Math.min(cur[0], m[0]), Math.max(cur[1], m[1])};\n                } else {\n                    nxt.add(m);\n                }\n            }\n            nxt.add(cur);\n            merged = nxt;\n        }\n        return merged.toArray(new int[merged.size()][]);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "For each of n intervals we scan up to O(n) merged intervals to check overlap and merge, giving quadratic time in worst case with no overlaps."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Extra space for merged and temporary nxt list holding up to n intervals, excluding output. No sorting overhead."
+      },
+      "dryRunExample": {
+        "input": "intervals = [[1,3],[2,6],[8,10],[15,18]]",
+        "steps": [
+          "merged=[]; process [1,3] -> merged=[[1,3]]",
+          "process [2,6]: overlaps [1,3] since max(2,1)=2 <= min(6,3)=3, fuse to [1,6] -> merged=[[1,6]]",
+          "process [8,10]: no overlap with [1,6] -> merged=[[1,6],[8,10]]",
+          "process [15,18]: no overlap -> merged=[[1,6],[8,10],[15,18]]"
+        ],
+        "output": "[[1,6],[8,10],[15,18]]"
+      },
+      "edgeCases": [
+        "empty input returns empty list",
+        "single interval returns itself",
+        "fully nested intervals like [[1,10],[2,5],[3,7]] merge to [[1,10]]",
+        "touching intervals [[1,4],[4,5]] merge to [[1,5]] because condition uses <="
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Sort by Start and Linear Merge",
+      "tag": "Optimal",
+      "intuition": "If intervals are sorted by start time, all intervals that can merge appear consecutively. Then one left-to-right sweep suffices: either start a new block or extend the current block.",
+      "theory": "Sort by start ascending (Quicksort / Timsort / Introsort depending on language). Invariant: merged is non-overlapping and sorted. For next [s,e] in sorted order, if merged is empty or last.end < s there is no overlap, so push new block. Else s <= last.end, so they overlap and merged block becomes [last.start, max(last.end, e)]. Sorting guarantees any interval overlapping the last block must be adjacent in sorted order, so single pass is correct.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        sort(intervals.begin(), intervals.end());\n        vector<vector<int>> merged;\n        for (auto& it : intervals) {\n            if (merged.empty() || merged.back()[1] < it[0]) {\n                merged.push_back(it);\n            } else {\n                merged.back()[1] = max(merged.back()[1], it[1]);\n            }\n        }\n        return merged;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        sort(intervals.begin(), intervals.end());\n        vector<vector<int>> merged;\n        for (auto& it : intervals) {\n            if (merged.empty() || merged.back()[1] < it[0]) {\n                merged.push_back(it);\n            } else {\n                merged.back()[1] = max(merged.back()[1], it[1]);\n            }\n        }\n        return merged;\n    }\n};",
+        "python": "class Solution:\n    def merge(self, intervals: List[List[int]]) -> List[List[int]]:\n        intervals.sort(key=lambda x: x[0])\n        merged: List[List[int]] = []\n        for s, e in intervals:\n            if not merged or merged[-1][1] < s:\n                merged.append([s, e])\n            else:\n                merged[-1][1] = max(merged[-1][1], e)\n        return merged",
+        "java": "class Solution {\n    public int[][] merge(int[][] intervals) {\n        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));\n        List<int[]> merged = new ArrayList<>();\n        for (int[] it : intervals) {\n            if (merged.isEmpty() || merged.get(merged.size() - 1)[1] < it[0]) {\n                merged.add(new int[]{it[0], it[1]});\n            } else {\n                int[] last = merged.get(merged.size() - 1);\n                last[1] = Math.max(last[1], it[1]);\n            }\n        }\n        return merged.toArray(new int[merged.size()][]);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "Dominant cost is sorting n intervals by start. Linear merge pass is O(n). Overall O(n log n) time."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "O(n) for output merged list. Sorting is O(log n) to O(n) auxiliary depending on language, plus O(1) extra for sweep."
+      },
+      "dryRunExample": {
+        "input": "intervals = [[1,3],[2,6],[8,10],[15,18]]",
+        "steps": [
+          "sort by start -> [[1,3],[2,6],[8,10],[15,18]]",
+          "merged=[[1,3]]; next [2,6]: 3 >= 2 so extend to [1,6]",
+          "next [8,10]: 6 < 8 so push -> [[1,6],[8,10]]",
+          "next [15,18]: 10 < 15 so push -> [[1,6],[8,10],[15,18]]"
+        ],
+        "output": "[[1,6],[8,10],[15,18]]"
+      },
+      "edgeCases": [
+        "empty input returns empty",
+        "single interval [[0,0]] returns [[0,0]]",
+        "unsorted input [[15,18],[1,3],[2,6],[8,10]] still merges correctly after sort",
+        "touching [[1,4],[4,5]] merges to [[1,5]]; use < not <= to test new block"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "questionId": 69,
+  "title": "Sqrt(x)",
+  "difficulty": "Easy",
+  "corePattern": "Binary Search on Answer Space",
+  "interviewTips": [
+    "Clarify truncation: return floor(sqrt(x)), e.g. x=8 returns 2, and confirm x is non-negative 32-bit int.",
+    "Trade-off: Binary Search is O(log x) and interview-safe with no overflow if you use division or long; Newton is faster in practice with quadratic convergence but needs convergence reasoning.",
+    "Edge-case tip: avoid overflow of mid*mid in C++/Java by using long or comparing mid <= x / mid, and handle x=0 and x=1 early."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Linear Search",
+      "tag": "Brute Force",
+      "intuition": "Squares are strictly increasing for non-negative numbers, so try candidates 1,2,3... until square exceeds x, then previous number is floor sqrt.",
+      "theory": "We search smallest i with i*i > x. Correctness follows from monotonicity of f(i)=i*i. Use 64-bit for i*i to avoid 32-bit overflow. It checks about sqrt(x) values.",
+      "cppCode": "class Solution {\npublic:\n    int mySqrt(int x) {\n        if (x < 2) return x;\n        long i = 1;\n        while (i * i <= x) {\n            ++i;\n        }\n        return (int)(i - 1);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int mySqrt(int x) {\n        if (x < 2) return x;\n        long i = 1;\n        while (i * i <= x) {\n            ++i;\n        }\n        return (int)(i - 1);\n    }\n};",
+        "python": "class Solution:\n    def mySqrt(self, x: int) -> int:\n        if x < 2:\n            return x\n        i = 1\n        while i * i <= x:\n            i += 1\n        return i - 1",
+        "java": "class Solution {\n    public int mySqrt(int x) {\n        if (x < 2) return x;\n        long i = 1;\n        while (i * i <= x) {\n            i++;\n        }\n        return (int)(i - 1);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(sqrt(x))",
+        "explanation": "Checks up to about sqrt(x)+1 candidates, each O(1). For x near 2^31-1 this is ~46340 iterations."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a counter variable."
+      },
+      "dryRunExample": {
+        "input": "x = 8",
+        "steps": [
+          "i=1, 1*1=1 <=8 continue",
+          "i=2, 2*2=4 <=8 continue",
+          "i=3, 3*3=9 >8 stop",
+          "return 3-1=2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "x=0 returns 0",
+        "x=1 returns 1",
+        "perfect square e.g. x=9 returns 3",
+        "max int x=2147483647 returns 46340 without overflow using long"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Binary Search on Answer",
+      "tag": "Optimal",
+      "intuition": "Answer lies in [0, x]. Since squaring is monotonic, we can binary search this range for largest mid with mid*mid <= x.",
+      "theory": "Maintain invariant: answer in [left, right]. Let mid=(left+right)/2. If mid*mid <= x, answer >= mid so move left up and record ans; else answer < mid so move right down. Halves search space each step. Bound right to x//2 for x>=2 to halve steps. Use long or division to avoid overflow.",
+      "cppCode": "class Solution {\npublic:\n    int mySqrt(int x) {\n        if (x < 2) return x;\n        long left = 1, right = x / 2, ans = 0;\n        while (left <= right) {\n            long mid = left + (right - left) / 2;\n            long sq = mid * mid;\n            if (sq == x) return (int)mid;\n            else if (sq < x) {\n                ans = mid;\n                left = mid + 1;\n            } else {\n                right = mid - 1;\n            }\n        }\n        return (int)ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int mySqrt(int x) {\n        if (x < 2) return x;\n        long left = 1, right = x / 2, ans = 0;\n        while (left <= right) {\n            long mid = left + (right - left) / 2;\n            long sq = mid * mid;\n            if (sq == x) return (int)mid;\n            else if (sq < x) {\n                ans = mid;\n                left = mid + 1;\n            } else {\n                right = mid - 1;\n            }\n        }\n        return (int)ans;\n    }\n};",
+        "python": "class Solution:\n    def mySqrt(self, x: int) -> int:\n        if x < 2:\n            return x\n        left, right = 1, x // 2\n        ans = 0\n        while left <= right:\n            mid = left + (right - left) // 2\n            sq = mid * mid\n            if sq == x:\n                return mid\n            elif sq < x:\n                ans = mid\n                left = mid + 1\n            else:\n                right = mid - 1\n        return ans",
+        "java": "class Solution {\n    public int mySqrt(int x) {\n        if (x < 2) return x;\n        long left = 1, right = x / 2, ans = 0;\n        while (left <= right) {\n            long mid = left + (right - left) / 2;\n            long sq = mid * mid;\n            if (sq == x) return (int)mid;\n            else if (sq < x) {\n                ans = mid;\n                left = mid + 1;\n            } else {\n                right = mid - 1;\n            }\n        }\n        return (int)ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log x)",
+        "explanation": "Search space size ~x/2 halved each iteration, about 31 steps max for 32-bit int."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only left, right, mid pointers."
+      },
+      "dryRunExample": {
+        "input": "x = 8",
+        "steps": [
+          "left=1 right=4 ans=0",
+          "mid=2 sq=4<8 ans=2 left=3",
+          "mid=3 sq=9>8 right=2",
+          "left>right stop return ans=2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "x=0 returns 0",
+        "x=1 returns 1",
+        "perfect square e.g. x=16 returns 4 via early equality",
+        "large x e.g. 2147483647 no overflow due to long"
+      ]
+    },
+    {
+      "id": "newton",
+      "name": "Approach 3: Newton Method (Newton-Raphson)",
+      "tag": "Newton's Method",
+      "intuition": "Solve r*r - x = 0 by iterative improvement: start from r=x and repeatedly average r with x/r to converge to sqrt.",
+      "theory": "Newton update for f(r)=r*r-x is r = r - f(r)/fprime(r) = (r + x/r)/2. Sequence decreases monotonically to sqrt(x) when starting above it. Integer version r = (r + x/r)/2 with loop while r*r > x converges to floor sqrt. Quadratic convergence gives very few iterations.",
+      "cppCode": "class Solution {\npublic:\n    int mySqrt(int x) {\n        if (x < 2) return x;\n        long r = x;\n        while (r * r > x) {\n            r = (r + x / r) / 2;\n        }\n        return (int)r;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int mySqrt(int x) {\n        if (x < 2) return x;\n        long r = x;\n        while (r * r > x) {\n            r = (r + x / r) / 2;\n        }\n        return (int)r;\n    }\n};",
+        "python": "class Solution:\n    def mySqrt(self, x: int) -> int:\n        if x < 2:\n            return x\n        r = x\n        while r * r > x:\n            r = (r + x // r) // 2\n        return r",
+        "java": "class Solution {\n    public int mySqrt(int x) {\n        if (x < 2) return x;\n        long r = x;\n        while (r * r > x) {\n            r = (r + x / r) / 2;\n        }\n        return (int)r;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log x)",
+        "explanation": "Quadratic convergence, typically <10 iterations for 32-bit range; often faster than binary search in practice."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only one variable r."
+      },
+      "dryRunExample": {
+        "input": "x = 8",
+        "steps": [
+          "r=8, 64>8 r=(8+1)/2=4",
+          "r=4, 16>8 r=(4+2)/2=3",
+          "r=3, 9>8 r=(3+2)/2=2",
+          "r=2, 4<=8 stop return 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "x=0 returns 0 to avoid divide by zero",
+        "x=1 returns 1",
+        "perfect square e.g. x=9 converges exactly to 3",
+        "large x uses long for r*r comparison"
+      ]
+    }
+  ]
+}

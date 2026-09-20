@@ -2,49 +2,83 @@
   "questionId": 162,
   "title": "Find Peak Element",
   "difficulty": "Medium",
-  "corePattern": "Binary Search",
+  "corePattern": "Binary Search on Slope (Peak Finding in Unsorted Array)",
   "interviewTips": [
-    "State the brute-force approach first before presenting the optimal Binary Search technique.",
-    "Discuss Time and Space complexities upfront before writing code.",
-    "Test on empty inputs and single-element edge cases."
+    "Clarify: nums[i] != nums[i+1] for all valid i guarantees a peak exists; any peak index is acceptable, and nums[-1] = nums[n] = -inf for boundary handling.",
+    "Trade-off: Linear scan is O(n) and trivially correct, but binary search achieves O(log n) by discarding half based on slope nums[mid] vs nums[mid+1] without needing sorted order.",
+    "Edge-case tip: Explicitly discuss n==1, strictly increasing [1,2,3], strictly decreasing [3,2,1], and two-element cases; verify mid+1 never goes out of bounds when loop is left < right."
   ],
   "approaches": [
     {
-      "id": "linear-scan",
-      "name": "Approach 1: Linear Scan (Brute Force)",
+      "id": "brute-force",
+      "name": "Approach 1: Linear Scan Brute Force",
       "tag": "Brute Force",
-      "intuition": "Examine every candidate answer sequentially from the start to the end until a valid match is found.",
-      "theory": "Linear scan tests all N candidates one by one without exploiting monotonicity.",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int linearSearch(const std::vector<int>& nums, int target) {\n        for (int i = 0; i < static_cast<int>(nums.size()); ++i) {\n            if (nums[i] == target) return i;\n        }\n        return -1;\n    }\n};",
+      "intuition": "A peak is simply larger than both neighbors, with missing neighbors treated as -infinity. Check every index sequentially and return the first that satisfies the definition.",
+      "theory": "By definition nums[-1] = nums[n] = -inf, so at least one peak must exist. Scanning i from 0 to n-1 and comparing nums[i] to left and right neighbors finds it. In worst case we visit all n elements. This is correct but does not exploit the nums[i] != nums[i+1] guarantee for faster search.",
+      "cppCode": "class Solution {\npublic:\n    int findPeakElement(vector<int>& nums) {\n        int n = nums.size();\n        for (int i = 0; i < n; ++i) {\n            long left = (i > 0) ? nums[i-1] : LONG_MIN;\n            long right = (i + 1 < n) ? nums[i+1] : LONG_MIN;\n            if (nums[i] > left && nums[i] > right) return i;\n        }\n        return 0;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int findPeakElement(vector<int>& nums) {\n        int n = nums.size();\n        for (int i = 0; i < n; ++i) {\n            long left = (i > 0) ? nums[i-1] : LONG_MIN;\n            long right = (i + 1 < n) ? nums[i+1] : LONG_MIN;\n            if (nums[i] > left && nums[i] > right) return i;\n        }\n        return 0;\n    }\n};",
+        "python": "class Solution:\n    def findPeakElement(self, nums: List[int]) -> int:\n        n = len(nums)\n        for i in range(n):\n            left = nums[i-1] if i > 0 else float('-inf')\n            right = nums[i+1] if i + 1 < n else float('-inf')\n            if nums[i] > left and nums[i] > right:\n                return i\n        return 0",
+        "java": "class Solution {\n    public int findPeakElement(int[] nums) {\n        int n = nums.length;\n        for (int i = 0; i < n; i++) {\n            long left = (i > 0) ? nums[i-1] : Long.MIN_VALUE;\n            long right = (i + 1 < n) ? nums[i+1] : Long.MIN_VALUE;\n            if (nums[i] > left && nums[i] > right) return i;\n        }\n        return 0;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Scans up to N elements."
+        "complexity": "O(n)",
+        "explanation": "We visit each element once and do O(1) neighbor comparisons, so time is linear in n."
       },
       "spaceComplexity": {
         "complexity": "O(1)",
-        "explanation": "Zero auxiliary space."
+        "explanation": "Only a few variables for indices and neighbor values, no extra array."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3,1]",
+        "steps": [
+          "i=0: 1 > -inf but 1 < 2 -> not peak",
+          "i=1: 2 > 1 but 2 < 3 -> not peak",
+          "i=2: 3 > 2 and 3 > 1 -> peak found, return 2"
+        ],
+        "output": "2"
       },
       "edgeCases": [
-        "Target smaller than minimum or larger than maximum."
+        "n==1: [5] returns 0 since both neighbors are -inf",
+        "Strictly increasing [1,2,3,4]: peak is last index 3",
+        "Strictly decreasing [4,3,2,1]: peak is first index 0",
+        "Two elements [1,2] returns 1, [2,1] returns 0"
       ]
     },
     {
-      "id": "binary-search-optimal",
-      "name": "Approach 2: Binary Search (Optimal)",
+      "id": "optimal",
+      "name": "Approach 2: Binary Search on Slope",
       "tag": "Optimal",
-      "intuition": "Because the search space is monotonic (sorted or monotonic predicate), calculate the midpoint `mid = left + (right - left) / 2` and discard half the search space in each step.",
-      "theory": "Halving the search range in each iteration guarantees logarithmic steps: log2(N). Using `left + (right - left) / 2` prevents integer overflow.",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int binarySearch(const std::vector<int>& nums, int target) {\n        int left = 0;\n        int right = nums.size() - 1;\n\n        while (left <= right) {\n            int mid = left + (right - left) / 2; // Prevent (left+right) overflow\n\n            if (nums[mid] == target) {\n                return mid;\n            } else if (nums[mid] < target) {\n                left = mid + 1;\n            } else {\n                right = mid - 1;\n            }\n        }\n\n        return -1; // Not found\n    }\n};",
+      "intuition": "If nums[mid] > nums[mid+1], we are on a descending slope so a peak must be at mid or to the left. Otherwise we are on an ascending slope so a peak must be to the right. Halve the search space each step.",
+      "theory": "Because nums[i] != nums[i+1] and boundaries are -inf, the slope test is decisive. Let mid = (left+right)/2. If nums[mid] > nums[mid+1], then interval [left, mid] must contain a peak (either mid is peak if nums[mid] > nums[mid-1], or peak lies left). Else nums[mid] < nums[mid+1], then interval [mid+1, right] must contain a peak. Invariant is maintained while left < right, converging to left==right which is a peak. This is binary search without sorted order, using only local slope.",
+      "cppCode": "class Solution {\npublic:\n    int findPeakElement(vector<int>& nums) {\n        int left = 0, right = (int)nums.size() - 1;\n        while (left < right) {\n            int mid = left + (right - left) / 2;\n            if (nums[mid] > nums[mid + 1]) right = mid;\n            else left = mid + 1;\n        }\n        return left;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int findPeakElement(vector<int>& nums) {\n        int left = 0, right = (int)nums.size() - 1;\n        while (left < right) {\n            int mid = left + (right - left) / 2;\n            if (nums[mid] > nums[mid + 1]) right = mid;\n            else left = mid + 1;\n        }\n        return left;\n    }\n};",
+        "python": "class Solution:\n    def findPeakElement(self, nums: List[int]) -> int:\n        left, right = 0, len(nums) - 1\n        while left < right:\n            mid = (left + right) // 2\n            if nums[mid] > nums[mid + 1]:\n                right = mid\n            else:\n                left = mid + 1\n        return left",
+        "java": "class Solution {\n    public int findPeakElement(int[] nums) {\n        int left = 0, right = nums.length - 1;\n        while (left < right) {\n            int mid = left + (right - left) / 2;\n            if (nums[mid] > nums[mid + 1]) right = mid;\n            else left = mid + 1;\n        }\n        return left;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(log N)",
-        "explanation": "Search interval is halved in every iteration."
+        "complexity": "O(log n)",
+        "explanation": "Each iteration halves the search interval [left, right]; at most log2(n) iterations with O(1) work per iteration."
       },
       "spaceComplexity": {
         "complexity": "O(1)",
-        "explanation": "Constant extra memory."
+        "explanation": "Iterative binary search uses only left, right, mid pointers."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3,1]",
+        "steps": [
+          "left=0, right=3, mid=1: nums[1]=2 < nums[2]=3 -> ascending, left=2",
+          "left=2, right=3, mid=2: nums[2]=3 > nums[3]=1 -> descending, right=2",
+          "left==right==2 -> return 2"
+        ],
+        "output": "2"
       },
       "edgeCases": [
-        "Array with 1 element, target not present in array."
+        "n==1: loop never runs, return 0",
+        "[1,2]: mid=0, 1<2 => left=1 return 1",
+        "[2,1]: mid=0, 2>1 => right=0 return 0",
+        "[1,2,1,3,5,6,4]: binary search may return 1 or 5, both valid peaks"
       ]
     }
   ]

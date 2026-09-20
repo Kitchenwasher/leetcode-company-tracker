@@ -1,0 +1,89 @@
+{
+  "questionId": 27,
+  "title": "Remove Element",
+  "difficulty": "Easy",
+  "corePattern": "Two Pointers - In-Place Overwrite (Slow-Fast Partition)",
+  "interviewTips": [
+    "Clarify: do we need to preserve relative order? Problem says order may be changed, so overwrite is allowed; ask what to return and whether elements beyond k matter (they don't).",
+    "Trade-off: shifting on every deletion is O(n^2) but simple; single-pass write-index is O(n) time O(1) space and stable, while swap-with-last is also O(n) but fewer writes when val is rare and unstable.",
+    "Edge-case tip: explicitly walk through empty array, all elements equal to val (return 0), no elements equal to val (return n), and single-element arrays."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with Shifting",
+      "tag": "Brute Force",
+      "intuition": "When we find val at index i, delete it by shifting every element to its right one step left, shrinking the logical size. This mimics what an ArrayList erase does and is the most first-principles way to keep order without extra space.",
+      "theory": "Maintain logical size n starting at nums.length. Scan with index i < n. If nums[i] == val, shift nums[i+1..n-1] left by one and decrement n without advancing i (since a new element moved into i needs checking). Otherwise advance i. At the end n equals count of non-val elements and first n positions hold the answer in original order. Each deletion costs O(n) shifts, leading to O(n^2) worst case.",
+      "cppCode": "class Solution {\npublic:\n    int removeElement(vector<int>& nums, int val) {\n        int n = nums.size();\n        int i = 0;\n        while (i < n) {\n            if (nums[i] == val) {\n                for (int j = i; j < n - 1; ++j) {\n                    nums[j] = nums[j + 1];\n                }\n                n--;\n            } else {\n                i++;\n            }\n        }\n        return n;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int removeElement(vector<int>& nums, int val) {\n        int n = nums.size();\n        int i = 0;\n        while (i < n) {\n            if (nums[i] == val) {\n                for (int j = i; j < n - 1; ++j) {\n                    nums[j] = nums[j + 1];\n                }\n                n--;\n            } else {\n                i++;\n            }\n        }\n        return n;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def removeElement(self, nums: List[int], val: int) -> int:\n        n = len(nums)\n        i = 0\n        while i < n:\n            if nums[i] == val:\n                for j in range(i, n - 1):\n                    nums[j] = nums[j + 1]\n                n -= 1\n            else:\n                i += 1\n        return n",
+        "java": "class Solution {\n    public int removeElement(int[] nums, int val) {\n        int n = nums.length;\n        int i = 0;\n        while (i < n) {\n            if (nums[i] == val) {\n                for (int j = i; j < n - 1; j++) {\n                    nums[j] = nums[j + 1];\n                }\n                n--;\n            } else {\n                i++;\n            }\n        }\n        return n;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "In worst case (e.g., all elements equal val) each of n deletions shifts up to O(n) elements, so total O(n^2). Best case with no val is O(n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only indices i, j and size n are used; shifting is done in place with no extra array."
+      },
+      "dryRunExample": {
+        "input": "nums = [3,2,2,3], val = 3",
+        "steps": [
+          "n=4, i=0: nums[0]=3==val -> shift to [2,2,3,3], n=3, i stays 0",
+          "i=0: nums[0]=2!=val -> i=1",
+          "i=1: nums[1]=2!=val -> i=2",
+          "i=2: nums[2]=3==val -> shift (no-op within n), n=2, i stays 2",
+          "i=2 == n=2 stop, return 2 with prefix [2,2]"
+        ],
+        "output": "2, nums = [2,2,_,_]"
+      },
+      "edgeCases": [
+        "Empty array: return 0 immediately",
+        "All equal to val e.g. [1,1,1], val=1: returns 0 after n shifts",
+        "No match e.g. [1,2,3], val=4: returns n with no shifts",
+        "Single element [1], val=1 vs val=2: returns 0 vs 1"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Two Pointers (Write Index)",
+      "tag": "Optimal",
+      "intuition": "We only care about keeping elements != val in the front. Use a write pointer k for the next position to fill, and scan every element with a read pointer. Whenever we see a keeper, copy it to nums[k] and advance k.",
+      "theory": "This is a stable partition / slow-fast pointer pattern. Invariant: nums[0..k-1] contains all non-val elements seen so far in order. Iterate x over nums: if x != val, set nums[k]=x and k++. Each element is visited once and each keeper is written once. At end k is the count and prefix nums[0..k-1] is the answer. Order is preserved, extra space is O(1). Correct because non-keepers are simply skipped and never written to the prefix.",
+      "cppCode": "class Solution {\npublic:\n    int removeElement(vector<int>& nums, int val) {\n        int k = 0;\n        for (int x : nums) {\n            if (x != val) {\n                nums[k++] = x;\n            }\n        }\n        return k;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int removeElement(vector<int>& nums, int val) {\n        int k = 0;\n        for (int x : nums) {\n            if (x != val) {\n                nums[k++] = x;\n            }\n        }\n        return k;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def removeElement(self, nums: List[int], val: int) -> int:\n        k = 0\n        for x in nums:\n            if x != val:\n                nums[k] = x\n                k += 1\n        return k",
+        "java": "class Solution {\n    public int removeElement(int[] nums, int val) {\n        int k = 0;\n        for (int x : nums) {\n            if (x != val) {\n                nums[k++] = x;\n            }\n        }\n        return k;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single linear scan over n elements, each does O(1) work. Each element is read once and written at most once."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only counter k and loop variable are used; all overwrites are in place."
+      },
+      "dryRunExample": {
+        "input": "nums = [3,2,2,3], val = 3",
+        "steps": [
+          "k=0, x=3==val -> skip",
+          "x=2!=val -> nums[0]=2, k=1 => [2,2,2,3]",
+          "x=2!=val -> nums[1]=2, k=2 => [2,2,2,3]",
+          "x=3==val -> skip",
+          "return k=2"
+        ],
+        "output": "2, nums = [2,2,_,_]"
+      },
+      "edgeCases": [
+        "Empty array: loop does nothing, return 0",
+        "All equal to val: k stays 0, return 0",
+        "No equal to val: every element copied to itself, return n",
+        "val at start/end only e.g. [3,1,2] or [1,2,3] with val=3: correctly compacts to [1,2]"
+      ]
+    }
+  ]
+}

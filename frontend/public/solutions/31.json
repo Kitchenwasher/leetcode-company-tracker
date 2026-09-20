@@ -1,0 +1,85 @@
+{
+  "questionId": 31,
+  "title": "Next Permutation",
+  "difficulty": "Medium",
+  "corePattern": "Lexicographic Pivot Search with Successor Swap and Suffix Reversal",
+  "interviewTips": [
+    "Ask if array must be modified in-place with O(1) extra space and what to do if no larger permutation exists (wrap to sorted ascending).",
+    "Trade-off to discuss: brute force enumerates factorial permutations vs linear two-pointer scan that exploits suffix structure.",
+    "Edge-case tip: mention fully descending input, duplicates, single element, and all-equal elements; test with [1,2,3], [3,2,1], [1,1,5]."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force via All Permutations",
+      "tag": "Brute Force",
+      "intuition": "If we list every distinct permutation of the array in sorted lexicographic order, the answer is simply the element right after the current arrangement, wrapping to the first if we are at the last. This is correct by definition but expensive.",
+      "theory": "Generate all unique permutations of nums via backtracking with sorting plus skip of used duplicates. Sort the list of permutations lexicographically. Linearly find the index of the current tuple and pick (index+1) mod total. Copy it back in-place. Generation costs factorial time and space, sorting dominates comparison cost.",
+      "cppCode": "class Solution {\npublic:\n    void nextPermutation(vector<int>& nums) {\n        int n = nums.size();\n        if (n <= 1) return;\n        vector<vector<int>> all;\n        vector<int> sorted = nums;\n        sort(sorted.begin(), sorted.end());\n        vector<int> path;\n        vector<bool> used(n, false);\n        dfs(sorted, used, path, all);\n        sort(all.begin(), all.end());\n        int idx = 0;\n        for (int i = 0; i < (int)all.size(); ++i) {\n            if (all[i] == nums) { idx = i; break; }\n        }\n        nums = all[(idx + 1) % all.size()];\n    }\nprivate:\n    void dfs(vector<int>& sorted, vector<bool>& used, vector<int>& path, vector<vector<int>>& all) {\n        if (path.size() == sorted.size()) { all.push_back(path); return; }\n        for (int i = 0; i < (int)sorted.size(); ++i) {\n            if (used[i]) continue;\n            if (i > 0 && sorted[i] == sorted[i-1] && !used[i-1]) continue;\n            used[i] = true;\n            path.push_back(sorted[i]);\n            dfs(sorted, used, path, all);\n            path.pop_back();\n            used[i] = false;\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void nextPermutation(vector<int>& nums) {\n        int n = nums.size();\n        if (n <= 1) return;\n        vector<vector<int>> all;\n        vector<int> sorted = nums;\n        sort(sorted.begin(), sorted.end());\n        vector<int> path;\n        vector<bool> used(n, false);\n        dfs(sorted, used, path, all);\n        sort(all.begin(), all.end());\n        int idx = 0;\n        for (int i = 0; i < (int)all.size(); ++i) {\n            if (all[i] == nums) { idx = i; break; }\n        }\n        nums = all[(idx + 1) % all.size()];\n    }\nprivate:\n    void dfs(vector<int>& sorted, vector<bool>& used, vector<int>& path, vector<vector<int>>& all) {\n        if (path.size() == sorted.size()) { all.push_back(path); return; }\n        for (int i = 0; i < (int)sorted.size(); ++i) {\n            if (used[i]) continue;\n            if (i > 0 && sorted[i] == sorted[i-1] && !used[i-1]) continue;\n            used[i] = true;\n            path.push_back(sorted[i]);\n            dfs(sorted, used, path, all);\n            path.pop_back();\n            used[i] = false;\n        }\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def nextPermutation(self, nums: List[int]) -> None:\n        from itertools import permutations\n        n = len(nums)\n        if n <= 1:\n            return\n        cur = tuple(nums)\n        all_perms = sorted(set(permutations(nums)))\n        idx = all_perms.index(cur)\n        nxt = all_perms[(idx + 1) % len(all_perms)]\n        for i in range(n):\n            nums[i] = nxt[i]",
+        "java": "class Solution {\n    public void nextPermutation(int[] nums) {\n        int n = nums.length;\n        if (n <= 1) return;\n        int[] sorted = nums.clone();\n        Arrays.sort(sorted);\n        List<List<Integer>> all = new ArrayList<>();\n        boolean[] used = new boolean[n];\n        dfs(sorted, used, new ArrayList<>(), all);\n        Collections.sort(all, (a, b) -> {\n            for (int i = 0; i < a.size(); i++) {\n                if (!a.get(i).equals(b.get(i))) return a.get(i) - b.get(i);\n            }\n            return 0;\n        });\n        int idx = 0;\n        for (int i = 0; i < all.size(); i++) {\n            boolean same = true;\n            for (int j = 0; j < n; j++) if (all.get(i).get(j) != nums[j]) same = false;\n            if (same) { idx = i; break; }\n        }\n        List<Integer> nxt = all.get((idx + 1) % all.size());\n        for (int i = 0; i < n; i++) nums[i] = nxt.get(i);\n    }\n    private void dfs(int[] sorted, boolean[] used, List<Integer> path, List<List<Integer>> all) {\n        if (path.size() == sorted.length) { all.add(new ArrayList<>(path)); return; }\n        for (int i = 0; i < sorted.length; i++) {\n            if (used[i]) continue;\n            if (i > 0 && sorted[i] == sorted[i-1] && !used[i-1]) continue;\n            used[i] = true;\n            path.add(sorted[i]);\n            dfs(sorted, used, path, all);\n            path.remove(path.size() - 1);\n            used[i] = false;\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n! * n log(n!))",
+        "explanation": "There are up to n! distinct permutations, each of length n to build and compare; sorting them dominates. Finding current index is linear in number of perms."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n! * n)",
+        "explanation": "Storing all distinct permutations plus recursion depth O(n) for backtracking path and used array."
+      },
+      "dryRunExample": {
+        "input": "[1,2,3]",
+        "steps": [
+          "Generate and sort all perms: [1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]",
+          "Find current tuple (1,2,3) at index 0",
+          "Pick next at index 1: (1,3,2) and copy back into nums"
+        ],
+        "output": "[1,3,2]"
+      },
+      "edgeCases": [
+        "Single element [1] stays unchanged",
+        "Fully descending [3,2,1] wraps to smallest [1,2,3]",
+        "Duplicates [1,1,5] -> [1,5,1], dedup via set or skip logic needed",
+        "All equal [1,1,1] only one distinct perm, stays same"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Pivot Swap and Suffix Reverse",
+      "tag": "Optimal",
+      "intuition": "From the right, the longest non-increasing suffix cannot be improved internally. The element just before it is the pivot that must increase. Swap it with the smallest larger element in the suffix, then reverse the suffix to make it minimal ascending.",
+      "theory": "Scan i from n-2 leftwards while nums[i] >= nums[i+1] to find pivot. If none, whole array is descending so reverse to ascending. Otherwise scan j from n-1 leftwards while nums[j] <= nums[i] to find rightmost successor, swap i and j. Since suffix was non-increasing, it is non-decreasing when viewed from right, and after swap remains non-increasing, so reversing i+1 to end yields minimal suffix. This gives immediate lexicographic successor in-place.",
+      "cppCode": "class Solution {\npublic:\n    void nextPermutation(vector<int>& nums) {\n        int n = nums.size();\n        int i = n - 2;\n        while (i >= 0 && nums[i] >= nums[i + 1]) i--;\n        if (i >= 0) {\n            int j = n - 1;\n            while (nums[j] <= nums[i]) j--;\n            swap(nums[i], nums[j]);\n        }\n        reverse(nums.begin() + i + 1, nums.end());\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void nextPermutation(vector<int>& nums) {\n        int n = nums.size();\n        int i = n - 2;\n        while (i >= 0 && nums[i] >= nums[i + 1]) i--;\n        if (i >= 0) {\n            int j = n - 1;\n            while (nums[j] <= nums[i]) j--;\n            swap(nums[i], nums[j]);\n        }\n        reverse(nums.begin() + i + 1, nums.end());\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def nextPermutation(self, nums: List[int]) -> None:\n        n = len(nums)\n        i = n - 2\n        while i >= 0 and nums[i] >= nums[i + 1]:\n            i -= 1\n        if i >= 0:\n            j = n - 1\n            while nums[j] <= nums[i]:\n                j -= 1\n            nums[i], nums[j] = nums[j], nums[i]\n        l, r = i + 1, n - 1\n        while l < r:\n            nums[l], nums[r] = nums[r], nums[l]\n            l += 1\n            r -= 1",
+        "java": "class Solution {\n    public void nextPermutation(int[] nums) {\n        int n = nums.length;\n        int i = n - 2;\n        while (i >= 0 && nums[i] >= nums[i + 1]) i--;\n        if (i >= 0) {\n            int j = n - 1;\n            while (nums[j] <= nums[i]) j--;\n            int tmp = nums[i];\n            nums[i] = nums[j];\n            nums[j] = tmp;\n        }\n        int l = i + 1, r = n - 1;\n        while (l < r) {\n            int tmp = nums[l];\n            nums[l] = nums[r];\n            nums[r] = tmp;\n            l++;\n            r--;\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "At most two right-to-left scans plus one reversal, each linear in n."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only indices i, j, l, r and constant swap temp, in-place modification."
+      },
+      "dryRunExample": {
+        "input": "[1,2,3]",
+        "steps": [
+          "Find pivot: i=1 since nums[1]=2 < nums[2]=3, suffix [3] is non-increasing",
+          "Find successor: j=2 since nums[2]=3 > 2, swap -> [1,3,2]",
+          "Reverse suffix from i+1=2 to end -> [1,3,2] unchanged"
+        ],
+        "output": "[1,3,2]"
+      },
+      "edgeCases": [
+        "Descending [3,2,1]: no pivot, reverse whole array to [1,2,3]",
+        "Duplicates [1,1,5]: pivot i=1, swap and reverse -> [1,5,1]",
+        "Single element or empty: loop does nothing",
+        "Pivot at start e.g. [2,3,1]: swap 2 with 3 -> [3,2,1] then reverse suffix -> [3,1,2]"
+      ]
+    }
+  ]
+}

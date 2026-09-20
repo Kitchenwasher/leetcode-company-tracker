@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, UserProgressItem, ProblemStatus, Difficulty } from '../types';
-import { QuestionSolution, SolutionApproach } from '../types/solution';
+import { QuestionSolution, SolutionApproach, QuestionDescription } from '../types/solution';
 import { questionsApi } from '../api/questionsApi';
 import { WhiteboardCanvas } from './WhiteboardCanvas';
 import { CppPlayground } from './CppPlayground';
@@ -44,8 +44,12 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
   const [personalDiff, setPersonalDiff] = useState<Difficulty | undefined>(initialProgress.personalDifficulty);
 
   // Left & Right Tabs
-  const [leftTab, setLeftTab] = useState<'theory' | 'notes' | 'srs' | 'companies'>('theory');
+  const [leftTab, setLeftTab] = useState<'description' | 'theory' | 'notes' | 'srs' | 'companies'>('description');
   const [rightTab, setRightTab] = useState<'runner' | 'whiteboard' | 'scratchpad'>('runner');
+
+  // Authentic LeetCode Problem Description
+  const [descriptionData, setDescriptionData] = useState<QuestionDescription | null>(null);
+  const [isLoadingDescription, setIsLoadingDescription] = useState<boolean>(false);
 
   // Solution data & Multi-Language support
   const [solutionData, setSolutionData] = useState<QuestionSolution | null>(null);
@@ -118,6 +122,49 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
       }
     };
     loadSolution();
+    return () => {
+      isMounted = false;
+    };
+  }, [q.id]);
+
+  // Load authentic LeetCode problem description (static edge files with on-demand fallback)
+  useEffect(() => {
+    let isMounted = true;
+    const loadDescription = async () => {
+      try {
+        setIsLoadingDescription(true);
+        let data: QuestionDescription | null = null;
+
+        // 1. Try static pre-downloaded description first (instant, edge CDN)
+        try {
+          const res = await fetch(`/descriptions/${q.id}.json`);
+          if (res.ok) {
+            const parsed = await res.json();
+            if (parsed && parsed.content) {
+              data = parsed;
+            }
+          }
+        } catch {}
+
+        // 2. If not found or empty, fallback to backend on-demand LeetCode GraphQL fetch
+        if (!data || !data.content) {
+          try {
+            data = await questionsApi.getDescription(q.id);
+          } catch {}
+        }
+
+        if (isMounted) {
+          setDescriptionData(data);
+          setIsLoadingDescription(false);
+        }
+      } catch {
+        if (isMounted) {
+          setDescriptionData(null);
+          setIsLoadingDescription(false);
+        }
+      }
+    };
+    loadDescription();
     return () => {
       isMounted = false;
     };
@@ -452,15 +499,25 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
           <div className="h-10 border-b border-border bg-surface/90 px-3 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
               <button
+                onClick={() => setLeftTab('description')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  leftTab === 'description' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Description</span>
+              </button>
+
+              <button
                 onClick={() => setLeftTab('theory')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   leftTab === 'theory' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
                 }`}
               >
-                <Lightbulb className="w-3.5 h-3.5 text-primary" />
-                <span>C++ Solutions & Theory</span>
+                <Lightbulb className="w-3.5 h-3.5" />
+                <span>Editorial & Solutions</span>
                 {solutionData && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary/20 text-primaryHover font-mono">
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${leftTab === 'theory' ? 'bg-black/20 text-black' : 'bg-primary/20 text-primary'}`}>
                     {solutionData.approaches.length}
                   </span>
                 )}
@@ -468,14 +525,14 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
 
               <button
                 onClick={() => setLeftTab('notes')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   leftTab === 'notes' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
                 <span>Notes & Tags</span>
                 {tags.length > 0 && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-surfaceElevated text-textSecondary font-mono">
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${leftTab === 'notes' ? 'bg-black/20 text-black' : 'bg-surfaceElevated text-textSecondary'}`}>
                     {tags.length}
                   </span>
                 )}
@@ -483,7 +540,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
 
               <button
                 onClick={() => setLeftTab('srs')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   leftTab === 'srs' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
                 }`}
               >
@@ -493,7 +550,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
 
               <button
                 onClick={() => setLeftTab('companies')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   leftTab === 'companies' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
                 }`}
               >
@@ -505,6 +562,123 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
 
           {/* Left Pane Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+            {/* TAB 0: AUTHENTIC LEETCODE PROBLEM DESCRIPTION */}
+            {leftTab === 'description' && (
+              <div className="space-y-6">
+                {/* Problem Title, ID, Difficulty, and Topic Tags */}
+                <div className="space-y-3 pb-4 border-b border-border">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
+                      <span className="text-primary font-mono">#{q.id}.</span>
+                      <span>{descriptionData?.title || q.title}</span>
+                    </h2>
+                    <span
+                      className={`text-xs font-bold px-2.5 py-1 rounded-md border ${
+                        (descriptionData?.difficulty || q.difficulty) === 'Easy'
+                          ? 'bg-easy/10 text-easy border-easy/40'
+                          : (descriptionData?.difficulty || q.difficulty) === 'Medium'
+                          ? 'bg-medium/10 text-medium border-medium/40'
+                          : 'bg-hard/10 text-hard border-hard/40'
+                      }`}
+                    >
+                      {descriptionData?.difficulty || q.difficulty}
+                    </span>
+                  </div>
+
+                  {/* Topic Tags */}
+                  {(descriptionData?.topicTags && descriptionData.topicTags.length > 0) ? (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {descriptionData.topicTags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2.5 py-1 rounded-lg bg-surfaceElevated border border-border text-[11px] font-medium text-textSecondary"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-lg bg-surfaceElevated border border-border text-[11px] font-medium text-textSecondary">
+                        LeetCode Problem #{q.id}
+                      </span>
+                      {companyFreq && (
+                        <span className="px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/30 text-[11px] font-medium text-primary">
+                          {companyFreq}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Loading State */}
+                {isLoadingDescription && (
+                  <div className="py-16 flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    <p className="text-xs text-textMuted font-mono">Fetching official LeetCode problem statement...</p>
+                  </div>
+                )}
+
+                {/* HTML Description Content */}
+                {!isLoadingDescription && descriptionData?.content && (
+                  <div
+                    className="leetcode-description-content"
+                    dangerouslySetInnerHTML={{ __html: descriptionData.content }}
+                  />
+                )}
+
+                {/* Fallback if no HTML description could be loaded */}
+                {!isLoadingDescription && !descriptionData?.content && (
+                  <div className="p-6 rounded-2xl bg-surfaceElevated border border-border text-center space-y-4">
+                    <div className="w-12 h-12 mx-auto rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-bold text-white">{q.title}</h3>
+                      <p className="text-xs text-textMuted leading-relaxed max-w-sm mx-auto">
+                        Solve on LeetCode or study the multi-approach verified editorial right here in cheatcode.
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-center gap-3">
+                      <a
+                        href={q.url || `https://leetcode.com/problems/${q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-black font-bold text-xs shadow-terminal-glow"
+                      >
+                        <span>Open on LeetCode</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                      <button
+                        onClick={() => setLeftTab('theory')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface hover:bg-border text-white text-xs font-semibold border border-border cursor-pointer"
+                      >
+                        <Lightbulb className="w-3.5 h-3.5 text-primary" />
+                        <span>View Editorial</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom CTA: Switch to Editorial & Solutions */}
+                {!isLoadingDescription && (
+                  <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
+                    <div className="text-xs text-textMuted">
+                      Ready to inspect algorithm proofs & implementations?
+                    </div>
+                    <button
+                      onClick={() => setLeftTab('theory')}
+                      className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-primary hover:bg-primaryHover text-black text-xs font-bold shadow-terminal-glow transition-all cursor-pointer"
+                    >
+                      <Lightbulb className="w-3.5 h-3.5" />
+                      <span>View Editorial & Solutions ({solutionData?.approaches?.length || 'Optimal'})</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* TAB 1: C++ MULTI-APPROACH SOLUTIONS & THEORY */}
             {leftTab === 'theory' && (
               <div className="space-y-5">

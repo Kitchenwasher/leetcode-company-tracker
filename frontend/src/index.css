@@ -176,3 +176,67 @@
   display: inline-block;
   animation: terminal-blink 1s infinite steps(1);
 }
+
+/* LeetCode Problem Description Styling */
+.leetcode-description-content {
+  color: #D1D5DB;
+  font-size: 0.8125rem;
+  line-height: 1.625;
+}
+
+.leetcode-description-content p {
+  margin-bottom: 0.75rem;
+}
+
+.leetcode-description-content strong {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.leetcode-description-content code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85em;
+  background-color: #161B22;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  color: var(--theme-accent);
+}
+
+.leetcode-description-content pre {
+  margin: 0.75rem 0;
+  padding: 0.875rem 1rem;
+  background-color: #0D1117;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #E6EDF3;
+}
+
+.leetcode-description-content pre code {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+.leetcode-description-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0 0.75rem 0;
+}
+
+.leetcode-description-content li {
+  margin-bottom: 0.35rem;
+  color: #9CA3AF;
+}
+
+.leetcode-description-content img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 0.75rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}

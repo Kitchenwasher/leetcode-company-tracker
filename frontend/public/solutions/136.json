@@ -1,0 +1,124 @@
+{
+  "questionId": 136,
+  "title": "Single Number",
+  "difficulty": "Easy",
+  "corePattern": "Bit Manipulation (XOR Cancellation)",
+  "interviewTips": [
+    "Clarify constraints: confirm every element appears exactly twice except one single element, and array length is odd.",
+    "Trade-off to discuss: HashSet gives O(n) time with O(n) space, while XOR gives O(n) time with O(1) space by exploiting a ^ a = 0 and commutativity.",
+    "Edge-case tip: mention single-element array, negative numbers, zero as single, and that XOR works for 32-bit signed ints in all languages without overflow.",
+    "Follow-up to offer: if elements appear 3 times except one, XOR no longer works and you need bit-counting modulo 3 or finite-state machine."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "For each element, count how many times it occurs in the whole array. The element with count 1 is the answer. This directly implements the definition without extra data structures.",
+      "theory": "Fix index i and scan all j to count occurrences of nums[i]. If count == 1, return it. Since exactly one such element is guaranteed, we will always return. This uses pairwise comparison and no extra memory, but repeats work for duplicates.",
+      "cppCode": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        int n = nums.size();\n        for (int i = 0; i < n; ++i) {\n            int count = 0;\n            for (int j = 0; j < n; ++j) {\n                if (nums[j] == nums[i]) count++;\n            }\n            if (count == 1) return nums[i];\n        }\n        return -1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        int n = nums.size();\n        for (int i = 0; i < n; ++i) {\n            int count = 0;\n            for (int j = 0; j < n; ++j) {\n                if (nums[j] == nums[i]) count++;\n            }\n            if (count == 1) return nums[i];\n        }\n        return -1;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        n = len(nums)\n        for i in range(n):\n            count = 0\n            for j in range(n):\n                if nums[j] == nums[i]:\n                    count += 1\n            if count == 1:\n                return nums[i]\n        return -1",
+        "java": "class Solution {\n    public int singleNumber(int[] nums) {\n        for (int i = 0; i < nums.length; i++) {\n            int count = 0;\n            for (int j = 0; j < nums.length; j++) {\n                if (nums[j] == nums[i]) count++;\n            }\n            if (count == 1) return nums[i];\n        }\n        return -1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "For each of n elements we scan all n elements to count occurrences."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only counters and loop indices are used, no extra storage proportional to input."
+      },
+      "dryRunExample": {
+        "input": "nums = [4,1,2,1,2]",
+        "steps": [
+          "i=0 val=4: scan all -> count=1 -> return 4",
+          "Worst-case example if single at end: check 1 finds 2 copies, check 2 finds 2 copies, until single found"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "Single element [1] returns 1 immediately",
+        "Single at end e.g. [2,2,1] requires full scans for first elements",
+        "Negative numbers and zero work with equality check"
+      ]
+    },
+    {
+      "id": "hash-set",
+      "name": "Approach 2: Hash Set Cancellation",
+      "tag": "Hashing",
+      "intuition": "Pairs cancel each other. Keep a set of unpaired elements: add on first sight, remove on second sight. At the end only the single remains.",
+      "theory": "Iterate once. Invariant: set contains elements seen odd times so far. Since duplicates appear exactly twice, they are inserted then erased. The lone element is inserted once and never erased, so set size is 1 at end. Equivalent variant uses HashMap to count frequencies then finds count 1.",
+      "cppCode": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        unordered_set<int> seen;\n        for (int x : nums) {\n            if (seen.count(x)) seen.erase(x);\n            else seen.insert(x);\n        }\n        return *seen.begin();\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        unordered_set<int> seen;\n        for (int x : nums) {\n            if (seen.count(x)) seen.erase(x);\n            else seen.insert(x);\n        }\n        return *seen.begin();\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        seen = set()\n        for x in nums:\n            if x in seen:\n                seen.remove(x)\n            else:\n                seen.add(x)\n        return next(iter(seen))",
+        "java": "class Solution {\n    public int singleNumber(int[] nums) {\n        Set<Integer> seen = new HashSet<>();\n        for (int x : nums) {\n            if (!seen.add(x)) seen.remove(x);\n        }\n        return seen.iterator().next();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass with O(1) average hash insert, lookup and erase per element."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "In worst case set holds up to (n+1)/2 unpaired elements before pairs close, e.g., all distinct first half."
+      },
+      "dryRunExample": {
+        "input": "nums = [4,1,2,1,2]",
+        "steps": [
+          "x=4: seen={4}",
+          "x=1: seen={4,1}",
+          "x=2: seen={4,1,2}",
+          "x=1: remove 1 -> seen={4,2}",
+          "x=2: remove 2 -> seen={4} -> return 4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "Single element [0] -> set {0} -> return 0",
+        "Large values and negatives work with hashing",
+        "Math alternative 2*sum(set)-sum(nums) also O(n) but risks overflow and needs two passes"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Bitwise XOR",
+      "tag": "Optimal",
+      "intuition": "XOR cancels duplicates: a ^ a = 0 and a ^ 0 = a. XORing all numbers leaves only the single because pairs become 0.",
+      "theory": "XOR is associative, commutative, self-inverse (x ^ x = 0) with identity 0 (x ^ 0 = x). So x1 ^ x2 ^ ... ^ xn reorders to (a ^ a) ^ (b ^ b) ^ ... ^ single = 0 ^ ... ^ 0 ^ single = single. This works at bit level independently and needs only one accumulator, no extra memory.",
+      "cppCode": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        int ans = 0;\n        for (int x : nums) ans ^= x;\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        int ans = 0;\n        for (int x : nums) ans ^= x;\n        return ans;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        ans = 0\n        for x in nums:\n            ans ^= x\n        return ans",
+        "java": "class Solution {\n    public int singleNumber(int[] nums) {\n        int ans = 0;\n        for (int x : nums) ans ^= x;\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One linear pass, constant-time XOR per element."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only single integer accumulator ans is used."
+      },
+      "dryRunExample": {
+        "input": "nums = [4,1,2,1,2]",
+        "steps": [
+          "ans=0",
+          "ans=0^4=4",
+          "ans=4^1=5",
+          "ans=5^2=7",
+          "ans=7^1=6",
+          "ans=6^2=4 -> return 4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "Single element [1] -> 0^1=1",
+        "Zero as single e.g. [2,2,0] -> 2^2^0=0",
+        "Negative numbers work because XOR operates on two's complement bits",
+        "Does not apply if duplicates appear 3 times - needs bit-count mod 3 instead"
+      ]
+    }
+  ]
+}

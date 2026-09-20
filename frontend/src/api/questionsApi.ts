@@ -33,6 +33,11 @@ export const questionsApi = {
     return res.data;
   },
 
+  getDescription: async (id: number | string): Promise<any> => {
+    const res = await api.get(`/questions/${id}/description`);
+    return res.data;
+  },
+
   getSolution: async (id: number | string, forceRegenerate: boolean = false): Promise<QuestionSolution> => {
     const res = await api.get<QuestionSolution>(`/questions/${id}/solution${forceRegenerate ? '?regenerate=true' : ''}`);
     return res.data;

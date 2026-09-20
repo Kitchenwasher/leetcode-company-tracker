@@ -1,0 +1,88 @@
+{
+  "questionId": 18,
+  "title": "4Sum",
+  "difficulty": "Medium",
+  "corePattern": "Sorting + K-Sum Reduction with Two Pointers",
+  "interviewTips": [
+    "Ask if quadruplets must be unique and order-independent - sorting plus skip-duplicates is expected.",
+    "Mention 32-bit overflow explicitly: cast sum to long / long long before comparing to target.",
+    "Discuss pruning with min/max possible sums and how solution generalizes to k-Sum recursion."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Enumeration",
+      "tag": "Brute Force",
+      "intuition": "Check every combination of 4 distinct indices and keep those summing to target, deduplicating by sorted canonical form.",
+      "theory": "There are C(n,4) index quadruples. Exhaustive search is correct by definition. Two different index sets with same values map to same sorted tuple, so inserting sorted tuple into a hash set removes duplicate value-quadruplets while preserving all distinct ones.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> fourSum(vector<int>& nums, int target) {\n        int n = nums.size();\n        set<vector<int>> uniq;\n        for (int i = 0; i < n; ++i)\n            for (int j = i + 1; j < n; ++j)\n                for (int k = j + 1; k < n; ++k)\n                    for (int l = k + 1; l < n; ++l) {\n                        long long s = (long long)nums[i] + nums[j] + nums[k] + nums[l];\n                        if (s == target) {\n                            vector<int> q = {nums[i], nums[j], nums[k], nums[l]};\n                            sort(q.begin(), q.end());\n                            uniq.insert(q);\n                        }\n                    }\n        return vector<vector<int>>(uniq.begin(), uniq.end());\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> fourSum(vector<int>& nums, int target) {\n        int n = nums.size();\n        set<vector<int>> uniq;\n        for (int i = 0; i < n; ++i)\n            for (int j = i + 1; j < n; ++j)\n                for (int k = j + 1; k < n; ++k)\n                    for (int l = k + 1; l < n; ++l) {\n                        long long s = (long long)nums[i] + nums[j] + nums[k] + nums[l];\n                        if (s == target) {\n                            vector<int> q = {nums[i], nums[j], nums[k], nums[l]};\n                            sort(q.begin(), q.end());\n                            uniq.insert(q);\n                        }\n                    }\n        return vector<vector<int>>(uniq.begin(), uniq.end());\n    }\n};",
+        "python": "class Solution:\n    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:\n        n = len(nums)\n        found = set()\n        for i in range(n):\n            for j in range(i+1, n):\n                for k in range(j+1, n):\n                    for l in range(k+1, n):\n                        if nums[i] + nums[j] + nums[k] + nums[l] == target:\n                            quad = tuple(sorted([nums[i], nums[j], nums[k], nums[l]]))\n                            found.add(quad)\n        return [list(q) for q in found]",
+        "java": "class Solution {\n    public List<List<Integer>> fourSum(int[] nums, int target) {\n        Set<List<Integer>> uniq = new HashSet<>();\n        int n = nums.length;\n        for (int i = 0; i < n; ++i)\n            for (int j = i + 1; j < n; ++j)\n                for (int k = j + 1; k < n; ++k)\n                    for (int l = k + 1; l < n; ++l) {\n                        long s = (long)nums[i] + nums[j] + nums[k] + nums[l];\n                        if (s == target) {\n                            List<Integer> q = Arrays.asList(nums[i], nums[j], nums[k], nums[l]);\n                            Collections.sort(q);\n                            uniq.add(q);\n                        }\n                    }\n        return new ArrayList<>(uniq);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^4 * log n)",
+        "explanation": "C(n,4) = O(n^4) quadruples checked, each needs O(1) sum plus sorting 4 elements for dedup key."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m)",
+        "explanation": "Hash set stores m unique quadruplets; output size m. No sorting space. Worst case m = O(n^4) if all zero."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,0,-1,0,-2,2], target = 0",
+        "steps": [
+          "Enumerate i<j<k<l, e.g. indices (0,1,2,3): 1+0-1+0=0 -> sorted (-1,0,0,1) added",
+          "Indices (1,3,4,5): 0+0-2+2=0 -> sorted (-2,0,0,2) added",
+          "Indices (2,3,4,5): -1+0-2+2=-1 skipped",
+          "Dedup via set ensures same values from different indices stored once"
+        ],
+        "output": "[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]] in any order"
+      },
+      "edgeCases": [
+        "n < 4 returns empty list",
+        "All duplicates e.g. [0,0,0,0,0] target 0 returns single [0,0,0,0]",
+        "Large values near 1e9 need 64-bit sum to avoid overflow",
+        "No solution returns empty list"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Sort + Double Loop + Two Pointers",
+      "tag": "Optimal",
+      "intuition": "Sort array, fix first two numbers with loops, then solve remaining 2Sum in O(n) with left/right pointers moving by sum comparison.",
+      "theory": "Sorting makes 2Sum on subarray nums[j+1..n-1] solvable with two pointers because if sum < target we must increase left, if sum > target we must decrease right. Skipping equal neighbors for i, j, left, right guarantees each distinct value quadruplet is emitted once. Early min/max sum pruning with smallest/largest possible partners safely breaks or continues loops.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> fourSum(vector<int>& nums, int target) {\n        sort(nums.begin(), nums.end());\n        int n = nums.size();\n        vector<vector<int>> res;\n        for (int i = 0; i < n - 3; ++i) {\n            if (i > 0 && nums[i] == nums[i-1]) continue;\n            if ((long long)nums[i] + nums[i+1] + nums[i+2] + nums[i+3] > target) break;\n            if ((long long)nums[i] + nums[n-3] + nums[n-2] + nums[n-1] < target) continue;\n            for (int j = i + 1; j < n - 2; ++j) {\n                if (j > i + 1 && nums[j] == nums[j-1]) continue;\n                if ((long long)nums[i] + nums[j] + nums[j+1] + nums[j+2] > target) break;\n                if ((long long)nums[i] + nums[j] + nums[n-2] + nums[n-1] < target) continue;\n                int left = j + 1, right = n - 1;\n                while (left < right) {\n                    long long s = (long long)nums[i] + nums[j] + nums[left] + nums[right];\n                    if (s == target) {\n                        res.push_back({nums[i], nums[j], nums[left], nums[right]});\n                        ++left; --right;\n                        while (left < right && nums[left] == nums[left-1]) ++left;\n                        while (left < right && nums[right] == nums[right+1]) --right;\n                    } else if (s < target) ++left;\n                    else --right;\n                }\n            }\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> fourSum(vector<int>& nums, int target) {\n        sort(nums.begin(), nums.end());\n        int n = nums.size();\n        vector<vector<int>> res;\n        for (int i = 0; i < n - 3; ++i) {\n            if (i > 0 && nums[i] == nums[i-1]) continue;\n            if ((long long)nums[i] + nums[i+1] + nums[i+2] + nums[i+3] > target) break;\n            if ((long long)nums[i] + nums[n-3] + nums[n-2] + nums[n-1] < target) continue;\n            for (int j = i + 1; j < n - 2; ++j) {\n                if (j > i + 1 && nums[j] == nums[j-1]) continue;\n                if ((long long)nums[i] + nums[j] + nums[j+1] + nums[j+2] > target) break;\n                if ((long long)nums[i] + nums[j] + nums[n-2] + nums[n-1] < target) continue;\n                int left = j + 1, right = n - 1;\n                while (left < right) {\n                    long long s = (long long)nums[i] + nums[j] + nums[left] + nums[right];\n                    if (s == target) {\n                        res.push_back({nums[i], nums[j], nums[left], nums[right]});\n                        ++left; --right;\n                        while (left < right && nums[left] == nums[left-1]) ++left;\n                        while (left < right && nums[right] == nums[right+1]) --right;\n                    } else if (s < target) ++left;\n                    else --right;\n                }\n            }\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:\n        nums.sort()\n        n = len(nums)\n        res = []\n        for i in range(n - 3):\n            if i > 0 and nums[i] == nums[i-1]:\n                continue\n            if nums[i] + nums[i+1] + nums[i+2] + nums[i+3] > target:\n                break\n            if nums[i] + nums[n-3] + nums[n-2] + nums[n-1] < target:\n                continue\n            for j in range(i + 1, n - 2):\n                if j > i + 1 and nums[j] == nums[j-1]:\n                    continue\n                if nums[i] + nums[j] + nums[j+1] + nums[j+2] > target:\n                    break\n                if nums[i] + nums[j] + nums[n-2] + nums[n-1] < target:\n                    continue\n                left, right = j + 1, n - 1\n                while left < right:\n                    s = nums[i] + nums[j] + nums[left] + nums[right]\n                    if s == target:\n                        res.append([nums[i], nums[j], nums[left], nums[right]])\n                        left += 1\n                        right -= 1\n                        while left < right and nums[left] == nums[left-1]:\n                            left += 1\n                        while left < right and nums[right] == nums[right+1]:\n                            right -= 1\n                    elif s < target:\n                        left += 1\n                    else:\n                        right -= 1\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> fourSum(int[] nums, int target) {\n        Arrays.sort(nums);\n        int n = nums.length;\n        List<List<Integer>> res = new ArrayList<>();\n        for (int i = 0; i < n - 3; ++i) {\n            if (i > 0 && nums[i] == nums[i-1]) continue;\n            if ((long)nums[i] + nums[i+1] + nums[i+2] + nums[i+3] > target) break;\n            if ((long)nums[i] + nums[n-3] + nums[n-2] + nums[n-1] < target) continue;\n            for (int j = i + 1; j < n - 2; ++j) {\n                if (j > i + 1 && nums[j] == nums[j-1]) continue;\n                if ((long)nums[i] + nums[j] + nums[j+1] + nums[j+2] > target) break;\n                if ((long)nums[i] + nums[j] + nums[n-2] + nums[n-1] < target) continue;\n                int left = j + 1, right = n - 1;\n                while (left < right) {\n                    long s = (long)nums[i] + nums[j] + nums[left] + nums[right];\n                    if (s == target) {\n                        res.add(Arrays.asList(nums[i], nums[j], nums[left], nums[right]));\n                        ++left; --right;\n                        while (left < right && nums[left] == nums[left-1]) ++left;\n                        while (left < right && nums[right] == nums[right+1]) --right;\n                    } else if (s < target) ++left;\n                    else --right;\n                }\n            }\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^3)",
+        "explanation": "Sorting O(n log n) plus O(n^2) pairs (i,j) each scanned once by two pointers O(n). Dominant term O(n^3)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1) extra, O(m) output",
+        "explanation": "Only pointers and result list; sorting uses O(log n) stack in most languages. Output holds m quadruplets."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,0,-1,0,-2,2], target = 0",
+        "steps": [
+          "Sort to [-2,-1,0,0,1,2]",
+          "i=0 (-2), j=1 (-1): left=2 (0), right=5 (2): sum=-1 <0 -> left=3",
+          "left=3 (0), right=5 (2): sum=-1 <0 -> left=4",
+          "left=4 (1), right=5 (2): sum=0 -> emit [-2,-1,1,2]",
+          "i=0 (-2), j=2 (0): finds [-2,0,0,2]; i=1 (-1), j=2 (0): finds [-1,0,0,1]; duplicates skipped"
+        ],
+        "output": "[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]"
+      },
+      "edgeCases": [
+        "n < 4 returns [] without entering loops",
+        "Duplicate-heavy input e.g. [2,2,2,2,2] target 8 returns one quad via skip logic",
+        "Overflow case [1000000000,1000000000,1000000000,1000000000] needs long sum",
+        "Negative target with all positives pruned early by break"
+      ]
+    }
+  ]
+}

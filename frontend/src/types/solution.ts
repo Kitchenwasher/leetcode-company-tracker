@@ -34,3 +34,14 @@ export interface QuestionSolution {
   approaches: SolutionApproach[];
   interviewTips: string[]; // Advice on how to present in an interview
 }
+
+export interface QuestionDescription {
+  id: number | string;
+  title: string;
+  titleSlug?: string;
+  difficulty: string;
+  content: string;
+  exampleTestcases?: string[];
+  topicTags?: string[];
+}
+

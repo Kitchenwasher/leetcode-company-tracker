@@ -2,41 +2,119 @@
   "questionId": 33,
   "title": "Search in Rotated Sorted Array",
   "difficulty": "Medium",
-  "corePattern": "Modified Binary Search (Sorted Half Invariant)",
+  "corePattern": "Modified Binary Search on Rotated Sorted Array",
   "interviewTips": [
-    "Key insight: Any rotated sorted array cut in half will ALWAYS have at least one sorted half.",
-    "Determine which half is sorted first, then check if target falls within that sorted half's bounds."
+    "Ask if array has distinct values and is guaranteed rotated from ascending sorted order with no duplicates, and confirm to return index or -1.",
+    "Trade-off: linear scan is O(n) simple but fails constraints; two-pass pivot-find plus binary search is clear but does two logs, one-pass halves constants and is preferred.",
+    "Edge-case tip: explicitly test n=1, no rotation, rotation at last index, target at lo-mid-hi boundaries, and target missing."
   ],
   "approaches": [
     {
-      "id": "binary-search-modified",
-      "name": "Approach 1: One-Pass Modified Binary Search (Optimal)",
-      "tag": "Optimal",
-      "intuition": "Divide the array at `mid`. At least one half (`nums[left..mid]` or `nums[mid..right]`) must be strictly sorted. Check if the target falls within that sorted half; if yes, narrow search to that half; otherwise, search the other half.",
-      "theory": "Invariant: If `nums[left] <= nums[mid]`, the left half is sorted. Target is in left half if `nums[left] <= target < nums[mid]`. Otherwise, the right half is sorted, and target is in right if `nums[mid] < target <= nums[right]`.",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int search(const std::vector<int>& nums, int target) {\n        int left = 0;\n        int right = nums.size() - 1;\n\n        while (left <= right) {\n            int mid = left + (right - left) / 2;\n\n            if (nums[mid] == target) {\n                return mid;\n            }\n\n            // Check if left half is normally sorted\n            if (nums[left] <= nums[mid]) {\n                // Target is within left sorted range\n                if (nums[left] <= target && target < nums[mid]) {\n                    right = mid - 1;\n                } else {\n                    left = mid + 1;\n                }\n            } else {\n                // Right half is normally sorted\n                if (nums[mid] < target && target <= nums[right]) {\n                    left = mid + 1;\n                } else {\n                    right = mid - 1;\n                }\n            }\n        }\n\n        return -1;\n    }\n};",
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Linear Scan",
+      "tag": "Brute Force",
+      "intuition": "If we ignore rotation, the problem is just find target index. Scanning left to right always works and establishes correctness baseline.",
+      "theory": "Iterate over all n elements and return first i with nums[i] == target, else -1. No assumption about order is used, so rotation is irrelevant. This is exhaustive search.",
+      "cppCode": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            if (nums[i] == target) return i;\n        }\n        return -1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            if (nums[i] == target) return i;\n        }\n        return -1;\n    }\n};",
+        "python": "class Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        for i, x in enumerate(nums):\n            if x == target:\n                return i\n        return -1",
+        "java": "class Solution {\n    public int search(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) {\n            if (nums[i] == target) return i;\n        }\n        return -1;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(log N)",
-        "explanation": "Search range halved at each step."
+        "complexity": "O(n)",
+        "explanation": "Visit each element once in worst case where target missing or at end."
       },
       "spaceComplexity": {
         "complexity": "O(1)",
-        "explanation": "Only index variables used."
+        "explanation": "Only index variables, no extra storage."
       },
       "dryRunExample": {
         "input": "nums = [4,5,6,7,0,1,2], target = 0",
         "steps": [
-          "left=0 (4), right=6 (2), mid=3 (7): left half [4..7] is sorted.",
-          "target 0 is not in [4..7], so left = mid + 1 = 4",
-          "left=4 (0), right=6 (2), mid=5 (1): right half [1..2] is sorted.",
-          "target 0 is in left side, right = mid - 1 = 4",
-          "left=4, right=4, mid=4 (0): nums[mid] == 0! Match found at index 4."
+          "i=0 val 4 !=0 continue",
+          "i=1 val 5 !=0 continue",
+          "i=2 val 6 !=0 continue",
+          "i=3 val 7 !=0 continue",
+          "i=4 val 0 ==0 return 4"
         ],
         "output": "4"
       },
       "edgeCases": [
-        "Array with 1 or 2 elements.",
-        "Target not found: returns -1."
+        "Single element match returns 0, mismatch returns -1",
+        "Target missing returns -1 after full scan",
+        "Empty array returns -1"
+      ]
+    },
+    {
+      "id": "pivot-binary-search",
+      "name": "Approach 2: Find Pivot Then Binary Search",
+      "tag": "Binary Search",
+      "intuition": "Rotation creates two sorted halves split at minimum element. If we find the pivot, we know which sorted half can contain target and can run normal binary search there.",
+      "theory": "Minimum element is the only place where nums[i] < nums[i-1] with wrap-around. Use binary search on property nums[mid] > nums[hi] to move lo to mid+1, else hi to mid, converging to pivot in O(log n). Then choose interval [pivot,n-1] if target between nums[pivot] and nums[n-1], else [0,pivot-1], and binary search that sorted interval.",
+      "cppCode": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        int n = nums.size();\n        if (n == 0) return -1;\n        int lo = 0, hi = n - 1;\n        while (lo < hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] > nums[hi]) lo = mid + 1;\n            else hi = mid;\n        }\n        int pivot = lo;\n        if (pivot == 0) { lo = 0; hi = n - 1; }\n        else if (nums[pivot] <= target && target <= nums[n - 1]) { lo = pivot; hi = n - 1; }\n        else { lo = 0; hi = pivot - 1; }\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) return mid;\n            else if (nums[mid] < target) lo = mid + 1;\n            else hi = mid - 1;\n        }\n        return -1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        int n = nums.size();\n        if (n == 0) return -1;\n        int lo = 0, hi = n - 1;\n        while (lo < hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] > nums[hi]) lo = mid + 1;\n            else hi = mid;\n        }\n        int pivot = lo;\n        if (pivot == 0) { lo = 0; hi = n - 1; }\n        else if (nums[pivot] <= target && target <= nums[n - 1]) { lo = pivot; hi = n - 1; }\n        else { lo = 0; hi = pivot - 1; }\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) return mid;\n            else if (nums[mid] < target) lo = mid + 1;\n            else hi = mid - 1;\n        }\n        return -1;\n    }\n};",
+        "python": "class Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        n = len(nums)\n        if n == 0:\n            return -1\n        lo, hi = 0, n - 1\n        while lo < hi:\n            mid = (lo + hi) // 2\n            if nums[mid] > nums[hi]:\n                lo = mid + 1\n            else:\n                hi = mid\n        pivot = lo\n        if pivot == 0:\n            lo, hi = 0, n - 1\n        elif nums[pivot] <= target <= nums[n - 1]:\n            lo, hi = pivot, n - 1\n        else:\n            lo, hi = 0, pivot - 1\n        while lo <= hi:\n            mid = (lo + hi) // 2\n            if nums[mid] == target:\n                return mid\n            elif nums[mid] < target:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n        return -1",
+        "java": "class Solution {\n    public int search(int[] nums, int target) {\n        int n = nums.length;\n        if (n == 0) return -1;\n        int lo = 0, hi = n - 1;\n        while (lo < hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] > nums[hi]) lo = mid + 1;\n            else hi = mid;\n        }\n        int pivot = lo;\n        if (pivot == 0) { lo = 0; hi = n - 1; }\n        else if (nums[pivot] <= target && target <= nums[n - 1]) { lo = pivot; hi = n - 1; }\n        else { lo = 0; hi = pivot - 1; }\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) return mid;\n            else if (nums[mid] < target) lo = mid + 1;\n            else hi = mid - 1;\n        }\n        return -1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log n)",
+        "explanation": "Pivot finding is O(log n) plus one binary search O(log n), total 2*log n."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only lo, hi, mid, pivot pointers."
+      },
+      "dryRunExample": {
+        "input": "nums = [4,5,6,7,0,1,2], target = 0",
+        "steps": [
+          "Find pivot: lo=0 hi=6 mid=3 val7>2 => lo=4; lo=4 hi=6 mid=5 val1<=2 => hi=5; lo=4 hi=5 mid=4 val0<=1 => hi=4 => pivot=4",
+          "Target 0 in [nums[4]=0, nums[6]=2] so search [4,6]",
+          "Binary search [4,6]: mid=5 val1>0 => hi=4; mid=4 val0==0 return 4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "No rotation pivot=0 searches whole array",
+        "Pivot at n-1 means only last element is smallest",
+        "Target equals pivot value or nums[0] or nums[n-1] boundary"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: One-Pass Modified Binary Search",
+      "tag": "Optimal",
+      "intuition": "At any mid, at least one side of [lo,hi] is sorted because rotation can break only one side. Check which side is sorted and whether target lies inside it to discard half.",
+      "theory": "If nums[lo] <= nums[mid], left half is sorted. If target in [nums[lo], nums[mid]) go left else go right. Otherwise right half must be sorted, so if target in (nums[mid], nums[hi]] go right else go left. Each step halves search space, preserving invariant that target if present is in [lo,hi]. Uses distinctness to decide sorted side unambiguously.",
+      "cppCode": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        int lo = 0, hi = (int)nums.size() - 1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) return mid;\n            if (nums[lo] <= nums[mid]) {\n                if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n                else lo = mid + 1;\n            } else {\n                if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n                else hi = mid - 1;\n            }\n        }\n        return -1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        int lo = 0, hi = (int)nums.size() - 1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) return mid;\n            if (nums[lo] <= nums[mid]) {\n                if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n                else lo = mid + 1;\n            } else {\n                if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n                else hi = mid - 1;\n            }\n        }\n        return -1;\n    }\n};",
+        "python": "class Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        lo, hi = 0, len(nums) - 1\n        while lo <= hi:\n            mid = (lo + hi) // 2\n            if nums[mid] == target:\n                return mid\n            if nums[lo] <= nums[mid]:\n                if nums[lo] <= target < nums[mid]:\n                    hi = mid - 1\n                else:\n                    lo = mid + 1\n            else:\n                if nums[mid] < target <= nums[hi]:\n                    lo = mid + 1\n                else:\n                    hi = mid - 1\n        return -1",
+        "java": "class Solution {\n    public int search(int[] nums, int target) {\n        int lo = 0, hi = nums.length - 1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) return mid;\n            if (nums[lo] <= nums[mid]) {\n                if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n                else lo = mid + 1;\n            } else {\n                if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n                else hi = mid - 1;\n            }\n        }\n        return -1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log n)",
+        "explanation": "Single binary search loop halves interval each iteration."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only three integer pointers."
+      },
+      "dryRunExample": {
+        "input": "nums = [4,5,6,7,0,1,2], target = 0",
+        "steps": [
+          "lo=0 hi=6 mid=3 val7 !=0, left sorted 4<=7 but target 0 not in [4,7) => lo=4",
+          "lo=4 hi=6 mid=5 val1 !=0, left sorted 0<=1 but target 0 not in [0,1) => lo=6? Wait check: nums[lo]=0 <=1 and 0<=0<1 true so hi=4",
+          "lo=4 hi=4 mid=4 val0==0 return 4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "n=1 with match or mismatch",
+        "Sorted no-rotation array behaves like normal binary search",
+        "Target at ends: nums[0] or nums[n-1]",
+        "Missing target between values returns -1 without infinite loop"
       ]
     }
   ]

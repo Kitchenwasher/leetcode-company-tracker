@@ -360,4 +360,77 @@ export class QuestionController {
       next(err);
     }
   }
+
+  static async getDescription(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const id = parseInt(String(req.params.id), 10);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid question ID' });
+        return;
+      }
+
+      const question = await prisma.question.findUnique({
+        where: { id },
+      });
+
+      if (!question) {
+        res.status(404).json({ error: 'Question not found' });
+        return;
+      }
+
+      // Determine slug from URL or title
+      let slug = '';
+      if (question.url) {
+        const parts = question.url.replace(/\/+$/, '').split('/');
+        const last = parts[parts.length - 1];
+        if (last && last !== 'problems') slug = last;
+      }
+      if (!slug) {
+        slug = question.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+
+      // Fetch from LeetCode GraphQL
+      const gqlRes = await fetch('https://leetcode.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Referer': 'https://leetcode.com',
+        },
+        body: JSON.stringify({
+          query: `query questionData($titleSlug: String!) {
+            question(titleSlug: $titleSlug) {
+              questionId
+              title
+              content
+              difficulty
+              exampleTestcaseList
+              topicTags { name }
+            }
+          }`,
+          variables: { titleSlug: slug },
+        }),
+      });
+
+      if (!gqlRes.ok) {
+        res.status(502).json({ error: 'Failed to fetch description from LeetCode' });
+        return;
+      }
+
+      const gqlData = (await gqlRes.json()) as any;
+      const detail = gqlData?.data?.question;
+
+      res.json({
+        id: question.id,
+        title: question.title,
+        titleSlug: slug,
+        difficulty: question.difficulty,
+        content: detail?.content || '<p>Problem description is currently unavailable.</p>',
+        exampleTestcases: detail?.exampleTestcaseList || [],
+        topicTags: detail?.topicTags?.map((t: any) => t.name) || [],
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 }

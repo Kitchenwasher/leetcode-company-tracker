@@ -1,0 +1,123 @@
+{
+  "questionId": 84,
+  "title": "Largest Rectangle in Histogram",
+  "difficulty": "Hard",
+  "corePattern": "Monotonic Increasing Stack for Previous and Next Smaller Element",
+  "interviewTips": [
+    "Ask if heights can be empty, contain zeros, or have up to 1e5 elements and if answer fits 32-bit int.",
+    "Trade-off: Brute force O(n^2) is simple but TLE; two-pass stack is clearer, one-pass stack with sentinel is optimal and most expected.",
+    "Edge tip: use strict vs non-strict inequality consistently for duplicates and always flush stack with sentinel 0; width is i - stack.top - 1 or i if stack empty."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "For every left bar expand right and keep minimum height, area is minHeight * width. The max over all pairs is the answer.",
+      "theory": "Fix left index i, iterate right index j >= i maintaining curMin = min(curMin, heights[j]). Candidate area = curMin * (j-i+1). This enumerates all subarrays as potential rectangles limited by minimum bar. Correct because any maximal rectangle has some interval where height equals minimum.",
+      "cppCode": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        int n = heights.size();\n        int maxArea = 0;\n        for (int i = 0; i < n; ++i) {\n            int minH = INT_MAX;\n            for (int j = i; j < n; ++j) {\n                minH = min(minH, heights[j]);\n                maxArea = max(maxArea, minH * (j - i + 1));\n            }\n        }\n        return maxArea;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        int n = heights.size();\n        int maxArea = 0;\n        for (int i = 0; i < n; ++i) {\n            int minH = INT_MAX;\n            for (int j = i; j < n; ++j) {\n                minH = min(minH, heights[j]);\n                maxArea = max(maxArea, minH * (j - i + 1));\n            }\n        }\n        return maxArea;\n    }\n};",
+        "python": "class Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        n = len(heights)\n        maxArea = 0\n        for i in range(n):\n            minH = float('inf')\n            for j in range(i, n):\n                if heights[j] < minH:\n                    minH = heights[j]\n                area = minH * (j - i + 1)\n                if area > maxArea:\n                    maxArea = area\n        return maxArea",
+        "java": "class Solution {\n    public int largestRectangleArea(int[] heights) {\n        int n = heights.length;\n        int maxArea = 0;\n        for (int i = 0; i < n; i++) {\n            int minH = Integer.MAX_VALUE;\n            for (int j = i; j < n; j++) {\n                minH = Math.min(minH, heights[j]);\n                maxArea = Math.max(maxArea, minH * (j - i + 1));\n            }\n        }\n        return maxArea;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "n left positions each expands up to n rights, constant work per pair."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only minH and maxArea variables besides input."
+      },
+      "dryRunExample": {
+        "input": "heights = [2,1,5,6,2,3]",
+        "steps": [
+          "i=0: expand j=0..5, min sequence 2,1,1,1,1,1 -> best 1*6=6",
+          "i=2: min sequence 5,5 -> areas 5,10 -> best 10",
+          "i=3: min 6 -> area 6, overall max stays 10",
+          "other i give smaller areas, final answer 10"
+        ],
+        "output": "10"
+      },
+      "edgeCases": [
+        "Empty array returns 0",
+        "Single bar [x] returns x",
+        "All equal [2,2,2] returns 2*n",
+        "Strictly decreasing needs full width with smallest bar"
+      ]
+    },
+    {
+      "id": "monotonic-two-pass",
+      "name": "Approach 2: Previous and Next Smaller with Monotonic Stack",
+      "tag": "Monotonic Stack",
+      "intuition": "For each bar as the limiting height, find how far it can extend left and right until a smaller bar stops it. Width * height is its best rectangle.",
+      "theory": "Compute left[i] = index of previous smaller element and right[i] = index of next smaller element using increasing stack. Pop while stack top >= current to maintain strict smaller boundaries. Then width = right[i]-left[i]-1 and area = heights[i]*width. Each index pushed and popped at most once, so linear. Correct because maximal rectangle for height heights[i] is exactly bounded by first smaller on each side.",
+      "cppCode": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        int n = heights.size();\n        if (n == 0) return 0;\n        vector<int> left(n), right(n);\n        vector<int> st;\n        for (int i = 0; i < n; ++i) {\n            while (!st.empty() && heights[st.back()] >= heights[i]) st.pop_back();\n            left[i] = st.empty() ? -1 : st.back();\n            st.push_back(i);\n        }\n        st.clear();\n        for (int i = n - 1; i >= 0; --i) {\n            while (!st.empty() && heights[st.back()] >= heights[i]) st.pop_back();\n            right[i] = st.empty() ? n : st.back();\n            st.push_back(i);\n        }\n        int ans = 0;\n        for (int i = 0; i < n; ++i) ans = max(ans, heights[i] * (right[i] - left[i] - 1));\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        int n = heights.size();\n        if (n == 0) return 0;\n        vector<int> left(n), right(n);\n        vector<int> st;\n        for (int i = 0; i < n; ++i) {\n            while (!st.empty() && heights[st.back()] >= heights[i]) st.pop_back();\n            left[i] = st.empty() ? -1 : st.back();\n            st.push_back(i);\n        }\n        st.clear();\n        for (int i = n - 1; i >= 0; --i) {\n            while (!st.empty() && heights[st.back()] >= heights[i]) st.pop_back();\n            right[i] = st.empty() ? n : st.back();\n            st.push_back(i);\n        }\n        int ans = 0;\n        for (int i = 0; i < n; ++i) ans = max(ans, heights[i] * (right[i] - left[i] - 1));\n        return ans;\n    }\n};",
+        "python": "class Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        n = len(heights)\n        if n == 0:\n            return 0\n        left = [-1] * n\n        right = [n] * n\n        stack = []\n        for i in range(n):\n            while stack and heights[stack[-1]] >= heights[i]:\n                stack.pop()\n            left[i] = stack[-1] if stack else -1\n            stack.append(i)\n        stack.clear()\n        for i in range(n - 1, -1, -1):\n            while stack and heights[stack[-1]] >= heights[i]:\n                stack.pop()\n            right[i] = stack[-1] if stack else n\n            stack.append(i)\n        ans = 0\n        for i in range(n):\n            ans = max(ans, heights[i] * (right[i] - left[i] - 1))\n        return ans",
+        "java": "class Solution {\n    public int largestRectangleArea(int[] heights) {\n        int n = heights.length;\n        if (n == 0) return 0;\n        int[] left = new int[n];\n        int[] right = new int[n];\n        Deque<Integer> st = new ArrayDeque<>();\n        for (int i = 0; i < n; i++) {\n            while (!st.isEmpty() && heights[st.peek()] >= heights[i]) st.pop();\n            left[i] = st.isEmpty() ? -1 : st.peek();\n            st.push(i);\n        }\n        st.clear();\n        for (int i = n - 1; i >= 0; i--) {\n            while (!st.isEmpty() && heights[st.peek()] >= heights[i]) st.pop();\n            right[i] = st.isEmpty() ? n : st.peek();\n            st.push(i);\n        }\n        int ans = 0;\n        for (int i = 0; i < n; i++) ans = Math.max(ans, heights[i] * (right[i] - left[i] - 1));\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Two linear passes, each index pushed and popped at most once."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Stack plus left and right arrays of size n."
+      },
+      "dryRunExample": {
+        "input": "heights = [2,1,5,6,2,3]",
+        "steps": [
+          "left = [-1,-1,1,2,1,4], right = [1,6,4,4,6,6]",
+          "i=2: h=5 width=4-1-1=2 area=10",
+          "i=3: h=6 width=4-2-1=1 area=6",
+          "max over all is 10"
+        ],
+        "output": "10"
+      },
+      "edgeCases": [
+        "Duplicates [2,2,2]: use >= to avoid double counting, width spans all",
+        "Increasing [1,2,3]: left is i-1, right is n",
+        "Decreasing [3,2,1]: left is -1, right is i+1"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: One-Pass Monotonic Stack with Sentinel",
+      "tag": "Optimal",
+      "intuition": "Keep increasing stack of bar indices. When a lower bar arrives, all taller bars on stack must end here, so pop and compute their rectangles immediately.",
+      "theory": "Stack maintains increasing heights. For current index i with height cur, while stack top height > cur, pop top h. Its right boundary is i (first smaller to right) and left boundary is new stack top (previous smaller). Width = i if stack empty else i - stack.top -1. Area = h*width. Append sentinel 0 to flush remaining stack. Each bar pushed and popped once, giving optimal linear time with single pass.",
+      "cppCode": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        heights.push_back(0);\n        vector<int> st;\n        int maxArea = 0;\n        for (int i = 0; i < (int)heights.size(); ++i) {\n            while (!st.empty() && heights[st.back()] >= heights[i]) {\n                int height = heights[st.back()];\n                st.pop_back();\n                int width = st.empty() ? i : i - st.back() - 1;\n                maxArea = max(maxArea, height * width);\n            }\n            st.push_back(i);\n        }\n        heights.pop_back();\n        return maxArea;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        heights.push_back(0);\n        vector<int> st;\n        int maxArea = 0;\n        for (int i = 0; i < (int)heights.size(); ++i) {\n            while (!st.empty() && heights[st.back()] >= heights[i]) {\n                int height = heights[st.back()];\n                st.pop_back();\n                int width = st.empty() ? i : i - st.back() - 1;\n                maxArea = max(maxArea, height * width);\n            }\n            st.push_back(i);\n        }\n        heights.pop_back();\n        return maxArea;\n    }\n};",
+        "python": "class Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        stack = []\n        maxArea = 0\n        ext = heights + [0]\n        for i, h in enumerate(ext):\n            while stack and ext[stack[-1]] >= h:\n                height = ext[stack.pop()]\n                width = i if not stack else i - stack[-1] - 1\n                if height * width > maxArea:\n                    maxArea = height * width\n            stack.append(i)\n        return maxArea",
+        "java": "class Solution {\n    public int largestRectangleArea(int[] heights) {\n        Deque<Integer> st = new ArrayDeque<>();\n        int maxArea = 0;\n        int n = heights.length;\n        for (int i = 0; i <= n; i++) {\n            int h = (i == n ? 0 : heights[i]);\n            while (!st.isEmpty() && h < heights[st.peek()]) {\n                int height = heights[st.pop()];\n                int width = st.isEmpty() ? i : i - st.peek() - 1;\n                maxArea = Math.max(maxArea, height * width);\n            }\n            st.push(i);\n        }\n        return maxArea;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each bar pushed once and popped once, single scan with sentinel."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Monotonic stack holds at most n indices, worst case increasing heights."
+      },
+      "dryRunExample": {
+        "input": "heights = [2,1,5,6,2,3] with sentinel 0",
+        "steps": [
+          "i=0 push 0 (2), i=1: 1<2 pop 0 width=1 area=2 push 1 (1)",
+          "i=2 push 2 (5), i=3 push 3 (6)",
+          "i=4 h=2: pop 3 h=6 width=4-2-1=1 area=6, pop 2 h=5 width=4-1-1=2 area=10 push 4",
+          "i=5 push 5 (3), i=6 h=0 flush rest max stays 10"
+        ],
+        "output": "10"
+      },
+      "edgeCases": [
+        "Single element [1] with sentinel flushes correctly",
+        "All zeros returns 0",
+        "Large n=1e5 increasing: stack grows to n but still O(n)",
+        "Do not forget sentinel else tallest suffix never popped"
+      ]
+    }
+  ]
+}

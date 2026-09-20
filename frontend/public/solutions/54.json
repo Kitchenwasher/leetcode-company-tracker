@@ -1,0 +1,90 @@
+{
+  "questionId": 54,
+  "title": "Spiral Matrix",
+  "difficulty": "Medium",
+  "corePattern": "Matrix Simulation with Shrinking Boundaries",
+  "interviewTips": [
+    "Clarify input constraints: can matrix be empty, 1x1, single row or single column, and rectangular m x n vs square?",
+    "Trade-off: visited + direction vectors is easiest to get bug-free but uses O(m*n) extra space, while four-boundary pointers use O(1) extra space but need careful guard checks to avoid double-counting corners.",
+    "Edge-case tip: after traversing top row and right column, always check if top <= bottom and left <= right before traversing bottom row and left column to handle single row/column layers."
+  ],
+  "approaches": [
+    {
+      "id": "simulation-visited",
+      "name": "Approach 1: Simulation with Visited Array",
+      "tag": "Brute Force",
+      "intuition": "Walk like a robot: always try to go straight, turn right when you hit a wall or a visited cell. Keep direction vectors right, down, left, up and a visited grid to know when to turn.",
+      "theory": "Model traversal as state (r,c,d). There are m*n steps total. At each step append matrix[r][c] and mark visited. Compute next cell nr,nc = r+dr[d], c+dc[d]. If out of bounds or visited, rotate d = (d+1)%4 and recompute. This visits each cell exactly once because visited prevents revisits and direction logic guarantees spiral order.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> spiralOrder(vector<vector<int>>& matrix) {\n        if (matrix.empty() || matrix[0].empty()) return {};\n        int m = matrix.size(), n = matrix[0].size();\n        vector<vector<bool>> seen(m, vector<bool>(n, false));\n        vector<vector<int>> dirs = {{0,1},{1,0},{0,-1},{-1,0}};\n        vector<int> res;\n        res.reserve(m * n);\n        int r = 0, c = 0, d = 0;\n        for (int i = 0; i < m * n; ++i) {\n            res.push_back(matrix[r][c]);\n            seen[r][c] = true;\n            int nr = r + dirs[d][0], nc = c + dirs[d][1];\n            if (nr < 0 || nr >= m || nc < 0 || nc >= n || seen[nr][nc]) {\n                d = (d + 1) % 4;\n                nr = r + dirs[d][0];\n                nc = c + dirs[d][1];\n            }\n            r = nr; c = nc;\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> spiralOrder(vector<vector<int>>& matrix) {\n        if (matrix.empty() || matrix[0].empty()) return {};\n        int m = matrix.size(), n = matrix[0].size();\n        vector<vector<bool>> seen(m, vector<bool>(n, false));\n        vector<vector<int>> dirs = {{0,1},{1,0},{0,-1},{-1,0}};\n        vector<int> res;\n        res.reserve(m * n);\n        int r = 0, c = 0, d = 0;\n        for (int i = 0; i < m * n; ++i) {\n            res.push_back(matrix[r][c]);\n            seen[r][c] = true;\n            int nr = r + dirs[d][0], nc = c + dirs[d][1];\n            if (nr < 0 || nr >= m || nc < 0 || nc >= n || seen[nr][nc]) {\n                d = (d + 1) % 4;\n                nr = r + dirs[d][0];\n                nc = c + dirs[d][1];\n            }\n            r = nr; c = nc;\n        }\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:\n        if not matrix or not matrix[0]:\n            return []\n        m, n = len(matrix), len(matrix[0])\n        visited = [[False] * n for _ in range(m)]\n        dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]\n        r = c = d = 0\n        res = []\n        for _ in range(m * n):\n            res.append(matrix[r][c])\n            visited[r][c] = True\n            nr, nc = r + dirs[d][0], c + dirs[d][1]\n            if not (0 <= nr < m and 0 <= nc < n and not visited[nr][nc]):\n                d = (d + 1) % 4\n                nr, nc = r + dirs[d][0], c + dirs[d][1]\n            r, c = nr, nc\n        return res",
+        "java": "class Solution {\n    public List<Integer> spiralOrder(int[][] matrix) {\n        List<Integer> res = new ArrayList<>();\n        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return res;\n        int m = matrix.length, n = matrix[0].length;\n        boolean[][] seen = new boolean[m][n];\n        int[][] dirs = {{0,1},{1,0},{0,-1},{-1,0}};\n        int r = 0, c = 0, d = 0;\n        for (int i = 0; i < m * n; i++) {\n            res.add(matrix[r][c]);\n            seen[r][c] = true;\n            int nr = r + dirs[d][0], nc = c + dirs[d][1];\n            if (nr < 0 || nr >= m || nc < 0 || nc >= n || seen[nr][nc]) {\n                d = (d + 1) % 4;\n                nr = r + dirs[d][0];\n                nc = c + dirs[d][1];\n            }\n            r = nr; c = nc;\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Each of the m*n cells is visited once and direction check is O(1)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "O(m*n) for visited boolean grid plus O(m*n) for output; O(1) auxiliary besides those."
+      },
+      "dryRunExample": {
+        "input": "[[1,2,3],[4,5,6],[7,8,9]]",
+        "steps": [
+          "start (0,0) dir=right, visit 1",
+          "move right: visit 2, 3, next (0,4) out of bounds -> turn down",
+          "move down: visit 6, 9, next (3,2) out of bounds -> turn left",
+          "move left: visit 8, 7, next (2,-1) visited/out -> turn up",
+          "move up: visit 4, next (0,0) visited -> turn right",
+          "move right: visit 5, done"
+        ],
+        "output": "[1,2,3,6,9,8,7,4,5]"
+      },
+      "edgeCases": [
+        "empty matrix [] or [[]] -> return []",
+        "single row [[1,2,3]] -> never turns, returns row",
+        "single column [[1],[2],[3]] -> turns after first cell",
+        "1x1 [[1]] -> single iteration, no turn needed"
+      ]
+    },
+    {
+      "id": "boundary-shrink",
+      "name": "Approach 2: Boundary Shrinking with Four Pointers",
+      "tag": "Optimal",
+      "intuition": "Peel the matrix like an onion: maintain top, bottom, left, right walls. Traverse top row left->right, right column top->bottom, bottom row right->left, left column bottom->top, then shrink walls inward and repeat.",
+      "theory": "Invariant: all elements outside [top,bottom]x[left,right] have been output in spiral order. Each loop iteration outputs the outer perimeter of the current submatrix and shrinks bounds by 1. Guards if top<=bottom and if left<=right before bottom/left traversals prevent double counting when remaining layer is a single row or column. Terminates when top>bottom or left>right, having emitted m*n elements.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> spiralOrder(vector<vector<int>>& matrix) {\n        if (matrix.empty() || matrix[0].empty()) return {};\n        int m = matrix.size(), n = matrix[0].size();\n        int top = 0, bottom = m - 1, left = 0, right = n - 1;\n        vector<int> res;\n        res.reserve(m * n);\n        while (top <= bottom && left <= right) {\n            for (int c = left; c <= right; ++c) res.push_back(matrix[top][c]);\n            ++top;\n            for (int r = top; r <= bottom; ++r) res.push_back(matrix[r][right]);\n            --right;\n            if (top <= bottom) {\n                for (int c = right; c >= left; --c) res.push_back(matrix[bottom][c]);\n                --bottom;\n            }\n            if (left <= right) {\n                for (int r = bottom; r >= top; --r) res.push_back(matrix[r][left]);\n                ++left;\n            }\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> spiralOrder(vector<vector<int>>& matrix) {\n        if (matrix.empty() || matrix[0].empty()) return {};\n        int m = matrix.size(), n = matrix[0].size();\n        int top = 0, bottom = m - 1, left = 0, right = n - 1;\n        vector<int> res;\n        res.reserve(m * n);\n        while (top <= bottom && left <= right) {\n            for (int c = left; c <= right; ++c) res.push_back(matrix[top][c]);\n            ++top;\n            for (int r = top; r <= bottom; ++r) res.push_back(matrix[r][right]);\n            --right;\n            if (top <= bottom) {\n                for (int c = right; c >= left; --c) res.push_back(matrix[bottom][c]);\n                --bottom;\n            }\n            if (left <= right) {\n                for (int r = bottom; r >= top; --r) res.push_back(matrix[r][left]);\n                ++left;\n            }\n        }\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:\n        if not matrix or not matrix[0]:\n            return []\n        m, n = len(matrix), len(matrix[0])\n        top, bottom = 0, m - 1\n        left, right = 0, n - 1\n        res = []\n        while top <= bottom and left <= right:\n            for c in range(left, right + 1):\n                res.append(matrix[top][c])\n            top += 1\n            for r in range(top, bottom + 1):\n                res.append(matrix[r][right])\n            right -= 1\n            if top <= bottom:\n                for c in range(right, left - 1, -1):\n                    res.append(matrix[bottom][c])\n                bottom -= 1\n            if left <= right:\n                for r in range(bottom, top - 1, -1):\n                    res.append(matrix[r][left])\n                left += 1\n        return res",
+        "java": "class Solution {\n    public List<Integer> spiralOrder(int[][] matrix) {\n        List<Integer> res = new ArrayList<>();\n        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return res;\n        int m = matrix.length, n = matrix[0].length;\n        int top = 0, bottom = m - 1, left = 0, right = n - 1;\n        while (top <= bottom && left <= right) {\n            for (int c = left; c <= right; c++) res.add(matrix[top][c]);\n            top++;\n            for (int r = top; r <= bottom; r++) res.add(matrix[r][right]);\n            right--;\n            if (top <= bottom) {\n                for (int c = right; c >= left; c--) res.add(matrix[bottom][c]);\n                bottom--;\n            }\n            if (left <= right) {\n                for (int r = bottom; r >= top; r--) res.add(matrix[r][left]);\n                left++;\n            }\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Each cell is appended exactly once; four for-loops per layer partition the perimeter without overlap."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only four boundary integers extra; output array O(m*n) not counted as auxiliary."
+      },
+      "dryRunExample": {
+        "input": "[[1,2,3],[4,5,6],[7,8,9]]",
+        "steps": [
+          "top=0,bottom=2,left=0,right=2: top row -> [1,2,3], top=1",
+          "right col -> [6,9], right=1",
+          "bottom row -> [8,7], bottom=1",
+          "left col -> [4], left=1",
+          "top=1,bottom=1,left=1,right=1: top row -> [5], top=2, loop ends"
+        ],
+        "output": "[1,2,3,6,9,8,7,4,5]"
+      },
+      "edgeCases": [
+        "3x1 single column: bottom-row guard prevents duplicate after right column",
+        "1x3 single row: left-column guard prevents duplicate after top row",
+        "rectangular 3x4 and 4x3: inner layer may be 1xN or Mx1, guards handle it",
+        "large m*n up to 10*10 per constraints: no overflow, fits in memory"
+      ]
+    }
+  ]
+}

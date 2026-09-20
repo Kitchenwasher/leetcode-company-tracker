@@ -1,0 +1,94 @@
+{
+  "questionId": 26,
+  "title": "Remove Duplicates from Sorted Array",
+  "difficulty": "Easy",
+  "corePattern": "Two Pointers - Slow-Fast In-Place Overwrite",
+  "interviewTips": [
+    "Clarify: array is sorted non-decreasing, must modify in-place and return k; what should be beyond k? (don't care).",
+    "Trade-off: extra array is simpler but O(n) space violates in-place requirement; two pointers achieves O(1) extra space by exploiting sorted order.",
+    "Edge-case tip: handle empty array, single element, all duplicates, and all unique; never use nums[k] before checking k bounds."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with Extra Array",
+      "tag": "Brute Force",
+      "intuition": "Since array is sorted, duplicates are adjacent. Collect first occurrence of each distinct value into a separate list, then copy it back to the front of original array. Simple to reason about but uses extra space.",
+      "theory": "Scan from left to right. Keep nums[0]. For i>0, nums[i] is new unique iff nums[i] != nums[i-1] due to sorted order. Append all such values to temp list expected. Then overwrite nums[0..m-1] with expected and return m = len(expected). This preserves order and uniqueness.",
+      "cppCode": "class Solution {\npublic:\n    int removeDuplicates(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        vector<int> expected;\n        expected.push_back(nums[0]);\n        for (int i = 1; i < (int)nums.size(); ++i) {\n            if (nums[i] != nums[i-1]) expected.push_back(nums[i]);\n        }\n        for (int i = 0; i < (int)expected.size(); ++i) nums[i] = expected[i];\n        return (int)expected.size();\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int removeDuplicates(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        vector<int> expected;\n        expected.push_back(nums[0]);\n        for (int i = 1; i < (int)nums.size(); ++i) {\n            if (nums[i] != nums[i-1]) expected.push_back(nums[i]);\n        }\n        for (int i = 0; i < (int)expected.size(); ++i) nums[i] = expected[i];\n        return (int)expected.size();\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def removeDuplicates(self, nums: List[int]) -> int:\n        if not nums:\n            return 0\n        expected = [nums[0]]\n        for i in range(1, len(nums)):\n            if nums[i] != nums[i-1]:\n                expected.append(nums[i])\n        for i in range(len(expected)):\n            nums[i] = expected[i]\n        return len(expected)",
+        "java": "class Solution {\n    public int removeDuplicates(int[] nums) {\n        if (nums.length == 0) return 0;\n        java.util.List<Integer> expected = new java.util.ArrayList<>();\n        expected.add(nums[0]);\n        for (int i = 1; i < nums.length; i++) {\n            if (nums[i] != nums[i-1]) expected.add(nums[i]);\n        }\n        for (int i = 0; i < expected.size(); i++) nums[i] = expected.get(i);\n        return expected.size();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One pass to build expected list plus one pass to copy back, each O(n) where n = nums.length."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Extra array holds up to n unique elements in worst case of all distinct."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,1,2]",
+        "steps": [
+          "expected=[1]",
+          "i=1: nums[1]==nums[0]==1 -> skip",
+          "i=2: nums[2]=2 !=1 -> expected=[1,2]",
+          "copy back: nums=[1,2,2]",
+          "return 2"
+        ],
+        "output": "2, nums first 2 elements are [1,2]"
+      },
+      "edgeCases": [
+        "Empty array -> return 0",
+        "Single element [1] -> return 1",
+        "All duplicates [1,1,1] -> return 1",
+        "All unique [1,2,3] -> return 3"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Two Pointers In-Place Overwrite",
+      "tag": "Optimal",
+      "intuition": "Use slow pointer k for next write position (length of unique prefix) and fast pointer i to scan. Because sorted, nums[i] is new unique iff it differs from last written element nums[k-1]; then write it at nums[k] and advance k.",
+      "theory": "Maintain invariant: nums[0..k-1] are sorted unique and are the uniques of nums[0..i-1]. Initially k=1, i=1. For each i, if nums[i] != nums[k-1], then nums[i] is larger than all in prefix (sorted), so extend prefix by nums[k]=nums[i], k++. Else duplicate, skip. By induction invariant holds at end, k is answer. In-place overwrite is safe because k <= i always.",
+      "cppCode": "class Solution {\npublic:\n    int removeDuplicates(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        int k = 1;\n        for (int i = 1; i < (int)nums.size(); ++i) {\n            if (nums[i] != nums[k-1]) {\n                nums[k] = nums[i];\n                ++k;\n            }\n        }\n        return k;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int removeDuplicates(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        int k = 1;\n        for (int i = 1; i < (int)nums.size(); ++i) {\n            if (nums[i] != nums[k-1]) {\n                nums[k] = nums[i];\n                ++k;\n            }\n        }\n        return k;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def removeDuplicates(self, nums: List[int]) -> int:\n        if not nums:\n            return 0\n        k = 1\n        for i in range(1, len(nums)):\n            if nums[i] != nums[k-1]:\n                nums[k] = nums[i]\n                k += 1\n        return k",
+        "java": "class Solution {\n    public int removeDuplicates(int[] nums) {\n        if (nums.length == 0) return 0;\n        int k = 1;\n        for (int i = 1; i < nums.length; i++) {\n            if (nums[i] != nums[k-1]) {\n                nums[k] = nums[i];\n                k++;\n            }\n        }\n        return k;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single linear scan with fast pointer i from 1 to n-1, each element visited once with O(1) work."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two integer pointers k and i, modifies array in-place with no extra allocation."
+      },
+      "dryRunExample": {
+        "input": "nums = [0,0,1,1,1,2,2,3,3,4]",
+        "steps": [
+          "k=1, prefix [0]",
+          "i=1 val 0 == nums[0] -> skip",
+          "i=2 val 1 != nums[0]=0 -> nums[1]=1, k=2",
+          "i=3,4 val 1 duplicate -> skip",
+          "i=5 val 2 != nums[1]=1 -> nums[2]=2, k=3",
+          "i=6 val 2 skip",
+          "i=7 val 3 -> nums[3]=3, k=4",
+          "i=8 val 3 skip",
+          "i=9 val 4 -> nums[4]=4, k=5",
+          "return 5"
+        ],
+        "output": "5, nums first 5 elements are [0,1,2,3,4]"
+      },
+      "edgeCases": [
+        "Empty array -> return 0",
+        "Single element -> return 1 without loop",
+        "All duplicates [1,1,1,1] -> k stays 1",
+        "Already unique [1,2,3,4] -> every element copied to itself, k=n"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "questionId": 118,
+  "title": "Pascal's Triangle",
+  "difficulty": "Easy",
+  "corePattern": "Dynamic Programming - Iterative Row Construction via Additive Recurrence",
+  "interviewTips": [
+    "Clarify input range: numRows = 0 vs 1-indexed? Constraints say 1 <= numRows <= 30, confirm expected return for 1 is [[1]].",
+    "Trade-off to discuss: binomial formula nCr recomputes each cell independently vs DP reuses previous row - O(n^3) vs O(n^2) time.",
+    "Edge-case tip: first and last element of every row are always 1, inner elements need bounds check j-1 >=0 and j < prev size; watch int overflow for larger n (C(29,14) fits 32-bit but larger would not)."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force via Binomial Coefficient (nCr)",
+      "tag": "Brute Force",
+      "intuition": "Each entry of Pascal's Triangle is a binomial coefficient: row i col j equals C(i, j). So we can build the triangle by directly computing the combinatorial value for every position independently using the multiplicative formula.",
+      "theory": "C(n,k) = n! / (k! * (n-k)!) can be computed iteratively as res=1; for i in 0..k-1: res = res*(n-i)/(i+1) using symmetry k = min(k, n-k) to halve work. We loop i=0..numRows-1 and j=0..i and fill ans[i][j]=C(i,j). This is correct because Pascal's Triangle is exactly the table of binomial coefficients, but it recomputes overlapping factorials from scratch.",
+      "cppCode": "class Solution {\npublic:\n    long long nCr(int n, int r) {\n        if (r > n - r) r = n - r;\n        long long res = 1;\n        for (int i = 0; i < r; ++i) {\n            res = res * (n - i) / (i + 1);\n        }\n        return res;\n    }\n    vector<vector<int>> generate(int numRows) {\n        vector<vector<int>> ans;\n        for (int i = 0; i < numRows; ++i) {\n            vector<int> row;\n            for (int j = 0; j <= i; ++j) {\n                row.push_back((int)nCr(i, j));\n            }\n            ans.push_back(row);\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    long long nCr(int n, int r) {\n        if (r > n - r) r = n - r;\n        long long res = 1;\n        for (int i = 0; i < r; ++i) {\n            res = res * (n - i) / (i + 1);\n        }\n        return res;\n    }\n    vector<vector<int>> generate(int numRows) {\n        vector<vector<int>> ans;\n        for (int i = 0; i < numRows; ++i) {\n            vector<int> row;\n            for (int j = 0; j <= i; ++j) {\n                row.push_back((int)nCr(i, j));\n            }\n            ans.push_back(row);\n        }\n        return ans;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def generate(self, numRows: int) -> List[List[int]]:\n        def nCr(n: int, r: int) -> int:\n            if r > n - r:\n                r = n - r\n            res = 1\n            for i in range(r):\n                res = res * (n - i) // (i + 1)\n            return res\n        ans = []\n        for i in range(numRows):\n            row = [nCr(i, j) for j in range(i + 1)]\n            ans.append(row)\n        return ans",
+        "java": "class Solution {\n    private long nCr(int n, int r) {\n        if (r > n - r) r = n - r;\n        long res = 1;\n        for (int i = 0; i < r; i++) {\n            res = res * (n - i) / (i + 1);\n        }\n        return res;\n    }\n    public List<List<Integer>> generate(int numRows) {\n        List<List<Integer>> ans = new ArrayList<>();\n        for (int i = 0; i < numRows; i++) {\n            List<Integer> row = new ArrayList<>();\n            for (int j = 0; j <= i; j++) {\n                row.add((int)nCr(i, j));\n            }\n            ans.add(row);\n        }\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(numRows^3)",
+        "explanation": "There are O(n^2/2) cells and each nCr(i,j) takes O(min(j, i-j)) = O(n) multiplications/divisions, so total O(n^3). If factorial is recomputed naively per cell it is even worse."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Output stores 1+2+...+n = O(n^2/2) integers. Extra auxiliary space is O(n) for current row, O(1) besides output if not counting result."
+      },
+      "dryRunExample": {
+        "input": "numRows = 4",
+        "steps": [
+          "i=0: C(0,0)=1 -> [1]",
+          "i=1: C(1,0)=1, C(1,1)=1 -> [1,1]",
+          "i=2: C(2,0)=1, C(2,1)=2, C(2,2)=1 -> [1,2,1]",
+          "i=3: C(3,0)=1, C(3,1)=3, C(3,2)=3, C(3,3)=1 -> [1,3,3,1]"
+        ],
+        "output": "[[1],[1,1],[1,2,1],[1,3,3,1]]"
+      },
+      "edgeCases": [
+        "numRows=1 returns [[1]] - single nCr(0,0) case",
+        "numRows=30 max constraint still fits 32-bit int, use long during intermediate multiplication to avoid overflow",
+        "Symmetry optimization r = min(r, n-r) needed to keep loop short and avoid overflow"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Iterative DP Row-by-Row",
+      "tag": "Optimal",
+      "intuition": "Each interior value is the sum of the two values above it. Instead of recomputing combinations, build rows top-down reusing the previous row: pad with 1s on both ends and fill middle as sum of upper-left and upper.",
+      "theory": "Pascal recurrence: T[i][j] = T[i-1][j-1] + T[i-1][j] for 0<j<i, with T[i][0]=T[i][i]=1. This is DP with optimal substructure - row i depends only on row i-1. By induction from base row [1], all rows are correct. Each cell computed once in O(1), giving optimal time for explicit triangle generation.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> generate(int numRows) {\n        vector<vector<int>> ans;\n        for (int i = 0; i < numRows; ++i) {\n            vector<int> row(i + 1, 1);\n            for (int j = 1; j < i; ++j) {\n                row[j] = ans[i - 1][j - 1] + ans[i - 1][j];\n            }\n            ans.push_back(row);\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> generate(int numRows) {\n        vector<vector<int>> ans;\n        for (int i = 0; i < numRows; ++i) {\n            vector<int> row(i + 1, 1);\n            for (int j = 1; j < i; ++j) {\n                row[j] = ans[i - 1][j - 1] + ans[i - 1][j];\n            }\n            ans.push_back(row);\n        }\n        return ans;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def generate(self, numRows: int) -> List[List[int]]:\n        ans = []\n        for i in range(numRows):\n            row = [1] * (i + 1)\n            for j in range(1, i):\n                row[j] = ans[i - 1][j - 1] + ans[i - 1][j]\n            ans.append(row)\n        return ans",
+        "java": "class Solution {\n    public List<List<Integer>> generate(int numRows) {\n        List<List<Integer>> ans = new ArrayList<>();\n        for (int i = 0; i < numRows; i++) {\n            List<Integer> row = new ArrayList<>(Collections.nCopies(i + 1, 1));\n            for (int j = 1; j < i; j++) {\n                row.set(j, ans.get(i - 1).get(j - 1) + ans.get(i - 1).get(j));\n            }\n            ans.add(row);\n        }\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(numRows^2)",
+        "explanation": "Total cells is sum_{i=0}^{n-1} (i+1) = n*(n+1)/2, each computed in O(1) addition. This is optimal since output size itself is O(n^2)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Output triangle uses O(n^2) space. Extra working space is O(n) for current row, O(1) if not counting output."
+      },
+      "dryRunExample": {
+        "input": "numRows = 5",
+        "steps": [
+          "i=0: [1]",
+          "i=1: [1,1] - no interior",
+          "i=2: ends 1,1 middle =1+1=2 -> [1,2,1]",
+          "i=3: middle j=1:1+2=3, j=2:2+1=3 -> [1,3,3,1]",
+          "i=4: j=1:1+3=4, j=2:3+3=6, j=3:3+1=4 -> [1,4,6,4,1]"
+        ],
+        "output": "[[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]"
+      },
+      "edgeCases": [
+        "numRows=1 returns [[1]] - loop for j in range(1,i) skipped",
+        "numRows=2 returns [[1],[1,1]] - second row has no interior computation",
+        "Large numRows beyond 30 would overflow 32-bit int, need long; current constraints safe"
+      ]
+    }
+  ]
+}

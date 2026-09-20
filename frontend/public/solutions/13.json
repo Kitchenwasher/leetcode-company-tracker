@@ -1,0 +1,93 @@
+{
+  "questionId": 13,
+  "title": "Roman to Integer",
+  "difficulty": "Easy",
+  "corePattern": "Hash Table Lookup with Subtractive Pair Handling via Linear Scan",
+  "interviewTips": [
+    "Ask if input is guaranteed to be a valid Roman numeral in range 1 to 3999 — this lets you assume only the 6 legal subtractive pairs (IV, IX, XL, XC, CD, CM) appear.",
+    "Trade-off to discuss: explicit 13-entry map with 2-char lookahead vs 7-entry map with value comparison — both O(n) time O(1) space, but right-to-left max-tracking avoids substring creation and double lookup.",
+    "Edge-case tip: single character (e.g., I, M), all subtractive string (e.g., CMXCIX = 999), and longest valid input MMMCMXCIX = 3999; ensure i+1 bounds check and correct add vs subtract decision."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with Explicit Subtractive Map",
+      "tag": "Brute Force",
+      "intuition": "There are only 13 meaningful symbols: 7 singles (I,V,X,L,C,D,M) and 6 subtractive pairs (IV,IX,XL,XC,CD,CM). Scan left to right, and at each position greedily try to consume 2 characters if they form a known subtractive pair, otherwise consume 1 character.",
+      "theory": "Roman numerals are normally additive, except when a smaller value precedes a larger value, which means subtraction. Instead of reasoning about ordering, enumerate all subtractive cases in a hash table. Left-to-right scan is correct because valid Roman numerals have a unique greedy tokenization: if s[i:i+2] is in the table it must be taken as one token (e.g., CM=900 not C+M=1100). Each index advances by 1 or 2, so each character is visited once.",
+      "cppCode": "class Solution {\npublic:\n    int romanToInt(string s) {\n        unordered_map<string, int> values = {{\"I\",1},{\"V\",5},{\"X\",10},{\"L\",50},{\"C\",100},{\"D\",500},{\"M\",1000},{\"IV\",4},{\"IX\",9},{\"XL\",40},{\"XC\",90},{\"CD\",400},{\"CM\",900}};\n        int total = 0;\n        int n = s.size();\n        for (int i = 0; i < n;) {\n            if (i + 1 < n && values.count(s.substr(i, 2))) {\n                total += values[s.substr(i, 2)];\n                i += 2;\n            } else {\n                total += values[string(1, s[i])];\n                i += 1;\n            }\n        }\n        return total;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int romanToInt(string s) {\n        unordered_map<string, int> values = {{\"I\",1},{\"V\",5},{\"X\",10},{\"L\",50},{\"C\",100},{\"D\",500},{\"M\",1000},{\"IV\",4},{\"IX\",9},{\"XL\",40},{\"XC\",90},{\"CD\",400},{\"CM\",900}};\n        int total = 0;\n        int n = s.size();\n        for (int i = 0; i < n;) {\n            if (i + 1 < n && values.count(s.substr(i, 2))) {\n                total += values[s.substr(i, 2)];\n                i += 2;\n            } else {\n                total += values[string(1, s[i])];\n                i += 1;\n            }\n        }\n        return total;\n    }\n};",
+        "python": "class Solution:\n    def romanToInt(self, s: str) -> int:\n        values = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000, 'IV': 4, 'IX': 9, 'XL': 40, 'XC': 90, 'CD': 400, 'CM': 900}\n        total = 0\n        i = 0\n        n = len(s)\n        while i < n:\n            if i + 1 < n and s[i:i+2] in values:\n                total += values[s[i:i+2]]\n                i += 2\n            else:\n                total += values[s[i]]\n                i += 1\n        return total",
+        "java": "class Solution {\n    public int romanToInt(String s) {\n        Map<String, Integer> values = new HashMap<>();\n        values.put(\"I\", 1);\n        values.put(\"V\", 5);\n        values.put(\"X\", 10);\n        values.put(\"L\", 50);\n        values.put(\"C\", 100);\n        values.put(\"D\", 500);\n        values.put(\"M\", 1000);\n        values.put(\"IV\", 4);\n        values.put(\"IX\", 9);\n        values.put(\"XL\", 40);\n        values.put(\"XC\", 90);\n        values.put(\"CD\", 400);\n        values.put(\"CM\", 900);\n        int total = 0;\n        int i = 0;\n        while (i < s.length()) {\n            if (i + 1 < s.length() && values.containsKey(s.substring(i, i + 2))) {\n                total += values.get(s.substring(i, i + 2));\n                i += 2;\n            } else {\n                total += values.get(s.substring(i, i + 1));\n                i += 1;\n            }\n        }\n        return total;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single left-to-right pass over n characters, each step does O(1) hash lookup. Substring of length 2 is O(1). Total O(n) where n = len(s) <= 15."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Hash table holds fixed 13 entries independent of input size, plus a few integer variables."
+      },
+      "dryRunExample": {
+        "input": "s = \"MCMXCIV\"",
+        "steps": [
+          "i=0: s[0:2]='MC' not in map -> add M=1000, total=1000, i=1",
+          "i=1: s[1:3]='CM' in map -> add 900, total=1900, i=3",
+          "i=3: s[3:5]='XC' in map -> add 90, total=1990, i=5",
+          "i=5: s[5:7]='IV' in map -> add 4, total=1994, i=7",
+          "end -> return 1994"
+        ],
+        "output": "1994"
+      },
+      "edgeCases": [
+        "Single char: 'I' -> 1, 'M' -> 1000, no pair lookup needed",
+        "No subtractive: 'VIII' -> 5+1+1+1=8, all single consumes",
+        "All subtractive: 'CMXCIX' -> 900+90+9=999",
+        "Max length: 'MMMCMXCIX' -> 3999"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Right-to-Left Single Pass",
+      "tag": "Optimal",
+      "intuition": "Scan from right to left keeping the maximum value seen so far. If current value >= max-so-far, it is additive; if current value < max-so-far, it must be a subtractive prefix and should be subtracted. This needs only the 7 single symbols.",
+      "theory": "In a valid Roman numeral, values generally decrease left-to-right except for subtractive prefixes which are smaller than the following larger symbol. When scanning right-to-left, prev tracks the largest value to the right. Invariant: prev = max of all processed suffix values. If cur < prev, cur is a subtractive prefix of a larger numeral to its right, so subtract it; otherwise add it and update prev = cur. This correctly handles IV=5-1, IX, XL, etc., without explicitly enumerating pairs and without lookahead or substring allocation.",
+      "cppCode": "class Solution {\npublic:\n    int romanToInt(string s) {\n        unordered_map<char, int> values = {{'I',1},{'V',5},{'X',10},{'L',50},{'C',100},{'D',500},{'M',1000}};\n        int total = 0;\n        int prev = 0;\n        for (int i = (int)s.size() - 1; i >= 0; --i) {\n            int cur = values[s[i]];\n            if (cur < prev) {\n                total -= cur;\n            } else {\n                total += cur;\n                prev = cur;\n            }\n        }\n        return total;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int romanToInt(string s) {\n        unordered_map<char, int> values = {{'I',1},{'V',5},{'X',10},{'L',50},{'C',100},{'D',500},{'M',1000}};\n        int total = 0;\n        int prev = 0;\n        for (int i = (int)s.size() - 1; i >= 0; --i) {\n            int cur = values[s[i]];\n            if (cur < prev) {\n                total -= cur;\n            } else {\n                total += cur;\n                prev = cur;\n            }\n        }\n        return total;\n    }\n};",
+        "python": "class Solution:\n    def romanToInt(self, s: str) -> int:\n        values = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}\n        total = 0\n        prev = 0\n        for ch in reversed(s):\n            cur = values[ch]\n            if cur < prev:\n                total -= cur\n            else:\n                total += cur\n                prev = cur\n        return total",
+        "java": "class Solution {\n    public int romanToInt(String s) {\n        Map<Character, Integer> values = new HashMap<>();\n        values.put('I', 1);\n        values.put('V', 5);\n        values.put('X', 10);\n        values.put('L', 50);\n        values.put('C', 100);\n        values.put('D', 500);\n        values.put('M', 1000);\n        int total = 0;\n        int prev = 0;\n        for (int i = s.length() - 1; i >= 0; i--) {\n            int cur = values.get(s.charAt(i));\n            if (cur < prev) {\n                total -= cur;\n            } else {\n                total += cur;\n                prev = cur;\n            }\n        }\n        return total;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One reverse pass over n characters with O(1) array/hash lookup per character."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only 7-entry map (or fixed array of size 128/256) plus total and prev variables."
+      },
+      "dryRunExample": {
+        "input": "s = \"MCMXCIV\"",
+        "steps": [
+          "values: I=1,V=5,X=10,L=50,C=100,D=500,M=1000, total=0, prev=0",
+          "reversed = V,I,C,X,M,C,M",
+          "V=5 >=0 -> total=5, prev=5",
+          "I=1 <5 -> total=4",
+          "C=100 >=5 -> total=104, prev=100",
+          "X=10 <100 -> total=94",
+          "M=1000 >=100 -> total=1094, prev=1000",
+          "C=100 <1000 -> total=994",
+          "M=1000 >=1000 -> total=1994, prev=1000"
+        ],
+        "output": "1994"
+      },
+      "edgeCases": [
+        "LVIII -> 58: all cur >= prev, pure addition",
+        "IV -> 4: I(1) < prev(5) so subtract",
+        "IX -> 9, XL -> 40, CM -> 900: same subtract logic",
+        "MMMCMXCIX -> 3999: alternating add/subtract still correct"
+      ]
+    }
+  ]
+}

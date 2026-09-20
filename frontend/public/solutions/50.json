@@ -1,0 +1,128 @@
+{
+  "questionId": 50,
+  "title": "Pow(x, n)",
+  "difficulty": "Medium",
+  "corePattern": "Binary Exponentiation (Exponentiation by Squaring)",
+  "interviewTips": [
+    "Clarify handling of negative n: ask if result should be 1 / pow(x, -n) and confirm n = -2147483648 (INT_MIN) cannot be negated in 32-bit int.",
+    "Trade-off: recursive fast pow is cleanest to explain but uses O(log n) stack; iterative binary exponentiation achieves O(1) space and is preferred for production.",
+    "Edge-case tip: explicitly mention x=0, n=0 => 1.0, x=1 or x=-1 with large |n|, and floating precision; never use pow or repeated multiplication for large n."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Iterative Multiplication",
+      "tag": "Brute Force",
+      "intuition": "Multiply x by itself |n| times. If n is negative, compute positive power then invert. This directly follows definition of power.",
+      "theory": "For n >= 0, x^n = x * x * ... * x (n times). For n < 0, x^n = 1 / x^(-n). We convert to positive exponent N = abs(n) with long to avoid overflow, loop N times accumulating result. Correct but linear in N, so it times out for large N like 2^31-1.",
+      "cppCode": "class Solution {\npublic:\n    double myPow(double x, int n) {\n        long long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        double res = 1.0;\n        for (long long i = 0; i < N; ++i) {\n            res *= x;\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    double myPow(double x, int n) {\n        long long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        double res = 1.0;\n        for (long long i = 0; i < N; ++i) {\n            res *= x;\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def myPow(self, x: float, n: int) -> float:\n        N = abs(n)\n        res = 1.0\n        for _ in range(N):\n            res *= x\n        return res if n >= 0 else 1.0 / res",
+        "java": "class Solution {\n    public double myPow(double x, int n) {\n        long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        double res = 1.0;\n        for (long i = 0; i < N; i++) {\n            res *= x;\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Loop runs |n| times with O(1) multiply each, so linear in absolute exponent."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only result and loop counter are stored."
+      },
+      "dryRunExample": {
+        "input": "x = 2.0, n = 3",
+        "steps": [
+          "res=1.0",
+          "res=1.0*2.0=2.0",
+          "res=2.0*2.0=4.0",
+          "res=4.0*2.0=8.0",
+          "n>=0 so return 8.0"
+        ],
+        "output": "8.0"
+      },
+      "edgeCases": [
+        "n = 0 returns 1.0 even if x = 0",
+        "n = -2147483648 overflows if negated as int, must use long/long long",
+        "TLE for large |n| like 2147483647"
+      ]
+    },
+    {
+      "id": "recursive-fast-pow",
+      "name": "Approach 2: Recursive Fast Pow (Divide and Conquer)",
+      "tag": "Recursion",
+      "intuition": "Halve the exponent: x^n = (x^(n/2))^2, with one extra x if n is odd. Recurse until n=0.",
+      "theory": "Using identity x^n = x^(n/2) * x^(n/2) * [x if n odd]. Each recursion halves n, so depth is O(log n). Handle negative n once upfront by inverting x and making N positive as long. This is exponentiation by squaring, reducing O(n) multiplies to O(log n).",
+      "cppCode": "class Solution {\npublic:\n    double myPow(double x, int n) {\n        long long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        return fastPow(x, N);\n    }\nprivate:\n    double fastPow(double x, long long n) {\n        if (n == 0) return 1.0;\n        double half = fastPow(x, n / 2);\n        if (n % 2 == 0) return half * half;\n        else return half * half * x;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    double myPow(double x, int n) {\n        long long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        return fastPow(x, N);\n    }\nprivate:\n    double fastPow(double x, long long n) {\n        if (n == 0) return 1.0;\n        double half = fastPow(x, n / 2);\n        if (n % 2 == 0) return half * half;\n        else return half * half * x;\n    }\n};",
+        "python": "class Solution:\n    def myPow(self, x: float, n: int) -> float:\n        if n < 0:\n            x = 1 / x\n            n = -n\n        return self.fastPow(x, n)\n    def fastPow(self, x: float, n: int) -> float:\n        if n == 0:\n            return 1.0\n        half = self.fastPow(x, n // 2)\n        if n % 2 == 0:\n            return half * half\n        else:\n            return half * half * x",
+        "java": "class Solution {\n    public double myPow(double x, int n) {\n        long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        return fastPow(x, N);\n    }\n    private double fastPow(double x, long N) {\n        if (N == 0) return 1.0;\n        double half = fastPow(x, N / 2);\n        if (N % 2 == 0) return half * half;\n        else return half * half * x;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log n)",
+        "explanation": "Exponent halves each call, so number of calls is log2(|n|)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(log n)",
+        "explanation": "Recursion stack depth is O(log n) due to halving."
+      },
+      "dryRunExample": {
+        "input": "x = 2.0, n = 10",
+        "steps": [
+          "fastPow(2,10) -> half=fastPow(2,5)",
+          "fastPow(2,5) -> half=fastPow(2,2)",
+          "fastPow(2,2) -> half=fastPow(2,1)",
+          "fastPow(2,1) -> half=fastPow(2,0)=1 => 1*1*2=2",
+          "fastPow(2,2)=2*2=4",
+          "fastPow(2,5)=4*4*2=32",
+          "fastPow(2,10)=32*32=1024"
+        ],
+        "output": "1024.0"
+      },
+      "edgeCases": [
+        "n = -2147483648: use long for N else -N overflows int",
+        "x = 0, n negative: mathematically inf, in double gives inf",
+        "n = 0 returns 1.0"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Optimal Iterative Binary Exponentiation",
+      "tag": "Optimal",
+      "intuition": "Read exponent in binary. Square x each bit and multiply into answer when current bit is 1.",
+      "theory": "Write N in binary: N = b0 + b1*2 + b2*4 + ... Then x^N = product of x^(2^i) for bits bi=1. Iterate bits from LSB to MSB maintaining cur = x^(2^i) by squaring each step. If bit is set, res *= cur. This is bottom-up exponentiation by squaring with O(1) extra space and no recursion.",
+      "cppCode": "class Solution {\npublic:\n    double myPow(double x, int n) {\n        long long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        double res = 1.0;\n        while (N > 0) {\n            if (N & 1) res *= x;\n            x *= x;\n            N >>= 1;\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    double myPow(double x, int n) {\n        long long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        double res = 1.0;\n        while (N > 0) {\n            if (N & 1) res *= x;\n            x *= x;\n            N >>= 1;\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def myPow(self, x: float, n: int) -> float:\n        N = n\n        if N < 0:\n            x = 1 / x\n            N = -N\n        res = 1.0\n        while N > 0:\n            if N & 1:\n                res *= x\n            x *= x\n            N >>= 1\n        return res",
+        "java": "class Solution {\n    public double myPow(double x, int n) {\n        long N = n;\n        if (N < 0) {\n            x = 1 / x;\n            N = -N;\n        }\n        double res = 1.0;\n        while (N > 0) {\n            if ((N & 1) == 1) res *= x;\n            x *= x;\n            N >>= 1;\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log n)",
+        "explanation": "Loop iterates over bits of N, which is O(log |n|) iterations."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only res, x, and N variables, no recursion stack."
+      },
+      "dryRunExample": {
+        "input": "x = 2.0, n = 10 (1010 binary)",
+        "steps": [
+          "res=1, x=2, N=1010",
+          "N even: x=4, N=101",
+          "N odd: res=1*4=4, x=16, N=10",
+          "N even: x=256, N=1",
+          "N odd: res=4*256=1024, x=65536, N=0",
+          "return 1024"
+        ],
+        "output": "1024.0"
+      },
+      "edgeCases": [
+        "n = -2147483648 handled via long N",
+        "x = 1.0 or -1.0 with huge N stays correct without overflow loop",
+        "x = 2.0, n = -2 returns 0.25 via x=0.5, N=2",
+        "Precision: repeated squaring may accumulate floating error, acceptable per problem"
+      ]
+    }
+  ]
+}

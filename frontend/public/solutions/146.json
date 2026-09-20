@@ -1,0 +1,93 @@
+{
+  "questionId": 146,
+  "title": "LRU Cache",
+  "difficulty": "Medium",
+  "corePattern": "Hash Map plus Doubly-Linked List for O(1) access with recency ordering",
+  "interviewTips": [
+    "Ask if get and put must both be O(1) average, what capacity range is expected, and whether to return -1 for missing keys.",
+    "Trade-off: list plus map is simple but O(n) moves; hash map plus doubly-linked list gives O(1) by splicing nodes via pointers.",
+    "Edge-case tip: handle capacity 0, updating existing key without eviction, evicting true LRU on full cache, and keeping map and list strictly in sync."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with Map plus Recency List",
+      "tag": "Brute Force",
+      "intuition": "Keep values in a hash map for lookup and keep keys in order of use. On every access move the key to most-recently-used end, and on overflow evict the least-recently-used front. Moving in a list costs linear scan.",
+      "theory": "Maintain invariant: order[0] is LRU, order[-1] is MRU, and map holds key to value. get: if missing return -1 else remove key from order O(n) and append O(1). put: if exists remove old position O(n), else if full pop front O(n) and delete from map O(1), then insert and append. Correct because every use refreshes recency and eviction always removes oldest.",
+      "cppCode": "class LRUCache {\npublic:\n    int cap;\n    unordered_map<int,int> mp;\n    list<int> order;\n    LRUCache(int capacity) : cap(capacity) {}\n    int get(int key) {\n        if (mp.find(key) == mp.end()) return -1;\n        order.remove(key);\n        order.push_back(key);\n        return mp[key];\n    }\n    void put(int key, int value) {\n        if (cap == 0) return;\n        if (mp.find(key) != mp.end()) {\n            order.remove(key);\n        } else {\n            if ((int)mp.size() >= cap) {\n                int lru = order.front();\n                order.pop_front();\n                mp.erase(lru);\n            }\n        }\n        mp[key] = value;\n        order.push_back(key);\n    }\n};",
+      "code": {
+        "cpp": "class LRUCache {\npublic:\n    int cap;\n    unordered_map<int,int> mp;\n    list<int> order;\n    LRUCache(int capacity) : cap(capacity) {}\n    int get(int key) {\n        if (mp.find(key) == mp.end()) return -1;\n        order.remove(key);\n        order.push_back(key);\n        return mp[key];\n    }\n    void put(int key, int value) {\n        if (cap == 0) return;\n        if (mp.find(key) != mp.end()) {\n            order.remove(key);\n        } else {\n            if ((int)mp.size() >= cap) {\n                int lru = order.front();\n                order.pop_front();\n                mp.erase(lru);\n            }\n        }\n        mp[key] = value;\n        order.push_back(key);\n    }\n};",
+        "python": "class LRUCache:\n    def __init__(self, capacity: int):\n        self.capacity = capacity\n        self.cache = {}\n        self.order = []\n    def get(self, key: int) -> int:\n        if key not in self.cache:\n            return -1\n        self.order.remove(key)\n        self.order.append(key)\n        return self.cache[key]\n    def put(self, key: int, value: int) -> None:\n        if self.capacity == 0:\n            return\n        if key in self.cache:\n            self.order.remove(key)\n        elif len(self.cache) >= self.capacity:\n            lru = self.order.pop(0)\n            del self.cache[lru]\n        self.cache[key] = value\n        self.order.append(key)",
+        "java": "class LRUCache {\n    int capacity;\n    Map<Integer,Integer> map;\n    LinkedList<Integer> order;\n    public LRUCache(int capacity) {\n        this.capacity = capacity;\n        this.map = new HashMap<>();\n        this.order = new LinkedList<>();\n    }\n    public int get(int key) {\n        if (!map.containsKey(key)) return -1;\n        order.remove((Integer)key);\n        order.addLast(key);\n        return map.get(key);\n    }\n    public void put(int key, int value) {\n        if (capacity == 0) return;\n        if (map.containsKey(key)) {\n            order.remove((Integer)key);\n        } else if (map.size() >= capacity) {\n            int lru = order.removeFirst();\n            map.remove(lru);\n        }\n        map.put(key, value);\n        order.addLast(key);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n) per get and put",
+        "explanation": "Removing a key from list or LinkedList requires linear scan to find it, where n is current size bounded by capacity. Hash map ops are O(1) average."
+      },
+      "spaceComplexity": {
+        "complexity": "O(capacity)",
+        "explanation": "Store at most capacity entries in map plus at most capacity keys in recency list."
+      },
+      "dryRunExample": {
+        "input": "capacity=2, put(1,1), put(2,2), get(1), put(3,3), get(2), get(3)",
+        "steps": [
+          "put 1: map {1:1}, order [1]",
+          "put 2: map {1:1,2:2}, order [1,2]",
+          "get 1: hit, move 1 to end -> order [2,1], return 1",
+          "put 3: full, evict order[0]=2 -> map {1:1,3:3}, order [1,3]",
+          "get 2: miss -> -1",
+          "get 3: hit -> 3"
+        ],
+        "output": "1, -1, 3"
+      },
+      "edgeCases": [
+        "capacity 1: every new put evicts previous",
+        "put existing key updates value and becomes MRU without eviction",
+        "get missing key returns -1 and does not change order",
+        "capacity 0: all puts no-op, all gets -1"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Hash Map plus Doubly Linked List",
+      "tag": "Optimal",
+      "intuition": "Need both O(1) lookup and O(1) reorder and eviction. Use hash map from key to list node, and doubly-linked list with MRU near head and LRU near tail. Splice nodes by rewiring prev and next pointers.",
+      "theory": "Use dummy head and tail to avoid null checks. Invariant: head.next is MRU, tail.prev is LRU, map points to live nodes. get: lookup node, if found detach and insert after head. put: if found update value and move to front; else if full detach tail.prev and erase its key, then create node, map it, insert after head. All pointer updates are constant time, so both ops are O(1) average.",
+      "cppCode": "struct Node {\n    int key, val;\n    Node *prev, *next;\n    Node(int k=0,int v=0):key(k),val(v),prev(nullptr),next(nullptr){}\n};\nclass LRUCache {\npublic:\n    int cap;\n    unordered_map<int,Node*> cache;\n    Node *head, *tail;\n    LRUCache(int capacity):cap(capacity) {\n        head = new Node();\n        tail = new Node();\n        head->next = tail;\n        tail->prev = head;\n    }\n    void removeNode(Node* node) {\n        node->prev->next = node->next;\n        node->next->prev = node->prev;\n    }\n    void addToFront(Node* node) {\n        node->next = head->next;\n        node->prev = head;\n        head->next->prev = node;\n        head->next = node;\n    }\n    int get(int key) {\n        if (cache.find(key) == cache.end()) return -1;\n        Node* node = cache[key];\n        removeNode(node);\n        addToFront(node);\n        return node->val;\n    }\n    void put(int key, int value) {\n        if (cap == 0) return;\n        if (cache.find(key) != cache.end()) {\n            Node* node = cache[key];\n            node->val = value;\n            removeNode(node);\n            addToFront(node);\n        } else {\n            if ((int)cache.size() >= cap) {\n                Node* lru = tail->prev;\n                removeNode(lru);\n                cache.erase(lru->key);\n                delete lru;\n            }\n            Node* node = new Node(key, value);\n            cache[key] = node;\n            addToFront(node);\n        }\n    }\n};",
+      "code": {
+        "cpp": "struct Node {\n    int key, val;\n    Node *prev, *next;\n    Node(int k=0,int v=0):key(k),val(v),prev(nullptr),next(nullptr){}\n};\nclass LRUCache {\npublic:\n    int cap;\n    unordered_map<int,Node*> cache;\n    Node *head, *tail;\n    LRUCache(int capacity):cap(capacity) {\n        head = new Node();\n        tail = new Node();\n        head->next = tail;\n        tail->prev = head;\n    }\n    void removeNode(Node* node) {\n        node->prev->next = node->next;\n        node->next->prev = node->prev;\n    }\n    void addToFront(Node* node) {\n        node->next = head->next;\n        node->prev = head;\n        head->next->prev = node;\n        head->next = node;\n    }\n    int get(int key) {\n        if (cache.find(key) == cache.end()) return -1;\n        Node* node = cache[key];\n        removeNode(node);\n        addToFront(node);\n        return node->val;\n    }\n    void put(int key, int value) {\n        if (cap == 0) return;\n        if (cache.find(key) != cache.end()) {\n            Node* node = cache[key];\n            node->val = value;\n            removeNode(node);\n            addToFront(node);\n        } else {\n            if ((int)cache.size() >= cap) {\n                Node* lru = tail->prev;\n                removeNode(lru);\n                cache.erase(lru->key);\n                delete lru;\n            }\n            Node* node = new Node(key, value);\n            cache[key] = node;\n            addToFront(node);\n        }\n    }\n};",
+        "python": "class Node:\n    def __init__(self, key=0, val=0):\n        self.key = key\n        self.val = val\n        self.prev = None\n        self.next = None\nclass LRUCache:\n    def __init__(self, capacity: int):\n        self.capacity = capacity\n        self.cache = {}\n        self.head = Node()\n        self.tail = Node()\n        self.head.next = self.tail\n        self.tail.prev = self.head\n    def _remove(self, node):\n        p = node.prev\n        n = node.next\n        p.next = n\n        n.prev = p\n    def _add_to_front(self, node):\n        node.next = self.head.next\n        node.prev = self.head\n        self.head.next.prev = node\n        self.head.next = node\n    def get(self, key: int) -> int:\n        if key not in self.cache:\n            return -1\n        node = self.cache[key]\n        self._remove(node)\n        self._add_to_front(node)\n        return node.val\n    def put(self, key: int, value: int) -> None:\n        if self.capacity == 0:\n            return\n        if key in self.cache:\n            node = self.cache[key]\n            node.val = value\n            self._remove(node)\n            self._add_to_front(node)\n        else:\n            if len(self.cache) >= self.capacity:\n                lru = self.tail.prev\n                self._remove(lru)\n                del self.cache[lru.key]\n            node = Node(key, value)\n            self.cache[key] = node\n            self._add_to_front(node)",
+        "java": "class LRUCache {\n    class Node {\n        int key, val;\n        Node prev, next;\n        Node() {}\n        Node(int k, int v) { key = k; val = v; }\n    }\n    int capacity;\n    Map<Integer,Node> cache;\n    Node head, tail;\n    public LRUCache(int capacity) {\n        this.capacity = capacity;\n        this.cache = new HashMap<>();\n        head = new Node();\n        tail = new Node();\n        head.next = tail;\n        tail.prev = head;\n    }\n    private void removeNode(Node node) {\n        node.prev.next = node.next;\n        node.next.prev = node.prev;\n    }\n    private void addToFront(Node node) {\n        node.next = head.next;\n        node.prev = head;\n        head.next.prev = node;\n        head.next = node;\n    }\n    public int get(int key) {\n        if (!cache.containsKey(key)) return -1;\n        Node node = cache.get(key);\n        removeNode(node);\n        addToFront(node);\n        return node.val;\n    }\n    public void put(int key, int value) {\n        if (capacity == 0) return;\n        if (cache.containsKey(key)) {\n            Node node = cache.get(key);\n            node.val = value;\n            removeNode(node);\n            addToFront(node);\n        } else {\n            if (cache.size() >= capacity) {\n                Node lru = tail.prev;\n                removeNode(lru);\n                cache.remove(lru.key);\n            }\n            Node node = new Node(key, value);\n            cache.put(key, node);\n            addToFront(node);\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(1) average per get and put",
+        "explanation": "Hash map lookup plus constant pointer rewiring to remove and insert after dummy head. No traversal."
+      },
+      "spaceComplexity": {
+        "complexity": "O(capacity)",
+        "explanation": "One map entry and one list node per cached key plus two dummy nodes."
+      },
+      "dryRunExample": {
+        "input": "capacity=2, put(1,1), put(2,2), get(1), put(3,3), get(2), put(4,4), get(1), get(3), get(4)",
+        "steps": [
+          "init head<->tail empty",
+          "put 1: insert 1 after head -> head-1-tail",
+          "put 2: insert 2 after head -> head-2-1-tail",
+          "get 1: move 1 to front -> head-1-2-tail return 1",
+          "put 3: evict tail.prev=2, insert 3 -> head-3-1-tail",
+          "get 2: miss -> -1",
+          "put 4: evict 1, insert 4 -> head-4-3-tail",
+          "get 1: miss -> -1, get 3: hit -> 3, get 4: hit -> 4"
+        ],
+        "output": "1, -1, -1, 3, 4"
+      },
+      "edgeCases": [
+        "capacity 1: put always evicts tail.prev before insert",
+        "repeated put on same key updates value and moves to front",
+        "get on missing key leaves structure unchanged",
+        "large sequential puts: each eviction removes exactly one LRU"
+      ]
+    }
+  ]
+}

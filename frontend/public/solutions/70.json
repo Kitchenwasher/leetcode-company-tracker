@@ -2,49 +2,155 @@
   "questionId": 70,
   "title": "Climbing Stairs",
   "difficulty": "Easy",
-  "corePattern": "Dynamic Programming",
+  "corePattern": "Linear Dynamic Programming - Fibonacci Recurrence",
   "interviewTips": [
-    "State the brute-force approach first before presenting the optimal Dynamic Programming technique.",
-    "Discuss Time and Space complexities upfront before writing code.",
-    "Test on empty inputs and single-element edge cases."
+    "Clarify if n can be 0 and whether order matters: here 1+2 and 2+1 count as distinct, giving f(n)=f(n-1)+f(n-2).",
+    "Trade-off to discuss: brute-force recursion is O(2^n), memoization fixes it to O(n) with O(n) stack+cache, bottom-up iterative achieves O(1) space and avoids recursion depth.",
+    "Edge cases to test: n=1, n=2, n=3, n=45 (max constraint fits 32-bit signed int); mention overflow to 64-bit if constraints grew."
   ],
   "approaches": [
     {
-      "id": "recursion-brute-force",
-      "name": "Approach 1: Recursive Formulation (Brute Force)",
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Recursion",
       "tag": "Brute Force",
-      "intuition": "Break the problem down into overlapping subproblems. For each choice at the current state, branch recursively into smaller subproblems.",
-      "theory": "Without memoization, overlapping subproblems are re-evaluated exponentially, resulting in an O(2^N) or O(K^N) recursion tree.",
-      "cppCode": "// Conceptual Recursive Formulation for: Climbing Stairs\n#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int solveRecursively(int n /*, ...args */) {\n        // Base case\n        if (n <= 0) return 0;\n\n        // Recursive transition exploring choices\n        int result = 0;\n        // result = std::max(result, solveRecursively(n - 1) + ...);\n        return result;\n    }\n};",
+      "intuition": "From step n you must have come from n-1 with a 1-step or from n-2 with a 2-step. So total ways is sum of ways to reach those two previous steps. Recursively explore both choices.",
+      "theory": "Defines recurrence f(n)=f(n-1)+f(n-2) with base f(1)=1, f(2)=2. Recursion builds a binary decision tree where each node branches to n-1 and n-2. Correct by exhaustive enumeration of all 1/2 sequences, but overlapping subproblems are recomputed exponentially many times.",
+      "cppCode": "class Solution {\npublic:\n    int climbStairs(int n) {\n        if (n <= 2) return n;\n        return climbStairs(n - 1) + climbStairs(n - 2);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        if (n <= 2) return n;\n        return climbStairs(n - 1) + climbStairs(n - 2);\n    }\n};",
+        "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        if n <= 2:\n            return n\n        return self.climbStairs(n - 1) + self.climbStairs(n - 2)",
+        "java": "class Solution {\n    public int climbStairs(int n) {\n        if (n <= 2) return n;\n        return climbStairs(n - 1) + climbStairs(n - 2);\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(2^N)",
-        "explanation": "Exponential branching recursion tree without memoization."
+        "complexity": "O(2^n)",
+        "explanation": "Each call spawns two calls, recursion tree has ~2^n nodes. For n=45 this TLEs."
       },
       "spaceComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Recursion call stack depth."
+        "complexity": "O(n)",
+        "explanation": "Maximum recursion depth is n due to repeated n-1 path."
+      },
+      "dryRunExample": {
+        "input": "n = 4",
+        "steps": [
+          "f(4)=f(3)+f(2)",
+          "f(3)=f(2)+f(1)=2+1=3",
+          "f(2)=2",
+          "f(4)=3+2=5"
+        ],
+        "output": "5"
       },
       "edgeCases": [
-        "Base cases at n = 0 and n = 1."
+        "n=1 returns 1 (single 1-step)",
+        "n=2 returns 2 (1+1, 2)",
+        "n=45 causes exponential blowup / TLE"
       ]
     },
     {
-      "id": "dp-tabulation-optimal",
-      "name": "Approach 2: Dynamic Programming (Bottom-Up Tabulation)",
-      "tag": "Optimal",
-      "intuition": "Identify the optimal substructure and dependency direction. Build a DP table starting from the base cases to avoid redundant recalculation.",
-      "theory": "DP table satisfies optimal substructure: each state `dp[i]` is computed from previously solved subproblems in O(1) or O(K) transitions.",
-      "cppCode": "#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int solve(const std::vector<int>& input) {\n        int n = input.size();\n        if (n == 0) return 0;\n\n        // dp[i] stores optimal answer for prefix of length i\n        std::vector<int> dp(n + 1, 0);\n\n        for (int i = 1; i <= n; ++i) {\n            // Transition: dp[i] = optimal choice from prior states\n            dp[i] = dp[i - 1] + input[i - 1];\n        }\n\n        return dp[n];\n    }\n};",
+      "id": "memoization",
+      "name": "Approach 2: Top-Down DP with Memoization",
+      "tag": "Memoization",
+      "intuition": "Brute force recomputes the same f(k) many times. Cache result of each k after first computation so each state is solved once.",
+      "theory": "Memoized DFS preserves recurrence f(n)=f(n-1)+f(n-2) but memo array guarantees each i in [1..n] is expanded at most once. This converts exponential tree into linear DAG traversal. Correctness follows from optimal substructure and overlapping subproblems.",
+      "cppCode": "class Solution {\npublic:\n    int climbStairs(int n) {\n        vector<int> memo(n + 1, -1);\n        return dfs(n, memo);\n    }\nprivate:\n    int dfs(int i, vector<int>& memo) {\n        if (i <= 2) return i;\n        if (memo[i] != -1) return memo[i];\n        return memo[i] = dfs(i - 1, memo) + dfs(i - 2, memo);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        vector<int> memo(n + 1, -1);\n        return dfs(n, memo);\n    }\nprivate:\n    int dfs(int i, vector<int>& memo) {\n        if (i <= 2) return i;\n        if (memo[i] != -1) return memo[i];\n        return memo[i] = dfs(i - 1, memo) + dfs(i - 2, memo);\n    }\n};",
+        "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        memo = {}\n        def dfs(i: int) -> int:\n            if i <= 2:\n                return i\n            if i not in memo:\n                memo[i] = dfs(i - 1) + dfs(i - 2)\n            return memo[i]\n        return dfs(n)",
+        "java": "class Solution {\n    public int climbStairs(int n) {\n        int[] memo = new int[n + 1];\n        return dfs(n, memo);\n    }\n    private int dfs(int i, int[] memo) {\n        if (i <= 2) return i;\n        if (memo[i] != 0) return memo[i];\n        memo[i] = dfs(i - 1, memo) + dfs(i - 2, memo);\n        return memo[i];\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Computes each table entry once with constant transitions."
+        "complexity": "O(n)",
+        "explanation": "n distinct states, each computed once with O(1) work combining two cached values."
       },
       "spaceComplexity": {
-        "complexity": "O(N) or O(1)",
-        "explanation": "Can often be space-optimized by storing only the previous state."
+        "complexity": "O(n)",
+        "explanation": "O(n) memo array plus O(n) recursion stack depth."
+      },
+      "dryRunExample": {
+        "input": "n = 5",
+        "steps": [
+          "dfs(5) needs dfs(4), dfs(3)",
+          "dfs(4) needs dfs(3), dfs(2)",
+          "dfs(3)=dfs(2)+dfs(1)=2+1=3 cached",
+          "dfs(4)=3+2=5 cached, dfs(5)=5+3=8"
+        ],
+        "output": "8"
       },
       "edgeCases": [
-        "Empty input, negative inputs, large numbers requiring long long."
+        "n=1 no recursion beyond base",
+        "n=45 easily passes, recursion depth 45 is safe",
+        "Repeated calls reuse cache within single query"
+      ]
+    },
+    {
+      "id": "dp-bottom-up",
+      "name": "Approach 3: Bottom-Up DP Tabulation",
+      "tag": "Dynamic Programming",
+      "intuition": "Compute answers from small to large: ways to reach step i only depends on previous two steps, so fill table iteratively.",
+      "theory": "Define dp[1]=1, dp[2]=2, dp[i]=dp[i-1]+dp[i-2] for i>=3. By induction dp[i] equals number of distinct sequences to reach i. Iterative order guarantees dependencies are already solved. This is Fibonacci shifted: answer is Fib(n+1).",
+      "cppCode": "class Solution {\npublic:\n    int climbStairs(int n) {\n        if (n <= 2) return n;\n        vector<int> dp(n + 1, 0);\n        dp[1] = 1;\n        dp[2] = 2;\n        for (int i = 3; i <= n; ++i) dp[i] = dp[i - 1] + dp[i - 2];\n        return dp[n];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        if (n <= 2) return n;\n        vector<int> dp(n + 1, 0);\n        dp[1] = 1;\n        dp[2] = 2;\n        for (int i = 3; i <= n; ++i) dp[i] = dp[i - 1] + dp[i - 2];\n        return dp[n];\n    }\n};",
+        "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        if n <= 2:\n            return n\n        dp = [0] * (n + 1)\n        dp[1], dp[2] = 1, 2\n        for i in range(3, n + 1):\n            dp[i] = dp[i - 1] + dp[i - 2]\n        return dp[n]",
+        "java": "class Solution {\n    public int climbStairs(int n) {\n        if (n <= 2) return n;\n        int[] dp = new int[n + 1];\n        dp[1] = 1;\n        dp[2] = 2;\n        for (int i = 3; i <= n; i++) dp[i] = dp[i - 1] + dp[i - 2];\n        return dp[n];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single linear pass from 3 to n with O(1) transition."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "dp array of size n+1 stores all subanswers."
+      },
+      "dryRunExample": {
+        "input": "n = 5",
+        "steps": [
+          "dp[1]=1, dp[2]=2",
+          "dp[3]=2+1=3",
+          "dp[4]=3+2=5",
+          "dp[5]=5+3=8"
+        ],
+        "output": "8"
+      },
+      "edgeCases": [
+        "n=1 returns 1 without loop",
+        "n=2 returns 2 without loop",
+        "n=45 dp[45]=1836311903 fits 32-bit int"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 4: Space-Optimized Iterative Fibonacci",
+      "tag": "Optimal",
+      "intuition": "Only the last two values are needed to compute the next. Keep two rolling variables instead of full array.",
+      "theory": "Since dp[i] depends only on dp[i-1] and dp[i-2], we maintain a= f(i-2), b=f(i-1) and iterate c=a+b. Invariant after each iteration: b = f(current). This is O(n) time Fibonacci iteration with constant memory, optimal for interview constraints. Can be extended to O(log n) via matrix exponentiation if needed.",
+      "cppCode": "class Solution {\npublic:\n    int climbStairs(int n) {\n        if (n <= 2) return n;\n        int a = 1, b = 2;\n        for (int i = 3; i <= n; ++i) {\n            int c = a + b;\n            a = b;\n            b = c;\n        }\n        return b;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        if (n <= 2) return n;\n        int a = 1, b = 2;\n        for (int i = 3; i <= n; ++i) {\n            int c = a + b;\n            a = b;\n            b = c;\n        }\n        return b;\n    }\n};",
+        "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        if n <= 2:\n            return n\n        a, b = 1, 2\n        for _ in range(3, n + 1):\n            a, b = b, a + b\n        return b",
+        "java": "class Solution {\n    public int climbStairs(int n) {\n        if (n <= 2) return n;\n        int a = 1, b = 2;\n        for (int i = 3; i <= n; i++) {\n            int c = a + b;\n            a = b;\n            b = c;\n        }\n        return b;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "n-2 iterations, each O(1). Optimal for linear DP; O(log n) matrix method possible but unnecessary for n<=45."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two integer variables regardless of n, no recursion or array."
+      },
+      "dryRunExample": {
+        "input": "n = 5",
+        "steps": [
+          "a=1, b=2",
+          "i=3: c=3 -> a=2, b=3",
+          "i=4: c=5 -> a=3, b=5",
+          "i=5: c=8 -> a=5, b=8"
+        ],
+        "output": "8"
+      },
+      "edgeCases": [
+        "n=1 returns 1",
+        "n=2 returns 2",
+        "Large n would need long/BigInteger to avoid overflow"
       ]
     }
   ]

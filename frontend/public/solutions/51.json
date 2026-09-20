@@ -1,0 +1,86 @@
+{
+  "questionId": 51,
+  "title": "N-Queens",
+  "difficulty": "Hard",
+  "corePattern": "Backtracking with Constraint Pruning - Row-by-Row Placement with Column and Diagonal Conflict Elimination",
+  "interviewTips": [
+    "Clarify: return all distinct board configurations as List[List[str]] with 'Q' and '.' - ask if n=0 should return [] or [[]] (LeetCode returns []).",
+    "Trade-off: O(1) safety check via hash sets / bitmask vs O(n) board scan - explain how pruning reduces N^N naive search to roughly N! nodes.",
+    "Edge-case tip: n=2 and n=3 have zero solutions, n=1 has one solution [['Q']]; mention bitmask overflow for n>32 in Java/C++ int and use long if needed."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Backtracking with O(N) Safety Scan",
+      "tag": "Brute Force",
+      "intuition": "Place one queen per row to automatically satisfy row constraint. For row r try every column c, scan upward column and both upper diagonals to verify no attack, place and recurse to r+1, then undo (backtrack). If r==n we found a valid board.",
+      "theory": "N-Queens is exact-cover / constraint satisfaction. By fixing row order we reduce search from N^(N^2) to N^N, and safety pruning further cuts to permutation-like search. Correctness by induction: invariant is first r rows are pairwise non-attacking; isSafe ensures extension preserves invariant; enumeration of all c ensures completeness.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<string>> solveNQueens(int n) {\n        vector<vector<string>> res;\n        vector<string> board(n, string(n, '.'));\n        function<bool(int,int)> isSafe = [&](int r, int c) {\n            for (int i = 0; i < r; ++i) if (board[i][c] == 'Q') return false;\n            for (int i = r-1, j = c-1; i >= 0 && j >= 0; --i, --j) if (board[i][j] == 'Q') return false;\n            for (int i = r-1, j = c+1; i >= 0 && j < n; --i, ++j) if (board[i][j] == 'Q') return false;\n            return true;\n        };\n        function<void(int)> backtrack = [&](int r) {\n            if (r == n) { res.push_back(board); return; }\n            for (int c = 0; c < n; ++c) {\n                if (isSafe(r, c)) {\n                    board[r][c] = 'Q';\n                    backtrack(r + 1);\n                    board[r][c] = '.';\n                }\n            }\n        };\n        backtrack(0);\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<string>> solveNQueens(int n) {\n        vector<vector<string>> res;\n        vector<string> board(n, string(n, '.'));\n        function<bool(int,int)> isSafe = [&](int r, int c) {\n            for (int i = 0; i < r; ++i) if (board[i][c] == 'Q') return false;\n            for (int i = r-1, j = c-1; i >= 0 && j >= 0; --i, --j) if (board[i][j] == 'Q') return false;\n            for (int i = r-1, j = c+1; i >= 0 && j < n; --i, ++j) if (board[i][j] == 'Q') return false;\n            return true;\n        };\n        function<void(int)> backtrack = [&](int r) {\n            if (r == n) { res.push_back(board); return; }\n            for (int c = 0; c < n; ++c) {\n                if (isSafe(r, c)) {\n                    board[r][c] = 'Q';\n                    backtrack(r + 1);\n                    board[r][c] = '.';\n                }\n            }\n        };\n        backtrack(0);\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def solveNQueens(self, n: int):\n        res = []\n        board = [['.' for _ in range(n)] for _ in range(n)]\n        def isSafe(r, c):\n            for i in range(r):\n                if board[i][c] == 'Q':\n                    return False\n            i, j = r - 1, c - 1\n            while i >= 0 and j >= 0:\n                if board[i][j] == 'Q':\n                    return False\n                i -= 1\n                j -= 1\n            i, j = r - 1, c + 1\n            while i >= 0 and j < n:\n                if board[i][j] == 'Q':\n                    return False\n                i -= 1\n                j += 1\n            return True\n        def backtrack(r):\n            if r == n:\n                res.append([''.join(row) for row in board])\n                return\n            for c in range(n):\n                if isSafe(r, c):\n                    board[r][c] = 'Q'\n                    backtrack(r + 1)\n                    board[r][c] = '.'\n        backtrack(0)\n        return res",
+        "java": "class Solution {\n    public List<List<String>> solveNQueens(int n) {\n        List<List<String>> res = new ArrayList<>();\n        char[][] board = new char[n][n];\n        for (char[] row : board) Arrays.fill(row, '.');\n        backtrack(0, n, board, res);\n        return res;\n    }\n    private void backtrack(int r, int n, char[][] board, List<List<String>> res) {\n        if (r == n) {\n            List<String> copy = new ArrayList<>();\n            for (char[] row : board) copy.add(new String(row));\n            res.add(copy);\n            return;\n        }\n        for (int c = 0; c < n; c++) {\n            if (isSafe(r, c, n, board)) {\n                board[r][c] = 'Q';\n                backtrack(r + 1, n, board, res);\n                board[r][c] = '.';\n            }\n        }\n    }\n    private boolean isSafe(int r, int c, int n, char[][] board) {\n        for (int i = 0; i < r; i++) if (board[i][c] == 'Q') return false;\n        for (int i = r-1, j = c-1; i >= 0 && j >= 0; i--, j--) if (board[i][j] == 'Q') return false;\n        for (int i = r-1, j = c+1; i >= 0 && j < n; i--, j++) if (board[i][j] == 'Q') return false;\n        return true;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N! * N)",
+        "explanation": "Search tree has at most N! / pruned nodes (permutations of columns). Each isSafe scans column + 2 diagonals up to O(N). Copying board on solution costs O(N^2) amortized over few solutions."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N^2)",
+        "explanation": "Board O(N^2) plus recursion depth O(N). Output storage not counted except board; storing all solutions takes O(S * N^2) where S is number of solutions."
+      },
+      "dryRunExample": {
+        "input": "n = 4",
+        "steps": [
+          "row 0: try c=0 -> place Q at (0,0), recurse",
+          "row 1: c=0,1 attacked, c=2 safe -> place (1,2), recurse",
+          "row 2: all c=0..3 attacked -> backtrack, row1 try c=3 -> place (1,3)",
+          "row 2: c=1 safe -> place (2,1), row3: no safe cell -> backtrack",
+          "row 0: try c=1 -> place (0,1), leads to solution [(0,1),(1,3),(2,0),(3,2)] and [(0,2),(1,0),(2,3),(3,1)] after full search"
+        ],
+        "output": "[[.Q.., ...Q, Q..., ..Q.], [..Q., Q..., ...Q, .Q..]] (2 solutions)"
+      },
+      "edgeCases": [
+        "n=1 returns [['Q']] single cell solution",
+        "n=2 and n=3 return [] - no placement possible, must still explore and backtrack correctly",
+        "n=0 (if tested) return [] - avoid (1<<n)-1 edge or empty board copy errors"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Backtracking with Bitmask O(1) Conflict Check",
+      "tag": "Optimal",
+      "intuition": "Encode attacked columns and two diagonals as bitmasks. For current row, available = allOnes & ~(cols | d1 | d2). Each 1-bit is a safe column. Pick lowest set bit, place queen, update masks for next row by shifting diagonals left/right, recurse. Clearing bit iterates only over safe spots.",
+      "theory": "Column index c maps to bit 1<<c. diag1 (r+c constant, \\) shifts left each row, diag2 (r-c constant, /) shifts right each row because diagonal attack moves by one column per row. available computation is exact set of non-attacked columns - proof by invariant that cols/d1/d2 contain all attacks from previous rows. Extracting bit with x & -x and iterating gives optimal branching without scanning board.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<string>> solveNQueens(int n) {\n        vector<vector<string>> res;\n        vector<string> board(n, string(n, '.'));\n        function<void(int,int,int,int)> backtrack = [&](int row, int cols, int d1, int d2) {\n            if (row == n) { res.push_back(board); return; }\n            int avail = ((1 << n) - 1) & ~(cols | d1 | d2);\n            while (avail) {\n                int bit = avail & -avail;\n                int col = __builtin_ctz(bit);\n                board[row][col] = 'Q';\n                backtrack(row + 1, cols | bit, (d1 | bit) << 1, (d2 | bit) >> 1);\n                board[row][col] = '.';\n                avail &= avail - 1;\n            }\n        };\n        backtrack(0, 0, 0, 0);\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<string>> solveNQueens(int n) {\n        vector<vector<string>> res;\n        vector<string> board(n, string(n, '.'));\n        function<void(int,int,int,int)> backtrack = [&](int row, int cols, int d1, int d2) {\n            if (row == n) { res.push_back(board); return; }\n            int avail = ((1 << n) - 1) & ~(cols | d1 | d2);\n            while (avail) {\n                int bit = avail & -avail;\n                int col = __builtin_ctz(bit);\n                board[row][col] = 'Q';\n                backtrack(row + 1, cols | bit, (d1 | bit) << 1, (d2 | bit) >> 1);\n                board[row][col] = '.';\n                avail &= avail - 1;\n            }\n        };\n        backtrack(0, 0, 0, 0);\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def solveNQueens(self, n: int):\n        res = []\n        board = [['.' for _ in range(n)] for _ in range(n)]\n        def backtrack(row, cols, d1, d2):\n            if row == n:\n                res.append([''.join(r) for r in board])\n                return\n            avail = ((1 << n) - 1) & ~(cols | d1 | d2)\n            while avail:\n                bit = avail & -avail\n                col = bit.bit_length() - 1\n                board[row][col] = 'Q'\n                backtrack(row + 1, cols | bit, (d1 | bit) << 1, (d2 | bit) >> 1)\n                board[row][col] = '.'\n                avail &= avail - 1\n        backtrack(0, 0, 0, 0)\n        return res",
+        "java": "class Solution {\n    public List<List<String>> solveNQueens(int n) {\n        List<List<String>> res = new ArrayList<>();\n        char[][] board = new char[n][n];\n        for (char[] row : board) Arrays.fill(row, '.');\n        backtrack(0, 0, 0, 0, n, board, res);\n        return res;\n    }\n    private void backtrack(int row, int cols, int d1, int d2, int n, char[][] board, List<List<String>> res) {\n        if (row == n) {\n            List<String> copy = new ArrayList<>();\n            for (char[] r : board) copy.add(new String(r));\n            res.add(copy);\n            return;\n        }\n        int avail = ((1 << n) - 1) & ~(cols | d1 | d2);\n        while (avail != 0) {\n            int bit = avail & -avail;\n            int col = Integer.numberOfTrailingZeros(bit);\n            board[row][col] = 'Q';\n            backtrack(row + 1, cols | bit, (d1 | bit) << 1, (d2 | bit) >> 1, n, board, res);\n            board[row][col] = '.';\n            avail &= avail - 1;\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N!)",
+        "explanation": "Same search nodes as backtracking but safety check is O(1) bit operations and loop iterates only over valid columns, not all N. Still exponential - N-Queens counting is #P-complete, cannot be polynomial."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Three integer masks + recursion depth O(N) plus board O(N^2) for construction. Masks replace O(N) boolean arrays/sets, minimal extra memory."
+      },
+      "dryRunExample": {
+        "input": "n = 4",
+        "steps": [
+          "row0: cols=0,d1=0,d2=0, avail=1111, pick bit0001 col0 -> recurse with cols=0001,d1=0010,d2=0000",
+          "row1: avail=1111 & ~0011 =1100 (col2,3 only) -> pick col2, update masks",
+          "row2: avail computed =0000 -> dead end, backtrack and pick col3",
+          "row0 pick col1 -> path leads to avail non-empty each row -> record 2 full solutions"
+        ],
+        "output": "[[.Q.., ...Q, Q..., ..Q.], [..Q., Q..., ...Q, .Q..]] (2 solutions)"
+      },
+      "edgeCases": [
+        "n=1: avail=1, bit=1, col=0 -> single solution",
+        "n=2,3: bit iteration quickly empties, returns [] without error",
+        "n>=31 overflow of (1<<n) in 32-bit int - LeetCode n<=9 so safe; for larger n use long / Python int"
+      ]
+    }
+  ]
+}

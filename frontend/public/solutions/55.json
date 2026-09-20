@@ -1,0 +1,121 @@
+{
+  "questionId": 55,
+  "title": "Jump Game",
+  "difficulty": "Medium",
+  "corePattern": "Greedy Reachability Tracking - Farthest Reachable Index",
+  "interviewTips": [
+    "Clarify constraints: can you assume non-negative integers? Is single element [0] considered already at last index (true)?",
+    "Trade-off to discuss: Brute force explores all jump combinations O(2^n) vs DP memoizes O(n^2) vs Greedy tracks max reach in O(n) with O(1) space - explain why greedy is safe because order does not matter, only farthest reach.",
+    "Edge-case tip: mention early exit when i > maxReach, zeros that trap you e.g., [3,2,1,0,4], and large jumps that overshoot end; test [0], [2,0,0] and [1,0,1,0]."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Backtracking",
+      "tag": "Brute Force",
+      "intuition": "From each index i try every possible jump 1..nums[i] recursively. If any path reaches the end, answer is true. This is depth-first search over all jump choices.",
+      "theory": "Model positions as nodes and jumps as directed edges i -> j for i<j<=i+nums[i]. The question is whether n-1 is reachable from 0. Brute force DFS explores all paths without memoization, so overlapping subproblems are recomputed exponentially. Correct but only for understanding baseline.",
+      "cppCode": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        return dfs(nums, 0);\n    }\nprivate:\n    bool dfs(vector<int>& nums, int i) {\n        int n = nums.size();\n        if (i >= n - 1) return true;\n        int furthest = min(i + nums[i], n - 1);\n        for (int j = i + 1; j <= furthest; ++j) {\n            if (dfs(nums, j)) return true;\n        }\n        return false;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        return dfs(nums, 0);\n    }\nprivate:\n    bool dfs(vector<int>& nums, int i) {\n        int n = nums.size();\n        if (i >= n - 1) return true;\n        int furthest = min(i + nums[i], n - 1);\n        for (int j = i + 1; j <= furthest; ++j) {\n            if (dfs(nums, j)) return true;\n        }\n        return false;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def canJump(self, nums: List[int]) -> bool:\n        n = len(nums)\n        def dfs(i: int) -> bool:\n            if i >= n - 1:\n                return True\n            furthest = min(i + nums[i], n - 1)\n            for j in range(i + 1, furthest + 1):\n                if dfs(j):\n                    return True\n            return False\n        return dfs(0)",
+        "java": "class Solution {\n    public boolean canJump(int[] nums) {\n        return dfs(nums, 0);\n    }\n    private boolean dfs(int[] nums, int i) {\n        if (i >= nums.length - 1) return true;\n        int furthest = Math.min(i + nums[i], nums.length - 1);\n        for (int j = i + 1; j <= furthest; j++) {\n            if (dfs(nums, j)) return true;\n        }\n        return false;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(2^n)",
+        "explanation": "In worst case each position branches up to nums[i] ways, leading to exponential number of paths. E.g., nums = [4,4,4,...] explores ~2^n calls."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Recursion stack depth up to n in worst case chain of jumps of length 1."
+      },
+      "dryRunExample": {
+        "input": "nums = [2,3,1,1,4]",
+        "steps": [
+          "dfs(0): can jump to 1,2 -> try dfs(1)",
+          "dfs(1): can jump to 2,3,4 -> try dfs(2)",
+          "dfs(2): can jump to 3 -> try dfs(3)",
+          "dfs(3): can jump to 4 -> try dfs(4)",
+          "dfs(4): i >= n-1 -> return True, unwinds to True"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "Single element [0] -> true (already at end)",
+        "[0,1] -> false (stuck at 0)",
+        "Zero in middle e.g., [2,0,0] -> true via direct jump over zeros"
+      ]
+    },
+    {
+      "id": "dp-memoization",
+      "name": "Approach 2: Top-Down DP with Memoization",
+      "tag": "Dynamic Programming",
+      "intuition": "Many positions are revisited by brute force. Cache result for each index as GOOD (can reach end), BAD (cannot), or UNKNOWN. Compute once per index.",
+      "theory": "Define dp[i] = whether suffix starting at i can reach end. Recurrence: dp[n-1]=True, dp[i]= OR_{j in (i+1..i+nums[i])} dp[j]. Compute via DFS + memo top-down or bottom-up right-to-left. Memoization prunes repeated work from exponential to polynomial because each i is expanded at most once over its outgoing edges.",
+      "cppCode": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        int n = nums.size();\n        vector<int> memo(n, -1); // -1 unknown, 0 bad, 1 good\n        memo[n - 1] = 1;\n        return dfs(nums, 0, memo);\n    }\nprivate:\n    bool dfs(vector<int>& nums, int i, vector<int>& memo) {\n        if (memo[i] != -1) return memo[i] == 1;\n        int n = nums.size();\n        int furthest = min(i + nums[i], n - 1);\n        for (int j = i + 1; j <= furthest; ++j) {\n            if (dfs(nums, j, memo)) {\n                memo[i] = 1;\n                return true;\n            }\n        }\n        memo[i] = 0;\n        return false;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        int n = nums.size();\n        vector<int> memo(n, -1); // -1 unknown, 0 bad, 1 good\n        memo[n - 1] = 1;\n        return dfs(nums, 0, memo);\n    }\nprivate:\n    bool dfs(vector<int>& nums, int i, vector<int>& memo) {\n        if (memo[i] != -1) return memo[i] == 1;\n        int n = nums.size();\n        int furthest = min(i + nums[i], n - 1);\n        for (int j = i + 1; j <= furthest; ++j) {\n            if (dfs(nums, j, memo)) {\n                memo[i] = 1;\n                return true;\n            }\n        }\n        memo[i] = 0;\n        return false;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def canJump(self, nums: List[int]) -> bool:\n        n = len(nums)\n        memo = [-1] * n  # -1 unknown, 0 bad, 1 good\n        memo[n - 1] = 1\n        def dfs(i: int) -> bool:\n            if memo[i] != -1:\n                return memo[i] == 1\n            furthest = min(i + nums[i], n - 1)\n            for j in range(i + 1, furthest + 1):\n                if dfs(j):\n                    memo[i] = 1\n                    return True\n            memo[i] = 0\n            return False\n        return dfs(0)",
+        "java": "class Solution {\n    public boolean canJump(int[] nums) {\n        int n = nums.length;\n        int[] memo = new int[n]; // 0 unknown, 1 good, 2 bad\n        memo[n - 1] = 1;\n        return dfs(nums, 0, memo);\n    }\n    private boolean dfs(int[] nums, int i, int[] memo) {\n        if (memo[i] == 1) return true;\n        if (memo[i] == 2) return false;\n        int furthest = Math.min(i + nums[i], nums.length - 1);\n        for (int j = i + 1; j <= furthest; j++) {\n            if (dfs(nums, j, memo)) {\n                memo[i] = 1;\n                return true;\n            }\n        }\n        memo[i] = 2;\n        return false;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Each index i is visited once and scans up to nums[i] <= n successors, so total O(n^2) worst case."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "O(n) memo array plus O(n) recursion stack."
+      },
+      "dryRunExample": {
+        "input": "nums = [3,2,1,0,4]",
+        "steps": [
+          "memo[4]=GOOD, dfs(0) tries 1,2,3",
+          "dfs(1) tries 2,3; dfs(2) tries 3; dfs(3) has nums[3]=0, no moves -> BAD",
+          "dfs(2) only leads to BAD -> BAD, dfs(1) only leads to BAD -> BAD",
+          "dfs(0) tries 1(BAD),2(BAD),3(BAD) -> BAD",
+          "return False"
+        ],
+        "output": "false"
+      },
+      "edgeCases": [
+        "[0] -> memo base case true",
+        "[2,0,0] -> dfs(1) is BAD but dfs(0) jumps directly to 2 GOOD -> true",
+        "Long array of 1s [1,1,1,...,1] -> O(n^2) but still passes, chain of GOOD"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Greedy Max Reach (Optimal)",
+      "tag": "Optimal",
+      "intuition": "We do not need to know exact jump path, only how far we can reach so far. Sweep left to right maintaining maxReach = max(maxReach, i+nums[i]). If current i is beyond maxReach, there is a gap and we are stuck.",
+      "theory": "Greedy invariant: after processing indices < i, maxReach is the farthest index reachable using any jumps from [0,i-1]. If i > maxReach, i is unreachable -> return false. Otherwise we can extend maxReach with i. If maxReach >= n-1 at any point, return true. This is correct because reachability is monotone: being able to reach farther can only help, never hurt. Equivalent to backward greedy tracking last good position.",
+      "cppCode": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        int n = nums.size();\n        int maxReach = 0;\n        for (int i = 0; i < n; ++i) {\n            if (i > maxReach) return false;\n            maxReach = max(maxReach, i + nums[i]);\n            if (maxReach >= n - 1) return true;\n        }\n        return true;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        int n = nums.size();\n        int maxReach = 0;\n        for (int i = 0; i < n; ++i) {\n            if (i > maxReach) return false;\n            maxReach = max(maxReach, i + nums[i]);\n            if (maxReach >= n - 1) return true;\n        }\n        return true;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def canJump(self, nums: List[int]) -> bool:\n        max_reach = 0\n        n = len(nums)\n        for i, jump in enumerate(nums):\n            if i > max_reach:\n                return False\n            max_reach = max(max_reach, i + jump)\n            if max_reach >= n - 1:\n                return True\n        return True",
+        "java": "class Solution {\n    public boolean canJump(int[] nums) {\n        int maxReach = 0;\n        for (int i = 0; i < nums.length; i++) {\n            if (i > maxReach) return false;\n            maxReach = Math.max(maxReach, i + nums[i]);\n            if (maxReach >= nums.length - 1) return true;\n        }\n        return true;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single linear pass, constant work per index."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only maxReach variable besides input."
+      },
+      "dryRunExample": {
+        "input": "nums = [2,3,1,1,4]",
+        "steps": [
+          "i=0, maxReach=0 -> maxReach=max(0,0+2)=2",
+          "i=1, 1<=2 -> maxReach=max(2,1+3)=4 >=4 -> return True"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "Single element [0] -> loop i=0 maxReach>=0 -> true",
+        "[3,2,1,0,4]: i=0 maxReach=3, i=1 maxReach=3, i=2 maxReach=3, i=3 maxReach=3, i=4 4>3 -> false",
+        "[2,0,0]: i=0 maxReach=2 >=2 -> true without visiting gap"
+      ]
+    }
+  ]
+}
