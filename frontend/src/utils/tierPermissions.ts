@@ -30,6 +30,10 @@ export const canExportAnkiOrObsidian = (isPro: boolean): boolean => {
   return isPro;
 };
 
+export const canAccessWhiteboard = (isPro: boolean): boolean => {
+  return isPro;
+};
+
 export const shouldShowAds = (isPro: boolean): boolean => {
   return !isPro;
 };

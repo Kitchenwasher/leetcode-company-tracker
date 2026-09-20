@@ -5,12 +5,14 @@ import {
   X, ExternalLink, Star, CheckCircle2, Clock, RotateCcw, Award, Circle,
   Timer as TimerIcon, Play, Pause, Code2, FileText, Calendar,
   Copy, Check, Sparkles, AlertCircle, Building2, Eye, Edit3, Terminal,
-  Lightbulb, BookOpen, ArrowRight, ShieldAlert, Cpu, Palette, Tag, Plus, Zap
+  Lightbulb, BookOpen, ArrowRight, ShieldAlert, Cpu, Palette, Tag, Plus, Zap,
+  Lock, Crown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/sound';
 import { WhiteboardCanvas } from './WhiteboardCanvas';
 import { CodeEditorRunner } from './CodeEditorRunner';
+import { useAuth } from '../context/AuthContext';
 
 interface QuestionDetailModalProps {
   question: Question;
@@ -27,6 +29,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
   onClose,
   onSaveProgress,
 }) => {
+  const { isPro, setShowSubscriptionModal } = useAuth();
   const [status, setStatus] = useState<ProblemStatus>(initialProgress.status || 'todo');
   const [isFavorite, setIsFavorite] = useState<boolean>(!!initialProgress.isFavorite);
   const [notes, setNotes] = useState<string>(initialProgress.notes || '');
@@ -551,7 +554,14 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 <span>Code Editor & Runner</span>
               </button>
               <button
-                onClick={() => setActiveTab('whiteboard')}
+                onClick={() => {
+                  if (!isPro) {
+                    sounds.playTimerAlert();
+                    setShowSubscriptionModal(true);
+                    return;
+                  }
+                  setActiveTab('whiteboard');
+                }}
                 className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                   activeTab === 'whiteboard'
                     ? 'border-primary text-primary'
@@ -560,6 +570,12 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
               >
                 <Palette className="w-3.5 h-3.5 text-primary" />
                 <span>Whiteboard Canvas</span>
+                {!isPro && (
+                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                    <Lock className="w-2.5 h-2.5" />
+                    PRO
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => setActiveTab('companies')}
@@ -928,7 +944,35 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
           {/* TAB CONTENT: WHITEBOARD CANVAS */}
           {activeTab === 'whiteboard' && (
             <div className="space-y-2">
-              <WhiteboardCanvas questionId={q.id} height={380} />
+              {isPro ? (
+                <WhiteboardCanvas questionId={q.id} height={380} isActive={true} />
+              ) : (
+                <div className="p-8 rounded-2xl bg-surfaceElevated border border-border text-center space-y-4">
+                  <div className="w-12 h-12 mx-auto rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400">
+                    <Palette className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/30 mb-1">
+                      <Lock className="w-3 h-3" />
+                      PRO FEATURE
+                    </div>
+                    <h3 className="text-sm font-bold text-white">Whiteboard Diagram Canvas</h3>
+                    <p className="text-xs text-textMuted max-w-sm mx-auto">
+                      Diagram data structures, trace recursion trees, and sketch solutions directly alongside the problem with CheatCode Pro.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      sounds.playClick();
+                      setShowSubscriptionModal(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-xs transition-all cursor-pointer"
+                  >
+                    <Crown className="w-3.5 h-3.5" />
+                    <span>Unlock with Pro</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

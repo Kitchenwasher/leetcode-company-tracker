@@ -197,6 +197,10 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>Interactive Whiteboard Canvas for diagramming</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                     <span>Unlimited timed mock interviews forever</span>
                   </li>
                   <li className="flex items-center gap-2">
@@ -205,7 +209,7 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>All future platform updates included</span>
+                    <span>100% Ad-Free Experience</span>
                   </li>
                 </ul>
               </div>
@@ -255,6 +259,10 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>Interactive Whiteboard Canvas for diagramming</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                     <span>Unlimited timed mock simulations</span>
                   </li>
                   <li className="flex items-center gap-2">
@@ -263,7 +271,7 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>Cancel with 1-click anytime</span>
+                    <span>100% Ad-Free Experience</span>
                   </li>
                 </ul>
               </div>

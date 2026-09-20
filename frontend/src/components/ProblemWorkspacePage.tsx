@@ -1134,13 +1134,26 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
               </button>
 
               <button
-                onClick={() => setRightTab('whiteboard')}
+                onClick={() => {
+                  if (!isPro) {
+                    sounds.playTimerAlert();
+                    setShowSubscriptionModal(true);
+                    return;
+                  }
+                  setRightTab('whiteboard');
+                }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   rightTab === 'whiteboard' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
                 }`}
               >
                 <Palette className="w-3.5 h-3.5 text-primary" />
                 <span>Whiteboard Canvas</span>
+                {!isPro && (
+                  <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                    <Lock className="w-2.5 h-2.5" />
+                    PRO
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -1164,7 +1177,37 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
             </div>
 
             <div className={`h-full ${rightTab === 'whiteboard' ? 'block' : 'hidden'}`}>
-              <WhiteboardCanvas questionId={q.id} height={560} isActive={rightTab === 'whiteboard'} />
+              {isPro ? (
+                <WhiteboardCanvas questionId={q.id} height={560} isActive={rightTab === 'whiteboard'} />
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center p-6 text-center bg-surfaceElevated border border-border rounded-xl space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shadow-xl">
+                    <Palette className="w-7 h-7" />
+                  </div>
+                  <div className="space-y-1.5 max-w-md">
+                    <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/30 mb-1">
+                      <Lock className="w-3 h-3" />
+                      CHEATCODE PRO EXCLUSIVE
+                    </div>
+                    <h3 className="text-base font-bold text-white tracking-tight">
+                      Interactive Interview Whiteboard Canvas
+                    </h3>
+                    <p className="text-xs text-textMuted leading-relaxed">
+                      Visualize complex data structures, diagram recursion trees, trace pointers, and practice FAANG system design live on a persistent whiteboard canvas.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      sounds.playClick();
+                      setShowSubscriptionModal(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer"
+                  >
+                    <Crown className="w-4 h-4" />
+                    <span>Unlock Whiteboard with Pro</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
