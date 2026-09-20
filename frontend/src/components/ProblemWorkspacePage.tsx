@@ -5,11 +5,12 @@ import { questionsApi } from '../api/questionsApi';
 import { WhiteboardCanvas } from './WhiteboardCanvas';
 import { CodeEditorRunner } from './CodeEditorRunner';
 import { useAuth } from '../context/AuthContext';
+import { AdBanner } from './AdBanner';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Star, CheckCircle2,
   Clock, RotateCcw, Award, Circle, Code2, FileText, Calendar, Copy, Check,
   Sparkles, Building2, Terminal, Lightbulb, ShieldAlert, Tag, Plus, Zap,
-  Palette, Play, Pause, RefreshCw, Send, BookOpen
+  Palette, Play, Pause, RefreshCw, Send, BookOpen, Crown, Lock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/sound';
@@ -33,7 +34,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
   onNavigateToProblem,
   onSaveProgress,
 }) => {
-  const { user } = useAuth();
+  const { user, isPro, setShowSubscriptionModal } = useAuth();
   const [status, setStatus] = useState<ProblemStatus>(initialProgress.status || 'todo');
   const [isFavorite, setIsFavorite] = useState<boolean>(!!initialProgress.isFavorite);
   const [notes, setNotes] = useState<string>(initialProgress.notes || '');
@@ -300,6 +301,11 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
   };
 
   const handleGenerateWithAi = async () => {
+    if (!isPro) {
+      sounds.playTimerAlert();
+      setShowSubscriptionModal(true);
+      return;
+    }
     try {
       setIsGeneratingAi(true);
       sounds.playClick();
@@ -674,6 +680,8 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                     </button>
                   </div>
                 )}
+
+                <AdBanner slotId="workspace-description-footer" />
               </div>
             )}
 
@@ -724,10 +732,24 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                       <button
                         onClick={handleGenerateWithAi}
                         disabled={isGeneratingAi}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primaryHover text-black font-bold text-xs shadow-terminal-glow transition-all cursor-pointer disabled:opacity-50"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50 ${
+                          isPro
+                            ? 'bg-primary hover:bg-primaryHover text-black shadow-terminal-glow'
+                            : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black shadow-lg shadow-amber-400/20'
+                        }`}
                       >
-                        <Sparkles className={`w-4 h-4 ${isGeneratingAi ? 'animate-spin' : ''}`} />
-                        <span>{isGeneratingAi ? 'Generating...' : '✨ Generate with Meta Muse AI'}</span>
+                        {isPro ? (
+                          <Sparkles className={`w-4 h-4 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+                        ) : (
+                          <Crown className="w-4 h-4" />
+                        )}
+                        <span>
+                          {isGeneratingAi
+                            ? 'Generating...'
+                            : isPro
+                            ? '✨ Generate with Meta Muse AI'
+                            : 'Generate with AI [PRO]'}
+                        </span>
                       </button>
                     )}
                   </div>
@@ -906,6 +928,8 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                     )}
                   </div>
                 )}
+
+                <AdBanner slotId="workspace-editorial-footer" />
               </div>
             )}
 

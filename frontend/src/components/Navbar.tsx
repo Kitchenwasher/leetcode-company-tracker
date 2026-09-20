@@ -5,7 +5,7 @@ import { UserMenu } from './UserMenu';
 import {
   Flame, BarChart3, Layers, Clock, Dices, Download, Volume2, VolumeX,
   Sun, Moon, Keyboard, CheckCircle2, Sparkles, Brain, Calendar, FileText, ChevronDown,
-  LayoutDashboard, Menu
+  LayoutDashboard, Menu, Lock
 } from 'lucide-react';
 import { exportQuestionsCSV } from '../services/storage';
 import { exportToAnkiCSV, exportToObsidianMarkdown } from '../utils/exporters';
@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onGoHome,
   onNavigateOverview,
 }) => {
-  const { user } = useAuth();
+  const { user, isPro, setShowSubscriptionModal } = useAuth();
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   return (
@@ -241,28 +241,66 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span>Export CSV</span>
                   <span className="text-[10px] text-textMuted font-mono">.csv</span>
                 </button>
-                <button
-                  onClick={() => {
-                    sounds.playClick();
-                    exportToAnkiCSV(filteredQuestions, state.progress, `Cheat_Code_${selectedCompanyId}`);
-                    setShowExportMenu(false);
-                  }}
-                  className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-white hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
-                >
-                  <span>Export Anki Deck</span>
-                  <span className="text-[10px] text-primary font-mono">.csv</span>
-                </button>
-                <button
-                  onClick={() => {
-                    sounds.playClick();
-                    exportToObsidianMarkdown(filteredQuestions, state.progress, user);
-                    setShowExportMenu(false);
-                  }}
-                  className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-white hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
-                >
-                  <span>Export Obsidian</span>
-                  <span className="text-[10px] text-primary font-mono">.md</span>
-                </button>
+                {isPro ? (
+                  <button
+                    onClick={() => {
+                      sounds.playClick();
+                      exportToAnkiCSV(filteredQuestions, state.progress, `Cheat_Code_${selectedCompanyId}`);
+                      setShowExportMenu(false);
+                    }}
+                    className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-white hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
+                  >
+                    <span>Export Anki Deck</span>
+                    <span className="text-[10px] text-primary font-mono">.csv</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      sounds.playTimerAlert();
+                      setShowSubscriptionModal(true);
+                      setShowExportMenu(false);
+                    }}
+                    className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-amber-400 hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <Lock className="w-3 h-3 text-amber-400" />
+                      <span>Export Anki Deck</span>
+                    </div>
+                    <span className="text-[9px] px-1 py-0.2 rounded bg-amber-400/20 text-amber-400 font-extrabold uppercase font-mono">
+                      PRO
+                    </span>
+                  </button>
+                )}
+                {isPro ? (
+                  <button
+                    onClick={() => {
+                      sounds.playClick();
+                      exportToObsidianMarkdown(filteredQuestions, state.progress, user);
+                      setShowExportMenu(false);
+                    }}
+                    className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-white hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
+                  >
+                    <span>Export Obsidian</span>
+                    <span className="text-[10px] text-primary font-mono">.md</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      sounds.playTimerAlert();
+                      setShowSubscriptionModal(true);
+                      setShowExportMenu(false);
+                    }}
+                    className="w-full text-left px-3.5 py-2 text-xs text-textSecondary hover:text-amber-400 hover:bg-white/[0.04] flex items-center justify-between cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <Lock className="w-3 h-3 text-amber-400" />
+                      <span>Export Obsidian</span>
+                    </div>
+                    <span className="text-[9px] px-1 py-0.2 rounded bg-amber-400/20 text-amber-400 font-extrabold uppercase font-mono">
+                      PRO
+                    </span>
+                  </button>
+                )}
               </div>
             )}
           </div>

@@ -10,11 +10,15 @@ import {
   Award,
   Sparkles,
   BookOpen,
-  ArrowRight
+  ArrowRight,
+  Crown,
+  Lock
 } from 'lucide-react';
 import { Question, CompanyMeta, UserStoreState } from '../types';
 import { sounds } from '../utils/sound';
 import { getMockInterviews, CompletedMockSession } from '../utils/mockInterviewStorage';
+import { useAuth } from '../context/AuthContext';
+import { getRemainingDailyMocks, recordMockInterviewTaken } from '../utils/tierPermissions';
 
 interface MockInterviewPageProps {
   questions: Question[];
@@ -29,9 +33,25 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
   store,
   onOpenMockModal,
 }) => {
+  const { user, isPro, setShowSubscriptionModal } = useAuth();
   const [activeTab, setActiveTab] = useState<'start' | 'past' | 'performance' | 'tips'>('start');
   const [interviewType, setInterviewType] = useState<'coding' | 'behavioral' | 'mixed'>('coding');
   const [mockSessions, setMockSessions] = useState<CompletedMockSession[]>([]);
+
+  const remainingMocks = getRemainingDailyMocks(user?.id || 'guest', isPro);
+
+  const handleStartMock = () => {
+    if (!isPro && remainingMocks <= 0) {
+      sounds.playTimerAlert();
+      setShowSubscriptionModal(true);
+      return;
+    }
+    if (!isPro) {
+      recordMockInterviewTaken(user?.id || 'guest');
+    }
+    sounds.playSuccess();
+    onOpenMockModal();
+  };
 
   useEffect(() => {
     setMockSessions(getMockInterviews());
@@ -631,17 +651,34 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                 {/* Start Mock Interview Button */}
                 <div className="pt-2">
                   <button
-                    onClick={() => {
-                      sounds.playSuccess();
-                      onOpenMockModal();
-                    }}
-                    className="w-full bg-primary hover:bg-[#D4ED00] text-black font-bold text-sm py-3.5 px-6 rounded-xl flex items-center justify-center gap-2.5 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all cursor-pointer font-sans"
+                    onClick={handleStartMock}
+                    className={`w-full font-bold text-sm py-3.5 px-6 rounded-xl flex items-center justify-center gap-2.5 shadow-lg transition-all cursor-pointer font-sans ${
+                      isPro || remainingMocks > 0
+                        ? 'bg-primary hover:bg-[#D4ED00] text-black shadow-primary/20 hover:shadow-primary/30'
+                        : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black shadow-amber-400/20'
+                    }`}
                   >
-                    <Play className="w-4 h-4 fill-black" />
-                    <span>Start Mock Interview</span>
+                    {isPro ? (
+                      <>
+                        <Play className="w-4 h-4 fill-black" />
+                        <span>Start Mock Interview</span>
+                      </>
+                    ) : remainingMocks > 0 ? (
+                      <>
+                        <Play className="w-4 h-4 fill-black" />
+                        <span>Start Free Daily Mock (1 Session Available)</span>
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="w-4 h-4" />
+                        <span>Unlock Unlimited Mock Interviews with Pro &rarr;</span>
+                      </>
+                    )}
                   </button>
                   <p className="text-xs text-textMuted text-center mt-2 font-sans">
-                    Simulate real-world conditions. Timed countdown begins when launched.
+                    {isPro
+                      ? 'Pro Plan Active: Unlimited timed countdown simulations.'
+                      : 'Free Plan: 1 mock interview simulation included per day.'}
                   </p>
                 </div>
               </div>

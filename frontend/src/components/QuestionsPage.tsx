@@ -29,6 +29,7 @@ import { sounds } from '../utils/sound';
 import { DifficultyBadge } from './ui/DifficultyBadge';
 import { Button } from './ui/Button';
 import GlideSelect, { GlideSelectOption } from './ui/GlideSelect';
+import { AdBanner } from './AdBanner';
 
 interface QuestionsPageProps {
   questions: Question[];
@@ -1270,6 +1271,9 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
           {Math.min(safePage * pageSize, totalCount)} of {totalCount.toLocaleString()} questions
         </div>
       </div>
+
+      {/* Sponsored Ad Banner for Free Users (100% Ad-Free for Pro) */}
+      <AdBanner slotId="questions-table-bottom" />
     </div>
   );
 };

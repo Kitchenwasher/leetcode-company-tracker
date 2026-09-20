@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { CompanyMeta, Question, UserProgressItem } from '../types';
 import {
   X, Calendar, Target, Flame, CheckCircle2, TrendingUp, Sparkles,
-  Clock, ShieldAlert, Award, ArrowRight, Layers
+  Clock, ShieldAlert, Award, ArrowRight, Layers, Crown, Lock
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 
@@ -59,6 +59,12 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
   const currentVelocity = (companySolvedCount / Math.max(1, totalPlannedProblems)) * 100;
 
   const handleSavePlan = () => {
+    if (!isPro) {
+      sounds.playTimerAlert();
+      setShowSubscriptionModal(true);
+      return;
+    }
+
     sounds.playSuccess();
     updateProfile({
       targetCompany: selectedCompany,
@@ -262,22 +268,32 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
             Target company: <span className="font-semibold text-white capitalize">{selectedCompany}</span>
           </div>
 
-          <button
-            onClick={handleSavePlan}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-black font-bold hover:bg-primary text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
-          >
-            {savedSuccess ? (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-primary" />
-                <span>Plan Saved to Profile!</span>
-              </>
-            ) : (
-              <>
-                <Calendar className="w-4 h-4" />
-                <span>Save & Set as Active Pacing Plan</span>
-              </>
-            )}
-          </button>
+          {isPro ? (
+            <button
+              onClick={handleSavePlan}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-black font-bold hover:bg-primaryHover text-xs shadow-lg shadow-primary/20 transition-all cursor-pointer"
+            >
+              {savedSuccess ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-black" />
+                  <span>Plan Saved to Profile!</span>
+                </>
+              ) : (
+                <>
+                  <Calendar className="w-4 h-4" />
+                  <span>Save & Set as Active Pacing Plan</span>
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleSavePlan}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-extrabold text-xs shadow-lg shadow-amber-400/20 transition-all cursor-pointer"
+            >
+              <Crown className="w-4 h-4" />
+              <span>Unlock Active Pacing Plan with Pro &rarr;</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

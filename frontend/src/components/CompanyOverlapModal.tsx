@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Question, CompanyMeta, ProblemStatus, UserProgressItem } from '../types';
-import { X, Layers, Check, ExternalLink, ArrowRight, Star } from 'lucide-react';
+import { X, Layers, Check, ExternalLink, ArrowRight, Star, Crown, Sparkles, Lock } from 'lucide-react';
 import { CompanyLogo } from './CompanyLogo';
 import { sounds } from '../utils/sound';
+import { useAuth } from '../context/AuthContext';
 
 interface CompanyOverlapModalProps {
   questions: Question[];
@@ -23,6 +24,7 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
   onClose,
   onSelectQuestion,
 }) => {
+  const { isPro, setShowSubscriptionModal } = useAuth();
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>(['google', 'meta']);
   const [minMatchCount, setMinMatchCount] = useState<number>(2);
 
@@ -149,7 +151,7 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
                   &gt; No overlapping questions found with the selected company criteria.
                 </div>
               ) : (
-                overlappingQuestions.slice(0, 50).map(({ question: q, matchCount, matches }) => {
+                (isPro ? overlappingQuestions.slice(0, 50) : overlappingQuestions.slice(0, 1)).map(({ question: q, matchCount, matches }) => {
                   const prog = progress[String(q.id)];
                   const isSolved = prog?.status === 'solved' || prog?.status === 'mastered';
 
@@ -221,6 +223,35 @@ export const CompanyOverlapModal: React.FC<CompanyOverlapModalProps> = ({
                     </div>
                   );
                 })
+              )}
+              {!isPro && overlappingQuestions.length > 1 && (
+                <div className="p-6 bg-[#0E1217] border-t border-amber-400/20 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shadow-lg shadow-amber-400/10">
+                    <Crown className="w-5 h-5" />
+                  </div>
+                  <div className="max-w-md">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/10 text-amber-400 text-[10px] font-extrabold uppercase mb-1">
+                      <Sparkles className="w-3 h-3" />
+                      <span>Pro Intelligence</span>
+                    </div>
+                    <h4 className="text-sm font-bold text-white font-sans">
+                      +{overlappingQuestions.length - 1} More Overlapping Questions Locked
+                    </h4>
+                    <p className="text-xs text-textMuted font-sans mt-1 leading-relaxed">
+                      Upgrade to Pro to unlock the full multi-company overlap matrix and prioritize questions asked simultaneously by your target companies.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      sounds.playMastered();
+                      setShowSubscriptionModal(true);
+                    }}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-extrabold text-xs font-sans tracking-wide shadow-lg shadow-amber-400/20 transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    <Crown className="w-4 h-4" />
+                    <span>Unlock All Overlaps with Pro &rarr;</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>
