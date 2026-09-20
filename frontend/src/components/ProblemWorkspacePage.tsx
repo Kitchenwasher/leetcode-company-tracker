@@ -107,8 +107,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
         if (isMounted) {
           if (data && data.approaches && data.approaches.length > 0) {
             setSolutionData(data);
-            const optimalIdx = data.approaches.findIndex((a) => a.tag === 'Optimal');
-            setSelectedApproachIndex(optimalIdx !== -1 ? optimalIdx : 0);
+            setSelectedApproachIndex(0); // Always start with Approach 1 (Brute Force baseline)
           } else {
             setSolutionData(null);
           }
@@ -307,8 +306,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
       const freshSolution = await questionsApi.generateAiSolution(q.id);
       if (freshSolution && freshSolution.approaches && freshSolution.approaches.length > 0) {
         setSolutionData(freshSolution);
-        const optimalIdx = freshSolution.approaches.findIndex((a) => a.tag === 'Optimal');
-        setSelectedApproachIndex(optimalIdx !== -1 ? optimalIdx : 0);
+        setSelectedApproachIndex(0);
       }
     } catch (err) {
       console.error('Failed to generate AI solution:', err);
@@ -754,7 +752,9 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                         <span>{app.name}</span>
                         <span
                           className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${
-                            app.tag === 'Optimal'
+                            selectedApproachIndex === idx
+                              ? 'bg-black/20 text-black border border-black/30'
+                              : app.tag === 'Optimal'
                               ? 'bg-primary/20 text-primary border border-primary/30'
                               : app.tag === 'Better'
                               ? 'bg-primaryHover/20 text-primaryHover border border-primaryHover/30'
@@ -1116,12 +1116,14 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
           </div>
 
           {/* Right Pane Active Content */}
-          <div className="flex-1 overflow-hidden p-2 sm:p-3">
-            {rightTab === 'code' && (
+          <div className="flex-1 overflow-hidden p-2 sm:p-3 relative">
+            <div className={`h-full ${rightTab === 'code' ? 'block' : 'hidden'}`}>
               <CodeEditorRunner
                 question={q}
                 currentApproach={currentApproach}
                 descriptionData={descriptionData}
+                initialCode={codeText}
+                onCodeChange={(newCode) => setCodeText(newCode)}
                 onSolved={() => handleSetStatus('solved')}
                 onSendToNotes={(codeSnippet) => {
                   setNotes((prev) => prev + '\n\n```\n' + codeSnippet + '\n```');
@@ -1129,13 +1131,11 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                   sounds.playSuccess();
                 }}
               />
-            )}
+            </div>
 
-            {rightTab === 'whiteboard' && (
-              <div className="h-full">
-                <WhiteboardCanvas questionId={q.id} height={560} />
-              </div>
-            )}
+            <div className={`h-full ${rightTab === 'whiteboard' ? 'block' : 'hidden'}`}>
+              <WhiteboardCanvas questionId={q.id} height={560} />
+            </div>
           </div>
         </div>
       </div>

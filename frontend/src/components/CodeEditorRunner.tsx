@@ -16,6 +16,8 @@ interface CodeEditorRunnerProps {
   descriptionData?: QuestionDescription | null;
   onSolved?: () => void;
   onSendToNotes?: (code: string) => void;
+  initialCode?: string;
+  onCodeChange?: (code: string) => void;
 }
 
 type SupportedLanguage = 'cpp' | 'python' | 'java' | 'javascript';
@@ -33,12 +35,17 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
   descriptionData,
   onSolved,
   onSendToNotes,
+  initialCode,
+  onCodeChange,
 }) => {
   const [language, setLanguage] = useState<SupportedLanguage>(() => {
     return (localStorage.getItem('cheatcode_editor_lang') as SupportedLanguage) || 'python';
   });
 
-  const [code, setCode] = useState<string>('');
+  const [code, setCode] = useState<string>(() => {
+    if (initialCode && initialCode.trim()) return initialCode;
+    return generateStarterCode(language, currentApproach, q.title);
+  });
   const [copied, setCopied] = useState<boolean>(false);
   const [isSolutionLoaded, setIsSolutionLoaded] = useState<boolean>(false);
 
@@ -54,6 +61,8 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const lineNumbersRef = useRef<HTMLDivElement | null>(null);
+  const lastQuestionIdRef = useRef(q.id);
+  const lastLanguageRef = useRef(language);
 
   // Initialize testcases when description data arrives
   useEffect(() => {
@@ -62,13 +71,34 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
     setSelectedCaseIdx(0);
   }, [descriptionData, q.id]);
 
-  // Generate clean starter template when language or question changes
+  // Generate clean starter template ONLY when question changes or user switches language
   useEffect(() => {
-    const starter = generateStarterCode(language, currentApproach, q.title);
-    setCode(starter);
-    setIsSolutionLoaded(false);
-    setExecResult(null);
+    const isNewQuestion = lastQuestionIdRef.current !== q.id;
+    const isNewLanguage = lastLanguageRef.current !== language;
+    lastQuestionIdRef.current = q.id;
+    lastLanguageRef.current = language;
+
+    if (isNewQuestion) {
+      const newCode = (initialCode && initialCode.trim())
+        ? initialCode
+        : generateStarterCode(language, currentApproach, q.title);
+      setCode(newCode);
+      onCodeChange?.(newCode);
+      setIsSolutionLoaded(false);
+      setExecResult(null);
+    } else if (isNewLanguage) {
+      const starter = generateStarterCode(language, currentApproach, q.title);
+      setCode(starter);
+      onCodeChange?.(starter);
+      setIsSolutionLoaded(false);
+      setExecResult(null);
+    }
   }, [language, q.id]);
+
+  const updateCode = (newCode: string) => {
+    setCode(newCode);
+    onCodeChange?.(newCode);
+  };
 
   // Synchronize scrolling between code textarea and line numbers
   const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
@@ -86,7 +116,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
   const handleResetStarter = () => {
     sounds.playClick();
     const starter = generateStarterCode(language, currentApproach, q.title);
-    setCode(starter);
+    updateCode(starter);
     setIsSolutionLoaded(false);
   };
 
@@ -94,7 +124,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
     sounds.playClick();
     const sol = (currentApproach?.code as Record<string, string | undefined>)?.[language] || (language === 'cpp' ? currentApproach?.cppCode : '');
     if (sol) {
-      setCode(sol);
+      updateCode(sol);
       setIsSolutionLoaded(true);
     }
   };
@@ -124,7 +154,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
       const end = ta.selectionEnd;
       const spaces = '    ';
       const newCode = code.substring(0, start) + spaces + code.substring(end);
-      setCode(newCode);
+      updateCode(newCode);
       requestAnimationFrame(() => {
         ta.selectionStart = ta.selectionEnd = start + 4;
       });
@@ -149,7 +179,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
         e.preventDefault();
         const closeChar = openCloseMap[e.key];
         const newCode = code.substring(0, start) + e.key + closeChar + code.substring(end);
-        setCode(newCode);
+        updateCode(newCode);
         requestAnimationFrame(() => {
           ta.selectionStart = ta.selectionEnd = start + 1;
         });
@@ -349,7 +379,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
         <textarea
           ref={textareaRef}
           value={code}
-          onChange={(e) => setCode(e.target.value)}
+          onChange={(e) => updateCode(e.target.value)}
           onKeyDown={handleKeyDown}
           onScroll={handleScroll}
           spellCheck={false}
