@@ -27,6 +27,7 @@ export interface JudgeExecutionResponse {
   stderr?: string;
   compileError?: string;
   beatsPercentile?: number;
+  beatsMemoryPercentile?: number;
 }
 
 export const judgeApi = {

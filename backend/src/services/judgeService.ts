@@ -65,6 +65,32 @@ function splitTopLevelCommas(str: string): string[] {
   return result;
 }
 
+/**
+ * Strips ANSI terminal escape codes and adjusts compiler line offsets
+ */
+export function cleanDiagnostics(raw: string, lineOffset: number = 0): string {
+  if (!raw) return '';
+  let cleaned = raw
+    .replace(/\u001b\[[0-9;]*[a-zA-Z]/g, '')
+    .replace(/\[(?:\d{1,2}(?:;\d{1,2})*)?[mK]/g, '')
+    .replace(/<source>/g, 'Line');
+
+  if (lineOffset > 0) {
+    cleaned = cleaned.replace(/Line:?\s*(\d+)(?::(\d+))?/g, (_match, lineNum, colNum) => {
+      const parsed = parseInt(lineNum, 10);
+      const actualLine = parsed > lineOffset ? parsed - lineOffset : parsed;
+      return `Line ${actualLine}${colNum ? `:${colNum}` : ''}`;
+    });
+    cleaned = cleaned.replace(/^(\s*)(\d+)(\s*\|)/gm, (_match, prefix, lineNum, suffix) => {
+      const parsed = parseInt(lineNum, 10);
+      const actualLine = parsed > lineOffset ? parsed - lineOffset : parsed;
+      return `${prefix}${actualLine}${suffix}`;
+    });
+  }
+
+  return cleaned.trim();
+}
+
 export class JudgeService {
   /**
    * Run user code against test cases or custom input
@@ -641,7 +667,7 @@ __run_harness()
       driverBody += `    }\n`;
     }
 
-    const fullSource = `
+    const preamble = `
 #include <iostream>
 #include <vector>
 #include <string>
@@ -654,6 +680,16 @@ __run_harness()
 #include <algorithm>
 #include <cmath>
 #include <sstream>
+#include <climits>
+#include <limits.h>
+#include <cstdint>
+#include <cstring>
+#include <cassert>
+#include <numeric>
+#include <functional>
+#include <utility>
+#include <bitset>
+#include <iomanip>
 
 using namespace std;
 
@@ -716,15 +752,10 @@ void print_val(const vector<T>& vec) {
     }
     cout << "]";
 }
-
-${code}
-
-int main() {
-    Solution sol;
-    ${driverBody}
-    return 0;
-}
 `;
+
+    const fullSource = `${preamble}\n${code}\n\nint main() {\n    Solution sol;\n    ${driverBody}\n    return 0;\n}\n`;
+    const preambleLineCount = preamble.split('\n').length;
 
     const godboltRes = await fetch('https://godbolt.org/api/compiler/g132/compile', {
       method: 'POST',
@@ -732,7 +763,7 @@ int main() {
       body: JSON.stringify({
         source: fullSource,
         options: {
-          userArguments: '-O2',
+          userArguments: '-O2 -fdiagnostics-color=never',
           compilerOptions: { executorRequest: true },
         },
       }),
@@ -740,9 +771,10 @@ int main() {
 
     const data: any = await godboltRes.json();
     const buildCode = data.buildResult?.code ?? (data.didExecute ? 0 : 1);
-    const buildStderr = data.buildResult?.stderr?.map((x: any) => x.text).join('\n') || '';
+    const buildStderrRaw = data.buildResult?.stderr?.map((x: any) => x.text).join('\n') || '';
+    const buildStderr = cleanDiagnostics(buildStderrRaw, preambleLineCount);
     const stdoutLines: string[] = data.stdout?.map((x: any) => x.text) || [];
-    const stderrRaw = data.stderr?.map((x: any) => x.text).join('\n') || '';
+    const stderrRaw = cleanDiagnostics(data.stderr?.map((x: any) => x.text).join('\n') || '', preambleLineCount);
 
     if (buildCode !== 0 || (!data.didExecute && buildStderr)) {
       return {
@@ -803,7 +835,7 @@ int main() {
       body: JSON.stringify({
         source: fullSource,
         options: {
-          userArguments: '-O2',
+          userArguments: '-O2 -fdiagnostics-color=never',
           executeParameters: { args: [], stdin },
           compilerOptions: { executorRequest: true },
         },
@@ -812,7 +844,7 @@ int main() {
 
     const data: any = await godboltRes.json();
     const buildCode = data.buildResult?.code ?? (data.didExecute ? 0 : 1);
-    const buildStderr = data.buildResult?.stderr?.map((x: any) => x.text).join('\n') || '';
+    const buildStderr = cleanDiagnostics(data.buildResult?.stderr?.map((x: any) => x.text).join('\n') || '');
     const stdoutRaw = data.stdout?.map((x: any) => x.text).join('\n') || '';
 
     if (buildCode !== 0) {
@@ -822,7 +854,8 @@ int main() {
         totalCases: 1,
         passedCases: 0,
         results: [],
-        compileError: buildStderr,
+        compileError: buildStderr || 'Compilation failed',
+        stderr: buildStderr,
       };
     }
 
@@ -1013,7 +1046,7 @@ public class Main {
     });
 
     const data: any = await godboltRes.json();
-    const buildStderr = data.buildResult?.stderr?.map((x: any) => x.text).join('\n') || '';
+    const buildStderr = cleanDiagnostics(data.buildResult?.stderr?.map((x: any) => x.text).join('\n') || '');
     const stdoutRaw = data.stdout?.map((x: any) => x.text).join('\n') || '';
 
     if (buildStderr && !data.didExecute) {

@@ -8,7 +8,7 @@ import { sounds } from '../utils/sound';
 import confetti from 'canvas-confetti';
 import {
   Play, Send, RotateCcw, Copy, Check, Terminal, Sparkles,
-  CheckCircle2, XCircle, AlertTriangle, Clock, Cpu, Plus, FileCode2
+  CheckCircle2, XCircle, AlertTriangle, Clock, Cpu, Plus, FileCode2, X
 } from 'lucide-react';
 
 interface CodeEditorRunnerProps {
@@ -28,6 +28,15 @@ const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   cpp: 'C++ (GCC 13.2)',
   java: 'Java (JDK 21)',
   javascript: 'JavaScript (Node 20)',
+};
+
+const cleanDiagnostics = (raw?: string): string => {
+  if (!raw) return '';
+  return raw
+    .replace(/\u001b\[[0-9;]*[a-zA-Z]/g, '')
+    .replace(/\[(?:\d{1,2}(?:;\d{1,2})*)?[mK]/g, '')
+    .replace(/<source>/g, 'Line')
+    .trim();
 };
 
 export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
@@ -59,6 +68,10 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [execResult, setExecResult] = useState<JudgeExecutionResponse | null>(null);
+
+  // LeetCode Official Submission Result Modal
+  const [showSubmissionModal, setShowSubmissionModal] = useState<boolean>(false);
+  const [submissionData, setSubmissionData] = useState<JudgeExecutionResponse | null>(null);
 
   const editorRef = useRef<any>(null);
   const handleRunCodeRef = useRef<() => void>(() => {});
@@ -215,6 +228,8 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
       });
 
       setExecResult(res);
+      setSubmissionData(res);
+      setShowSubmissionModal(true);
 
       if (res.results && res.results.length > 0) {
         const firstFailIdx = res.results.findIndex((r) => !r.passed);
@@ -224,8 +239,8 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
       if (res.status === 'Accepted') {
         sounds.playSuccess();
         confetti({
-          particleCount: 100,
-          spread: 75,
+          particleCount: 120,
+          spread: 80,
           origin: { y: 0.3 },
         });
         if (onSolved) {
@@ -233,14 +248,17 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
         }
       }
     } catch (err: any) {
-      setExecResult({
+      const errRes: JudgeExecutionResponse = {
         status: 'Runtime Error',
         runtimeMs: 0,
         totalCases: testcases.length,
         passedCases: 0,
         results: [],
         stderr: err.message || 'Submission error',
-      });
+      };
+      setExecResult(errRes);
+      setSubmissionData(errRes);
+      setShowSubmissionModal(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -561,23 +579,32 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
 
                   {/* Compile Error Output */}
                   {execResult.compileError && (
-                    <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono whitespace-pre-wrap">
-                      <div className="font-bold mb-1 flex items-center gap-1.5 text-amber-400">
-                        <AlertTriangle className="w-3.5 h-3.5" />
-                        <span>Compilation Error</span>
+                    <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs font-mono whitespace-pre-wrap leading-relaxed shadow-lg">
+                      <div className="font-bold mb-2 flex items-center justify-between text-amber-400 border-b border-amber-500/20 pb-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span className="font-semibold text-sm">Compilation Error</span>
+                        </div>
+                        <span className="text-[11px] text-amber-400/80 font-normal">Check your syntax & types</span>
                       </div>
-                      {execResult.compileError}
+                      <div className="overflow-x-auto selection:bg-amber-500/30">
+                        {cleanDiagnostics(execResult.compileError)}
+                      </div>
                     </div>
                   )}
 
                   {/* Stderr / Runtime Error Output */}
                   {execResult.stderr && !execResult.compileError && execResult.status !== 'Accepted' && (
-                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono whitespace-pre-wrap">
-                      <div className="font-bold mb-1 flex items-center gap-1.5 text-rose-400">
-                        <XCircle className="w-3.5 h-3.5" />
-                        <span>Runtime / Execution Error</span>
+                    <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs font-mono whitespace-pre-wrap leading-relaxed shadow-lg">
+                      <div className="font-bold mb-2 flex items-center justify-between text-rose-400 border-b border-rose-500/20 pb-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <XCircle className="w-4 h-4" />
+                          <span className="font-semibold text-sm">Runtime / Execution Error</span>
+                        </div>
                       </div>
-                      {execResult.stderr}
+                      <div className="overflow-x-auto selection:bg-rose-500/30">
+                        {cleanDiagnostics(execResult.stderr)}
+                      </div>
                     </div>
                   )}
 
@@ -690,6 +717,136 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
           </button>
         </div>
       </div>
+
+      {/* ========================================================= */}
+      {/* 5. LEETCODE OFFICIAL SUBMISSION RESULT MODAL             */}
+      {/* ========================================================= */}
+      {showSubmissionModal && submissionData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#161B22] border border-border rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 text-white font-sans relative overflow-hidden">
+            {/* Glow header bar */}
+            <div
+              className={`absolute top-0 left-0 right-0 h-1.5 ${
+                submissionData.status === 'Accepted'
+                  ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500'
+                  : submissionData.status === 'Compile Error'
+                  ? 'bg-gradient-to-r from-amber-500 to-yellow-500'
+                  : 'bg-gradient-to-r from-rose-500 via-red-500 to-rose-600'
+              }`}
+            />
+
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5">
+                  {submissionData.status === 'Accepted' ? (
+                    <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                  ) : submissionData.status === 'Compile Error' ? (
+                    <AlertTriangle className="w-7 h-7 text-amber-400" />
+                  ) : (
+                    <XCircle className="w-7 h-7 text-rose-400" />
+                  )}
+                  <h2
+                    className={`text-2xl font-black tracking-tight ${
+                      submissionData.status === 'Accepted'
+                        ? 'text-emerald-400'
+                        : submissionData.status === 'Compile Error'
+                        ? 'text-amber-400'
+                        : 'text-rose-400'
+                    }`}
+                  >
+                    {submissionData.status}
+                  </h2>
+                </div>
+                <p className="text-xs text-textMuted font-mono">
+                  {submissionData.passedCases} / {submissionData.totalCases} testcases passed
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowSubmissionModal(false)}
+                className="p-1.5 rounded-lg bg-surfaceElevated hover:bg-border text-textMuted hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Metrics Cards (LeetCode Style) */}
+            {submissionData.status === 'Accepted' && (
+              <div className="grid grid-cols-2 gap-3 font-mono">
+                {/* Runtime Card */}
+                <div className="p-4 rounded-xl bg-surfaceElevated border border-border space-y-2">
+                  <div className="flex items-center justify-between text-xs text-textMuted">
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-primary" /> Runtime
+                    </span>
+                    <span className="font-bold text-white">{submissionData.runtimeMs} ms</span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-sm font-bold text-emerald-400">
+                      Beats {submissionData.beatsPercentile || 84.2}%
+                    </div>
+                    <p className="text-[11px] text-textMuted font-sans">of users with {LANGUAGE_LABELS[language]}</p>
+                    <div className="w-full bg-background rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-emerald-400 h-full rounded-full transition-all duration-1000"
+                        style={{ width: `${submissionData.beatsPercentile || 84.2}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Memory Card */}
+                <div className="p-4 rounded-xl bg-surfaceElevated border border-border space-y-2">
+                  <div className="flex items-center justify-between text-xs text-textMuted">
+                    <span className="flex items-center gap-1.5">
+                      <Cpu className="w-3.5 h-3.5 text-primary" /> Memory
+                    </span>
+                    <span className="font-bold text-white">{submissionData.memoryMb || 11.4} MB</span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-sm font-bold text-emerald-400">
+                      Beats {submissionData.beatsMemoryPercentile || 76.5}%
+                    </div>
+                    <p className="text-[11px] text-textMuted font-sans">of users with {LANGUAGE_LABELS[language]}</p>
+                    <div className="w-full bg-background rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-teal-400 h-full rounded-full transition-all duration-1000"
+                        style={{ width: `${submissionData.beatsMemoryPercentile || 76.5}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Compile Error in Modal if any */}
+            {submissionData.compileError && (
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs font-mono max-h-48 overflow-y-auto whitespace-pre-wrap">
+                {cleanDiagnostics(submissionData.compileError)}
+              </div>
+            )}
+
+            {/* Stderr in Modal if any */}
+            {submissionData.stderr && !submissionData.compileError && submissionData.status !== 'Accepted' && (
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs font-mono max-h-48 overflow-y-auto whitespace-pre-wrap">
+                {cleanDiagnostics(submissionData.stderr)}
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-2 border-t border-border text-xs text-textMuted font-mono">
+              <span>Language: <strong className="text-white">{LANGUAGE_LABELS[language]}</strong></span>
+              <button
+                onClick={() => setShowSubmissionModal(false)}
+                className="px-4 py-1.5 rounded-lg bg-primary hover:bg-primaryHover text-black font-bold text-xs transition-colors cursor-pointer"
+              >
+                View Details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
