@@ -95,6 +95,7 @@ export class BMCService {
     const amountNum = parseFloat(
       String(inner.total_amount || inner.amount || (inner.support_coffees ? inner.support_coffees * 5 : 2000))
     ) || 2000;
+    const currency = String(inner.currency || 'INR').toLowerCase();
     const isLifetime =
       amountNum >= 1000 ||
       String(inner.membership_tier_name || inner.extra_title || payload.type || '').toLowerCase().includes('life') ||
