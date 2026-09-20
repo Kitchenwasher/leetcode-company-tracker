@@ -15,6 +15,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { Question, UserStoreState } from '../types';
+import { AdBanner } from './AdBanner';
 
 interface ProgressPageProps {
   questions: Question[];
@@ -144,6 +145,9 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
+
+      {/* Top Banner Ad (Free Tier only) */}
+      <AdBanner format="horizontal" variant="aws" slotId="progress-top-banner" className="my-2" />
 
       {/* Row 1: Macro Solved Ring Card (5 cols) + Difficulty Breakdown Card (7 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">

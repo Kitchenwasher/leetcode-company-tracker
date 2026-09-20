@@ -22,6 +22,7 @@ import { DifficultyBadge } from './ui/DifficultyBadge';
 import { Button } from './ui/Button';
 import { useAuth } from '../context/AuthContext';
 import { calculateStreaks, getTodayKey } from '../services/storage';
+import { AdBanner } from './AdBanner';
 
 interface OverviewPageProps {
   questions: Question[];
@@ -285,6 +286,9 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
 
   return (
     <div className="p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-[#F3F4F6] font-sans">
+      {/* Top Banner Ad (Free Tier only) */}
+      <AdBanner format="horizontal" variant="google-cloud" slotId="dash-top-banner" className="mb-2" />
+
       {/* Top Greeting Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -911,6 +915,9 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
               {currentStreak > 0 ? 'Active 🔥' : '0 Days'}
             </span>
           </div>
+
+          {/* Ad Slot 2: Sidebar / Right Rail (Free Tier only) */}
+          <AdBanner format="sidebar" variant="copilot" slotId="dash-sidebar-banner" className="my-2" />
 
           {/* Card 3: Upcoming Schedule Card */}
           <div className="bg-[#0E1217]/75 backdrop-blur-md border border-white/[0.08] rounded-xl p-5 space-y-3.5">

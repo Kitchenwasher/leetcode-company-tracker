@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
 import { communityApi, CommunityStats, LeaderboardUser } from '../api/communityApi';
+import { AdBanner } from './AdBanner';
 
 const INTERVIEW_EXPERIENCES = [
   {
@@ -109,6 +110,9 @@ export const CommunityPage: React.FC = () => {
           </a>
         </div>
       </div>
+
+      {/* Top Banner Ad (Free Tier only) */}
+      <AdBanner format="horizontal" variant="jetbrains" slotId="community-top-banner" className="my-2" />
 
       {/* Row 1: Real Community Platform Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

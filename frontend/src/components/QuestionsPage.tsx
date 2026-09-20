@@ -715,6 +715,9 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
         </div>
       </div>
 
+      {/* Top Banner Ad (Free Tier only) */}
+      <AdBanner format="horizontal" variant="aws" slotId="questions-top-banner" className="my-2" />
+
       {/* Sleek Single-Line Filter Toolbar */}
       <div className="bg-[#0E1217] border border-white/[0.08] rounded-xl p-2 sm:p-2.5 relative z-30">
         <div className="flex items-center gap-1.5 flex-wrap lg:flex-nowrap">

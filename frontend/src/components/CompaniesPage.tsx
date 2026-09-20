@@ -15,6 +15,7 @@ import { CompanyMeta, Question } from '../types';
 import { sounds } from '../utils/sound';
 import { DifficultyBadge } from './ui/DifficultyBadge';
 import { Button } from './ui/Button';
+import { AdBanner } from './AdBanner';
 
 interface CompaniesPageProps {
   companies: Record<string, CompanyMeta>;
@@ -312,6 +313,9 @@ export const CompaniesPage: React.FC<CompaniesPageProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Top Banner Ad (Free Tier only) */}
+      <AdBanner format="horizontal" variant="aws" slotId="companies-top-banner" className="my-2" />
 
       {/* Search Bar + Filters Row */}
       <div className="space-y-4">
