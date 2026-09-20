@@ -6,51 +6,79 @@ import { EmailService } from './emailService.js';
 export interface PlanConfig {
   id: string;
   name: string;
-  amountCents: number;
+  amountCents: number; // in smallest currency unit (paise for inr)
   currency: string;
   interval?: 'month' | 'year';
+  firstYearAmountCents?: number;
+  renewalAmountCents?: number;
+  description: string;
+  badge?: string;
+  features: string[];
 }
 
 export const PLANS: Record<string, PlanConfig> = {
-  pro_monthly: {
-    id: 'pro_monthly',
-    name: 'Pro Candidate (Monthly)',
-    amountCents: 900, // $9.00
-    currency: 'usd',
-    interval: 'month',
-  },
-  pro_yearly: {
-    id: 'pro_yearly',
-    name: 'Pro Candidate (Annual Pass)',
-    amountCents: 4900, // $49.00
-    currency: 'usd',
+  annual_special: {
+    id: 'annual_special',
+    name: 'Annual Pass (First Year Special)',
+    amountCents: 200000, // ₹2,000 in paise
+    currency: 'inr',
     interval: 'year',
+    firstYearAmountCents: 200000,
+    renewalAmountCents: 29900,
+    description: '₹2,000 for your first full year, then renews at ₹299/month starting the next year.',
+    badge: 'Save 44% • Best Value',
+    features: [
+      'Full 365-day access to all 3,399 verified questions',
+      'Exclusive ₹2,000 first-year special (₹166/month equivalent)',
+      'Renews at ₹299/month in Year 2 (cancel or pause anytime)',
+      'High-frequency company question sorting for 659 companies',
+      'Unlimited timed mock interview simulations & rubrics',
+      'Spaced repetition memory queue & mastery retention',
+      'Multi-language verified editorial solutions (C++, Python, Java)',
+    ],
   },
-  pro_lifetime: {
-    id: 'pro_lifetime',
-    name: 'Pro Candidate (Lifetime Access)',
-    amountCents: 7900, // $79.00
-    currency: 'usd',
+  monthly: {
+    id: 'monthly',
+    name: 'Monthly Pro Access',
+    amountCents: 29900, // ₹299 in paise
+    currency: 'inr',
+    interval: 'month',
+    description: '₹299 billed monthly. Full platform access with complete flexibility.',
+    badge: 'Flexible Monthly',
+    features: [
+      'Full access to all 3,399 verified questions',
+      'Billed monthly at ₹299/month',
+      'Company interview frequency trends for 659 companies',
+      'Unlimited timed mock interview simulations',
+      'Spaced repetition memory queue & mastery retention',
+      'Multi-language verified editorial solutions',
+      'Cancel anytime with 1 click',
+    ],
   },
 };
+
+// Aliases for backwards compatibility
+PLANS.pro_yearly = PLANS.annual_special;
+PLANS.pro_monthly = PLANS.monthly;
 
 export class StripeService {
   static async createCheckoutSession(userId: string, planId: string): Promise<{ url: string; isMock: boolean }> {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error('User not found');
 
-    const plan = PLANS[planId] || PLANS.pro_monthly;
+    const plan = PLANS[planId] || PLANS.annual_special;
 
     // Self-Hosting / Sandbox Mock Mode
     if (isStripeMockMode || !stripe) {
-      console.log(`[PAYMENT MOCK] Instant upgrade for user ${user.email} to ${plan.name}`);
+      console.log(`[STRIPE GATEWAY] Running in mock/sandbox mode for ${user.email} -> ${plan.name}`);
       
-      // Upgrade user
+      // Upgrade user in Neon database
       await prisma.user.update({
         where: { id: userId },
         data: {
           tier: 'pro',
           subscriptionStatus: 'active',
+          stripeSubscriptionId: `mock_sub_${Date.now()}`,
         },
       });
 
@@ -66,14 +94,23 @@ export class StripeService {
         },
       });
 
+      // Format currency receipt
+      const formattedPrice = plan.currency === 'inr'
+        ? `₹${(plan.amountCents / 100).toLocaleString('en-IN')}`
+        : `$${(plan.amountCents / 100).toFixed(2)}`;
+
       // Send email confirmation
-      await EmailService.sendSubscriptionReceipt(
-        user.email,
-        user.name,
-        plan.name,
-        `$${(plan.amountCents / 100).toFixed(2)}`,
-        user.id
-      );
+      try {
+        await EmailService.sendSubscriptionReceipt(
+          user.email,
+          user.name,
+          plan.name,
+          formattedPrice,
+          user.id
+        );
+      } catch (e) {
+        console.warn('[EMAIL WARNING] Could not send mock receipt email:', e);
+      }
 
       return {
         url: `${ENV.FRONTEND_URL}/#/subscription-success?session_id=mock_${Date.now()}&plan=${plan.id}`,
@@ -82,9 +119,8 @@ export class StripeService {
     }
 
     // Real Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: any = {
       payment_method_types: ['card'],
-      customer_email: user.email,
       client_reference_id: user.id,
       metadata: {
         userId: user.id,
@@ -95,8 +131,11 @@ export class StripeService {
           price_data: {
             currency: plan.currency,
             product_data: {
-              name: `LeetTracker Pro - ${plan.name}`,
-              description: 'Full access to 659 companies, C++ solutions, unlimited mocks, and whiteboard.',
+              name: `Cheat Code Pro - ${plan.name}`,
+              description: plan.description,
+              metadata: {
+                planId: plan.id,
+              },
             },
             unit_amount: plan.amountCents,
             recurring: plan.interval ? { interval: plan.interval } : undefined,
@@ -104,10 +143,18 @@ export class StripeService {
           quantity: 1,
         },
       ],
-      mode: plan.interval ? 'subscription' : 'payment',
+      mode: 'subscription',
       success_url: `${ENV.FRONTEND_URL}/#/subscription-success?session_id={CHECKOUT_SESSION_ID}&plan=${plan.id}`,
-      cancel_url: `${ENV.FRONTEND_URL}/#/pricing?canceled=true`,
-    });
+      cancel_url: `${ENV.FRONTEND_URL}/#/settings?canceled=true`,
+    };
+
+    if (user.stripeCustomerId) {
+      sessionParams.customer = user.stripeCustomerId;
+    } else {
+      sessionParams.customer_email = user.email;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     if (!session.url) throw new Error('Failed to create Stripe checkout session');
     return { url: session.url, isMock: false };
@@ -115,16 +162,13 @@ export class StripeService {
 
   static async createCustomerPortalSession(userId: string): Promise<string> {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || !user.stripeCustomerId) {
-      // In mock mode or if customer has no Stripe ID, return frontend subscription page
-      return `${ENV.FRONTEND_URL}/#/pricing`;
+    if (!user || !user.stripeCustomerId || !stripe) {
+      return `${ENV.FRONTEND_URL}/#/settings`;
     }
-
-    if (!stripe) return `${ENV.FRONTEND_URL}/#/pricing`;
 
     const portal = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,
-      return_url: `${ENV.FRONTEND_URL}/#/`,
+      return_url: `${ENV.FRONTEND_URL}/#/settings`,
     });
 
     return portal.url;
@@ -140,7 +184,7 @@ export class StripeService {
       case 'checkout.session.completed': {
         const session = event.data.object as any;
         const userId = session.client_reference_id || session.metadata?.userId;
-        const planId = session.metadata?.planId || 'pro_monthly';
+        const planId = session.metadata?.planId || 'annual_special';
 
         if (userId) {
           const user = await prisma.user.update({
@@ -153,24 +197,35 @@ export class StripeService {
             },
           });
 
+          const paidAmount = session.amount_total || (PLANS[planId]?.amountCents ?? 200000);
+          const paidCurrency = session.currency || 'inr';
+
           await prisma.payment.create({
             data: {
               userId,
               stripeSessionId: session.id,
-              amount: session.amount_total || 900,
-              currency: session.currency || 'usd',
+              amount: paidAmount,
+              currency: paidCurrency,
               status: 'succeeded',
               plan: planId,
             },
           });
 
-          await EmailService.sendSubscriptionReceipt(
-            user.email,
-            user.name,
-            PLANS[planId]?.name || 'Pro Candidate',
-            `$${((session.amount_total || 900) / 100).toFixed(2)}`,
-            user.id
-          );
+          const formattedPrice = paidCurrency === 'inr'
+            ? `₹${(paidAmount / 100).toLocaleString('en-IN')}`
+            : `$${(paidAmount / 100).toFixed(2)}`;
+
+          try {
+            await EmailService.sendSubscriptionReceipt(
+              user.email,
+              user.name,
+              PLANS[planId]?.name || 'Cheat Code Pro',
+              formattedPrice,
+              user.id
+            );
+          } catch (e) {
+            console.warn('[EMAIL WARNING] Could not send receipt email:', e);
+          }
         }
         break;
       }
@@ -188,6 +243,23 @@ export class StripeService {
             },
           });
           console.log(`[STRIPE WEBHOOK] Subscription cancelled for customer ${customerId}`);
+        }
+        break;
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as any;
+        const customerId = invoice.customer as string;
+
+        if (customerId) {
+          await prisma.user.updateMany({
+            where: { stripeCustomerId: customerId },
+            data: {
+              tier: 'pro',
+              subscriptionStatus: 'active',
+            },
+          });
+          console.log(`[STRIPE WEBHOOK] Recurring payment succeeded for customer ${customerId}`);
         }
         break;
       }

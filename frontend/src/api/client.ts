@@ -37,7 +37,7 @@ const PRIMARY_URL = formatUrl(import.meta.env.VITE_API_URL);
 const FALLBACK_URL = import.meta.env.VITE_FALLBACK_API_URL
   ? formatUrl(import.meta.env.VITE_FALLBACK_API_URL)
   : '';
-const TIMEOUT_MS = parseInt(import.meta.env.VITE_API_TIMEOUT_MS || '2500', 10);
+const TIMEOUT_MS = parseInt(import.meta.env.VITE_API_TIMEOUT_MS || '15000', 10);
 
 // Circuit Breaker State
 let consecutiveFailures = 0;

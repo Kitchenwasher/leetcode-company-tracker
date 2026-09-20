@@ -20,6 +20,8 @@ import { Question, UserStoreState, CompanyMeta } from '../types';
 import { sounds } from '../utils/sound';
 import { DifficultyBadge } from './ui/DifficultyBadge';
 import { Button } from './ui/Button';
+import { useAuth } from '../context/AuthContext';
+import { calculateStreaks, getTodayKey } from '../services/storage';
 
 interface OverviewPageProps {
   questions: Question[];
@@ -39,26 +41,15 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
   onOpenMockModal,
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // Daily goal checklist state
-  const [goals, setGoals] = useState([
-    { id: '1', text: 'Solve 2 Medium problems', completed: true },
-    { id: '2', text: 'Review 1 target company set', completed: true },
-    { id: '3', text: 'Take 45-min mock interview', completed: true },
-    { id: '4', text: 'Revise Spaced Repetition deck', completed: false },
-    { id: '5', text: 'Read community solution breakdown', completed: false },
-  ]);
-
-  const toggleGoal = (id: string) => {
-    sounds.playClick();
-    setGoals((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, completed: !g.completed } : g))
-    );
-  };
-
-  const completedCount = goals.filter((g) => g.completed).length;
-  const progressRatio = completedCount / goals.length;
-  const strokeDashoffset = 251.32 * (1 - progressRatio);
+  const { currentStreak } = useMemo(
+    () => calculateStreaks(store.activityLog || {}),
+    [store.activityLog]
+  );
+  const todayKey = getTodayKey();
+  const todaySolved = (store.activityLog || {})[todayKey] || 0;
+  const targetGoal = user.dailyTarget || store.dailyGoal || 3;
 
   // Bookmarked questions state
   const [bookmarkedIds, setBookmarkedIds] = useState<Record<string, boolean>>({});
@@ -69,54 +60,183 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
     setBookmarkedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Recent Questions data
-  const recentQuestions = [
-    {
-      id: 42,
-      num: 1,
-      title: 'Trapping Rain Water',
-      difficulty: 'Hard',
-      company: 'Google',
-      companySlug: 'google',
-      solvedAt: '2 hours ago',
-    },
-    {
-      id: 146,
-      num: 2,
-      title: 'LRU Cache',
-      difficulty: 'Medium',
-      company: 'Amazon',
-      companySlug: 'amazon',
-      solvedAt: '5 hours ago',
-    },
-    {
-      id: 20,
-      num: 3,
-      title: 'Valid Parentheses',
-      difficulty: 'Easy',
-      company: 'Microsoft',
-      companySlug: 'microsoft',
-      solvedAt: '1 day ago',
-    },
-    {
-      id: 23,
-      num: 4,
-      title: 'Merge k Sorted Lists',
-      difficulty: 'Hard',
-      company: 'Meta',
-      companySlug: 'meta',
-      solvedAt: '2 days ago',
-    },
-    {
-      id: 704,
-      num: 5,
-      title: 'Binary Search',
-      difficulty: 'Easy',
-      company: 'Apple',
-      companySlug: 'apple',
-      solvedAt: '3 days ago',
-    },
-  ];
+  // Overall progress calculations across all questions
+  const totalQuestionsCount = questions.length || 3399;
+  const totalSolved = useMemo(() => {
+    return Object.values(store.progress || {}).filter(
+      (p) => p.status === 'solved' || p.status === 'mastered'
+    ).length;
+  }, [store.progress]);
+
+  const easyTotal = useMemo(() => questions.filter((q) => q.difficulty === 'Easy').length || 830, [questions]);
+  const medTotal = useMemo(() => questions.filter((q) => q.difficulty === 'Medium').length || 1720, [questions]);
+  const hardTotal = useMemo(() => questions.filter((q) => q.difficulty === 'Hard').length || 849, [questions]);
+
+  const { easySolved, medSolved, hardSolved, reviewCount, masteredCount } = useMemo(() => {
+    let easy = 0;
+    let med = 0;
+    let hard = 0;
+    let review = 0;
+    let mastered = 0;
+
+    Object.entries(store.progress || {}).forEach(([qId, p]) => {
+      if (p.status === 'review') review++;
+      if (p.status === 'mastered') mastered++;
+      if (p.status === 'solved' || p.status === 'mastered') {
+        const q = questions.find((item) => String(item.id) === String(qId));
+        if (q?.difficulty === 'Easy') easy++;
+        else if (q?.difficulty === 'Hard') hard++;
+        else med++;
+      }
+    });
+
+    return { easySolved: easy, medSolved: med, hardSolved: hard, reviewCount: review, masteredCount: mastered };
+  }, [store.progress, questions]);
+
+  const solveRate = useMemo(() => {
+    const denom = totalSolved + reviewCount;
+    if (denom === 0) return '0.0%';
+    return `${((totalSolved / denom) * 100).toFixed(1)}%`;
+  }, [totalSolved, reviewCount]);
+
+  const progressPercent = totalQuestionsCount > 0 ? ((totalSolved / totalQuestionsCount) * 100).toFixed(1) : '0.0';
+  const overallRatio = totalQuestionsCount > 0 ? Math.min(1, totalSolved / totalQuestionsCount) : 0;
+  const overallDashoffset = 251.32 * (1 - overallRatio);
+
+  // Daily goal checklist state with dynamic progress
+  const [goalOverrides, setGoalOverrides] = useState<Record<string, boolean>>({});
+
+  const goals = useMemo(() => {
+    const baseGoals = [
+      {
+        id: '1',
+        text: `Solve ${targetGoal} problems (${todaySolved}/${targetGoal} today)`,
+        autoCompleted: todaySolved >= targetGoal,
+      },
+      {
+        id: '2',
+        text: `Review target company set (${user.targetCompany || 'Google'})`,
+        autoCompleted: false,
+      },
+      {
+        id: '3',
+        text: 'Take 45-min mock interview simulation',
+        autoCompleted: false,
+      },
+      {
+        id: '4',
+        text: 'Revise Spaced Repetition queue',
+        autoCompleted: reviewCount === 0 && totalSolved > 0,
+      },
+      {
+        id: '5',
+        text: 'Read community solutions & patterns',
+        autoCompleted: false,
+      },
+    ];
+
+    return baseGoals.map((g) => ({
+      id: g.id,
+      text: g.text,
+      completed: goalOverrides[g.id] !== undefined ? goalOverrides[g.id] : g.autoCompleted,
+    }));
+  }, [todaySolved, targetGoal, user.targetCompany, reviewCount, totalSolved, goalOverrides]);
+
+  const toggleGoal = (id: string) => {
+    sounds.playClick();
+    setGoalOverrides((prev) => {
+      const current = goals.find((g) => g.id === id)?.completed ?? false;
+      return { ...prev, [id]: !current };
+    });
+  };
+
+  const completedCount = goals.filter((g) => g.completed).length;
+  const progressRatio = completedCount / goals.length;
+  const strokeDashoffset = 251.32 * (1 - progressRatio);
+
+  // Recent Questions data derived from real store.progress
+  const solvedProgressEntries = useMemo(() => {
+    return Object.entries(store.progress || {})
+      .filter(([_, p]) => p.status === 'solved' || p.status === 'mastered')
+      .map(([id, p]) => ({
+        id: Number(id),
+        status: p.status,
+        lastSolved: p.lastSolvedAt ? new Date(p.lastSolvedAt).getTime() : 0,
+      }))
+      .sort((a, b) => b.lastSolved - a.lastSolved);
+  }, [store.progress]);
+
+  const recentQuestions = useMemo(() => {
+    return solvedProgressEntries.slice(0, 5).map((entry, idx) => {
+      const q = questions.find((item) => item.id === entry.id);
+      const companyNames = q ? Object.keys(q.companies || {}) : [];
+      const primaryCompany = companyNames[0] || 'General';
+
+      let solvedAt = 'Recently';
+      if (entry.lastSolved > 0) {
+        const diffMs = Date.now() - entry.lastSolved;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays > 0) solvedAt = `${diffDays}d ago`;
+        else if (diffHours > 0) solvedAt = `${diffHours}h ago`;
+        else solvedAt = 'Just now';
+      }
+
+      return {
+        id: entry.id,
+        num: idx + 1,
+        title: q ? q.title : `Question #${entry.id}`,
+        difficulty: (q ? q.difficulty : 'Medium') as any,
+        company: primaryCompany,
+        companySlug: primaryCompany.toLowerCase(),
+        solvedAt,
+      };
+    });
+  }, [solvedProgressEntries, questions]);
+
+  // Dynamic 7-day practice activity bar chart
+  const { chartBars, weekSolved, avgDaily, totalTimeDisplay } = useMemo(() => {
+    const log = store.activityLog || {};
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const now = new Date();
+    const bars = [];
+    let weekTotal = 0;
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(now.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const count = log[key] || 0;
+      weekTotal += count;
+      bars.push({
+        day: days[d.getDay()],
+        key,
+        count,
+        isToday: i === 0,
+      });
+    }
+
+    const maxCount = Math.max(...bars.map((b) => b.count), 1);
+    const formattedBars = bars.map((b) => ({
+      day: b.day,
+      height: b.count === 0 ? '8%' : `${Math.min(100, Math.round((b.count / maxCount) * 85) + 15)}%`,
+      count: b.count,
+      active: b.isToday && b.count > 0,
+    }));
+
+    const dailyAvg = (weekTotal / 7).toFixed(1);
+    const estTimeMinutes = weekTotal * 20;
+    const timeDisplay = estTimeMinutes >= 60 
+      ? `${Math.floor(estTimeMinutes / 60)}h ${estTimeMinutes % 60}m` 
+      : `${estTimeMinutes}m`;
+
+    return {
+      chartBars: formattedBars,
+      weekSolved: weekTotal,
+      avgDaily: dailyAvg,
+      totalTimeDisplay: timeDisplay,
+    };
+  }, [store.activityLog]);
 
   // Brand logos
   const renderCompanyLogo = (company: string) => {
@@ -162,42 +282,6 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
     }
   };
 
-  // Overall progress calculations across all questions
-  const totalQuestionsCount = questions.length || 3399;
-  const totalSolved = useMemo(() => {
-    return Object.values(store.progress).filter(
-      (p) => p.status === 'solved' || p.status === 'mastered'
-    ).length;
-  }, [store.progress]);
-
-  const progressPercent = totalQuestionsCount > 0 ? ((totalSolved / totalQuestionsCount) * 100).toFixed(1) : '0.0';
-  const overallRatio = totalQuestionsCount > 0 ? Math.min(1, totalSolved / totalQuestionsCount) : 0;
-  const overallDashoffset = 251.32 * (1 - overallRatio);
-
-  const easyTotal = 830;
-  const medTotal = 1720;
-  const hardTotal = 849;
-
-  const { easySolved, medSolved, hardSolved, reviewCount, masteredCount } = useMemo(() => {
-    let easy = 0;
-    let med = 0;
-    let hard = 0;
-    let review = 0;
-    let mastered = 0;
-
-    Object.entries(store.progress).forEach(([qId, p]) => {
-      if (p.status === 'review') review++;
-      if (p.status === 'mastered') mastered++;
-      if (p.status === 'solved' || p.status === 'mastered') {
-        const q = questions.find((item) => String(item.id) === String(qId));
-        if (q?.difficulty === 'Easy') easy++;
-        else if (q?.difficulty === 'Hard') hard++;
-        else med++;
-      }
-    });
-
-    return { easySolved: easy, medSolved: med, hardSolved: hard, reviewCount: review, masteredCount: mastered };
-  }, [store.progress, questions]);
 
   return (
     <div className="p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-[#F3F4F6] font-sans">
@@ -205,7 +289,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-            <span>Welcome back, Nitish</span>
+            <span>Welcome back, {user.name ? user.name.split(' ')[0] : 'Developer'}</span>
             <span className="inline-block hover:rotate-12 transition-transform cursor-default select-none">👋</span>
           </h1>
           <p className="text-sm text-zinc-400 mt-1">
@@ -345,20 +429,14 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
               <div className="flex items-end justify-between gap-5 pt-2">
                 {/* 7-Day Vertical Bar Chart */}
                 <div className="flex-1 flex items-end justify-between gap-2 h-28 pb-1">
-                  {[
-                    { day: 'Mon', height: '25%', active: false },
-                    { day: 'Tue', height: '55%', active: false },
-                    { day: 'Wed', height: '40%', active: false },
-                    { day: 'Thu', height: '50%', active: false },
-                    { day: 'Fri', height: '90%', active: true },
-                    { day: 'Sat', height: '20%', active: false },
-                    { day: 'Sun', height: '15%', active: false },
-                  ].map((bar) => (
-                    <div key={bar.day} className="flex flex-col items-center gap-2 flex-1 h-full justify-end">
+                  {chartBars.map((bar, idx) => (
+                    <div key={`${bar.day}-${idx}`} className="flex flex-col items-center gap-2 flex-1 h-full justify-end" title={`${bar.count} solved`}>
                       <div
                         className={`w-full max-w-[14px] rounded-md transition-all duration-300 ${
                           bar.active
                             ? 'bg-accent shadow-[0_0_14px_rgba(229,255,0,0.35)]'
+                            : bar.count > 0
+                            ? 'bg-accent/70 hover:bg-accent'
                             : 'bg-zinc-800 hover:bg-zinc-700'
                         }`}
                         style={{ height: bar.height }}
@@ -374,18 +452,18 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                 <div className="shrink-0 space-y-3 pl-4 border-l border-white/[0.08]">
                   <div>
                     <p className="text-xs text-zinc-500">This Week</p>
-                    <p className="text-2xl font-bold text-white tracking-tight mt-0.5">52</p>
+                    <p className="text-2xl font-bold text-white tracking-tight mt-0.5">{weekSolved}</p>
                     <p className="text-[11px] text-zinc-400">questions solved</p>
                   </div>
 
                   <div className="pt-2 border-t border-white/[0.08] space-y-1">
                     <div className="flex items-center justify-between text-xs gap-3">
                       <span className="text-zinc-500">Time:</span>
-                      <span className="font-semibold text-white font-mono">3h 24m</span>
+                      <span className="font-semibold text-white font-mono">{totalTimeDisplay}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs gap-3">
                       <span className="text-zinc-500">Streak:</span>
-                      <span className="font-semibold text-accent font-mono">12 days</span>
+                      <span className="font-semibold text-accent font-mono">{currentStreak} days</span>
                     </div>
                   </div>
                 </div>
@@ -497,48 +575,68 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.04]">
-                  {recentQuestions.map((q) => (
-                    <tr
-                      key={q.id}
-                      onClick={() => {
-                        sounds.playClick();
-                        onNavigateToProblem(q.id);
-                      }}
-                      className="hover:bg-white/[0.03] transition-colors cursor-pointer group"
-                    >
-                      <td className="py-3 px-3 font-mono text-zinc-500 text-xs">{q.num}</td>
-                      <td className="py-3 px-3 font-medium text-zinc-200 group-hover:text-white transition-colors">
-                        {q.title}
-                      </td>
-                      <td className="py-3 px-3">
-                        <DifficultyBadge difficulty={q.difficulty} size="sm" />
-                      </td>
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2">
-                          {renderCompanyLogo(q.company)}
-                          <span className="text-zinc-300 text-xs">{q.company}</span>
+                  {recentQuestions.length > 0 ? (
+                    recentQuestions.map((q) => (
+                      <tr
+                        key={q.id}
+                        onClick={() => {
+                          sounds.playClick();
+                          onNavigateToProblem(q.id);
+                        }}
+                        className="hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                      >
+                        <td className="py-3 px-3 font-mono text-zinc-500 text-xs">{q.num}</td>
+                        <td className="py-3 px-3 font-medium text-zinc-200 group-hover:text-white transition-colors">
+                          {q.title}
+                        </td>
+                        <td className="py-3 px-3">
+                          <DifficultyBadge difficulty={q.difficulty} size="sm" />
+                        </td>
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2">
+                            {renderCompanyLogo(q.company)}
+                            <span className="text-zinc-300 text-xs">{q.company}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-zinc-400 text-xs font-sans">
+                          {q.solvedAt}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <button
+                            onClick={(e) => toggleBookmark(String(q.id), e)}
+                            className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                            title="Bookmark"
+                          >
+                            <Bookmark
+                              className={`w-4 h-4 ${
+                                bookmarkedIds[String(q.id)]
+                                  ? 'text-accent fill-accent'
+                                  : 'text-zinc-500'
+                              }`}
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-zinc-500 text-xs">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <FileText className="w-7 h-7 text-zinc-600" />
+                          <p className="text-zinc-300 font-medium">No solved questions yet</p>
+                          <p className="text-zinc-500 text-[11px] max-w-sm">
+                            Pick problems from top companies or curated lists. Your solved questions will appear here automatically.
+                          </p>
+                          <button
+                            onClick={() => onNavigateToQuestions()}
+                            className="mt-1.5 px-3.5 py-1.5 rounded-lg bg-accent text-black font-semibold text-xs hover:bg-[#d4ed00] transition-colors cursor-pointer"
+                          >
+                            Solve Your First Question
+                          </button>
                         </div>
                       </td>
-                      <td className="py-3 px-3 text-zinc-400 text-xs font-sans">
-                        {q.solvedAt}
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        <button
-                          onClick={(e) => toggleBookmark(String(q.id), e)}
-                          className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                          title="Bookmark"
-                        >
-                          <Bookmark
-                            className={`w-4 h-4 ${
-                              bookmarkedIds[String(q.id)]
-                                ? 'text-accent fill-accent'
-                                : 'text-zinc-500'
-                            }`}
-                          />
-                        </button>
-                      </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -562,42 +660,45 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { id: 'google', name: 'Google', badge: 'Tier 1', count: 1248, diff: 'Medium' },
-                { id: 'amazon', name: 'Amazon', badge: 'Tier 1', count: 1432, diff: 'Medium' },
-                { id: 'meta', name: 'Meta', badge: 'Tier 1', count: 1085, diff: 'Hard' },
-                { id: 'microsoft', name: 'Microsoft', badge: 'Tier 1', count: 920, diff: 'Medium' },
-                { id: 'apple', name: 'Apple', badge: 'Tier 1', count: 650, diff: 'Hard' },
-                { id: 'netflix', name: 'Netflix', badge: 'Tier 1', count: 310, diff: 'Hard' },
-                { id: 'uber', name: 'Uber', badge: 'Unicorn', count: 480, diff: 'Medium' },
-                { id: 'adobe', name: 'Adobe', badge: 'Enterprise', count: 420, diff: 'Medium' },
-              ].map((c) => (
-                <div
-                  key={c.id}
-                  onClick={() => {
-                    sounds.playClick();
-                    navigate(`/questions?company=${c.id}`);
-                  }}
-                  className="p-3.5 rounded-xl bg-[#11141A]/70 backdrop-blur-xs border border-white/[0.06] hover:border-white/[0.16] hover:bg-[#141820]/80 transition-all cursor-pointer group flex flex-col justify-between space-y-2.5"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {renderCompanyLogo(c.name)}
-                      <span className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors">
-                        {c.name}
+                { id: 'google', name: 'Google', badge: 'Tier 1', diff: 'Medium' as const },
+                { id: 'amazon', name: 'Amazon', badge: 'Tier 1', diff: 'Medium' as const },
+                { id: 'meta', name: 'Meta', badge: 'Tier 1', diff: 'Hard' as const },
+                { id: 'microsoft', name: 'Microsoft', badge: 'Tier 1', diff: 'Medium' as const },
+                { id: 'apple', name: 'Apple', badge: 'Tier 1', diff: 'Hard' as const },
+                { id: 'netflix', name: 'Netflix', badge: 'Tier 1', diff: 'Hard' as const },
+                { id: 'uber', name: 'Uber', badge: 'Unicorn', diff: 'Medium' as const },
+                { id: 'adobe', name: 'Adobe', badge: 'Enterprise', diff: 'Medium' as const },
+              ].map((c) => {
+                const count = questions.filter((q) => !!q.companies[c.name]).length;
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => {
+                      sounds.playClick();
+                      navigate(`/questions?company=${c.id}`);
+                    }}
+                    className="p-3.5 rounded-xl bg-[#11141A]/70 backdrop-blur-xs border border-white/[0.06] hover:border-white/[0.16] hover:bg-[#141820]/80 transition-all cursor-pointer group flex flex-col justify-between space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {renderCompanyLogo(c.name)}
+                        <span className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors">
+                          {c.name}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-sans font-medium text-zinc-500">
+                        {c.badge}
                       </span>
                     </div>
-                    <span className="text-[10px] font-sans font-medium text-zinc-500">
-                      {c.badge}
-                    </span>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-xs font-mono text-zinc-400">
+                        {count > 0 ? `${count} Qs` : 'Tagged'}
+                      </span>
+                      <DifficultyBadge difficulty={c.diff} size="sm" />
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-xs font-mono text-zinc-400">
-                      {c.count} Qs
-                    </span>
-                    <DifficultyBadge difficulty={c.diff} size="sm" />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -729,7 +830,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                   </div>
                   <div className="p-2 rounded-lg bg-white/[0.02] text-center">
                     <p className="text-[10px] text-zinc-500">Solve Rate</p>
-                    <p className="text-xs font-bold text-emerald-400 mt-0.5">58.4%</p>
+                    <p className="text-xs font-bold text-emerald-400 mt-0.5">{solveRate}</p>
                   </div>
                 </div>
               </div>
@@ -752,7 +853,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
 
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">
-                Google &amp; Meta Technical Loop
+                {user.targetCompany ? `${user.targetCompany} Technical Loop` : 'Tier-1 FAANG Technical Loop'}
               </h3>
               <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
                 Focus on Dynamic Programming, Graph Traversals, and optimal space invariants.
@@ -776,22 +877,38 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </div>
           </div>
 
-          {/* Card 2: Streak Card */}
+          {/* Card 2: Real Streak Card */}
           <div className="bg-[#0E1217]/75 backdrop-blur-md border border-white/[0.08] rounded-xl p-5 flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
-                <Flame className="w-6 h-6 fill-amber-400 text-amber-400" />
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                currentStreak > 0
+                  ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+                  : 'bg-white/[0.03] border border-white/[0.06] text-zinc-500'
+              }`}>
+                <Flame className={`w-6 h-6 ${currentStreak > 0 ? 'fill-amber-400 text-amber-400' : 'text-zinc-500'}`} />
               </div>
               <div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold text-white font-sans tracking-tight">52</span>
+                  <span className="text-2xl font-bold text-white font-sans tracking-tight">{currentStreak}</span>
                   <span className="text-xs text-zinc-400">day streak</span>
                 </div>
-                <p className="text-xs text-zinc-500 mt-0.5">Top 3% of active interview preppers</p>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  {currentStreak > 0
+                    ? currentStreak >= 30
+                      ? 'Top 1% consistency on platform'
+                      : currentStreak >= 7
+                      ? 'Top 10% consistency among peers'
+                      : 'Keep practicing daily to grow streak'
+                    : 'Solve 1 question today to start your streak'}
+                </p>
               </div>
             </div>
-            <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-              Active 🔥
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              currentStreak > 0
+                ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20'
+                : 'text-zinc-500 bg-white/[0.04] border border-white/[0.06]'
+            }`}>
+              {currentStreak > 0 ? 'Active 🔥' : '0 Days'}
             </span>
           </div>
 
@@ -800,7 +917,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-accent" />
-                <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Upcoming Schedule</h3>
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider">Practice Milestones</h3>
               </div>
               <button
                 onClick={() => {
@@ -826,16 +943,16 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors">
-                    Mock Interview (Google Loop)
+                    {user.targetCompany || 'Google'} Loop Simulation
                   </p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Tomorrow, 6:00 PM</p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">45-min timed session • On demand</p>
                 </div>
               </div>
 
               <div
                 onClick={() => {
                   sounds.playClick();
-                  onNavigateToQuestions();
+                  navigate('/bookmarks');
                 }}
                 className="p-3 rounded-lg bg-[#11141A] border border-white/[0.04] hover:border-white/[0.12] transition-colors flex items-start gap-3 cursor-pointer group"
               >
@@ -844,9 +961,11 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors">
-                    Arrays &amp; Strings Spaced Repetition
+                    Spaced Repetition Review Queue
                   </p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Sep 21, 2026</p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    {reviewCount > 0 ? `${reviewCount} questions due for spaced repetition` : 'All caught up • 0 pending'}
+                  </p>
                 </div>
               </div>
 
@@ -862,9 +981,11 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors">
-                    System Architecture Timed Sprint
+                    Daily Targeted Drill
                   </p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Sep 23, 2026</p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    {todaySolved} of {targetGoal} questions solved today
+                  </p>
                 </div>
               </div>
             </div>

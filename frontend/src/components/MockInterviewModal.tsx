@@ -5,6 +5,8 @@ import { sounds } from '../utils/sound';
 import confetti from 'canvas-confetti';
 import { DifficultyBadge } from './ui/DifficultyBadge';
 
+import { saveMockInterview } from '../utils/mockInterviewStorage';
+
 interface MockInterviewModalProps {
   company: string;
   companyMeta?: CompanyMeta;
@@ -25,6 +27,7 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
   const [totalSeconds, setTotalSeconds] = useState<number>(45 * 60); // 45 mins
   const [secondsRemaining, setSecondsRemaining] = useState<number>(45 * 60);
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [solvedInSession, setSolvedInSession] = useState<Set<number | string>>(new Set());
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     clarify: false,
     bruteForce: false,
@@ -103,7 +106,36 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
       origin: { y: 0.7 },
       colors: ['#E5FF00', '#FFFFFF', '#D4ED00', '#F3F4F6'],
     });
+    setSolvedInSession((prev) => new Set([...prev, activeQ.id]));
     onUpdateStatus(activeQ.id, 'solved');
+  };
+
+  const handleEndSession = () => {
+    const elapsedSecs = totalSeconds - secondsRemaining;
+    const elapsedMins = Math.max(1, Math.round(elapsedSecs / 60));
+    const rubricCheckedCount = Object.values(checklist).filter(Boolean).length;
+    const solvedCount = solvedInSession.size;
+
+    if (rubricCheckedCount > 0 || solvedCount > 0 || elapsedMins >= 2) {
+      const rubricScore = (rubricCheckedCount / 6) * 50;
+      const solveScore = selectedQuestions.length > 0 ? (solvedCount / selectedQuestions.length) * 50 : 0;
+      const finalScore = Math.min(100, Math.round(rubricScore + solveScore));
+
+      saveMockInterview({
+        id: 'mock_' + Date.now(),
+        company: companyMeta?.name || company,
+        role: 'SWE Candidate',
+        type: 'Coding',
+        difficulty: selectedQuestions[0]?.difficulty || 'Medium',
+        score: finalScore,
+        durationMinutes: elapsedMins,
+        solvedCount,
+        totalQuestions: selectedQuestions.length,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        timestamp: Date.now(),
+      });
+    }
+    onClose();
   };
 
   const formatTime = (secs: number) => {
@@ -132,7 +164,7 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleEndSession}
             className="p-1.5 rounded-lg text-textMuted hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer"
             title="Close session"
           >
@@ -308,7 +340,7 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
             Tip: State your thought process aloud before writing code.
           </span>
           <button
-            onClick={onClose}
+            onClick={handleEndSession}
             className="px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-white text-xs font-medium transition-colors cursor-pointer"
           >
             End Interview

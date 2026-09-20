@@ -18,10 +18,12 @@ import {
   ChevronDown,
   Sparkles,
   Palette,
+  LogOut,
 } from 'lucide-react';
 import { UserStoreState } from '../types';
 import { sounds } from '../utils/sound';
 import { QuickThemePopover } from './ThemeToolkit';
+import { useAuth } from '../context/AuthContext';
 
 interface AppSidebarLayoutProps {
   children: React.ReactNode;
@@ -48,6 +50,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated, isPro, logout, setShowAuthModal } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showThemeToolkit, setShowThemeToolkit] = useState(false);
@@ -61,7 +64,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
 
   const isOverview = location.pathname === '/dashboard' || location.pathname === '/overview';
   const isCompanies = location.pathname === '/companies';
-  const isQuestions = location.pathname === '/questions' || location.pathname.startsWith('/dashboard/company');
+  const isQuestions = location.pathname === '/questions' || location.pathname.startsWith('/company') || location.pathname.startsWith('/dashboard/company');
   const isPractice = location.pathname === '/practice';
   const isMockInterview = location.pathname === '/mock-interview';
   const isProgress = location.pathname === '/progress';
@@ -257,69 +260,104 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />
             </button>
 
-            {/* User Profile Pill */}
-            <div className="relative ml-1">
+            {/* User Profile Pill / Auth Button */}
+            {!isAuthenticated ? (
               <button
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className="flex items-center gap-2.5 pl-2 pr-2 py-1.5 rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer"
+                onClick={() => {
+                  sounds.playClick();
+                  setShowAuthModal(true);
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-[#D4ED00] text-black font-semibold text-xs font-sans transition-colors cursor-pointer shadow-md shadow-primary/20"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 text-white font-semibold text-xs flex items-center justify-center shrink-0 shadow-sm">
-                  N
-                </div>
-                <div className="text-left hidden sm:block">
-                  <p className="text-xs font-semibold text-white leading-tight font-sans">Nitish Kumar</p>
-                  <p className="text-[10px] text-zinc-400 leading-tight font-sans">Pro Member</p>
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                Sign In
               </button>
-
-              {/* Dropdown Menu */}
-              {showUserDropdown && (
-                <div
-                  className="absolute right-0 mt-2 w-56 bg-[#11141A] border border-white/[0.1] rounded-xl shadow-2xl p-2 z-50 animate-fadeIn font-sans text-xs"
-                  onClick={() => setShowUserDropdown(false)}
+            ) : (
+              <div className="relative ml-1">
+                <button
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  className="flex items-center gap-2.5 pl-2 pr-2 py-1.5 rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer"
                 >
-                  <div className="px-3 py-2 border-b border-white/[0.08] mb-1">
-                    <p className="font-semibold text-white">Nitish Kumar</p>
-                    <p className="text-[11px] text-zinc-400 font-mono">nitish@cheatcode.dev</p>
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-white/10"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary text-black font-bold text-xs flex items-center justify-center shrink-0 shadow-sm font-sans">
+                      {user.name ? user.name.slice(0, 2).toUpperCase() : 'U'}
+                    </div>
+                  )}
+                  <div className="text-left hidden sm:block">
+                    <p className="text-xs font-semibold text-white leading-tight font-sans truncate max-w-[120px]">
+                      {user.name}
+                    </p>
+                    <p className="text-[10px] text-zinc-400 leading-tight font-sans">
+                      {isPro ? 'Pro Member' : 'Free Tier'}
+                    </p>
                   </div>
-                  <button
-                    onClick={() => onOpenPlanner()}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between"
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showUserDropdown && (
+                  <div
+                    className="absolute right-0 mt-2 w-56 bg-[#11141A] border border-white/[0.1] rounded-xl shadow-2xl p-2 z-50 animate-fadeIn font-sans text-xs"
+                    onClick={() => setShowUserDropdown(false)}
                   >
-                    <span>Interview Planner</span>
-                  </button>
-                  <button
-                    onClick={() => onOpenFlashcards()}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between"
-                  >
-                    <span>Spaced Repetition</span>
-                  </button>
-                  <button
-                    onClick={() => onOpenLeetCodeSync()}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between"
-                  >
-                    <span>Sync LeetCode</span>
-                  </button>
-                  <button
-                    onClick={() => navigate('/settings')}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between border-t border-white/[0.08] mt-1 pt-2"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Palette className="w-3.5 h-3.5 text-accent" />
-                      <span>Theme Color Toolkit</span>
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-accent" />
-                  </button>
-                  <button
-                    onClick={() => navigate('/settings')}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between"
-                  >
-                    <span>Settings</span>
-                  </button>
-                </div>
-              )}
-            </div>
+                    <div className="px-3 py-2 border-b border-white/[0.08] mb-1">
+                      <p className="font-semibold text-white truncate">{user.name}</p>
+                      <p className="text-[11px] text-zinc-400 font-mono truncate">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => onOpenPlanner()}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between cursor-pointer"
+                    >
+                      <span>Interview Planner</span>
+                    </button>
+                    <button
+                      onClick={() => onOpenFlashcards()}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between cursor-pointer"
+                    >
+                      <span>Spaced Repetition</span>
+                    </button>
+                    <button
+                      onClick={() => onOpenLeetCodeSync()}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between cursor-pointer"
+                    >
+                      <span>Sync LeetCode</span>
+                    </button>
+                    <button
+                      onClick={() => navigate('/settings')}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between border-t border-white/[0.08] mt-1 pt-2 cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Palette className="w-3.5 h-3.5 text-accent" />
+                        <span>Theme Color Toolkit</span>
+                      </span>
+                      <span className="w-2 h-2 rounded-full bg-accent" />
+                    </button>
+                    <button
+                      onClick={() => navigate('/settings')}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between cursor-pointer"
+                    >
+                      <span>Settings</span>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        sounds.playClick();
+                        await logout();
+                        navigate('/');
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 flex items-center gap-2 border-t border-white/[0.08] mt-1 pt-2 cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </header>
       )}

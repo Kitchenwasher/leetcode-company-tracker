@@ -24,8 +24,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({
     user,
     isAuthenticated,
     isPro,
-    usersList,
-    switchUser,
     logout,
     setShowAuthModal,
     setShowSubscriptionModal,
@@ -207,32 +205,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             </button>
           </div>
 
-          {/* Switch Accounts Submenu */}
-          <div className="p-1">
-            <div className="px-2.5 py-1 text-[10px] font-bold text-textMuted uppercase tracking-wider">
-              &gt; SWITCH_USER
-            </div>
-            {usersList.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => {
-                  sounds.playClick();
-                  switchUser(u.id);
-                  setIsOpen(false);
-                }}
-                className={`w-full flex items-center justify-between px-2.5 py-1 rounded-[2px] text-xs font-mono transition-colors ${
-                  u.id === user.id
-                    ? 'bg-surfaceElevated text-primary font-bold border border-primary/30'
-                    : 'text-textMuted hover:text-textPrimary hover:bg-surfaceElevated'
-                }`}
-              >
-                <span className="truncate">{u.name}</span>
-                <span className="text-[10px] uppercase font-mono text-textMuted">
-                  [{u.tier}]
-                </span>
-              </button>
-            ))}
-          </div>
+
 
           {/* Footer Actions */}
           <div className="p-1">
@@ -241,6 +214,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 sounds.playClick();
                 logout();
                 setIsOpen(false);
+                navigate('/');
               }}
               className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[2px] text-xs font-mono text-error hover:bg-surfaceElevated transition-colors text-left"
             >

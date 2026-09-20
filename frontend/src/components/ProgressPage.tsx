@@ -21,16 +21,16 @@ interface ProgressPageProps {
   store: UserStoreState;
 }
 
-const TOPIC_MASTERY_LIST = [
-  { topic: 'Arrays & Hashing', solved: 42, total: 180, pct: 23, color: 'bg-emerald-500' },
-  { topic: 'Two Pointers', solved: 18, total: 65, pct: 28, color: 'bg-emerald-500' },
-  { topic: 'Sliding Window', solved: 12, total: 45, pct: 27, color: 'bg-emerald-500' },
-  { topic: 'Trees & BST', solved: 26, total: 120, pct: 22, color: 'bg-primary' },
-  { topic: 'Dynamic Programming', solved: 15, total: 240, pct: 6, color: 'bg-primary' },
-  { topic: 'Graphs & BFS/DFS', solved: 14, total: 140, pct: 10, color: 'bg-primary' },
-  { topic: 'Binary Search', solved: 16, total: 80, pct: 20, color: 'bg-blue-400' },
-  { topic: 'Backtracking', solved: 9, total: 55, pct: 16, color: 'bg-blue-400' },
-  { topic: 'Heap & Priority Queue', solved: 8, total: 60, pct: 13, color: 'bg-purple-400' },
+const CORE_TOPICS = [
+  { topic: 'Arrays & Hashing', tags: ['Array', 'Hash Table', 'String'], color: 'bg-emerald-500' },
+  { topic: 'Two Pointers', tags: ['Two Pointers'], color: 'bg-emerald-500' },
+  { topic: 'Sliding Window', tags: ['Sliding Window'], color: 'bg-emerald-500' },
+  { topic: 'Trees & BST', tags: ['Tree', 'Binary Tree', 'Binary Search Tree'], color: 'bg-primary' },
+  { topic: 'Dynamic Programming', tags: ['Dynamic Programming'], color: 'bg-primary' },
+  { topic: 'Graphs & BFS/DFS', tags: ['Graph', 'Breadth-First Search', 'Depth-First Search'], color: 'bg-primary' },
+  { topic: 'Binary Search', tags: ['Binary Search'], color: 'bg-blue-400' },
+  { topic: 'Backtracking', tags: ['Backtracking'], color: 'bg-blue-400' },
+  { topic: 'Heap & Priority Queue', tags: ['Heap (Priority Queue)', 'Heap'], color: 'bg-purple-400' },
 ];
 
 export const ProgressPage: React.FC<ProgressPageProps> = ({
@@ -51,8 +51,16 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
   const progressRatio = totalQuestions > 0 ? Math.min(1, totalSolved / totalQuestions) : 0;
   const dashoffset = 251.32 * (1 - progressRatio);
 
-  const { easySolved, medSolved, hardSolved, reviewCount, masteredCount } = useMemo(() => {
+  const { easySolved, medSolved, hardSolved, reviewCount, masteredCount, easyTotal, medTotal, hardTotal } = useMemo(() => {
     let easy = 0, med = 0, hard = 0, review = 0, mastered = 0;
+    let totalE = 0, totalM = 0, totalH = 0;
+
+    questions.forEach((q) => {
+      if (q.difficulty === 'Easy') totalE++;
+      else if (q.difficulty === 'Hard') totalH++;
+      else totalM++;
+    });
+
     Object.entries(store.progress).forEach(([qId, p]) => {
       if (p.status === 'review') review++;
       if (p.status === 'mastered') mastered++;
@@ -63,8 +71,53 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
         else med++;
       }
     });
-    return { easySolved: easy, medSolved: med, hardSolved: hard, reviewCount: review, masteredCount: mastered };
+
+    return {
+      easySolved: easy,
+      medSolved: med,
+      hardSolved: hard,
+      reviewCount: review,
+      masteredCount: mastered,
+      easyTotal: totalE || 830,
+      medTotal: totalM || 1720,
+      hardTotal: totalH || 849,
+    };
   }, [store.progress, questions]);
+
+  // Dynamically compute real Topic Mastery from user progress
+  const topicMasteryList = useMemo(() => {
+    return CORE_TOPICS.map((ct) => {
+      const matching = questions.filter((q) =>
+        q.topics?.some((t) => ct.tags.some((tag) => tag.toLowerCase() === t.toLowerCase()))
+      );
+      const total = matching.length;
+      const solved = matching.filter((q) => {
+        const p = store.progress[String(q.id)];
+        return p?.status === 'solved' || p?.status === 'mastered';
+      }).length;
+      const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
+      return {
+        topic: ct.topic,
+        solved,
+        total,
+        pct,
+        color: ct.color,
+      };
+    });
+  }, [questions, store.progress]);
+
+  const globalAccuracy = useMemo(() => {
+    const attempted = totalSolved + reviewCount;
+    if (attempted === 0) return '--';
+    return `${((totalSolved / attempted) * 100).toFixed(1)}%`;
+  }, [totalSolved, reviewCount]);
+
+  const consistencyText = useMemo(() => {
+    if (totalSolved === 0) return 'Start solving questions to establish consistency telemetry.';
+    if (totalSolved < 10) return 'Solid start! Continue solving to advance in percentiles.';
+    if (totalSolved < 50) return 'Top 35% consistency among active engineering candidates.';
+    return 'Top 15% consistency among active interview candidates.';
+  }, [totalSolved]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-white font-sans">
@@ -143,7 +196,7 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
               {completionPct}% Complete
             </p>
             <p className="text-xs text-textSecondary mt-1">
-              Top 15% consistency among active interview candidates.
+              {consistencyText}
             </p>
           </div>
 
@@ -158,7 +211,7 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
             </div>
             <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
               <p className="text-[10px] text-textMuted uppercase font-medium">Global Acc</p>
-              <p className="text-xs sm:text-sm font-bold text-emerald-400 font-mono mt-0.5">58.4%</p>
+              <p className="text-xs sm:text-sm font-bold text-emerald-400 font-mono mt-0.5">{globalAccuracy}</p>
             </div>
           </div>
         </div>
@@ -182,13 +235,13 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
                   Easy Problems
                 </span>
                 <span className="font-mono text-zinc-300">
-                  {easySolved} / 830 <span className="text-textMuted text-[11px]">({((easySolved / 830) * 100).toFixed(0)}%)</span>
+                  {easySolved} / {easyTotal} <span className="text-textMuted text-[11px]">({easyTotal > 0 ? ((easySolved / easyTotal) * 100).toFixed(0) : 0}%)</span>
                 </span>
               </div>
               <div className="w-full h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.max(2, (easySolved / 830) * 100)}%` }}
+                  style={{ width: `${easyTotal > 0 ? Math.min(100, Math.max(2, (easySolved / easyTotal) * 100)) : 0}%` }}
                 />
               </div>
             </div>
@@ -201,13 +254,13 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
                   Medium Problems
                 </span>
                 <span className="font-mono text-zinc-300">
-                  {medSolved} / 1,720 <span className="text-textMuted text-[11px]">({((medSolved / 1720) * 100).toFixed(0)}%)</span>
+                  {medSolved} / {medTotal} <span className="text-textMuted text-[11px]">({medTotal > 0 ? ((medSolved / medTotal) * 100).toFixed(0) : 0}%)</span>
                 </span>
               </div>
               <div className="w-full h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
                 <div
                   className="h-full bg-amber-400 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.max(2, (medSolved / 1720) * 100)}%` }}
+                  style={{ width: `${medTotal > 0 ? Math.min(100, Math.max(2, (medSolved / medTotal) * 100)) : 0}%` }}
                 />
               </div>
             </div>
@@ -220,13 +273,13 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
                   Hard Problems
                 </span>
                 <span className="font-mono text-zinc-300">
-                  {hardSolved} / 849 <span className="text-textMuted text-[11px]">({((hardSolved / 849) * 100).toFixed(0)}%)</span>
+                  {hardSolved} / {hardTotal} <span className="text-textMuted text-[11px]">({hardTotal > 0 ? ((hardSolved / hardTotal) * 100).toFixed(0) : 0}%)</span>
                 </span>
               </div>
               <div className="w-full h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
                 <div
                   className="h-full bg-rose-500 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.max(2, (hardSolved / 849) * 100)}%` }}
+                  style={{ width: `${hardTotal > 0 ? Math.min(100, Math.max(2, (hardSolved / hardTotal) * 100)) : 0}%` }}
                 />
               </div>
             </div>
@@ -256,7 +309,7 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {TOPIC_MASTERY_LIST.map((t) => (
+          {topicMasteryList.map((t) => (
             <div
               key={t.topic}
               onClick={() => navigate(`/questions?topic=${encodeURIComponent(t.topic)}`)}

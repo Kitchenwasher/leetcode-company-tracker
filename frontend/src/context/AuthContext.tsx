@@ -2,54 +2,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { User, UserTier } from '../types/auth';
 import { authApi } from '../api/authApi';
 import { paymentApi } from '../api/paymentApi';
-import { api, getStoredAccessToken, setStoredAccessToken } from '../api/client';
+import { api, getStoredAccessToken, setStoredAccessToken, setStoredRefreshToken } from '../api/client';
 
-interface AuthContextType {
-  user: User;
-  isAuthenticated: boolean;
-  isPro: boolean;
-  usersList: User[];
-  login: (email: string, password?: string) => Promise<boolean>;
-  signup: (name: string, email: string, password?: string, targetCompany?: string) => Promise<boolean>;
-  loginAsGuest: () => void;
-  logout: () => void;
-  switchUser: (userId: string) => void;
-  upgradeToPro: (planId?: string) => Promise<void>;
-  updateProfile: (patch: Partial<User>) => Promise<void>;
-  showAuthModal: boolean;
-  setShowAuthModal: (show: boolean) => void;
-  showSubscriptionModal: boolean;
-  setShowSubscriptionModal: (show: boolean) => void;
-}
-
-const DEFAULT_USERS: User[] = [
-  {
-    id: 'user_alex_pro',
-    name: 'Alex Chen',
-    email: 'alex@faangprep.io',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    tier: 'pro',
-    leetcodeUsername: 'alex_faang',
-    targetCompany: 'google',
-    targetDate: '2026-10-15',
-    dailyTarget: 4,
-    createdAt: '2026-08-01T00:00:00.000Z',
-  },
-  {
-    id: 'user_sarah_free',
-    name: 'Sarah Lin',
-    email: 'sarah@coder.dev',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    tier: 'free',
-    leetcodeUsername: 'sarah_codes',
-    targetCompany: 'meta',
-    targetDate: '2026-11-01',
-    dailyTarget: 2,
-    createdAt: '2026-08-15T00:00:00.000Z',
-  },
-];
-
-const GUEST_USER: User = {
+export const GUEST_USER: User = {
   id: 'guest',
   name: 'Guest Explorer',
   email: 'guest@leettracker.io',
@@ -57,151 +12,208 @@ const GUEST_USER: User = {
   leetcodeUsername: '',
   targetCompany: 'google',
   dailyTarget: 3,
-  createdAt: new Date().toISOString(),
+  createdAt: '2026-01-01T00:00:00.000Z',
+  emailVerified: false,
 };
+
+interface AuthContextType {
+  user: User;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isPro: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  signup: (
+    name: string,
+    email: string,
+    password: string,
+    targetCompany?: string,
+    leetcodeUsername?: string
+  ) => Promise<boolean>;
+  loginWithGoogle: (credential?: string, code?: string) => Promise<boolean>;
+  loginWithGithub: (code: string) => Promise<boolean>;
+  loginAsGuest: () => void;
+  logout: () => Promise<void>;
+  upgradeToPro: (planId?: string) => Promise<void>;
+  updateProfile: (patch: Partial<User>) => Promise<void>;
+  showAuthModal: boolean;
+  setShowAuthModal: (show: boolean) => void;
+  showSubscriptionModal: boolean;
+  setShowSubscriptionModal: (show: boolean) => void;
+  authError: string | null;
+  setAuthError: (error: string | null) => void;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [usersList, setUsersList] = useState<User[]>(DEFAULT_USERS);
-  const [currentUser, setCurrentUser] = useState<User>(DEFAULT_USERS[0] || GUEST_USER);
+  const [currentUser, setCurrentUser] = useState<User>(GUEST_USER);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  // Restore session on initial mount
+  // Restore authenticated session on initial mount from Neon DB
   useEffect(() => {
+    let isMounted = true;
+
     const restoreSession = async () => {
-      // 1. Try stored access token
-      const token = getStoredAccessToken();
-      if (token) {
+      try {
+        // 1. Try stored access token
+        const token = getStoredAccessToken();
+        if (token) {
+          try {
+            const res = await authApi.getMe();
+            if (res?.user && isMounted) {
+              setCurrentUser(res.user);
+              setIsAuthenticated(true);
+              return;
+            }
+          } catch {
+            // Token expired or invalid, fall through to refresh
+          }
+        }
+
+        // 2. Attempt silent refresh using HttpOnly cookie or stored refresh token
         try {
-          const res = await authApi.getMe();
-          if (res?.user) {
-            setCurrentUser(res.user);
+          const { data } = await api.post<{ accessToken: string; user: User; refreshToken?: string }>('/auth/refresh');
+          if (data?.accessToken && data?.user && isMounted) {
+            setStoredAccessToken(data.accessToken);
+            if (data.refreshToken) {
+              setStoredRefreshToken(data.refreshToken);
+            }
+            setCurrentUser(data.user);
+            setIsAuthenticated(true);
             return;
           }
         } catch {
-          // Token expired or invalid, fall through to refresh
+          // No active refresh session
         }
-      }
 
-      // 2. Attempt silent refresh using HttpOnly cookie
-      try {
-        const { data } = await api.post<{ accessToken: string; user: User }>('/auth/refresh');
-        if (data?.accessToken && data?.user) {
-          setStoredAccessToken(data.accessToken);
-          setCurrentUser(data.user);
-          return;
+        // Clean unauthenticated guest state
+        if (isMounted) {
+          setStoredAccessToken(null);
+          setStoredRefreshToken(null);
+          setCurrentUser(GUEST_USER);
+          setIsAuthenticated(false);
         }
-      } catch {
-        // No active refresh session
-      }
-
-      // 3. Fallback for client-side demo account persistence
-      const savedUserId = localStorage.getItem('srmcode_current_user_id');
-      if (savedUserId) {
-        const found = usersList.find((u) => u.id === savedUserId);
-        if (found) {
-          setCurrentUser(found);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
     };
+
     restoreSession();
-  }, [usersList]);
 
-  // Persist current active user ID for client-side refresh resilience
-  useEffect(() => {
-    if (currentUser && currentUser.id !== 'guest') {
-      localStorage.setItem('srmcode_current_user_id', currentUser.id);
-    } else {
-      localStorage.removeItem('srmcode_current_user_id');
-    }
-  }, [currentUser]);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  const login = async (email: string, password: string = 'password123'): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setAuthError(null);
     try {
       const res = await authApi.login(email, password);
       if (res?.user) {
         setCurrentUser(res.user);
+        setIsAuthenticated(true);
         setShowAuthModal(false);
         return true;
       }
-    } catch {
-      // Fallback for client-side demo accounts
-      const existing = usersList.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-      if (existing) {
-        setCurrentUser(existing);
-        setShowAuthModal(false);
-        return true;
-      }
+      return false;
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || 'Invalid email or password.';
+      setAuthError(msg);
+      throw new Error(msg);
     }
-    return false;
   };
 
   const signup = async (
     name: string,
     email: string,
-    password: string = 'password123',
-    targetCompany: string = 'google'
+    password: string,
+    targetCompany: string = 'google',
+    leetcodeUsername?: string
   ): Promise<boolean> => {
+    setAuthError(null);
     try {
-      const res = await authApi.register(name, email, password, targetCompany);
+      const res = await authApi.register(name, email, password, targetCompany, leetcodeUsername);
       if (res?.user) {
         setCurrentUser(res.user);
+        setIsAuthenticated(true);
         setShowAuthModal(false);
         return true;
       }
-    } catch {
-      // Fallback creation
-      const newUser: User = {
-        id: `user_${Date.now()}`,
-        name: name.trim() || 'New Developer',
-        email: email.trim().toLowerCase(),
-        tier: 'free',
-        targetCompany,
-        dailyTarget: 3,
-        createdAt: new Date().toISOString(),
-      };
-      setUsersList((prev) => [...prev, newUser]);
-      setCurrentUser(newUser);
-      setShowAuthModal(false);
-      return true;
+      return false;
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || 'Registration failed.';
+      setAuthError(msg);
+      throw new Error(msg);
     }
-    return false;
+  };
+
+  const loginWithGoogle = async (credential?: string, code?: string): Promise<boolean> => {
+    setAuthError(null);
+    try {
+      const res = await authApi.googleAuth(credential, code);
+      if (res?.user) {
+        setCurrentUser(res.user);
+        setIsAuthenticated(true);
+        setShowAuthModal(false);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || 'Google authentication failed.';
+      setAuthError(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const loginWithGithub = async (code: string): Promise<boolean> => {
+    setAuthError(null);
+    try {
+      const res = await authApi.githubAuth(code);
+      if (res?.user) {
+        setCurrentUser(res.user);
+        setIsAuthenticated(true);
+        setShowAuthModal(false);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || 'GitHub authentication failed.';
+      setAuthError(msg);
+      throw new Error(msg);
+    }
   };
 
   const loginAsGuest = () => {
-    localStorage.removeItem('srmcode_current_user_id');
     setStoredAccessToken(null);
+    setStoredRefreshToken(null);
     setCurrentUser(GUEST_USER);
+    setIsAuthenticated(false);
     setShowAuthModal(false);
+    setAuthError(null);
   };
 
   const logout = async () => {
     try {
       await authApi.logout();
     } catch {}
-    localStorage.removeItem('srmcode_current_user_id');
     setStoredAccessToken(null);
+    setStoredRefreshToken(null);
     setCurrentUser(GUEST_USER);
-  };
-
-  const switchUser = (userId: string) => {
-    const target = usersList.find((u) => u.id === userId);
-    if (target) {
-      setCurrentUser(target);
-      localStorage.setItem('srmcode_current_user_id', target.id);
-      // Attempt backend login for demo accounts
-      authApi.login(target.email, 'password123').catch(() => {});
-    }
+    setIsAuthenticated(false);
   };
 
   const upgradeToPro = async (planId: string = 'pro_monthly') => {
     try {
       const { url } = await paymentApi.createCheckoutSession(planId);
       if (url) {
-        // If mock session, update user state directly
-        if (url.includes('mock=')) {
+        if (url.includes('session_id=mock_session_') || url.includes('mock=')) {
+          // Mock payment upgraded in Neon DB directly
           const updated: User = { ...currentUser, tier: 'pro' as UserTier };
           setCurrentUser(updated);
         } else {
@@ -209,7 +221,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } catch {
-      // Fallback local upgrade
+      // Fallback local update
       const updated: User = { ...currentUser, tier: 'pro' as UserTier };
       setCurrentUser(updated);
     }
@@ -217,40 +229,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateProfile = async (patch: Partial<User>) => {
-    try {
-      const res = await authApi.updateProfile(patch);
-      if (res?.user) {
-        setCurrentUser(res.user);
-        return;
+    if (isAuthenticated) {
+      try {
+        const res = await authApi.updateProfile(patch);
+        if (res?.user) {
+          setCurrentUser(res.user);
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to sync profile update to Neon DB:', err);
       }
-    } catch {}
-    // Fallback local update
-    const updated: User = { ...currentUser, ...patch };
-    setCurrentUser(updated);
-    setUsersList((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+    }
+    // Optimistic / fallback update
+    setCurrentUser((prev) => ({ ...prev, ...patch }));
   };
 
   const isPro = currentUser.tier === 'pro' || currentUser.tier === 'enterprise';
-  const isAuthenticated = currentUser.id !== 'guest';
 
   return (
     <AuthContext.Provider
       value={{
         user: currentUser,
         isAuthenticated,
+        isLoading,
         isPro,
-        usersList,
         login,
         signup,
+        loginWithGoogle,
+        loginWithGithub,
         loginAsGuest,
         logout,
-        switchUser,
         upgradeToPro,
         updateProfile,
         showAuthModal,
         setShowAuthModal,
         showSubscriptionModal,
         setShowSubscriptionModal,
+        authError,
+        setAuthError,
       }}
     >
       {children}

@@ -1,16 +1,27 @@
-import { api, setStoredAccessToken } from './client';
+import { api, setStoredAccessToken, setStoredRefreshToken } from './client';
 import { User } from '../types/auth';
 
 export interface AuthResponse {
   user: User;
   accessToken: string;
+  refreshToken?: string;
   message?: string;
+}
+
+export interface OAuthConfig {
+  googleClientId: string | null;
+  githubConfigured: boolean;
 }
 
 export const authApi = {
   login: async (email: string, password?: string): Promise<AuthResponse> => {
     const res = await api.post<AuthResponse>('/auth/login', { email, password });
-    setStoredAccessToken(res.data.accessToken);
+    if (res.data?.accessToken) {
+      setStoredAccessToken(res.data.accessToken);
+    }
+    if (res.data?.refreshToken) {
+      setStoredRefreshToken(res.data.refreshToken);
+    }
     return res.data;
   },
 
@@ -18,15 +29,49 @@ export const authApi = {
     name: string,
     email: string,
     password?: string,
-    targetCompany: string = 'google'
+    targetCompany: string = 'google',
+    leetcodeUsername?: string
   ): Promise<AuthResponse> => {
     const res = await api.post<AuthResponse>('/auth/register', {
       name,
       email,
       password,
       targetCompany,
+      leetcodeUsername,
     });
-    setStoredAccessToken(res.data.accessToken);
+    if (res.data?.accessToken) {
+      setStoredAccessToken(res.data.accessToken);
+    }
+    if (res.data?.refreshToken) {
+      setStoredRefreshToken(res.data.refreshToken);
+    }
+    return res.data;
+  },
+
+  googleAuth: async (credential?: string, code?: string): Promise<AuthResponse> => {
+    const res = await api.post<AuthResponse>('/auth/google', { credential, code });
+    if (res.data?.accessToken) {
+      setStoredAccessToken(res.data.accessToken);
+    }
+    if (res.data?.refreshToken) {
+      setStoredRefreshToken(res.data.refreshToken);
+    }
+    return res.data;
+  },
+
+  githubAuth: async (code: string): Promise<AuthResponse> => {
+    const res = await api.post<AuthResponse>('/auth/github', { code });
+    if (res.data?.accessToken) {
+      setStoredAccessToken(res.data.accessToken);
+    }
+    if (res.data?.refreshToken) {
+      setStoredRefreshToken(res.data.refreshToken);
+    }
+    return res.data;
+  },
+
+  getOAuthConfig: async (): Promise<OAuthConfig> => {
+    const res = await api.get<OAuthConfig>('/auth/oauth-config');
     return res.data;
   },
 
@@ -40,11 +85,12 @@ export const authApi = {
       await api.post('/auth/logout');
     } finally {
       setStoredAccessToken(null);
+      setStoredRefreshToken(null);
     }
   },
 
-  updateProfile: async (patch: Partial<User>): Promise<{ user: User }> => {
-    const res = await api.put<{ user: User }>('/auth/profile', patch);
+  updateProfile: async (patch: Partial<User>): Promise<{ user: User; message?: string }> => {
+    const res = await api.put<{ user: User; message?: string }>('/auth/profile', patch);
     return res.data;
   },
 

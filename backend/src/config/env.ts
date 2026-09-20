@@ -24,4 +24,14 @@ export const ENV = {
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || 'sk_test_mock_stripe_key_leettracker',
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || 'whsec_mock_stripe_webhook_key',
   STRIPE_MOCK_MODE: process.env.STRIPE_MOCK_MODE !== 'false', // Default true for frictionless self-hosting
+
+  // OAuth Credentials (Google & GitHub)
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || '',
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || '',
+
+  // Buy Me a Coffee Gateway
+  BMC_WEBHOOK_SECRET: process.env.BMC_WEBHOOK_SECRET || '105509fc00258be02142f120fa6311291af80ccc17357b69c9045f32ab2e1ef7680bc642676cbbfe',
+  BMC_CREATOR_PAGE: process.env.BMC_CREATOR_PAGE || 'https://buymeacoffee.com/cheatcode69',
 };

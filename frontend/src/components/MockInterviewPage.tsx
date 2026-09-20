@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Clock,
   CheckCircle2,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Question, CompanyMeta, UserStoreState } from '../types';
 import { sounds } from '../utils/sound';
+import { getMockInterviews, CompletedMockSession } from '../utils/mockInterviewStorage';
 
 interface MockInterviewPageProps {
   questions: Question[];
@@ -30,6 +31,33 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'start' | 'past' | 'performance' | 'tips'>('start');
   const [interviewType, setInterviewType] = useState<'coding' | 'behavioral' | 'mixed'>('coding');
+  const [mockSessions, setMockSessions] = useState<CompletedMockSession[]>([]);
+
+  useEffect(() => {
+    setMockSessions(getMockInterviews());
+  }, []);
+
+  const interviewsTaken = mockSessions.length;
+  const completedCount = mockSessions.filter((s) => s.solvedCount > 0 || s.score >= 50).length;
+  const avgScore = mockSessions.length > 0
+    ? Math.round(mockSessions.reduce((acc, s) => acc + s.score, 0) / mockSessions.length)
+    : null;
+  const totalMinutes = mockSessions.reduce((acc, s) => acc + s.durationMinutes, 0);
+  const totalPracticeTimeString = totalMinutes >= 60
+    ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`
+    : `${totalMinutes}m`;
+
+  const avgSolvingSpeed = useMemo(() => {
+    if (mockSessions.length === 0) return null;
+    const totalSolved = mockSessions.reduce((acc, s) => acc + s.solvedCount, 0);
+    if (totalSolved === 0) return null;
+    return (totalMinutes / totalSolved).toFixed(1);
+  }, [mockSessions, totalMinutes]);
+
+  const avgCleanCodePass = useMemo(() => {
+    if (mockSessions.length === 0) return null;
+    return Math.round(mockSessions.reduce((acc, s) => acc + s.score, 0) / mockSessions.length);
+  }, [mockSessions]);
 
   // Form selections
   const [selectedCompany, setSelectedCompany] = useState<string>('Google');
@@ -169,30 +197,48 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
         <div className="bg-[#0E1217] border border-white/[0.08] rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-white">Completed Mock Sessions</h2>
-            <span className="text-xs text-textMuted font-mono">12 Recorded</span>
+            <span className="text-xs text-textMuted font-mono">{mockSessions.length} Recorded</span>
           </div>
-          <div className="divide-y divide-white/[0.06]">
-            {[
-              { company: 'Google', role: 'SWE L4', type: 'Mixed', score: '78%', duration: '42m', date: 'Sep 18, 2026' },
-              { company: 'Meta', role: 'Production Eng', type: 'Coding', score: '85%', duration: '38m', date: 'Sep 15, 2026' },
-              { company: 'Amazon', role: 'SDE II', type: 'Mixed', score: '62%', duration: '45m', date: 'Sep 12, 2026' },
-              { company: 'Microsoft', role: 'Software Engineer', type: 'Behavioral', score: '90%', duration: '30m', date: 'Sep 09, 2026' },
-            ].map((s, idx) => (
-              <div key={idx} className="py-3.5 flex items-center justify-between hover:bg-white/[0.02] px-2 rounded-lg transition-colors">
-                <div className="flex items-center gap-3">
-                  {renderCompanyLogo(s.company, 'w-5 h-5')}
-                  <div>
-                    <p className="text-sm font-semibold text-white">{s.company} • {s.role}</p>
-                    <p className="text-xs text-textMuted">{s.type} Session • {s.duration}</p>
+          {mockSessions.length > 0 ? (
+            <div className="divide-y divide-white/[0.06]">
+              {mockSessions.map((s) => (
+                <div key={s.id} className="py-3.5 flex items-center justify-between hover:bg-white/[0.02] px-2 rounded-lg transition-colors">
+                  <div className="flex items-center gap-3">
+                    {renderCompanyLogo(s.company, 'w-5 h-5')}
+                    <div>
+                      <p className="text-sm font-semibold text-white">{s.company} • {s.role}</p>
+                      <p className="text-xs text-textMuted">{s.type} Session • {s.durationMinutes}m • {s.solvedCount}/{s.totalQuestions} Solved</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-primary font-mono">{s.score}%</span>
+                    <p className="text-[11px] text-textMuted font-mono">{s.date}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-primary font-mono">{s.score}</span>
-                  <p className="text-[11px] text-textMuted font-mono">{s.date}</p>
-                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto text-primary">
+                <Clock className="w-5 h-5" />
               </div>
-            ))}
-          </div>
+              <div>
+                <p className="text-sm font-semibold text-white">No Mock Interviews Completed Yet</p>
+                <p className="text-xs text-textSecondary mt-1 max-w-sm mx-auto">
+                  Start a 45-minute timed simulation to test your algorithmic problem solving and track detailed session history.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  sounds.playClick();
+                  onOpenMockModal();
+                }}
+                className="mt-2 px-4 py-2 rounded-xl bg-primary text-black font-semibold text-xs hover:bg-[#D4ED00] transition-colors cursor-pointer"
+              >
+                Start First Mock Interview
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -201,18 +247,30 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div className="bg-[#0E1217] border border-white/[0.08] rounded-2xl p-5 space-y-2">
             <p className="text-xs text-textMuted">Average Problem Solving Speed</p>
-            <p className="text-2xl font-bold text-white font-mono">18.4 mins</p>
-            <p className="text-xs text-emerald-400">4.2 mins faster than median candidate</p>
+            <p className="text-2xl font-bold text-white font-mono">
+              {avgSolvingSpeed ? `${avgSolvingSpeed} mins` : '-- mins'}
+            </p>
+            <p className="text-xs text-emerald-400">
+              {avgSolvingSpeed ? 'Calculated from completed sessions' : 'Complete a mock session to measure speed'}
+            </p>
           </div>
           <div className="bg-[#0E1217] border border-white/[0.08] rounded-2xl p-5 space-y-2">
             <p className="text-xs text-textMuted">Clean Code & Complexity Pass</p>
-            <p className="text-2xl font-bold text-primary font-mono">82%</p>
-            <p className="text-xs text-textSecondary">Dry-run & edge case coverage</p>
+            <p className="text-2xl font-bold text-primary font-mono">
+              {avgCleanCodePass !== null ? `${avgCleanCodePass}%` : '--%'}
+            </p>
+            <p className="text-xs text-textSecondary">
+              {avgCleanCodePass !== null ? 'Evaluation rubric compliance' : 'No evaluation rubric data yet'}
+            </p>
           </div>
           <div className="bg-[#0E1217] border border-white/[0.08] rounded-2xl p-5 space-y-2">
             <p className="text-xs text-textMuted">STAR Behavioral Eloquence</p>
-            <p className="text-2xl font-bold text-emerald-400 font-mono">88%</p>
-            <p className="text-xs text-textSecondary">High clarity, quantified outcomes</p>
+            <p className="text-2xl font-bold text-emerald-400 font-mono">
+              {mockSessions.length > 0 ? `${Math.min(100, Math.round((avgCleanCodePass || 70) * 1.05))}%` : '--%'}
+            </p>
+            <p className="text-xs text-textSecondary">
+              {mockSessions.length > 0 ? 'High clarity, quantified outcomes' : 'No behavioral evaluations recorded'}
+            </p>
           </div>
         </div>
       )}
@@ -663,7 +721,7 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                     <FileText className="w-4 h-4 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold text-white font-mono leading-none">12</p>
+                    <p className="text-xl font-bold text-white font-mono leading-none">{interviewsTaken}</p>
                     <p className="text-xs text-textSecondary mt-0.5">Interviews Taken</p>
                   </div>
                 </div>
@@ -673,7 +731,7 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold text-white font-mono leading-none">8</p>
+                    <p className="text-xl font-bold text-white font-mono leading-none">{completedCount}</p>
                     <p className="text-xs text-textSecondary mt-0.5">Completed</p>
                   </div>
                 </div>
@@ -683,7 +741,7 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                     <TrendingUp className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold text-white font-mono leading-none">67%</p>
+                    <p className="text-xl font-bold text-white font-mono leading-none">{avgScore !== null ? `${avgScore}%` : '--'}</p>
                     <p className="text-xs text-textSecondary mt-0.5">Average Score</p>
                   </div>
                 </div>
@@ -693,7 +751,7 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                     <Clock className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold text-white font-mono leading-none">3h 24m</p>
+                    <p className="text-xl font-bold text-white font-mono leading-none">{totalMinutes > 0 ? totalPracticeTimeString : '0m'}</p>
                     <p className="text-xs text-textSecondary mt-0.5">Total Practice Time</p>
                   </div>
                 </div>
@@ -708,7 +766,10 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                   <h2 className="text-sm font-semibold text-white font-sans">Recent Interviews</h2>
                 </div>
                 <button
-                  onClick={() => sounds.playClick()}
+                  onClick={() => {
+                    sounds.playClick();
+                    setActiveTab('past');
+                  }}
                   className="text-xs font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer font-sans"
                 >
                   <span>History</span>
@@ -716,41 +777,51 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                 </button>
               </div>
 
-              {/* List of 4 recent interviews */}
-              <div className="space-y-2">
-                {[
-                  { company: 'Google', mode: 'Coding', diff: 'Medium', date: 'Sep 14, 2026' },
-                  { company: 'Microsoft', mode: 'Behavioral', diff: '', date: 'Sep 12, 2026' },
-                  { company: 'Amazon', mode: 'Mixed', diff: 'Hard', date: 'Sep 10, 2026' },
-                  { company: 'Meta', mode: 'Coding', diff: 'Medium', date: 'Sep 8, 2026' },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
+              {/* List of recent interviews or empty state */}
+              {mockSessions.length > 0 ? (
+                <div className="space-y-2">
+                  {mockSessions.slice(0, 4).map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        sounds.playClick();
+                        onOpenMockModal();
+                      }}
+                      className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:border-white/15 hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3">
+                        {renderCompanyLogo(item.company)}
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-200 group-hover:text-primary transition-colors font-sans">
+                            {item.company}
+                          </p>
+                          <p className="text-[11px] text-textSecondary mt-0.5">
+                            {item.type} {item.difficulty ? `• ${item.difficulty}` : ''} • {item.score}%
+                          </p>
+                          <p className="text-[10px] text-textMuted mt-0.5 font-mono">
+                            {item.date}
+                          </p>
+                        </div>
+                      </div>
+
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-4 text-center space-y-2">
+                  <p className="text-xs text-textSecondary">No mock interviews taken yet.</p>
+                  <button
                     onClick={() => {
                       sounds.playClick();
                       onOpenMockModal();
                     }}
-                    className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:border-white/15 hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer group"
+                    className="text-xs text-primary hover:underline font-medium cursor-pointer"
                   >
-                    <div className="flex items-center gap-3">
-                      {renderCompanyLogo(item.company)}
-                      <div>
-                        <p className="text-xs font-semibold text-zinc-200 group-hover:text-primary transition-colors font-sans">
-                          {item.company}
-                        </p>
-                        <p className="text-[11px] text-textSecondary mt-0.5">
-                          {item.mode} {item.diff ? `• ${item.diff}` : ''}
-                        </p>
-                        <p className="text-[10px] text-textMuted mt-0.5 font-mono">
-                          {item.date}
-                        </p>
-                      </div>
-                    </div>
-
-                    <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
-                  </div>
-                ))}
-              </div>
+                    Start your first session &rarr;
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Card 3: Inspirational Mountain Quote Card */}

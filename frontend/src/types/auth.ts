@@ -11,6 +11,7 @@ export interface User {
   targetDate?: string;
   createdAt: string;
   dailyTarget?: number;
+  emailVerified?: boolean;
 }
 
 export interface SubscriptionPlan {

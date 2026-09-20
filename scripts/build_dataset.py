@@ -74,6 +74,13 @@ def infer_topics(title):
 
 def main():
     print("Parsing repository data...")
+    official_tags = {}
+    tags_file = os.path.join('frontend', 'src', 'data', 'official_tags.json')
+    if os.path.exists(tags_file):
+        with open(tags_file, 'r', encoding='utf-8') as f:
+            official_tags = json.load(f)
+        print(f"Loaded {len(official_tags)} official LeetCode topic tags.")
+
     all_questions = {}
     companies_meta = {}
     company_names = sorted([d for d in os.listdir(REPO_DIR) if os.path.isdir(os.path.join(REPO_DIR, d)) and not d.startswith('.')])
@@ -110,7 +117,7 @@ def main():
                             diff_counts[diff] += 1
                             
                         if qid not in all_questions:
-                            topics = infer_topics(title)
+                            topics = official_tags.get(str(qid)) or infer_topics(title)
                             is_b75 = qid in BLIND_75_IDS if isinstance(qid, int) else False
                             is_g169 = qid in GRIND_169_IDS if isinstance(qid, int) else False
                             

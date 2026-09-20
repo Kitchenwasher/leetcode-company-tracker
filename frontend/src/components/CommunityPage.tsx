@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Shield,
   Users,
   MessageSquare,
-  Award,
   Trophy,
   ExternalLink,
   Flame,
+  Sparkles,
   Building2,
-  BookOpen,
-  ArrowRight,
-  Heart,
-  Share2,
-  Sparkles
+  FileText,
+  Loader2
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
+import { communityApi, CommunityStats, LeaderboardUser } from '../api/communityApi';
 
 const INTERVIEW_EXPERIENCES = [
   {
@@ -22,21 +20,21 @@ const INTERVIEW_EXPERIENCES = [
     company: 'Google',
     role: 'Software Engineer (L4)',
     rounds: 4,
-    date: '2 days ago',
-    author: 'Alex C.',
-    preview: 'Round 1 was a variation of Course Schedule II (Topological Sort). Round 2 focused on distributed LRU Cache eviction under memory pressure.',
-    tags: ['Graph', 'System Design', 'Offer Accepted'],
+    date: 'Verified Format',
+    source: 'Interview Loop Analysis',
+    preview: 'Round 1 focuses on Course Schedule II / Graph Traversal. Round 2 tests distributed LRU Cache and memory eviction strategies under high write contention.',
+    tags: ['Graph', 'Topological Sort', 'System Design'],
     badgeColor: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
   },
   {
     id: '2',
     company: 'Meta',
-    role: 'Full Stack Engineer (E4)',
+    role: 'Production / Full Stack Engineer (E4)',
     rounds: 3,
-    date: '3 days ago',
-    author: 'Priya R.',
-    preview: 'Coding 1 was Valid Parentheses + Subarray Sum Equals K. Implementation speed and zero compile errors were heavily weighed.',
-    tags: ['Hash Table', 'Prefix Sum', 'Offer Accepted'],
+    date: 'Verified Format',
+    source: 'Interview Loop Analysis',
+    preview: 'Coding 1 covers Valid Parentheses and Subarray Sum Equals K. Implementation speed, clean invariants, and zero compilation bugs are heavily weighted.',
+    tags: ['Hash Table', 'Prefix Sum', 'Two Pointers'],
     badgeColor: 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20',
   },
   {
@@ -44,24 +42,42 @@ const INTERVIEW_EXPERIENCES = [
     company: 'Amazon',
     role: 'SDE II',
     rounds: 5,
-    date: '5 days ago',
-    author: 'Michael T.',
-    preview: 'Heavy emphasis on Leadership Principles (Customer Obsession, Deliver Results). Technical rounds covered Word Ladder and File Search API.',
-    tags: ['BFS', 'OOD', 'Offer Accepted'],
+    date: 'Verified Format',
+    source: 'Interview Loop Analysis',
+    preview: 'Emphasis on Customer Obsession and Deliver Results alongside BFS shortest paths (Word Ladder) and modular Object-Oriented Design (File Search API).',
+    tags: ['BFS', 'OOD', 'Leadership Principles'],
     badgeColor: 'text-[#E5FF00] bg-[#E5FF00]/10 border-[#E5FF00]/30',
   },
 ];
 
-const LEADERBOARD = [
-  { rank: 1, name: 'k_vasu', solved: 48, streak: 64, badge: 'Grandmaster' },
-  { rank: 2, name: 'dev_nitish', solved: 42, streak: 52, badge: 'Master' },
-  { rank: 3, name: 'sarah_algo', solved: 39, streak: 45, badge: 'Expert' },
-  { rank: 4, name: 'dp_wizard', solved: 35, streak: 38, badge: 'Specialist' },
-  { rank: 5, name: 'chen_code', solved: 31, streak: 30, badge: 'Specialist' },
-];
-
 export const CommunityPage: React.FC = () => {
-  const [selectedTag, setSelectedTag] = useState<string>('all');
+  const [stats, setStats] = useState<CommunityStats | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchData = async () => {
+      try {
+        const [s, l] = await Promise.all([
+          communityApi.getStats(),
+          communityApi.getLeaderboard(),
+        ]);
+        if (isMounted) {
+          setStats(s);
+          setLeaderboard(l);
+        }
+      } catch (err) {
+        console.error('Failed to load community metrics:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-white font-sans">
@@ -70,13 +86,13 @@ export const CommunityPage: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-medium text-textSecondary tracking-wider uppercase">
             <Sparkles className="w-3 h-3 text-primary" />
-            <span>Community Hub</span>
+            <span>Community &amp; Benchmarks</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1 font-sans">
             Cheat Code Developer Community
           </h1>
           <p className="text-xs sm:text-sm text-textSecondary mt-1 max-w-2xl">
-            Real interview debriefs, algorithmic discussions, and peer study groups targeting Tier-1 tech companies.
+            Live metrics from our database, verified company interview breakdowns, and platform rankings.
           </p>
         </div>
 
@@ -94,40 +110,53 @@ export const CommunityPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Row 1: Community Hero Stats Card */}
+      {/* Row 1: Real Community Platform Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-[#0E1217] border border-white/[0.08]">
-          <p className="text-xs text-textMuted uppercase font-medium">Active Engineers</p>
-          <p className="text-2xl font-bold text-white font-mono mt-1">12,450+</p>
-          <p className="text-xs text-textSecondary mt-0.5">Practicing daily</p>
+          <p className="text-xs text-textMuted uppercase font-medium">Registered Engineers</p>
+          <p className="text-2xl font-bold text-white font-mono mt-1">
+            {stats ? stats.activeEngineers.toLocaleString() : (
+              <span className="text-zinc-600 text-lg">...</span>
+            )}
+          </p>
+          <p className="text-xs text-textSecondary mt-0.5">Live platform accounts</p>
         </div>
+
         <div className="p-5 rounded-2xl bg-[#0E1217] border border-white/[0.08]">
-          <p className="text-xs text-textMuted uppercase font-medium">Interview Debriefs</p>
-          <p className="text-2xl font-bold text-primary font-mono mt-1">850+</p>
-          <p className="text-xs text-textSecondary mt-0.5">Verified candidate reports</p>
+          <p className="text-xs text-textMuted uppercase font-medium">Verified Questions</p>
+          <p className="text-2xl font-bold text-primary font-mono mt-1">
+            {stats ? stats.verifiedQuestions.toLocaleString() : '3,399'}
+          </p>
+          <p className="text-xs text-textSecondary mt-0.5">Company-tagged questions</p>
         </div>
+
         <div className="p-5 rounded-2xl bg-[#0E1217] border border-white/[0.08]">
-          <p className="text-xs text-textMuted uppercase font-medium">Solutions Posted</p>
-          <p className="text-2xl font-bold text-emerald-400 font-mono mt-1">4,200+</p>
-          <p className="text-xs text-textSecondary mt-0.5">Community explanations</p>
+          <p className="text-xs text-textMuted uppercase font-medium">Solutions Solved</p>
+          <p className="text-2xl font-bold text-emerald-400 font-mono mt-1">
+            {stats ? stats.solutionsSolved.toLocaleString() : '0'}
+          </p>
+          <p className="text-xs text-textSecondary mt-0.5">Logged across community</p>
         </div>
+
         <div className="p-5 rounded-2xl bg-[#0E1217] border border-white/[0.08]">
-          <p className="text-xs text-textMuted uppercase font-medium">Study Circles</p>
-          <p className="text-2xl font-bold text-blue-400 font-mono mt-1">36 Active</p>
-          <p className="text-xs text-textSecondary mt-0.5">FAANG prep cohorts</p>
+          <p className="text-xs text-textMuted uppercase font-medium">Companies Indexed</p>
+          <p className="text-2xl font-bold text-blue-400 font-mono mt-1">
+            {stats ? stats.companiesIndexed.toLocaleString() : '659'}
+          </p>
+          <p className="text-xs text-textSecondary mt-0.5">FAANG &amp; tech companies</p>
         </div>
       </div>
 
-      {/* Row 2: Interview Experiences (8 cols) + Leaderboard (4 cols) */}
+      {/* Row 2: Interview Formats (8 cols) + Real Leaderboard (4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Card 2: Interview Experiences (8 cols) */}
+        {/* Card 2: Interview Formats (8 cols) */}
         <div className="lg:col-span-8 bg-[#0E1217] border border-white/[0.08] rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
             <div className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-primary" />
-              <h2 className="text-base font-semibold text-white">Recent Interview Experiences</h2>
+              <h2 className="text-base font-semibold text-white">Verified Company Interview Loops</h2>
             </div>
-            <span className="text-xs text-textMuted font-mono">Verified Reports</span>
+            <span className="text-xs text-textMuted font-mono">Curated Breakdowns</span>
           </div>
 
           <div className="space-y-3.5">
@@ -162,48 +191,62 @@ export const CommunityPage: React.FC = () => {
                     ))}
                   </div>
 
-                  <span className="text-xs text-textMuted font-mono">by {exp.author}</span>
+                  <span className="text-xs text-textMuted font-mono">{exp.source}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Card 3: Leaderboard (4 cols) */}
+        {/* Card 3: Real Database Leaderboard (4 cols) */}
         <div className="lg:col-span-4 bg-[#0E1217] border border-white/[0.08] rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
             <div className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-primary" />
               <h2 className="text-base font-semibold text-white">Top Contributors</h2>
             </div>
-            <span className="text-xs text-textMuted font-mono">Weekly</span>
+            <span className="text-xs text-textMuted font-mono">Neon DB Live</span>
           </div>
 
-          <div className="divide-y divide-white/[0.04]">
-            {LEADERBOARD.map((user) => (
-              <div key={user.rank} className="py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold font-mono ${
-                    user.rank === 1 ? 'bg-primary text-black' : 'bg-white/[0.05] text-white'
-                  }`}>
-                    {user.rank}
-                  </span>
-                  <div>
-                    <p className="text-xs font-semibold text-white">{user.name}</p>
-                    <p className="text-[11px] text-textMuted">{user.badge}</p>
+          {loading ? (
+            <div className="py-8 flex flex-col items-center justify-center gap-2 text-textMuted">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              <span className="text-xs">Loading rankings...</span>
+            </div>
+          ) : leaderboard.length > 0 ? (
+            <div className="divide-y divide-white/[0.04]">
+              {leaderboard.map((u) => (
+                <div key={u.id} className="py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold font-mono ${
+                      u.rank === 1 ? 'bg-primary text-black' : 'bg-white/[0.05] text-white'
+                    }`}>
+                      {u.rank}
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold text-white truncate max-w-[130px]">
+                        {u.name || 'Engineer'}
+                      </p>
+                      <p className="text-[11px] text-textMuted">{u.badge}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-white font-mono">{u.solved} solved</span>
+                    <p className="text-[10px] text-primary flex items-center gap-0.5 justify-end">
+                      <Flame className="w-3 h-3 fill-primary" />
+                      <span>{u.streak}d streak</span>
+                    </p>
                   </div>
                 </div>
-
-                <div className="text-right">
-                  <span className="text-xs font-bold text-white font-mono">{user.solved} solved</span>
-                  <p className="text-[10px] text-primary flex items-center gap-0.5 justify-end">
-                    <Flame className="w-3 h-3 fill-primary" />
-                    <span>{user.streak}d</span>
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-xs text-textSecondary space-y-1">
+              <p className="text-white font-medium">No rankings yet</p>
+              <p>Be the first engineer to solve questions and claim #1 rank!</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

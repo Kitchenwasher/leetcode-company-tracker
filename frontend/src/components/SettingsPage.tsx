@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Settings,
@@ -16,12 +16,15 @@ import {
   Sparkles,
   ShieldCheck,
   Building2,
-  Calendar
+  Calendar,
+  Code,
+  ExternalLink
 } from 'lucide-react';
 import { Question, UserStoreState } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { exportBackupJSON, exportQuestionsCSV } from '../services/storage';
 import { sounds } from '../utils/sound';
+import { paymentApi } from '../api/paymentApi';
 import { ThemeToolkitCard } from './ThemeToolkit';
 
 interface SettingsPageProps {
@@ -43,8 +46,32 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [name, setName] = useState(user.name || '');
   const [targetCompany, setTargetCompany] = useState(user.targetCompany || 'google');
   const [dailyTarget, setDailyTarget] = useState(user.dailyTarget || store.dailyGoal || 3);
+  const [leetcodeUsername, setLeetcodeUsername] = useState(user.leetcodeUsername || '');
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+
+  const handleOpenStripePortal = async () => {
+    setIsOpeningPortal(true);
+    sounds.playClick();
+    try {
+      const res = await paymentApi.createPortalSession();
+      if (res?.url) {
+        window.location.href = res.url;
+      }
+    } catch (err) {
+      console.error('Failed to open Stripe portal:', err);
+    } finally {
+      setIsOpeningPortal(false);
+    }
+  };
+
+  useEffect(() => {
+    setName(user.name || '');
+    setTargetCompany(user.targetCompany || 'google');
+    setDailyTarget(user.dailyTarget || store.dailyGoal || 3);
+    setLeetcodeUsername(user.leetcodeUsername || '');
+  }, [user]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +83,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         name,
         targetCompany,
         dailyTarget: Number(dailyTarget),
+        leetcodeUsername: leetcodeUsername.trim() || undefined,
       });
       sounds.playSuccess();
       setSavedSuccess(true);
@@ -208,6 +236,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </div>
               </div>
 
+              <div>
+                <label className="block text-xs text-textSecondary mb-1.5 font-medium flex items-center gap-1.5">
+                  <Code className="w-3.5 h-3.5 text-primary" />
+                  <span>LeetCode Profile Username (Synced to Neon DB)</span>
+                </label>
+                <input
+                  type="text"
+                  value={leetcodeUsername}
+                  onChange={(e) => setLeetcodeUsername(e.target.value)}
+                  placeholder="e.g. tour_guide"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#12161E] border border-white/[0.08] focus:border-primary text-xs text-white outline-none transition-colors font-mono"
+                />
+              </div>
+
               <div className="pt-2">
                 <button
                   type="submit"
@@ -226,7 +268,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
               <span className="text-sm font-semibold text-white flex items-center gap-2">
                 <Crown className="w-4 h-4 text-primary" />
-                <span>Subscription Plan</span>
+                <span>Subscription &amp; Billing</span>
               </span>
               <span
                 className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
@@ -241,21 +283,48 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
             <p className="text-xs text-textSecondary leading-relaxed">
               {isPro
-                ? 'You have unlocked unlimited mock interviews, real recency trend graphs, and spaced repetition analytics.'
-                : 'Free tier includes all 3,399 verified questions, company tagging, and local progress tracking.'}
+                ? 'Your account has full Pro access to all 659 companies, unlimited mock interviews, and spaced repetition analytics.'
+                : 'Free tier includes verified questions, company tagging, and local progress tracking.'}
             </p>
 
-            {!isPro && (
-              <button
-                onClick={() => {
-                  sounds.playClick();
-                  setShowSubscriptionModal(true);
-                }}
-                className="px-4 py-2.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer font-sans"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Upgrade to Pro</span>
-              </button>
+            {isPro ? (
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={handleOpenStripePortal}
+                  disabled={isOpeningPortal}
+                  className="px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-white text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer border border-white/[0.08]"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-primary" />
+                  <span>{isOpeningPortal ? 'Connecting to Stripe...' : 'Manage Subscription (Stripe Portal)'}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <span className="text-[10px] font-bold text-primary uppercase">Offer 1: Annual Special</span>
+                    <p className="text-base font-bold text-white font-mono mt-0.5">₹2,000</p>
+                    <p className="text-[11px] text-zinc-400">1st full year, then ₹299/mo</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase">Offer 2: Monthly</span>
+                    <p className="text-base font-bold text-white font-mono mt-0.5">₹299</p>
+                    <p className="text-[11px] text-zinc-400">per month, cancel anytime</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    sounds.playClick();
+                    setShowSubscriptionModal(true);
+                  }}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans shadow-md shadow-primary/20"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Upgrade to Pro via Stripe</span>
+                </button>
+              </div>
             )}
           </div>
         </div>

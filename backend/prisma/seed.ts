@@ -13,45 +13,8 @@ async function main() {
   console.log('==================================================');
   console.log('🌱 STARTING LEETTRACKER PRO DATABASE SEEDER');
   console.log('==================================================');
+  console.log('🌱 LEETTRACKER PRO: Production questions & solutions seeder');
 
-  // 1. Seed Demo Users
-  console.log('1. Seeding demo candidate accounts...');
-  const defaultPasswordHash = await bcrypt.hash('password123', 10);
-
-  const alex = await prisma.user.upsert({
-    where: { email: 'alex@faangprep.io' },
-    update: {},
-    create: {
-      id: 'user_alex_pro',
-      name: 'Alex Chen',
-      email: 'alex@faangprep.io',
-      passwordHash: defaultPasswordHash,
-      tier: 'pro',
-      targetCompany: 'google',
-      dailyTarget: 4,
-      emailVerified: true,
-      subscriptionStatus: 'active',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    },
-  });
-
-  const sarah = await prisma.user.upsert({
-    where: { email: 'sarah@coder.dev' },
-    update: {},
-    create: {
-      id: 'user_sarah_free',
-      name: 'Sarah Lin',
-      email: 'sarah@coder.dev',
-      passwordHash: defaultPasswordHash,
-      tier: 'free',
-      targetCompany: 'meta',
-      dailyTarget: 2,
-      emailVerified: true,
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    },
-  });
-
-  console.log(`   [OK] Seeded demo users: ${alex.email} (PRO) and ${sarah.email} (Free)`);
 
   // 2. Load Questions Dataset
   console.log('2. Loading primary questions dataset...');

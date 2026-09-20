@@ -55,6 +55,13 @@ app.post(
   PaymentController.handleWebhook
 );
 
+// Buy Me a Coffee webhook requires raw body for HMAC-SHA256 signature verification
+app.post(
+  '/api/payments/bmc-webhook',
+  express.raw({ type: '*/*' }),
+  PaymentController.handleBMCWebhook
+);
+
 // Standard parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

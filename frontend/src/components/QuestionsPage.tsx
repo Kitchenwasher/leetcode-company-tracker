@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -20,7 +20,8 @@ import {
   Building2,
   BookOpen,
   ArrowUpDown,
-  ArrowRight
+  ArrowRight,
+  Flame,
 } from 'lucide-react';
 import { Question, CompanyMeta, UserStoreState, ProblemStatus, Difficulty } from '../types';
 import { isQuestionInTrack } from '../data/curatedLists';
@@ -36,6 +37,7 @@ interface QuestionsPageProps {
   onUpdateStatus: (id: number | string, status: ProblemStatus) => void;
   onToggleFavorite: (id: number | string) => void;
   onNavigateToProblem: (id: number | string) => void;
+  onSelectCompany?: (companyId: string) => void;
 }
 
 const TOP_COMPANIES = [
@@ -49,21 +51,136 @@ const TOP_COMPANIES = [
   { id: 'uber', name: 'Uber' },
 ];
 
-const TOP_ALGORITHMS = [
+export const TOP_ALGORITHMS = [
   'Dynamic Programming',
-  'Greedy',
   'Array',
   'String',
+  'Hash Table',
   'Tree',
   'Graph',
   'Binary Search',
-  'Backtracking',
   'Two Pointers',
-  'Heap (Priority Queue)',
+  'Greedy',
   'Stack',
+  'Heap (Priority Queue)',
+  'Sliding Window',
+  'Backtracking',
+  'Linked List',
   'Bit Manipulation',
   'Math',
 ];
+
+export function matchesTopicFilter(selected: string, qTopics: string[]): boolean {
+  if (!selected || selected === 'all') return true;
+  if (!qTopics || qTopics.length === 0) return false;
+
+  const s = selected.toLowerCase().trim();
+
+  return qTopics.some((topic) => {
+    const t = topic.toLowerCase().trim();
+    if (t === s) return true;
+
+    // Graph paradigm: Graph Theory, BFS, DFS, Union-Find
+    if (s === 'graph' || s === 'graphs') {
+      return (
+        t.includes('graph') ||
+        t.includes('depth-first search') ||
+        t.includes('breadth-first search') ||
+        t.includes('union-find') ||
+        t.includes('topological sort') ||
+        t.includes('shortest path')
+      );
+    }
+
+    // Tree paradigm: Tree, Binary Tree, Binary Search Tree
+    if (s === 'tree' || s === 'trees') {
+      return t.includes('tree');
+    }
+
+    // Dynamic Programming paradigm: Dynamic Programming, Memoization
+    if (s === 'dynamic programming' || s === 'dp') {
+      return t.includes('dynamic programming') || t.includes('memoization');
+    }
+
+    // Array / Arrays & Hashing
+    if (s === 'array' || s === 'arrays') {
+      return t.includes('array');
+    }
+
+    // String / Strings
+    if (s === 'string' || s === 'strings') {
+      return t.includes('string');
+    }
+
+    // Hash Table / Hash Map / Arrays & Hashing
+    if (s === 'hash table' || s === 'hash map' || s === 'hashing') {
+      return t.includes('hash');
+    }
+
+    // Stack
+    if (s === 'stack') {
+      return t.includes('stack');
+    }
+
+    // Queue
+    if (s === 'queue') {
+      return t.includes('queue');
+    }
+
+    // Heap / Priority Queue
+    if (s === 'heap' || s.includes('priority queue')) {
+      return t.includes('heap') || t.includes('priority queue');
+    }
+
+    // Linked List
+    if (s === 'linked list') {
+      return t.includes('linked list');
+    }
+
+    // Math & Geometry
+    if (s === 'math') {
+      return (
+        t.includes('math') ||
+        t.includes('geometry') ||
+        t.includes('combinatorics') ||
+        t.includes('number theory')
+      );
+    }
+
+    // Binary Search
+    if (s === 'binary search') {
+      return t.includes('binary search');
+    }
+
+    // Two Pointers
+    if (s === 'two pointers') {
+      return t.includes('two pointer') || t.includes('two-pointer');
+    }
+
+    // Sliding Window
+    if (s === 'sliding window') {
+      return t.includes('sliding window');
+    }
+
+    // Greedy
+    if (s === 'greedy') {
+      return t.includes('greedy');
+    }
+
+    // Backtracking
+    if (s === 'backtracking') {
+      return t.includes('backtracking');
+    }
+
+    // Bit Manipulation
+    if (s === 'bit manipulation' || s === 'bit') {
+      return t.includes('bit');
+    }
+
+    // General substring match
+    return t.includes(s) || s.includes(t);
+  });
+}
 
 const renderCompanyLogo = (company: string) => {
   switch (company.toLowerCase()) {
@@ -120,12 +237,21 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
   onUpdateStatus,
   onToggleFavorite,
   onNavigateToProblem,
+  onSelectCompany,
 }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Active filters from URL search params with defaults
-  const selectedCompany = searchParams.get('company') || 'all';
+  const rawCompany = searchParams.get('company');
+  const selectedCompany = rawCompany ? rawCompany.toLowerCase() : 'all';
+
+  // Sync selectedCompany into store when updated
+  useEffect(() => {
+    if (selectedCompany && selectedCompany !== 'all' && onSelectCompany) {
+      onSelectCompany(selectedCompany);
+    }
+  }, [selectedCompany, onSelectCompany]);
   const selectedDifficulty = (searchParams.get('difficulty') as Difficulty | 'all') || 'all';
   const selectedTopic = searchParams.get('topic') || 'all';
   const selectedStatus = (searchParams.get('status') as ProblemStatus | 'favorite' | 'due-review' | 'all') || 'all';
@@ -176,7 +302,8 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       .filter((q) => {
         // 1. Company filter
         if (selectedCompany !== 'all') {
-          if (!q.companies[selectedCompany]) return false;
+          const compKey = selectedCompany.toLowerCase();
+          if (!q.companies[compKey] && !q.companies[selectedCompany]) return false;
         }
 
         // 2. Difficulty filter
@@ -186,10 +313,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
 
         // 3. Topic / DSA algorithm filter
         if (selectedTopic !== 'all') {
-          const matchTopic = q.topics.some(
-            (t) => t.toLowerCase() === selectedTopic.toLowerCase()
-          );
-          if (!matchTopic) return false;
+          if (!matchesTopicFilter(selectedTopic, q.topics)) return false;
         }
 
         // 4. Curated lists
@@ -226,7 +350,15 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       .sort((a, b) => {
         const getFreq = (item: Question) => {
           if (selectedCompany !== 'all') {
-            const str = item.companies[selectedCompany]?.all || '0.0%';
+            const compKey = selectedCompany.toLowerCase();
+            const compObj = item.companies[compKey] || item.companies[selectedCompany] || {};
+            const str =
+              compObj.all ||
+              compObj['thirty-days'] ||
+              compObj['three-months'] ||
+              compObj['six-months'] ||
+              compObj['more-than-six-months'] ||
+              '0.0%';
             return parseFloat(str.replace('%', '')) || 0;
           }
           return Object.keys(item.companies || {}).length;
@@ -259,7 +391,12 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
             comparison = Number(a.id) - Number(b.id);
         }
 
-        return sortOrder === 'desc' ? -comparison : comparison;
+        if (comparison !== 0) {
+          return sortOrder === 'desc' ? -comparison : comparison;
+        }
+
+        // Stable secondary tie-breaker by problem ID ascending
+        return Number(a.id) - Number(b.id);
       });
   }, [
     questions,
@@ -355,19 +492,36 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
         });
       });
 
+    if (selectedCompany !== 'all' && !list.some((it) => it.value.toLowerCase() === selectedCompany.toLowerCase())) {
+      const cMeta = companies[selectedCompany.toLowerCase()] || companies[selectedCompany];
+      const displayName = cMeta?.name || (selectedCompany.charAt(0).toUpperCase() + selectedCompany.slice(1));
+      list.push({
+        value: selectedCompany,
+        label: (
+          <span className="flex items-center gap-1.5 truncate">
+            {renderCompanyLogo(selectedCompany)}
+            <span className="truncate">{displayName}</span>
+          </span>
+        ),
+        tag: cMeta ? `${cMeta.totalQuestions}Q` : 'Selected',
+        searchText: displayName,
+      });
+    }
+
     return list;
-  }, [allCompaniesList, TOP_TECH_IDS]);
+  }, [allCompaniesList, TOP_TECH_IDS, selectedCompany, companies]);
 
   const topicGlideOptions = useMemo(() => {
-    const list = [
-      { value: 'all', label: 'All Topics', tag: `${allTopics.length}`, searchText: 'All Topics' }
+    const list: GlideSelectOption[] = [
+      { value: 'all', label: 'All Topics', tag: `${questions.length}`, searchText: 'All Topics' }
     ];
 
     TOP_ALGORITHMS.forEach((algo) => {
+      const matchCount = questions.filter((q) => matchesTopicFilter(algo, q.topics)).length;
       list.push({
         value: algo,
         label: algo,
-        tag: 'Core',
+        tag: `${matchCount}`,
         searchText: algo
       });
     });
@@ -376,16 +530,17 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     allTopics
       .filter((t) => !algoSet.has(t.toLowerCase()))
       .forEach((t) => {
+        const count = questions.filter((q) => q.topics.some((item) => item.toLowerCase() === t.toLowerCase())).length;
         list.push({
           value: t,
           label: t,
-          tag: 'Topic',
+          tag: `${count}`,
           searchText: t
         });
       });
 
     return list;
-  }, [allTopics]);
+  }, [allTopics, questions]);
 
   const difficultyGlideOptions = useMemo(() => [
     { value: 'all', label: 'All Diff', tag: 'All', searchText: 'All Diff' },
@@ -755,7 +910,9 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                   <th className="py-3 px-4 font-medium">Question</th>
                   <th className="py-3 px-4 font-medium w-28">Difficulty</th>
                   <th className="py-3 px-4 font-medium">DSA Topics</th>
-                  <th className="py-3 px-4 font-medium">Companies</th>
+                  <th className="py-3 px-4 font-medium">
+                    {selectedCompany !== 'all' ? 'Frequency' : 'Companies'}
+                  </th>
                   <th className="py-3 px-4 font-medium w-24">Acceptance</th>
                   <th className="py-3 px-4 font-medium w-32">Status</th>
                   <th className="py-3 px-4 font-medium text-right w-24">Action</th>
@@ -828,29 +985,72 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                         </div>
                       </td>
 
-                      {/* Companies */}
+                      {/* Companies / Frequency */}
                       <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5">
-                          {companyKeys.slice(0, 3).map((comp) => (
-                            <span
-                              key={comp}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                sounds.playClick();
-                                updateFilters({ company: comp });
-                              }}
-                              title={comp}
-                              className="p-1 rounded-md bg-[#11141A] border border-white/[0.06] hover:border-white/20 transition-colors cursor-pointer"
-                            >
-                              {renderCompanyLogo(comp)}
+                        {selectedCompany !== 'all' ? (
+                          (() => {
+                            const compKey = selectedCompany.toLowerCase();
+                            const compObj = q.companies[compKey] || q.companies[selectedCompany] || {};
+                            const freqStr =
+                              compObj.all ||
+                              compObj['thirty-days'] ||
+                              compObj['three-months'] ||
+                              compObj['six-months'] ||
+                              compObj['more-than-six-months'] ||
+                              '0.0%';
+                            const freqVal = parseFloat(freqStr.replace('%', '')) || 0;
+                            const isHot = freqVal >= 75;
+                            const compName = companies[compKey]?.name || selectedCompany;
+                            return (
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-bold border transition-colors ${
+                                    isHot
+                                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                      : 'bg-white/[0.04] text-zinc-300 border-white/[0.08]'
+                                  }`}
+                                  title={`${freqStr} interview frequency at ${compName}`}
+                                >
+                                  {isHot && <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />}
+                                  <span>{freqStr}</span>
+                                </span>
+                                {companyKeys.length > 1 && (
+                                  <span
+                                    className="text-[11px] text-zinc-500 font-sans"
+                                    title={`Also asked by ${companyKeys.length - 1} other companies`}
+                                  >
+                                    +{companyKeys.length - 1} cos
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            {companyKeys.slice(0, 3).map((comp) => (
+                              <span
+                                key={comp}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  sounds.playClick();
+                                  updateFilters({ company: comp });
+                                }}
+                                title={comp}
+                                className="p-1 rounded-md bg-[#11141A] border border-white/[0.06] hover:border-white/20 transition-colors cursor-pointer"
+                              >
+                                {renderCompanyLogo(comp)}
+                              </span>
+                            ))}
+                            {companyKeys.length > 3 && (
+                              <span className="text-xs text-zinc-500 font-mono font-medium">
+                                +{companyKeys.length - 3}
+                              </span>
+                            )}
+                            <span className="text-[11px] text-zinc-500 ml-1 font-mono hidden xl:inline">
+                              ({companyKeys.length})
                             </span>
-                          ))}
-                          {companyKeys.length > 3 && (
-                            <span className="text-xs text-zinc-500">
-                              +{companyKeys.length - 3}
-                            </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </td>
 
                       {/* Acceptance */}
@@ -973,11 +1173,38 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
 
                 <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
                   <div className="flex items-center gap-1.5">
-                    {companyKeys.slice(0, 3).map((comp) => (
-                      <span key={comp} className="p-1 rounded bg-[#11141A] border border-white/[0.06]">
-                        {renderCompanyLogo(comp)}
-                      </span>
-                    ))}
+                    {selectedCompany !== 'all' ? (
+                      (() => {
+                        const compKey = selectedCompany.toLowerCase();
+                        const compObj = q.companies[compKey] || q.companies[selectedCompany] || {};
+                        const freqStr =
+                          compObj.all ||
+                          compObj['thirty-days'] ||
+                          compObj['three-months'] ||
+                          compObj['six-months'] ||
+                          '0.0%';
+                        const freqVal = parseFloat(freqStr.replace('%', '')) || 0;
+                        const isHot = freqVal >= 75;
+                        return (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-bold border ${
+                              isHot
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                : 'bg-white/[0.04] text-zinc-300 border-white/[0.08]'
+                            }`}
+                          >
+                            {isHot && <Flame className="w-3 h-3 text-amber-400 fill-amber-400" />}
+                            <span>{freqStr}</span>
+                          </span>
+                        );
+                      })()
+                    ) : (
+                      companyKeys.slice(0, 3).map((comp) => (
+                        <span key={comp} className="p-1 rounded bg-[#11141A] border border-white/[0.06]">
+                          {renderCompanyLogo(comp)}
+                        </span>
+                      ))
+                    )}
                     <span className="text-xs text-zinc-400 font-mono ml-1">
                       {q.acceptance}
                     </span>

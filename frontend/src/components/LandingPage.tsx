@@ -25,6 +25,8 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { DeviceMockup } from './DeviceMockup';
+import { useAuth } from '../context/AuthContext';
+import { sounds } from '../utils/sound';
 
 const GithubIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -38,6 +40,16 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn }) => {
+  const { isAuthenticated, user, setShowAuthModal } = useAuth();
+
+  const handleLaunch = () => {
+    sounds.playClick();
+    if (isAuthenticated) {
+      onGetStarted();
+    } else {
+      setShowAuthModal(true);
+    }
+  };
   return (
     <div className="min-h-screen bg-background text-textPrimary flex flex-col font-sans selection:bg-primary/20 selection:text-primary relative overflow-x-hidden">
       {/* Top Status Bar */}
@@ -98,19 +110,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
               <GithubIcon className="w-4 h-4" />
               <span className="hidden sm:inline">GitHub</span>
             </a>
-            <button
-              onClick={onSignIn}
-              className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-white hover:text-primary transition-colors cursor-pointer hidden sm:block font-medium"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={onGetStarted}
-              className="px-4 py-2 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer font-sans"
-            >
-              <span>Launch Platform</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={handleLaunch}
+                className="px-4 py-2 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer font-sans"
+              >
+                <span>Enter Dashboard</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    sounds.playClick();
+                    onSignIn();
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-white hover:text-primary transition-colors cursor-pointer hidden sm:block font-medium"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={handleLaunch}
+                  className="px-4 py-2 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer font-sans"
+                >
+                  <span>Launch Platform</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -165,10 +192,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 {/* Dual CTAs */}
                 <div className="flex flex-wrap items-center gap-3 pt-1">
                   <button
-                    onClick={onGetStarted}
+                    onClick={handleLaunch}
                     className="px-6 py-3.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-sm font-semibold tracking-wide shadow-lg shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer font-sans"
                   >
-                    <span>Get Started</span>
+                    <span>{isAuthenticated ? 'Enter Dashboard' : 'Get Started'}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                   <a
@@ -473,10 +500,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             <div className="space-y-6 pt-6">
               <div>
                 <button
-                  onClick={onGetStarted}
+                  onClick={handleLaunch}
                   className="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-sm sm:text-base font-semibold tracking-wide shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                 >
-                  <span>Launch Cheat Code</span>
+                  <span>{isAuthenticated ? 'Enter Dashboard' : 'Launch Cheat Code'}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -528,7 +555,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             </a>
             <span>•</span>
             <button
-              onClick={onGetStarted}
+              onClick={handleLaunch}
               className="text-textSecondary hover:text-primary transition-colors cursor-pointer"
             >
               Dashboard

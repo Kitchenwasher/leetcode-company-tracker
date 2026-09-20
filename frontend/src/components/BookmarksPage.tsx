@@ -49,6 +49,33 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
     });
   }, [questions, store.progress]);
 
+  // Real solved from saved count
+  const solvedFromSavedCount = useMemo(() => {
+    return bookmarkedQuestions.filter((q) => {
+      const p = store.progress[String(q.id)];
+      return p?.status === 'solved' || p?.status === 'mastered';
+    }).length;
+  }, [bookmarkedQuestions, store.progress]);
+
+  // Real retention index based on user recall accuracy
+  const retentionIndex = useMemo(() => {
+    let mastered = 0;
+    let solved = 0;
+    let review = 0;
+
+    Object.values(store.progress).forEach((p) => {
+      if (p.status === 'mastered') mastered++;
+      else if (p.status === 'solved') solved++;
+      else if (p.status === 'review') review++;
+    });
+
+    const totalEvaluated = mastered + solved + review;
+    if (totalEvaluated === 0) return { pct: '--', label: 'No review data yet' };
+
+    const score = Math.round(((mastered + solved) / totalEvaluated) * 100);
+    return { pct: `${score}%`, label: 'Recall accuracy' };
+  }, [store.progress]);
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-white font-sans">
       {/* Header */}
@@ -94,14 +121,14 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
         <div className="p-5 rounded-2xl bg-[#0E1217] border border-white/[0.08]">
           <p className="text-xs text-textMuted uppercase font-medium">Solved from Saved</p>
           <p className="text-2xl font-bold text-emerald-400 font-mono mt-1">
-            {bookmarkedQuestions.filter((q) => store.progress[String(q.id)]?.status === 'solved').length}
+            {solvedFromSavedCount}
           </p>
           <p className="text-xs text-textSecondary mt-0.5">Successfully closed</p>
         </div>
         <div className="p-5 rounded-2xl bg-[#0E1217] border border-white/[0.08]">
           <p className="text-xs text-textMuted uppercase font-medium">Retention Index</p>
-          <p className="text-2xl font-bold text-white font-mono mt-1">94%</p>
-          <p className="text-xs text-textSecondary mt-0.5">Recall accuracy</p>
+          <p className="text-2xl font-bold text-white font-mono mt-1">{retentionIndex.pct}</p>
+          <p className="text-xs text-textSecondary mt-0.5">{retentionIndex.label}</p>
         </div>
       </div>
 

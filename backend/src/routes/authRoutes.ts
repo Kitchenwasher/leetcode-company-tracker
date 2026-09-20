@@ -7,6 +7,9 @@ const router = Router();
 
 router.post('/register', authRateLimiter, AuthController.register);
 router.post('/login', authRateLimiter, AuthController.login);
+router.post('/google', authRateLimiter, AuthController.googleAuth);
+router.post('/github', authRateLimiter, AuthController.githubAuth);
+router.get('/oauth-config', AuthController.getOAuthConfig);
 router.post('/refresh', AuthController.refreshToken);
 router.post('/logout', AuthController.logout);
 router.get('/me', authenticateToken, AuthController.getMe);

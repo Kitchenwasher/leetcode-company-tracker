@@ -6,6 +6,7 @@ import {
   loadStoredState, saveStoredState, getTodayKey, calculateStreaks,
   isDueForReview, generateDemoProgress
 } from './services/storage';
+import { progressApi } from './api/progressApi';
 import { useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
 import { SubscriptionModal } from './components/SubscriptionModal';
@@ -27,6 +28,7 @@ import { AnalyticsModal } from './components/AnalyticsModal';
 import { KeyboardHelpModal } from './components/KeyboardHelpModal';
 import { CompanyLogo } from './components/CompanyLogo';
 import { LandingPage } from './components/LandingPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppSidebarLayout } from './components/AppSidebarLayout';
 import { OverviewPage } from './components/OverviewPage';
 import { QuestionsPage } from './components/QuestionsPage';
@@ -37,6 +39,7 @@ import { CommunityPage } from './components/CommunityPage';
 import { BookmarksPage } from './components/BookmarksPage';
 import { CompaniesPage } from './components/CompaniesPage';
 import { SettingsPage } from './components/SettingsPage';
+import { SubscriptionSuccessPage } from './components/SubscriptionSuccessPage';
 import {
   Flame, ChevronLeft, ChevronRight, AlertCircle, Target
 } from 'lucide-react';
@@ -76,7 +79,7 @@ const ProblemRouteView: React.FC<ProblemRouteViewProps> = ({
     if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
-      navigate(`/dashboard/company/${store.selectedCompany || 'google'}`);
+      navigate(`/questions${store.selectedCompany ? `?company=${encodeURIComponent(store.selectedCompany.toLowerCase())}` : ''}`);
     }
   }, [navigate, store.selectedCompany]);
 
@@ -123,594 +126,23 @@ const ProblemRouteView: React.FC<ProblemRouteViewProps> = ({
 };
 
 // ====================================================================
-// Dashboard Route View (/dashboard and /dashboard/company/:companySlug)
+// Company Deep-Link Redirect Component (/company/:slug & /dashboard/company/:slug)
 // ====================================================================
-interface DashboardViewProps {
-  allQuestions: Question[];
-  isLoading: boolean;
-  error: string | null;
-  store: UserStoreState;
-  updateStore: (patch: Partial<UserStoreState>) => void;
-  handleUpdateStatus: (id: number | string, status: ProblemStatus) => void;
-  handleToggleFavorite: (id: number | string) => void;
-  handleRandomRoulette: (pool: Question[]) => void;
-  setShowOverlapModal: (v: boolean) => void;
-  setShowMockModal: (v: boolean) => void;
-  setShowAnalyticsModal: (v: boolean) => void;
-  setShowShortcutsModal: (v: boolean) => void;
-  setShowPlannerModal: (v: boolean) => void;
-  setShowFlashcardModal: (v: boolean) => void;
-  setShowLeetCodeSyncModal: (v: boolean) => void;
-  focusedIndex: number;
-  setFocusedIndex: React.Dispatch<React.SetStateAction<number>>;
-  setHotkeysQuestions: (qs: Question[]) => void;
-  onNavigateOverview?: () => void;
-}
-
-const DashboardView: React.FC<DashboardViewProps> = ({
-  allQuestions,
-  isLoading,
-  error,
-  store,
-  updateStore,
-  handleUpdateStatus,
-  handleToggleFavorite,
-  handleRandomRoulette,
-  setShowOverlapModal,
-  setShowMockModal,
-  setShowAnalyticsModal,
-  setShowShortcutsModal,
-  setShowPlannerModal,
-  setShowFlashcardModal,
-  setShowLeetCodeSyncModal,
-  focusedIndex,
-  setFocusedIndex,
-  setHotkeysQuestions,
-  onNavigateOverview,
-}) => {
-  const { companySlug } = useParams<{ companySlug?: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { isAuthenticated } = useAuth();
-
-  // Active target company: URL slug has precedence
-  const activeCompany = useMemo(() => {
-    if (companySlug && companiesDict[companySlug]) {
-      return companySlug;
-    }
-    return store.selectedCompany || 'google';
-  }, [companySlug, store.selectedCompany]);
-
-  // Sync activeCompany into store state
-  useEffect(() => {
-    if (activeCompany && store.selectedCompany !== activeCompany) {
-      updateStore({ selectedCompany: activeCompany });
-    }
-  }, [activeCompany, store.selectedCompany, updateStore]);
-
-  // Read filter state from searchParams
-  const selectedTimeframe = (searchParams.get('timeframe') as Timeframe) || 'all';
-  const selectedDifficulty = (searchParams.get('difficulty') as Difficulty | 'all') || 'all';
-  const selectedStatus = (searchParams.get('status') as ProblemStatus | 'favorite' | 'due-review' | 'all') || 'all';
-  const selectedTopic = searchParams.get('topic') || 'all';
-  const curatedList = (searchParams.get('curated') || 'all') as UserStoreState['curatedList'];
-  const sortBy = (searchParams.get('sort') as 'frequency' | 'acceptance' | 'id' | 'title' | 'difficulty' | 'status') || 'frequency';
-  const sortOrder = (searchParams.get('order') as 'asc' | 'desc') || 'desc';
-  const searchQuery = searchParams.get('search') || '';
-  const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-  const pageSize = 50;
-
-  // Helper to update URL searchParams (with { replace: true })
-  const updateFilters = useCallback((patch: Record<string, string | number | undefined | null>) => {
-    const next = new URLSearchParams(searchParams);
-    Object.entries(patch).forEach(([key, val]) => {
-      if (val === undefined || val === null || val === '' || val === 'all' || (key === 'page' && val === 1)) {
-        next.delete(key);
-      } else {
-        next.set(key, String(val));
-      }
-    });
-    // Reset page to 1 unless the page itself is being changed
-    if (!('page' in patch)) {
-      next.delete('page');
-    }
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
-
-  // Handle switching target company
-  const handleSelectCompany = useCallback((cId: string) => {
-    sounds.playClick();
-    updateStore({ selectedCompany: cId });
-    navigate(`/dashboard/company/${cId}${location.search}`);
-  }, [navigate, location.search, updateStore]);
-
-  // All distinct topics extracted from questions
-  const topicsList = useMemo(() => {
-    const set = new Set<string>();
-    allQuestions.forEach((q) => q.topics.forEach((t) => set.add(t)));
-    return Array.from(set).sort();
-  }, [allQuestions]);
-
-  // Status counts for current company & timeframe
-  const statusCounts = useMemo(() => {
-    const company = activeCompany;
-    const tf = selectedTimeframe;
-    const companyQuestions = allQuestions.filter((q) => {
-      if (!q.companies[company]) return false;
-      if (tf !== 'all' && !q.companies[company][tf]) return false;
-      return true;
-    });
-
-    let todo = 0, inProgress = 0, solved = 0, dueReview = 0, starred = 0;
-    companyQuestions.forEach((q) => {
-      const p = store.progress[String(q.id)];
-      const st = p?.status || 'todo';
-      if (p?.isFavorite) starred++;
-      if (isDueForReview(p)) dueReview++;
-
-      if (st === 'solved' || st === 'mastered') solved++;
-      else if (st === 'in-progress') inProgress++;
-      else todo++;
-    });
-
-    return {
-      total: companyQuestions.length,
-      todo,
-      inProgress,
-      solved,
-      dueReview,
-      starred,
-    };
-  }, [allQuestions, activeCompany, selectedTimeframe, store.progress]);
-
-  // Filtered & Sorted Questions
-  const filteredQuestions = useMemo(() => {
-    const company = activeCompany;
-    const tf = selectedTimeframe;
-    const query = searchQuery.toLowerCase().trim();
-
-    return allQuestions.filter((q) => {
-      // 1. Company filter
-      const compData = q.companies[company];
-      if (!compData) return false;
-
-      // 2. Timeframe filter
-      if (tf !== 'all' && !compData[tf]) return false;
-
-      // 3. Curated list filter
-      if (curatedList === 'blind75' && !isQuestionInTrack(q.id, 'blind75')) return false;
-      if (curatedList === 'neetcode150' && !isQuestionInTrack(q.id, 'neetcode150')) return false;
-      if (curatedList === 'striver180' && !isQuestionInTrack(q.id, 'striver180')) return false;
-      if (curatedList === 'grind169' && !q.isGrind169) return false;
-
-      // Tag filter
-      if (store.selectedTag) {
-        const itemProg = store.progress[String(q.id)];
-        if (!itemProg?.tags?.includes(store.selectedTag)) return false;
-      }
-
-      // 4. Difficulty filter
-      if (selectedDifficulty !== 'all' && q.difficulty !== selectedDifficulty) {
-        return false;
-      }
-
-      // 5. Topic filter
-      if (selectedTopic !== 'all' && !q.topics.includes(selectedTopic)) {
-        return false;
-      }
-
-      // 6. Status filter
-      const p = store.progress[String(q.id)];
-      const st = p?.status || 'todo';
-      if (selectedStatus === 'favorite' && !p?.isFavorite) return false;
-      if (selectedStatus === 'due-review' && !isDueForReview(p)) return false;
-      if (
-        selectedStatus !== 'all' &&
-        selectedStatus !== 'favorite' &&
-        selectedStatus !== 'due-review' &&
-        st !== selectedStatus
-      ) {
-        return false;
-      }
-
-      // 7. Search query filter
-      if (query) {
-        const matchesId = String(q.id) === query || String(q.id).includes(query);
-        const matchesTitle = q.title.toLowerCase().includes(query);
-        const matchesTopic = q.topics.some((t) => t.toLowerCase().includes(query));
-        if (!matchesId && !matchesTitle && !matchesTopic) return false;
-      }
-
-      return true;
-    }).sort((a, b) => {
-      const getFreq = (item: Question) => {
-        const str = item.companies[company]?.[tf] || item.companies[company]?.all || '0.0%';
-        return parseFloat(str.replace('%', '')) || 0;
-      };
-
-      const getAcc = (item: Question) => {
-        return parseFloat(item.acceptance.replace('%', '')) || 0;
-      };
-
-      let comparison = 0;
-      switch (sortBy) {
-        case 'frequency':
-          comparison = getFreq(a) - getFreq(b);
-          break;
-        case 'acceptance':
-          comparison = getAcc(a) - getAcc(b);
-          break;
-        case 'id':
-          comparison = Number(a.id) - Number(b.id);
-          break;
-        case 'title':
-          comparison = a.title.localeCompare(b.title);
-          break;
-        case 'difficulty': {
-          const rank: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
-          comparison = rank[a.difficulty] - rank[b.difficulty];
-          break;
-        }
-        case 'status': {
-          const rank: Record<string, number> = { todo: 1, 'in-progress': 2, review: 3, solved: 4, mastered: 5 };
-          const sa = store.progress[String(a.id)]?.status || 'todo';
-          const sb = store.progress[String(b.id)]?.status || 'todo';
-          comparison = rank[sa] - rank[sb];
-          break;
-        }
-        default:
-          comparison = 0;
-      }
-
-      return sortOrder === 'desc' ? -comparison : comparison;
-    });
-  }, [allQuestions, activeCompany, selectedTimeframe, curatedList, store.selectedTag, store.progress, selectedDifficulty, selectedTopic, selectedStatus, searchQuery, sortBy, sortOrder]);
-
-  const displayQuestions = useMemo(() => {
-    if (curatedList === 'sprint30') {
-      return filteredQuestions.slice(0, 30);
-    }
-    return filteredQuestions;
-  }, [filteredQuestions, curatedList]);
-
-  // Paginated Questions
-  const totalPages = Math.ceil(displayQuestions.length / pageSize) || 1;
-  const paginatedQuestions = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return displayQuestions.slice(start, start + pageSize);
-  }, [displayQuestions, currentPage, pageSize]);
-
-  // Synchronize paginated questions for keyboard shortcuts in App
-  useEffect(() => {
-    setHotkeysQuestions(paginatedQuestions);
-  }, [paginatedQuestions, setHotkeysQuestions]);
-
-  // Reset focusedIndex when filter or page changes
-  useEffect(() => {
-    setFocusedIndex(0);
-  }, [activeCompany, selectedTimeframe, selectedDifficulty, selectedStatus, selectedTopic, curatedList, sortBy, sortOrder, searchQuery, currentPage, setFocusedIndex]);
-
-  // Today solved count & streaks
-  const todaySolvedCount = useMemo(() => {
-    const today = getTodayKey();
-    return store.activityLog[today] || 0;
-  }, [store.activityLog]);
-
-  const totalSolvedCount = useMemo(() => {
-    return Object.values(store.progress).filter(
-      (p) => p.status === 'solved' || p.status === 'mastered'
-    ).length;
-  }, [store.progress]);
-
-  const { currentStreak } = useMemo(() => calculateStreaks(store.activityLog), [store.activityLog]);
-  const activeCompanyMeta = companiesDict[activeCompany];
-
-  // Bridge store shape to FilterBar
-  const effectiveFilterState: UserStoreState = useMemo(() => ({
-    ...store,
-    selectedCompany: activeCompany,
-    selectedTimeframe,
-    selectedDifficulty,
-    selectedStatus,
-    selectedTopic,
-    curatedList,
-    sortBy,
-    sortOrder,
-    searchQuery,
-  }), [store, activeCompany, selectedTimeframe, selectedDifficulty, selectedStatus, selectedTopic, curatedList, sortBy, sortOrder, searchQuery]);
-
-  const handleFilterChange = useCallback((patch: Partial<UserStoreState>) => {
-    if (patch.selectedCompany && patch.selectedCompany !== activeCompany) {
-      handleSelectCompany(patch.selectedCompany);
-      return;
-    }
-
-    const filterPatch: Record<string, string | number | undefined | null> = {};
-    if (patch.selectedTimeframe !== undefined) filterPatch.timeframe = patch.selectedTimeframe;
-    if (patch.selectedDifficulty !== undefined) filterPatch.difficulty = patch.selectedDifficulty;
-    if (patch.selectedStatus !== undefined) filterPatch.status = patch.selectedStatus;
-    if (patch.selectedTopic !== undefined) filterPatch.topic = patch.selectedTopic;
-    if (patch.curatedList !== undefined) filterPatch.curated = patch.curatedList;
-    if (patch.sortBy !== undefined) filterPatch.sort = patch.sortBy;
-    if (patch.sortOrder !== undefined) filterPatch.order = patch.sortOrder;
-    if (patch.searchQuery !== undefined) filterPatch.search = patch.searchQuery;
-
-    const storePatch: Partial<UserStoreState> = {};
-    if (patch.viewMode !== undefined) storePatch.viewMode = patch.viewMode;
-    if (patch.soundEnabled !== undefined) storePatch.soundEnabled = patch.soundEnabled;
-    if (patch.dailyGoal !== undefined) storePatch.dailyGoal = patch.dailyGoal;
-    if (Object.keys(storePatch).length > 0) {
-      updateStore(storePatch);
-    }
-
-    if (Object.keys(filterPatch).length > 0) {
-      updateFilters(filterPatch);
-    }
-  }, [activeCompany, handleSelectCompany, updateFilters, updateStore]);
-
-  const handleOpenProblem = (q: Question | number | string) => {
-    const qId = typeof q === 'object' ? q.id : q;
-    navigate(`/problem/${qId}`);
-  };
-
-  return (
-    <>
-      {/* Top Navbar */}
-      <Navbar
-        companies={companiesDict}
-        selectedCompanyId={activeCompany}
-        onSelectCompany={handleSelectCompany}
-        state={effectiveFilterState}
-        onUpdateState={handleFilterChange}
-        filteredQuestions={filteredQuestions}
-        totalSolved={totalSolvedCount}
-        currentStreak={currentStreak}
-        onOpenOverlap={() => setShowOverlapModal(true)}
-        onOpenMock={() => setShowMockModal(true)}
-        onOpenAnalytics={() => setShowAnalyticsModal(true)}
-        onOpenShortcuts={() => setShowShortcutsModal(true)}
-        onRandomRoulette={() => handleRandomRoulette(filteredQuestions)}
-        onOpenPlanner={() => setShowPlannerModal(true)}
-        onOpenFlashcards={() => setShowFlashcardModal(true)}
-        onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-        onGoHome={() => {
-          if (isAuthenticated) {
-            navigate('/dashboard');
-          } else {
-            navigate('/');
-          }
-        }}
-        onNavigateOverview={onNavigateOverview}
-      />
-
-      {/* Main Dashboard Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Company Header Banner */}
-        <div className="terminal-panel p-5 relative overflow-hidden shadow-xl">
-          <div className="relative z-10 flex flex-col gap-4 font-mono">
-            {/* Top row: Company details + Timeframe selector */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-              <div className="flex items-start gap-4">
-                <CompanyLogo companyId={activeCompany} size="lg" />
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-xl sm:text-2xl font-black tracking-wider text-primary uppercase">
-                      &gt; {activeCompanyMeta?.name?.toUpperCase() || activeCompany.toUpperCase()}
-                    </h2>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-[2px] bg-surfaceElevated text-primaryDim border border-primaryDim/40 font-bold">
-                      [{activeCompanyMeta?.tier || 'TECH'}]
-                    </span>
-                    {activeCompanyMeta?.thirtyDaysCount > 0 && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-[2px] bg-surfaceElevated text-medium border border-medium/40">
-                        <Flame className="w-3.5 h-3.5 text-medium" />
-                        [{activeCompanyMeta.thirtyDaysCount} HOT IN 30D]
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-xs text-textMuted mt-1 font-mono">
-                    Verified interview dataset curated for {activeCompanyMeta?.name || activeCompany}.
-                  </p>
-
-                  {/* Company stats pills */}
-                  <div className="flex flex-wrap items-center gap-2 mt-2 text-xs font-mono">
-                    <span className="text-textSecondary">
-                      [TOTAL: <strong className="text-primary">{activeCompanyMeta?.totalQuestions || 0}</strong>]
-                    </span>
-                    <span className="text-easy">
-                      [EASY: {activeCompanyMeta?.diffCounts?.Easy || 0}]
-                    </span>
-                    <span className="text-medium">
-                      [MED: {activeCompanyMeta?.diffCounts?.Medium || 0}]
-                    </span>
-                    <span className="text-hard">
-                      [HARD: {activeCompanyMeta?.diffCounts?.Hard || 0}]
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Timeframe selector tabs */}
-              <div className="flex flex-col items-start md:items-end gap-1.5 shrink-0">
-                <span className="text-[10px] font-bold text-textMuted uppercase tracking-wider">
-                  &gt; RECENCY_TIMEFRAME
-                </span>
-                <TimeframeTabs
-                  selectedTimeframe={selectedTimeframe}
-                  onSelectTimeframe={(tf) => updateFilters({ timeframe: tf })}
-                  companyMeta={activeCompanyMeta}
-                />
-              </div>
-            </div>
-
-            {/* Quick Switch Pills for Top Companies & Daily Goal Tracker */}
-            <div className="pt-3 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs">
-              {/* Quick switch company buttons */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                <span className="text-textMuted mr-1 font-bold hidden lg:inline">&gt; JUMP:</span>
-                {TOP_FAANG_PILLS.map((cId) => {
-                  const isCur = activeCompany === cId;
-                  const cMeta = companiesDict[cId];
-                  return (
-                    <button
-                      key={cId}
-                      onClick={() => handleSelectCompany(cId)}
-                      className={`flex items-center gap-1.5 px-2 py-1 rounded-[2px] font-mono text-xs font-bold transition-all border ${
-                        isCur
-                          ? 'bg-primary text-black border-borderActive shadow-terminal-glow'
-                          : 'bg-surface text-textSecondary border-border hover:border-primary hover:text-primary'
-                      }`}
-                    >
-                      <CompanyLogo companyId={cId} size="sm" />
-                      <span>[{cMeta?.name || cId}]</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Today's Goal Progress */}
-              <div className="flex items-center gap-2 px-2.5 py-1 rounded-[2px] bg-surface border border-border shrink-0 font-mono">
-                <Target className="w-3.5 h-3.5 text-primary" />
-                <span className="text-textSecondary">
-                  GOAL: <strong className="text-primary">{todaySolvedCount}</strong>/<span className="text-primaryDim">{store.dailyGoal}</span>
-                </span>
-                <div className="w-14 h-1 bg-surfaceElevated border border-border overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all"
-                    style={{ width: `${Math.min(100, (todaySolvedCount / store.dailyGoal) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filter & Control Bar */}
-        <FilterBar
-          state={effectiveFilterState}
-          onChange={handleFilterChange}
-          statusCounts={statusCounts}
-          topicsList={topicsList}
-        />
-
-        {/* Problem List or Grid View */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-textSecondary gap-3 font-mono">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs">&gt; Loading question index...</span>
-          </div>
-        ) : error ? (
-          <div className="p-4 bg-error/15 border border-error/40 rounded-[2px] text-error text-center font-mono text-xs">
-            [ERROR: {error}]
-          </div>
-        ) : (
-          <>
-            {store.viewMode === 'table' ? (
-              <QuestionTable
-                questions={paginatedQuestions}
-                progress={store.progress}
-                selectedCompany={activeCompany}
-                selectedTimeframe={selectedTimeframe}
-                focusedIndex={focusedIndex}
-                onUpdateStatus={handleUpdateStatus}
-                onToggleFavorite={handleToggleFavorite}
-                onOpenDetail={handleOpenProblem}
-                onStartTimer={handleOpenProblem}
-                onSelectRow={setFocusedIndex}
-              />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {paginatedQuestions.map((q, idx) => (
-                  <QuestionCard
-                    key={q.id}
-                    question={q}
-                    progress={store.progress[String(q.id)]}
-                    selectedCompany={activeCompany}
-                    selectedTimeframe={selectedTimeframe}
-                    isFocused={idx === focusedIndex}
-                    onUpdateStatus={handleUpdateStatus}
-                    onToggleFavorite={handleToggleFavorite}
-                    onOpenDetail={handleOpenProblem}
-                    onStartTimer={handleOpenProblem}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Pagination Controls */}
-            {displayQuestions.length > pageSize && (
-              <div className="flex items-center justify-between py-3 border-t border-border px-2 text-xs font-mono">
-                <span className="text-textMuted">
-                  Showing <strong className="text-primary">{(currentPage - 1) * pageSize + 1}</strong> to{' '}
-                  <strong className="text-primary">
-                    {Math.min(currentPage * pageSize, displayQuestions.length)}
-                  </strong>{' '}
-                  of <strong className="text-primary">{displayQuestions.length}</strong> problems
-                </span>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => updateFilters({ page: Math.max(1, currentPage - 1) })}
-                    disabled={currentPage === 1}
-                    className="px-2.5 py-1 rounded-[2px] bg-surface border border-border text-textSecondary hover:text-primary hover:border-primaryDim disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-                  >
-                    [ PREV ]
-                  </button>
-
-                  <span className="px-2.5 py-1 font-mono text-textPrimary bg-surface border border-border rounded-[2px]">
-                    PAGE <span className="text-primary font-bold">{currentPage}</span>/{totalPages}
-                  </span>
-
-                  <button
-                    onClick={() => updateFilters({ page: Math.min(totalPages, currentPage + 1) })}
-                    disabled={currentPage === totalPages}
-                    className="px-2.5 py-1 rounded-[2px] bg-surface border border-border text-textSecondary hover:text-primary hover:border-primaryDim disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-                  >
-                    [ NEXT ]
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="w-full border-t border-border bg-surface py-5 px-4 sm:px-6 text-center text-xs font-mono text-textMuted">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-primary">&gt; CHEAT_CODE</span>
-            <span>•</span>
-            <span>659 Companies • 3,399 Questions</span>
-            <span>•</span>
-            <span className="text-textSecondary">SNAPSHOT: 2026</span>
-          </div>
-          <div className="flex items-center gap-3 text-textSecondary">
-            <button onClick={() => setShowShortcutsModal(true)} className="hover:text-primary transition-colors cursor-pointer">
-              [HOTKEYS (?)]
-            </button>
-            <span>•</span>
-            <a
-              href="https://github.com/Kitchenwasher/leetcode-company-tracker"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors"
-            >
-              [GITHUB_REPO]
-            </a>
-          </div>
-        </div>
-      </footer>
-    </>
-  );
+const CompanyRedirect: React.FC = () => {
+  const { companySlug } = useParams<{ companySlug: string }>();
+  const [searchParams] = useSearchParams();
+  const query = searchParams.toString();
+  const target = companySlug
+    ? `/questions?company=${encodeURIComponent(companySlug.toLowerCase())}${query ? `&${query}` : ''}`
+    : `/questions${query ? `?${query}` : ''}`;
+  return <Navigate to={target} replace />;
 };
 
 // ====================================================================
 // Root App Component with React Router
 // ====================================================================
 export const App: React.FC = () => {
-  const { user, showAuthModal, setShowAuthModal, setShowSubscriptionModal } = useAuth();
+  const { user, isAuthenticated, showAuthModal, setShowAuthModal, setShowSubscriptionModal } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -745,6 +177,45 @@ export const App: React.FC = () => {
       setStore(loadStoredState(user.id));
     }
   }, [user?.id]);
+
+  // Sync progress and preferences from Neon DB when authenticated
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || user.id === 'guest') return;
+
+    let isCancelled = false;
+
+    const fetchServerData = async () => {
+      try {
+        const [serverProgress, stats] = await Promise.all([
+          progressApi.getProgress().catch(() => ({})),
+          progressApi.getStats().catch(() => null),
+        ]);
+
+        if (isCancelled) return;
+
+        setStore((prev) => {
+          const mergedProgress = { ...prev.progress, ...serverProgress };
+          const mergedActivity = stats?.activityLog ? { ...prev.activityLog, ...stats.activityLog } : prev.activityLog;
+
+          return {
+            ...prev,
+            progress: mergedProgress,
+            activityLog: mergedActivity,
+            dailyGoal: user.dailyTarget || prev.dailyGoal,
+            selectedCompany: user.targetCompany || prev.selectedCompany,
+          };
+        });
+      } catch (err) {
+        console.warn('Failed to load user progress from Neon DB:', err);
+      }
+    };
+
+    fetchServerData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated, user?.id, user?.dailyTarget, user?.targetCompany]);
 
   // Save to user-scoped local storage whenever store changes
   useEffect(() => {
@@ -797,19 +268,33 @@ export const App: React.FC = () => {
       updatedActivity[todayStr] = (updatedActivity[todayStr] || 0) + 1;
     }
 
+    const updatedItem = {
+      ...prevItem,
+      status: newStatus,
+      lastSolvedAt: isNowSolved ? new Date().toISOString() : prevItem.lastSolvedAt,
+      solveCount: isNowSolved ? (prevItem.solveCount || 0) + 1 : prevItem.solveCount,
+    };
+
     setStore((prev) => ({
       ...prev,
       activityLog: updatedActivity,
       progress: {
         ...prev.progress,
-        [idStr]: {
-          ...prevItem,
-          status: newStatus,
-          lastSolvedAt: isNowSolved ? new Date().toISOString() : prevItem.lastSolvedAt,
-          solveCount: isNowSolved ? (prevItem.solveCount || 0) + 1 : prevItem.solveCount,
-        },
+        [idStr]: updatedItem,
       },
     }));
+
+    // Persist to Neon DB if authenticated
+    if (isAuthenticated && user?.id && user.id !== 'guest') {
+      const qNum = parseInt(idStr, 10);
+      if (!isNaN(qNum)) {
+        progressApi.updateQuestionProgress(qNum, {
+          status: newStatus,
+          lastSolvedAt: updatedItem.lastSolvedAt,
+          solveCount: updatedItem.solveCount,
+        }).catch((err) => console.warn('Failed to sync question status to Neon DB:', err));
+      }
+    }
   };
 
   const handleToggleFavorite = (qId: number | string) => {
@@ -820,16 +305,28 @@ export const App: React.FC = () => {
       isFavorite: false,
     };
 
+    const nextFavorite = !prevItem.isFavorite;
+
     setStore((prev) => ({
       ...prev,
       progress: {
         ...prev.progress,
         [idStr]: {
           ...prevItem,
-          isFavorite: !prevItem.isFavorite,
+          isFavorite: nextFavorite,
         },
       },
     }));
+
+    // Persist to Neon DB if authenticated
+    if (isAuthenticated && user?.id && user.id !== 'guest') {
+      const qNum = parseInt(idStr, 10);
+      if (!isNaN(qNum)) {
+        progressApi.updateQuestionProgress(qNum, {
+          isFavorite: nextFavorite,
+        }).catch((err) => console.warn('Failed to sync favorite to Neon DB:', err));
+      }
+    }
   };
 
   const handleSaveProgressPatch = (qId: number | string, patch: Partial<UserProgressItem>) => {
@@ -850,6 +347,16 @@ export const App: React.FC = () => {
         },
       },
     }));
+
+    // Persist to Neon DB if authenticated
+    if (isAuthenticated && user?.id && user.id !== 'guest') {
+      const qNum = parseInt(idStr, 10);
+      if (!isNaN(qNum)) {
+        progressApi.updateQuestionProgress(qNum, patch).catch((err) =>
+          console.warn('Failed to sync progress patch to Neon DB:', err)
+        );
+      }
+    }
   };
 
   const handleBatchUpdateStatus = useCallback((questionIds: (number | string)[], newStatus: ProblemStatus) => {
@@ -866,7 +373,14 @@ export const App: React.FC = () => {
       });
       return { ...prev, progress: nextProg };
     });
-  }, []);
+
+    // Persist to Neon DB if authenticated
+    if (isAuthenticated && user?.id && user.id !== 'guest') {
+      progressApi.batchUpdateProgress(questionIds, newStatus).catch((err) =>
+        console.warn('Failed to sync batch progress to Neon DB:', err)
+      );
+    }
+  }, [isAuthenticated, user?.id]);
 
   // Random Roulette
   const handleRandomRoulette = (pool: Question[]) => {
@@ -897,7 +411,7 @@ export const App: React.FC = () => {
           if (window.history.state && window.history.state.idx > 0) {
             navigate(-1);
           } else {
-            navigate(`/dashboard/company/${store.selectedCompany || 'google'}`);
+            navigate(`/questions${store.selectedCompany ? `?company=${encodeURIComponent(store.selectedCompany.toLowerCase())}` : ''}`);
           }
           return;
         }
@@ -1054,7 +568,11 @@ export const App: React.FC = () => {
             <LandingPage
               onGetStarted={() => {
                 sounds.playClick();
-                navigate('/dashboard');
+                if (isAuthenticated) {
+                  navigate('/dashboard');
+                } else {
+                  setShowAuthModal(true);
+                }
               }}
               onSignIn={() => {
                 sounds.playClick();
@@ -1068,27 +586,29 @@ export const App: React.FC = () => {
         <Route
           path="/dashboard"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => navigate(`/dashboard/company/${store.selectedCompany || 'google'}`)}
-            >
-              <OverviewPage
-                questions={allQuestions}
-                companies={companiesDict}
+            <ProtectedRoute>
+              <AppSidebarLayout
                 store={store}
-                onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
-                onNavigateToCompany={(slug: string) => {
-                  navigate(`/questions?company=${slug}`);
-                }}
-                onNavigateToQuestions={() => navigate('/questions')}
                 onOpenMockModal={() => setShowMockModal(true)}
-              />
-            </AppSidebarLayout>
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => navigate('/questions')}
+              >
+                <OverviewPage
+                  questions={allQuestions}
+                  companies={companiesDict}
+                  store={store}
+                  onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+                  onNavigateToCompany={(slug: string) => {
+                    navigate(`/questions?company=${encodeURIComponent(slug.toLowerCase())}`);
+                  }}
+                  onNavigateToQuestions={() => navigate('/questions')}
+                  onOpenMockModal={() => setShowMockModal(true)}
+                />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -1099,27 +619,30 @@ export const App: React.FC = () => {
         <Route
           path="/questions"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => {
-                const searchInput = document.querySelector('input[placeholder*="Search by ID"]') as HTMLInputElement;
-                if (searchInput) searchInput.focus();
-              }}
-            >
-              <QuestionsPage
-                questions={allQuestions}
-                companies={companiesDict}
+            <ProtectedRoute>
+              <AppSidebarLayout
                 store={store}
-                onUpdateStatus={handleUpdateStatus}
-                onToggleFavorite={handleToggleFavorite}
-                onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
-              />
-            </AppSidebarLayout>
+                onOpenMockModal={() => setShowMockModal(true)}
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => {
+                  const searchInput = document.querySelector('input[placeholder*="Search by ID"]') as HTMLInputElement;
+                  if (searchInput) searchInput.focus();
+                }}
+              >
+                <QuestionsPage
+                  questions={allQuestions}
+                  companies={companiesDict}
+                  store={store}
+                  onUpdateStatus={handleUpdateStatus}
+                  onToggleFavorite={handleToggleFavorite}
+                  onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+                  onSelectCompany={(slug) => setStore((prev) => ({ ...prev, selectedCompany: slug }))}
+                />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -1127,24 +650,26 @@ export const App: React.FC = () => {
         <Route
           path="/companies"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => navigate('/questions')}
-            >
-              <CompaniesPage
-                companies={companiesDict}
-                questions={allQuestions}
-                onSelectCompany={(slug) => {
-                  setStore((prev) => ({ ...prev, selectedCompany: slug }));
-                  navigate(`/dashboard/company/${slug}`);
-                }}
-              />
-            </AppSidebarLayout>
+            <ProtectedRoute>
+              <AppSidebarLayout
+                store={store}
+                onOpenMockModal={() => setShowMockModal(true)}
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => navigate('/questions')}
+              >
+                <CompaniesPage
+                  companies={companiesDict}
+                  questions={allQuestions}
+                  onSelectCompany={(slug) => {
+                    setStore((prev) => ({ ...prev, selectedCompany: slug }));
+                    navigate(`/questions?company=${encodeURIComponent(slug.toLowerCase())}`);
+                  }}
+                />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -1152,21 +677,23 @@ export const App: React.FC = () => {
         <Route
           path="/practice"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => navigate('/questions')}
-            >
-              <PracticePage
-                questions={allQuestions}
+            <ProtectedRoute>
+              <AppSidebarLayout
                 store={store}
-                onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
-              />
-            </AppSidebarLayout>
+                onOpenMockModal={() => setShowMockModal(true)}
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => navigate('/questions')}
+              >
+                <PracticePage
+                  questions={allQuestions}
+                  store={store}
+                  onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+                />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -1174,22 +701,24 @@ export const App: React.FC = () => {
         <Route
           path="/mock-interview"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => navigate('/questions')}
-            >
-              <MockInterviewPage
-                questions={allQuestions}
-                companies={companiesDict}
+            <ProtectedRoute>
+              <AppSidebarLayout
                 store={store}
                 onOpenMockModal={() => setShowMockModal(true)}
-              />
-            </AppSidebarLayout>
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => navigate('/questions')}
+              >
+                <MockInterviewPage
+                  questions={allQuestions}
+                  companies={companiesDict}
+                  store={store}
+                  onOpenMockModal={() => setShowMockModal(true)}
+                />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -1197,20 +726,22 @@ export const App: React.FC = () => {
         <Route
           path="/progress"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => navigate('/questions')}
-            >
-              <ProgressPage
-                questions={allQuestions}
+            <ProtectedRoute>
+              <AppSidebarLayout
                 store={store}
-              />
-            </AppSidebarLayout>
+                onOpenMockModal={() => setShowMockModal(true)}
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => navigate('/questions')}
+              >
+                <ProgressPage
+                  questions={allQuestions}
+                  store={store}
+                />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -1218,17 +749,19 @@ export const App: React.FC = () => {
         <Route
           path="/community"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => navigate('/questions')}
-            >
-              <CommunityPage />
-            </AppSidebarLayout>
+            <ProtectedRoute>
+              <AppSidebarLayout
+                store={store}
+                onOpenMockModal={() => setShowMockModal(true)}
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => navigate('/questions')}
+              >
+                <CommunityPage />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -1236,23 +769,25 @@ export const App: React.FC = () => {
         <Route
           path="/bookmarks"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => navigate('/questions')}
-            >
-              <BookmarksPage
-                questions={allQuestions}
+            <ProtectedRoute>
+              <AppSidebarLayout
                 store={store}
-                onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
-                onToggleFavorite={handleToggleFavorite}
-                onUpdateStatus={handleUpdateStatus}
-              />
-            </AppSidebarLayout>
+                onOpenMockModal={() => setShowMockModal(true)}
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => navigate('/questions')}
+              >
+                <BookmarksPage
+                  questions={allQuestions}
+                  store={store}
+                  onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+                  onToggleFavorite={handleToggleFavorite}
+                  onUpdateStatus={handleUpdateStatus}
+                />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -1260,76 +795,55 @@ export const App: React.FC = () => {
         <Route
           path="/settings"
           element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => navigate(`/dashboard/company/${store.selectedCompany || 'google'}`)}
-            >
-              <SettingsPage
+            <ProtectedRoute>
+              <AppSidebarLayout
                 store={store}
-                questions={allQuestions}
-                onImportBackup={handleImportBackup}
-                onResetProgress={handleResetProgress}
-              />
-            </AppSidebarLayout>
+                onOpenMockModal={() => setShowMockModal(true)}
+                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                onOpenPlanner={() => setShowPlannerModal(true)}
+                onOpenFlashcards={() => setShowFlashcardModal(true)}
+                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                onSearchFocus={() => navigate('/questions')}
+              >
+                <SettingsPage
+                  store={store}
+                  questions={allQuestions}
+                  onImportBackup={handleImportBackup}
+                  onResetProgress={handleResetProgress}
+                />
+              </AppSidebarLayout>
+            </ProtectedRoute>
           }
         />
 
-        <Route
-          path="/dashboard/company/:companySlug"
-          element={
-            <AppSidebarLayout
-              store={store}
-              onOpenMockModal={() => setShowMockModal(true)}
-              onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-              onOpenPlanner={() => setShowPlannerModal(true)}
-              onOpenFlashcards={() => setShowFlashcardModal(true)}
-              onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-              onSearchFocus={() => {
-                const searchInput = document.querySelector('input[placeholder*="filter query"]') as HTMLInputElement;
-                if (searchInput) searchInput.focus();
-              }}
-              hideTopBar={true}
-            >
-              <DashboardView
-                allQuestions={allQuestions}
-                isLoading={isLoading}
-                error={error}
-                store={store}
-                updateStore={updateStore}
-                handleUpdateStatus={handleUpdateStatus}
-                handleToggleFavorite={handleToggleFavorite}
-                handleRandomRoulette={handleRandomRoulette}
-                setShowOverlapModal={setShowOverlapModal}
-                setShowMockModal={setShowMockModal}
-                setShowAnalyticsModal={setShowAnalyticsModal}
-                setShowShortcutsModal={setShowShortcutsModal}
-                setShowPlannerModal={setShowPlannerModal}
-                setShowFlashcardModal={setShowFlashcardModal}
-                setShowLeetCodeSyncModal={setShowLeetCodeSyncModal}
-                focusedIndex={focusedIndex}
-                setFocusedIndex={setFocusedIndex}
-                setHotkeysQuestions={setHotkeysQuestions}
-                onNavigateOverview={() => navigate('/overview')}
-              />
-            </AppSidebarLayout>
-          }
-        />
+        {/* Company Redirects (auto-redirect to /questions?company=...) */}
+        <Route path="/dashboard/company/:companySlug" element={<CompanyRedirect />} />
+        <Route path="/company/:companySlug" element={<CompanyRedirect />} />
+        <Route path="/dashboard/company" element={<Navigate to="/companies" replace />} />
+        <Route path="/company" element={<Navigate to="/companies" replace />} />
 
         {/* Dedicated Problem Workspace */}
         <Route
           path="/problem/:problemId"
           element={
-            <ProblemRouteView
-              allQuestions={allQuestions}
-              isLoading={isLoading}
-              store={store}
-              onSaveProgressPatch={handleSaveProgressPatch}
-            />
+            <ProtectedRoute>
+              <ProblemRouteView
+                allQuestions={allQuestions}
+                isLoading={isLoading}
+                store={store}
+                onSaveProgressPatch={handleSaveProgressPatch}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Subscription Success Page */}
+        <Route
+          path="/subscription-success"
+          element={
+            <ProtectedRoute>
+              <SubscriptionSuccessPage />
+            </ProtectedRoute>
           }
         />
 
@@ -1392,7 +906,7 @@ export const App: React.FC = () => {
         <KeyboardHelpModal onClose={() => setShowShortcutsModal(false)} />
       )}
 
-      <AuthModal onSuccess={() => navigate('/overview')} />
+      <AuthModal onSuccess={() => navigate('/dashboard')} />
       <SubscriptionModal />
 
       <PrepPlannerModal
@@ -1403,7 +917,7 @@ export const App: React.FC = () => {
         progress={store.progress}
         onSelectCompany={(cId) => {
           updateStore({ selectedCompany: cId });
-          navigate(`/dashboard/company/${cId}`);
+          navigate(`/questions?company=${encodeURIComponent(cId.toLowerCase())}`);
         }}
       />
 

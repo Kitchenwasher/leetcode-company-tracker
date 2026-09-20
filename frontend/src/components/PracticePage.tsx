@@ -17,6 +17,8 @@ import {
 import { Question, UserStoreState, Difficulty } from '../types';
 import { sounds } from '../utils/sound';
 import { DifficultyBadge } from './ui/DifficultyBadge';
+import { calculateStreaks, getTodayKey } from '../services/storage';
+import { useAuth } from '../context/AuthContext';
 
 interface PracticePageProps {
   questions: Question[];
@@ -62,13 +64,13 @@ const CURATED_TRACKS = [
   },
 ];
 
-const PARADIGMS = [
-  { name: 'Dynamic Programming', slug: 'Dynamic Programming', count: 480, icon: '⚡', diff: 'Hard' as Difficulty },
-  { name: 'Trees & BST', slug: 'Tree', count: 320, icon: '🌲', diff: 'Medium' as Difficulty },
-  { name: 'Graphs & BFS/DFS', slug: 'Graph', count: 260, icon: '🕸️', diff: 'Hard' as Difficulty },
-  { name: 'Two Pointers', slug: 'Two Pointers', count: 210, icon: '↔️', diff: 'Medium' as Difficulty },
-  { name: 'Binary Search', slug: 'Binary Search', count: 190, icon: '🔍', diff: 'Medium' as Difficulty },
-  { name: 'Greedy Algorithms', slug: 'Greedy', count: 180, icon: '🎯', diff: 'Medium' as Difficulty },
+const PARADIGM_DEFS = [
+  { name: 'Dynamic Programming', slug: 'Dynamic Programming', icon: '⚡', diff: 'Hard' as Difficulty },
+  { name: 'Trees & BST', slug: 'Tree', icon: '🌲', diff: 'Medium' as Difficulty },
+  { name: 'Graphs & BFS/DFS', slug: 'Graph', icon: '🕸️', diff: 'Hard' as Difficulty },
+  { name: 'Two Pointers', slug: 'Two Pointers', icon: '↔️', diff: 'Medium' as Difficulty },
+  { name: 'Binary Search', slug: 'Binary Search', icon: '🔍', diff: 'Medium' as Difficulty },
+  { name: 'Greedy Algorithms', slug: 'Greedy', icon: '🎯', diff: 'Medium' as Difficulty },
 ];
 
 export const PracticePage: React.FC<PracticePageProps> = ({
@@ -77,18 +79,29 @@ export const PracticePage: React.FC<PracticePageProps> = ({
   onNavigateToProblem,
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedDuration, setSelectedDuration] = useState<number>(30);
 
-  // Today's featured daily question (e.g. Trapping Rain Water #42)
+  const todayFormatted = useMemo(() => {
+    return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }, []);
+
+  // Today's featured daily question picked deterministically
   const dailyQuestion = useMemo(() => {
-    return questions.find((q) => Number(q.id) === 42) || questions[0] || {
-      id: 42,
-      title: 'Trapping Rain Water',
-      difficulty: 'Hard' as Difficulty,
-      acceptance: '61.2%',
-      topics: ['Array', 'Two Pointers', 'Dynamic Programming', 'Stack'],
-      companies: { google: { all: '85%' }, amazon: { all: '92%' } }
-    };
+    if (!questions.length) {
+      return {
+        id: 42,
+        title: 'Trapping Rain Water',
+        difficulty: 'Hard' as Difficulty,
+        acceptance: '61.2%',
+        topics: ['Array', 'Two Pointers', 'Dynamic Programming', 'Stack'],
+        companies: { google: { all: '85%' }, amazon: { all: '92%' } }
+      };
+    }
+    const d = new Date();
+    const dayOfYear = Math.floor((d.getTime() - new Date(d.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
+    const idx = dayOfYear % questions.length;
+    return questions[idx] || questions[0];
   }, [questions]);
 
   // Overall solved counts
@@ -97,6 +110,26 @@ export const PracticePage: React.FC<PracticePageProps> = ({
       (p) => p.status === 'solved' || p.status === 'mastered'
     ).length;
   }, [store.progress]);
+
+  // Real streak calculation from user activityLog
+  const { currentStreak } = useMemo(() => {
+    return calculateStreaks(store.activityLog || {});
+  }, [store.activityLog]);
+
+  // Real today's goal calculation
+  const todayKey = getTodayKey();
+  const todaySolved = (store.activityLog && store.activityLog[todayKey]) || 0;
+  const targetGoal = user?.dailyTarget || store.dailyGoal || 3;
+
+  // Real paradigm question counts
+  const paradigms = useMemo(() => {
+    return PARADIGM_DEFS.map((p) => {
+      const count = questions.filter((q) =>
+        q.topics?.some((t) => t.toLowerCase().includes(p.slug.toLowerCase()))
+      ).length;
+      return { ...p, count };
+    });
+  }, [questions]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-white font-sans">
@@ -125,12 +158,16 @@ export const PracticePage: React.FC<PracticePageProps> = ({
             <Flame className="w-4 h-4 text-primary fill-primary" />
             <div className="text-left">
               <p className="text-[10px] text-textMuted uppercase font-medium">Streak</p>
-              <p className="text-sm sm:text-base font-bold text-primary font-mono">52 Days</p>
+              <p className="text-sm sm:text-base font-bold text-primary font-mono">
+                {currentStreak} {currentStreak === 1 ? 'Day' : 'Days'}
+              </p>
             </div>
           </div>
           <div className="px-4 py-2.5 rounded-xl bg-[#0E1217] border border-white/[0.08] text-center">
             <p className="text-[10px] text-emerald-400 uppercase font-medium">Today's Goal</p>
-            <p className="text-sm sm:text-base font-bold text-emerald-400 font-mono">3 / 5</p>
+            <p className="text-sm sm:text-base font-bold text-emerald-400 font-mono">
+              {todaySolved} / {targetGoal}
+            </p>
           </div>
         </div>
       </div>
@@ -144,7 +181,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({
               <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
                 Problem of the Day
               </span>
-              <span className="text-xs text-textMuted font-mono">Sep 19, 2026</span>
+              <span className="text-xs text-textMuted font-mono">{todayFormatted}</span>
             </div>
             <DifficultyBadge difficulty={dailyQuestion.difficulty} />
           </div>
@@ -310,7 +347,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-          {PARADIGMS.map((p) => (
+          {paradigms.map((p) => (
             <div
               key={p.name}
               onClick={() => {

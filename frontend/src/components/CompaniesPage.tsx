@@ -282,7 +282,7 @@ export const CompaniesPage: React.FC<CompaniesPageProps> = ({
   const handleSelect = (slug: string) => {
     sounds.playClick();
     onSelectCompany(slug);
-    navigate(`/dashboard/company/${slug}`);
+    navigate(`/questions?company=${encodeURIComponent(slug.toLowerCase())}`);
   };
 
   return (

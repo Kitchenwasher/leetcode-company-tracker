@@ -25,10 +25,12 @@ const setRefreshTokenCookie = (res: Response, token: string) => {
   });
 };
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { name, email, password, targetCompany = 'google' } = req.body;
+      const { name, email, password, targetCompany = 'google', leetcodeUsername } = req.body;
 
       if (!name || !email || !password) {
         res.status(400).json({ error: 'Name, email, and password are required.' });
@@ -36,6 +38,16 @@ export class AuthController {
       }
 
       const normalizedEmail = email.trim().toLowerCase();
+      if (!EMAIL_REGEX.test(normalizedEmail)) {
+        res.status(400).json({ error: 'Please enter a valid email address.' });
+        return;
+      }
+
+      if (password.length < 8) {
+        res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+        return;
+      }
+
       const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
       if (existing) {
         res.status(409).json({ error: 'An account with this email address already exists.' });
@@ -50,7 +62,8 @@ export class AuthController {
           name: name.trim(),
           email: normalizedEmail,
           passwordHash,
-          targetCompany,
+          targetCompany: targetCompany.trim(),
+          leetcodeUsername: leetcodeUsername ? String(leetcodeUsername).trim() : null,
           verificationToken,
           emailVerified: false,
           tier: 'free',
@@ -64,6 +77,7 @@ export class AuthController {
           targetCompany: true,
           targetDate: true,
           dailyTarget: true,
+          leetcodeUsername: true,
           emailVerified: true,
           createdAt: true,
         },
@@ -104,6 +118,13 @@ export class AuthController {
         return;
       }
 
+      if (!user.passwordHash) {
+        res.status(400).json({
+          error: 'This account was registered using Google Sign-In. Please sign in with Google.',
+        });
+        return;
+      }
+
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
       if (!isPasswordValid) {
         res.status(401).json({ error: 'Invalid email or password.' });
@@ -125,6 +146,7 @@ export class AuthController {
           targetCompany: user.targetCompany,
           targetDate: user.targetDate,
           dailyTarget: user.dailyTarget,
+          leetcodeUsername: user.leetcodeUsername,
           emailVerified: user.emailVerified,
           createdAt: user.createdAt,
         },
@@ -134,6 +156,286 @@ export class AuthController {
     } catch (err) {
       next(err);
     }
+  }
+
+  /**
+   * Google OAuth: Verifies Google credential (ID token) or authorization code and upserts user in Neon DB
+   */
+  static async googleAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { credential, code } = req.body;
+
+      if (!credential && !code) {
+        res.status(400).json({ error: 'Google credential or authorization code is required.' });
+        return;
+      }
+
+      let googleUser: {
+        sub: string;
+        email: string;
+        name?: string;
+        picture?: string;
+        email_verified?: boolean;
+      } | null = null;
+
+      if (credential) {
+        // 1. Verify token directly via Google OAuth tokeninfo endpoint
+        const googleRes = await fetch(
+          `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`
+        );
+        if (!googleRes.ok) {
+          res.status(401).json({ error: 'Invalid or expired Google authentication token.' });
+          return;
+        }
+        const tokenInfo = (await googleRes.json()) as any;
+        if (!tokenInfo.email || !tokenInfo.sub) {
+          res.status(401).json({ error: 'Invalid Google token payload.' });
+          return;
+        }
+        googleUser = {
+          sub: tokenInfo.sub,
+          email: tokenInfo.email.toLowerCase().trim(),
+          name: tokenInfo.name || tokenInfo.email.split('@')[0],
+          picture: tokenInfo.picture,
+          email_verified: tokenInfo.email_verified === 'true' || tokenInfo.email_verified === true,
+        };
+      } else if (code) {
+        // OAuth authorization code flow
+        if (!ENV.GOOGLE_CLIENT_ID || !ENV.GOOGLE_CLIENT_SECRET) {
+          res.status(500).json({ error: 'Google OAuth server credentials not configured.' });
+          return;
+        }
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            code,
+            client_id: ENV.GOOGLE_CLIENT_ID,
+            client_secret: ENV.GOOGLE_CLIENT_SECRET,
+            redirect_uri: `${ENV.FRONTEND_URL}/auth/google/callback`,
+            grant_type: 'authorization_code',
+          }),
+        });
+        if (!tokenResponse.ok) {
+          res.status(401).json({ error: 'Failed to exchange Google authorization code.' });
+          return;
+        }
+        const tokens = (await tokenResponse.json()) as any;
+        const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokens.access_token}` },
+        });
+        if (!userRes.ok) {
+          res.status(401).json({ error: 'Failed to fetch user profile from Google.' });
+          return;
+        }
+        const profile = (await userRes.json()) as any;
+        googleUser = {
+          sub: profile.sub,
+          email: profile.email.toLowerCase().trim(),
+          name: profile.name || profile.email.split('@')[0],
+          picture: profile.picture,
+          email_verified: profile.email_verified,
+        };
+      }
+
+      if (!googleUser) {
+        res.status(400).json({ error: 'Failed to parse Google user data.' });
+        return;
+      }
+
+      // Check if user exists by googleId or email
+      let user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { googleId: googleUser.sub },
+            { email: googleUser.email },
+          ],
+        },
+      });
+
+      if (user) {
+        // Link googleId if needed & update avatar if not set
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            googleId: user.googleId || googleUser.sub,
+            emailVerified: true,
+            avatarUrl: user.avatarUrl || googleUser.picture || undefined,
+            name: user.name || googleUser.name || 'Developer',
+          },
+        });
+      } else {
+        // Create new user in Neon PostgreSQL
+        user = await prisma.user.create({
+          data: {
+            email: googleUser.email,
+            googleId: googleUser.sub,
+            name: googleUser.name || 'Developer',
+            avatarUrl: googleUser.picture || null,
+            tier: 'free',
+            targetCompany: 'google',
+            dailyTarget: 3,
+            emailVerified: true,
+          },
+        });
+      }
+
+      const accessToken = generateAccessToken(user.id);
+      const refreshToken = generateRefreshToken(user.id);
+      setRefreshTokenCookie(res, refreshToken);
+
+      res.json({
+        message: 'Signed in with Google successfully.',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          avatarUrl: user.avatarUrl,
+          tier: user.tier,
+          targetCompany: user.targetCompany,
+          targetDate: user.targetDate,
+          dailyTarget: user.dailyTarget,
+          leetcodeUsername: user.leetcodeUsername,
+          emailVerified: user.emailVerified,
+          createdAt: user.createdAt,
+        },
+        accessToken,
+        refreshToken,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * GitHub OAuth Architecture: Exchanging auth code for user and upserting in Neon DB
+   */
+  static async githubAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { code } = req.body;
+      if (!code) {
+        res.status(400).json({ error: 'GitHub authorization code is required.' });
+        return;
+      }
+
+      if (!ENV.GITHUB_CLIENT_ID || !ENV.GITHUB_CLIENT_SECRET) {
+        res.status(501).json({
+          error: 'GitHub OAuth is not configured on the server yet. Please add GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET to .env',
+        });
+        return;
+      }
+
+      const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          client_id: ENV.GITHUB_CLIENT_ID,
+          client_secret: ENV.GITHUB_CLIENT_SECRET,
+          code,
+        }),
+      });
+
+      const tokenData = (await tokenRes.json()) as any;
+      if (!tokenData.access_token) {
+        res.status(401).json({ error: 'Failed to retrieve GitHub access token.' });
+        return;
+      }
+
+      const userRes = await fetch('https://api.github.com/user', {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+          'User-Agent': 'LeetTracker-Auth',
+        },
+      });
+      const ghUser = (await userRes.json()) as any;
+
+      let email = ghUser.email;
+      if (!email) {
+        const emailRes = await fetch('https://api.github.com/user/emails', {
+          headers: {
+            Authorization: `Bearer ${tokenData.access_token}`,
+            'User-Agent': 'LeetTracker-Auth',
+          },
+        });
+        const emails = (await emailRes.json()) as any;
+        const primary = Array.isArray(emails) ? emails.find((e: any) => e.primary && e.verified) : null;
+        email = primary?.email || `${ghUser.id}+github@leettracker.io`;
+      }
+
+      const normalizedEmail = email.toLowerCase().trim();
+      const githubId = String(ghUser.id);
+
+      let user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { githubId },
+            { email: normalizedEmail },
+          ],
+        },
+      });
+
+      if (user) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            githubId: user.githubId || githubId,
+            emailVerified: true,
+            avatarUrl: user.avatarUrl || ghUser.avatar_url || undefined,
+          },
+        });
+      } else {
+        user = await prisma.user.create({
+          data: {
+            email: normalizedEmail,
+            githubId,
+            name: ghUser.name || ghUser.login || 'GitHub Developer',
+            avatarUrl: ghUser.avatar_url || null,
+            tier: 'free',
+            targetCompany: 'google',
+            dailyTarget: 3,
+            emailVerified: true,
+          },
+        });
+      }
+
+      const accessToken = generateAccessToken(user.id);
+      const refreshToken = generateRefreshToken(user.id);
+      setRefreshTokenCookie(res, refreshToken);
+
+      res.json({
+        message: 'Signed in with GitHub successfully.',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          avatarUrl: user.avatarUrl,
+          tier: user.tier,
+          targetCompany: user.targetCompany,
+          targetDate: user.targetDate,
+          dailyTarget: user.dailyTarget,
+          leetcodeUsername: user.leetcodeUsername,
+          emailVerified: user.emailVerified,
+          createdAt: user.createdAt,
+        },
+        accessToken,
+        refreshToken,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * Returns public OAuth configuration to frontend
+   */
+  static getOAuthConfig(_req: Request, res: Response): void {
+    res.json({
+      googleClientId: ENV.GOOGLE_CLIENT_ID || null,
+      githubConfigured: !!(ENV.GITHUB_CLIENT_ID && ENV.GITHUB_CLIENT_SECRET),
+    });
   }
 
   static async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -157,7 +459,9 @@ export class AuthController {
           targetCompany: true,
           targetDate: true,
           dailyTarget: true,
+          leetcodeUsername: true,
           emailVerified: true,
+          createdAt: true,
         },
       });
 
@@ -203,6 +507,7 @@ export class AuthController {
           targetCompany: true,
           targetDate: true,
           dailyTarget: true,
+          leetcodeUsername: true,
           emailVerified: true,
           createdAt: true,
         },
@@ -226,16 +531,19 @@ export class AuthController {
         return;
       }
 
-      const { name, targetCompany, targetDate, dailyTarget, avatarUrl } = req.body;
+      const { name, targetCompany, targetDate, dailyTarget, avatarUrl, leetcodeUsername } = req.body;
 
       const updated = await prisma.user.update({
         where: { id: req.user.id },
         data: {
           name: name ? name.trim() : undefined,
-          targetCompany: targetCompany || undefined,
+          targetCompany: targetCompany ? targetCompany.trim() : undefined,
           targetDate: targetDate !== undefined ? targetDate : undefined,
           dailyTarget: dailyTarget !== undefined ? Number(dailyTarget) : undefined,
           avatarUrl: avatarUrl !== undefined ? avatarUrl : undefined,
+          leetcodeUsername: leetcodeUsername !== undefined
+            ? (leetcodeUsername ? String(leetcodeUsername).trim() : null)
+            : undefined,
         },
         select: {
           id: true,
@@ -246,7 +554,9 @@ export class AuthController {
           targetCompany: true,
           targetDate: true,
           dailyTarget: true,
+          leetcodeUsername: true,
           emailVerified: true,
+          createdAt: true,
         },
       });
 
@@ -297,7 +607,6 @@ export class AuthController {
       }
 
       const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
-      // Always return 200 to prevent user enumeration
       if (!user) {
         res.json({ message: 'If an account exists with this email, a password reset link has been sent.' });
         return;
@@ -326,8 +635,8 @@ export class AuthController {
     try {
       const { token, newPassword } = req.body;
 
-      if (!token || !newPassword || newPassword.length < 6) {
-        res.status(400).json({ error: 'Token and a password of at least 6 characters are required.' });
+      if (!token || !newPassword || newPassword.length < 8) {
+        res.status(400).json({ error: 'Token and a password of at least 8 characters are required.' });
         return;
       }
 
