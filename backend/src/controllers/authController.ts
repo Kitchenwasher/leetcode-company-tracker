@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto';
 import { prisma } from '../config/db.js';
 import { ENV } from '../config/env.js';
 import { EmailService } from '../services/emailService.js';
+import { BMCService } from '../services/bmcService.js';
 
 const generateAccessToken = (userId: string): string => {
   return jwt.sign({ userId }, ENV.JWT_SECRET, { expiresIn: '15m' });
@@ -86,13 +87,22 @@ export class AuthController {
       // Send verification email in background
       EmailService.sendWelcomeVerification(user.email, user.name, verificationToken, user.id);
 
+      // Check if user already paid before signing up
+      const subInfo = await BMCService.syncUserSubscription(user.id);
+
       const accessToken = generateAccessToken(user.id);
       const refreshToken = generateRefreshToken(user.id);
       setRefreshTokenCookie(res, refreshToken);
 
       res.status(201).json({
         message: 'Account created successfully. A verification email has been dispatched.',
-        user,
+        user: {
+          ...user,
+          tier: subInfo.tier,
+          subscriptionStatus: subInfo.subscriptionStatus,
+          plan: subInfo.plan,
+          daysRemaining: subInfo.daysRemaining,
+        },
         accessToken,
         refreshToken,
       });
@@ -131,6 +141,9 @@ export class AuthController {
         return;
       }
 
+      // Sync subscription status on login
+      const subInfo = await BMCService.syncUserSubscription(user.id);
+
       const accessToken = generateAccessToken(user.id);
       const refreshToken = generateRefreshToken(user.id);
       setRefreshTokenCookie(res, refreshToken);
@@ -142,7 +155,10 @@ export class AuthController {
           email: user.email,
           name: user.name,
           avatarUrl: user.avatarUrl,
-          tier: user.tier,
+          tier: subInfo.tier,
+          subscriptionStatus: subInfo.subscriptionStatus,
+          plan: subInfo.plan,
+          daysRemaining: subInfo.daysRemaining,
           targetCompany: user.targetCompany,
           targetDate: user.targetDate,
           dailyTarget: user.dailyTarget,
@@ -280,6 +296,9 @@ export class AuthController {
         });
       }
 
+      // Sync subscription status on Google OAuth login
+      const subInfo = await BMCService.syncUserSubscription(user.id);
+
       const accessToken = generateAccessToken(user.id);
       const refreshToken = generateRefreshToken(user.id);
       setRefreshTokenCookie(res, refreshToken);
@@ -291,7 +310,10 @@ export class AuthController {
           email: user.email,
           name: user.name,
           avatarUrl: user.avatarUrl,
-          tier: user.tier,
+          tier: subInfo.tier,
+          subscriptionStatus: subInfo.subscriptionStatus,
+          plan: subInfo.plan,
+          daysRemaining: subInfo.daysRemaining,
           targetCompany: user.targetCompany,
           targetDate: user.targetDate,
           dailyTarget: user.dailyTarget,
@@ -401,6 +423,9 @@ export class AuthController {
         });
       }
 
+      // Sync subscription status on GitHub OAuth login
+      const subInfo = await BMCService.syncUserSubscription(user.id);
+
       const accessToken = generateAccessToken(user.id);
       const refreshToken = generateRefreshToken(user.id);
       setRefreshTokenCookie(res, refreshToken);
@@ -412,7 +437,10 @@ export class AuthController {
           email: user.email,
           name: user.name,
           avatarUrl: user.avatarUrl,
-          tier: user.tier,
+          tier: subInfo.tier,
+          subscriptionStatus: subInfo.subscriptionStatus,
+          plan: subInfo.plan,
+          daysRemaining: subInfo.daysRemaining,
           targetCompany: user.targetCompany,
           targetDate: user.targetDate,
           dailyTarget: user.dailyTarget,
@@ -496,6 +524,9 @@ export class AuthController {
         return;
       }
 
+      // Synchronize subscription against actual database payments (checks 30-day expiration, auto-links pending payments)
+      const subInfo = await BMCService.syncUserSubscription(req.user.id);
+
       const user = await prisma.user.findUnique({
         where: { id: req.user.id },
         select: {
@@ -504,6 +535,7 @@ export class AuthController {
           name: true,
           avatarUrl: true,
           tier: true,
+          subscriptionStatus: true,
           targetCompany: true,
           targetDate: true,
           dailyTarget: true,
@@ -518,7 +550,15 @@ export class AuthController {
         return;
       }
 
-      res.json({ user });
+      res.json({
+        user: {
+          ...user,
+          tier: subInfo.tier,
+          subscriptionStatus: subInfo.subscriptionStatus,
+          plan: subInfo.plan,
+          daysRemaining: subInfo.daysRemaining,
+        },
+      });
     } catch (err) {
       next(err);
     }

@@ -50,6 +50,10 @@ export const paymentApi = {
     tier: string;
     isPro: boolean;
     subscriptionStatus: string;
+    plan?: string;
+    planType?: 'monthly' | 'lifetime';
+    expiresAt?: string | null;
+    daysRemaining?: number | null;
     payments: any[];
     bmcCreatorPage?: string;
   }> => {
@@ -60,6 +64,10 @@ export const paymentApi = {
   verifyBMC: async (payerEmail?: string): Promise<{
     tier: string;
     isPro: boolean;
+    plan?: string;
+    planType?: 'monthly' | 'lifetime';
+    expiresAt?: string | null;
+    daysRemaining?: number | null;
     message: string;
   }> => {
     const res = await api.post('/payments/bmc-verify', { payerEmail });

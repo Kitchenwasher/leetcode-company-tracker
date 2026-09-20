@@ -104,7 +104,7 @@ export class PaymentController {
       }
 
       const { payerEmail } = req.body;
-      const result = await BMCService.verifyAndUpgradeUser(req.user.id, payerEmail || req.user.email);
+      const result = await BMCService.verifyAndUpgradeUser(req.user.id, payerEmail);
       res.json(result);
     } catch (err) {
       next(err);
@@ -118,25 +118,25 @@ export class PaymentController {
         return;
       }
 
-      const user = await prisma.user.findUnique({
-        where: { id: req.user.id },
-        select: {
-          tier: true,
-          subscriptionStatus: true,
-          stripeSubscriptionId: true,
-        },
-      });
+      const subInfo = await BMCService.syncUserSubscription(req.user.id);
 
       const payments = await prisma.payment.findMany({
-        where: { userId: req.user.id },
+        where: {
+          userId: req.user.id,
+          NOT: { stripeSessionId: { startsWith: 'bmc_claim_' } },
+        },
         orderBy: { createdAt: 'desc' },
         take: 10,
       });
 
       res.json({
-        tier: user?.tier || 'free',
-        isPro: user?.tier === 'pro' || user?.tier === 'enterprise',
-        subscriptionStatus: user?.subscriptionStatus || 'none',
+        tier: subInfo.tier,
+        isPro: subInfo.isPro,
+        subscriptionStatus: subInfo.subscriptionStatus || 'none',
+        plan: subInfo.plan,
+        planType: subInfo.planType,
+        expiresAt: subInfo.expiresAt,
+        daysRemaining: subInfo.daysRemaining,
         payments,
         bmcCreatorPage: ENV.BMC_CREATOR_PAGE,
       });

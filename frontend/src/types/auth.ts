@@ -6,6 +6,9 @@ export interface User {
   name: string;
   avatarUrl?: string;
   tier: UserTier;
+  subscriptionStatus?: string | null;
+  plan?: string | null;
+  daysRemaining?: number | null;
   leetcodeUsername?: string;
   targetCompany?: string;
   targetDate?: string;

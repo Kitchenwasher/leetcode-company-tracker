@@ -17,39 +17,48 @@ export const SubscriptionModal: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [customEmail, setCustomEmail] = useState('');
+  const [showEmailInput, setShowEmailInput] = useState(false);
 
   if (!showSubscriptionModal) return null;
 
   const handleBuyMeACoffeeCheckout = () => {
     sounds.playClick();
-    // Open Buy Me a Coffee in a new window with user email hint
     const url = BMC_PAGE_URL;
     window.open(url, '_blank', 'noopener,noreferrer');
-    setSuccessMsg(`Buy Me a Coffee opened in a new tab. Complete your ${selectedPlan === 'lifetime' ? 'Lifetime Pass' : '1-Month'} payment using "${user?.email || 'your account email'}", then click "Verify & Activate Pro" below.`);
+    setSuccessMsg(`Buy Me a Coffee opened in a new tab. Complete your ${selectedPlan === 'lifetime' ? 'Lifetime Pass' : '1-Month'} payment using "${customEmail || user?.email || 'your account email'}", then click "Verify & Activate Pro" below.`);
   };
 
   const handleVerifyPayment = async () => {
     setIsVerifying(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
     sounds.playClick();
 
     try {
-      const res = await paymentApi.verifyBMC(user?.email);
+      const emailToVerify = customEmail.trim() || user?.email;
+      const res = await paymentApi.verifyBMC(emailToVerify);
+      
       if (res?.isPro) {
-        await updateProfile({ tier: 'pro' });
+        await updateProfile({
+          tier: 'pro',
+          subscriptionStatus: res.planType === 'lifetime' ? 'lifetime' : 'active',
+          plan: res.plan,
+          daysRemaining: res.daysRemaining,
+        });
         sounds.playMastered();
         confetti({
-          particleCount: 150,
+          particleCount: 160,
           spread: 80,
           origin: { y: 0.6 },
           colors: ['#FFDD00', '#E5FF00', '#FFFFFF', '#D4ED00']
         });
-        setSuccessMsg('🎉 Pro access successfully verified and activated!');
+        setSuccessMsg(res.message || '🎉 Pro access successfully verified and activated!');
         setTimeout(() => {
           setShowSubscriptionModal(false);
-        }, 1800);
+        }, 2200);
       } else {
-        throw new Error(res.message || 'Payment not found yet. If you just paid, please wait 30 seconds.');
+        setErrorMsg(res.message || 'No confirmed payment found yet. If you just paid, please wait 30-60 seconds for the webhook to reach our server.');
       }
     } catch (err: unknown) {
       console.error('BMC verification error:', err);
@@ -296,7 +305,7 @@ export const SubscriptionModal: React.FC = () => {
               <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
 
-            <div className="flex items-center gap-2 justify-center">
+            <div className="flex flex-col items-center gap-2 justify-center">
               <button
                 type="button"
                 onClick={handleVerifyPayment}
@@ -312,6 +321,34 @@ export const SubscriptionModal: React.FC = () => {
                   <span>Already paid? Click here to Verify & Activate Pro</span>
                 )}
               </button>
+
+              {!showEmailInput ? (
+                <button
+                  type="button"
+                  onClick={() => setShowEmailInput(true)}
+                  className="text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+                >
+                  Paid with a different email on Buy Me a Coffee?
+                </button>
+              ) : (
+                <div className="w-full max-w-sm flex items-center gap-2 mt-1 animate-fade-in">
+                  <input
+                    type="email"
+                    placeholder="Enter email used on Buy Me a Coffee"
+                    value={customEmail}
+                    onChange={(e) => setCustomEmail(e.target.value)}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-black/50 border border-white/20 text-white text-xs placeholder:text-zinc-500 focus:outline-none focus:border-amber-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleVerifyPayment}
+                    disabled={isVerifying}
+                    className="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    Verify
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

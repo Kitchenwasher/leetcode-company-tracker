@@ -116,7 +116,8 @@ model ActivityLog {
 
 model Payment {
   id              String   @id @default(uuid())
-  userId          String
+  userId          String?
+  payerEmail      String?
   stripeSessionId String?  @unique
   amount          Int      // Amount in cents (900 = $9.00)
   currency        String   @default("usd")
@@ -124,7 +125,7 @@ model Payment {
   plan            String   // "pro_monthly", "pro_yearly", "pro_lifetime"
   createdAt       DateTime @default(now())
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EmailLog {
