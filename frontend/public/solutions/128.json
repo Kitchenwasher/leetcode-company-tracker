@@ -1,0 +1,125 @@
+{
+  "questionId": 128,
+  "title": "Longest Consecutive Sequence",
+  "difficulty": "Medium",
+  "corePattern": "Hash Set Sequence Start Detection",
+  "interviewTips": [
+    "Ask if array can contain duplicates, negatives, and unsorted values, and whether O(n) time is required or O(n log n) sorting is acceptable.",
+    "Trade-off: sorting is simplest with O(1) extra space but O(n log n) time; hash set gives O(n) time with O(n) space and is expected optimal; union-find is O(n) but has higher constants and more code.",
+    "Edge-case tip: empty array returns 0, duplicates must be skipped not counted as breaks, and only start counting when n-1 is absent to avoid O(n^2) re-scanning."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Sorting",
+      "tag": "Brute Force",
+      "intuition": "If we sort the numbers, all consecutive values become adjacent. Then a single linear scan can count runs of x, x+1, x+2 while skipping duplicates. This turns the problem into finding the longest run in a sorted array.",
+      "theory": "Sorting imposes total order. After sorting, any consecutive sequence appears as a contiguous block with differences of 0 (duplicate) or 1 (next in sequence). A larger gap ends the current sequence. Maintaining current length and global maximum yields the answer. Correctness follows because sorting preserves set membership and adjacency characterizes consecutiveness.",
+      "cppCode": "class Solution {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        sort(nums.begin(), nums.end());\n        int longest = 1;\n        int cur = 1;\n        for (int i = 1; i < (int)nums.size(); ++i) {\n            if (nums[i] == nums[i-1]) continue;\n            else if (nums[i] == nums[i-1] + 1) {\n                ++cur;\n                longest = max(longest, cur);\n            } else {\n                cur = 1;\n            }\n        }\n        return longest;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        sort(nums.begin(), nums.end());\n        int longest = 1;\n        int cur = 1;\n        for (int i = 1; i < (int)nums.size(); ++i) {\n            if (nums[i] == nums[i-1]) continue;\n            else if (nums[i] == nums[i-1] + 1) {\n                ++cur;\n                longest = max(longest, cur);\n            } else {\n                cur = 1;\n            }\n        }\n        return longest;\n    }\n};",
+        "python": "class Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        if not nums:\n            return 0\n        nums.sort()\n        longest = 1\n        cur = 1\n        for i in range(1, len(nums)):\n            if nums[i] == nums[i-1]:\n                continue\n            elif nums[i] == nums[i-1] + 1:\n                cur += 1\n                longest = max(longest, cur)\n            else:\n                cur = 1\n        return longest",
+        "java": "class Solution {\n    public int longestConsecutive(int[] nums) {\n        if (nums.length == 0) return 0;\n        Arrays.sort(nums);\n        int longest = 1;\n        int cur = 1;\n        for (int i = 1; i < nums.length; i++) {\n            if (nums[i] == nums[i-1]) continue;\n            else if (nums[i] == nums[i-1] + 1) {\n                cur++;\n                longest = Math.max(longest, cur);\n            } else {\n                cur = 1;\n            }\n        }\n        return longest;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "Sorting dominates at O(n log n), linear scan is O(n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only constant extra variables besides in-place sort stack, ignoring sort implementation overhead."
+      },
+      "dryRunExample": {
+        "input": "[100,4,200,1,3,2]",
+        "steps": [
+          "Sort to [1,2,3,4,100,200]",
+          "Scan: 1->2->3->4 gives cur=4, longest=4",
+          "Gap 4 to 100 resets cur=1, gap 100 to 200 resets cur=1",
+          "Return longest=4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "Empty array returns 0",
+        "All duplicates like [1,1,1] returns 1",
+        "Single element returns 1",
+        "Negatives and mixed values handled by same logic"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Hash Set with Sequence Start Detection",
+      "tag": "Optimal",
+      "intuition": "A sequence only needs to be counted once from its smallest element. Put all numbers in a hash set for O(1) lookup, then for each n that has no predecessor n-1, expand forward n+1, n+2 until break. This visits each number at most twice.",
+      "theory": "Let S be the set of distinct values. Every maximal consecutive block has a unique start s where s-1 not in S. Expanding only from starts partitions work across blocks with no overlap. Each element is checked once as potential start and once inside a forward walk, giving linear time. Hash set gives expected O(1) membership.",
+      "cppCode": "class Solution {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        unordered_set<int> s(nums.begin(), nums.end());\n        int longest = 0;\n        for (int n : s) {\n            if (s.find(n - 1) == s.end()) {\n                int cur = n;\n                int len = 1;\n                while (s.find(cur + 1) != s.end()) {\n                    ++cur;\n                    ++len;\n                }\n                longest = max(longest, len);\n            }\n        }\n        return longest;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        unordered_set<int> s(nums.begin(), nums.end());\n        int longest = 0;\n        for (int n : s) {\n            if (s.find(n - 1) == s.end()) {\n                int cur = n;\n                int len = 1;\n                while (s.find(cur + 1) != s.end()) {\n                    ++cur;\n                    ++len;\n                }\n                longest = max(longest, len);\n            }\n        }\n        return longest;\n    }\n};",
+        "python": "class Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        num_set = set(nums)\n        longest = 0\n        for n in num_set:\n            if n - 1 not in num_set:\n                cur = n\n                length = 1\n                while cur + 1 in num_set:\n                    cur += 1\n                    length += 1\n                longest = max(longest, length)\n        return longest",
+        "java": "class Solution {\n    public int longestConsecutive(int[] nums) {\n        Set<Integer> set = new HashSet<>();\n        for (int n : nums) set.add(n);\n        int longest = 0;\n        for (int n : set) {\n            if (!set.contains(n - 1)) {\n                int cur = n;\n                int len = 1;\n                while (set.contains(cur + 1)) {\n                    cur++;\n                    len++;\n                }\n                longest = Math.max(longest, len);\n            }\n        }\n        return longest;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Building set is O(n), each distinct number is visited at most twice - once as loop element and once in forward expansion - so expected O(n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Hash set stores up to n distinct numbers."
+      },
+      "dryRunExample": {
+        "input": "[100,4,200,1,3,2]",
+        "steps": [
+          "Set = {100,4,200,1,3,2}",
+          "100 has no 99, expand to 100 only, len=1",
+          "4 has predecessor 3, skip; 200 has no 199, len=1",
+          "1 has no 0, expand 1->2->3->4, len=4, longest=4",
+          "Others skipped as non-starts"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "Empty array returns 0",
+        "Duplicates removed by set, e.g., [1,2,2,3] returns 3",
+        "Large gaps do not cause extra work due to start check",
+        "Single element returns 1"
+      ]
+    },
+    {
+      "id": "union-find",
+      "name": "Approach 3: Union-Find (Disjoint Set Union)",
+      "tag": "Union-Find",
+      "intuition": "Treat each distinct number as a node and union it with its neighbor n+1 if present. Each connected component then corresponds exactly to a consecutive sequence, and component size is its length. The answer is the largest component size.",
+      "theory": "Union-Find maintains partitions under union operations with path compression and union by size. Initially each value is its own set. For each n, union(n, n+1) when both exist merges adjacent values. By transitivity, all values in interval [a,b] with no gaps end in one set of size b-a+1. Taking max size gives longest consecutive length. Complexity is near-linear due to inverse Ackermann function.",
+      "cppCode": "class Solution {\npublic:\n    unordered_map<int,int> parent;\n    unordered_map<int,int> sz;\n    int find(int x) {\n        int root = x;\n        while (parent[root] != root) root = parent[root];\n        while (parent[x] != x) {\n            int nxt = parent[x];\n            parent[x] = root;\n            x = nxt;\n        }\n        return root;\n    }\n    void unite(int a, int b) {\n        int ra = find(a), rb = find(b);\n        if (ra == rb) return;\n        if (sz[ra] < sz[rb]) swap(ra, rb);\n        parent[rb] = ra;\n        sz[ra] += sz[rb];\n    }\n    int longestConsecutive(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        parent.clear(); sz.clear();\n        for (int n : nums) {\n            if (parent.find(n) == parent.end()) {\n                parent[n] = n;\n                sz[n] = 1;\n            }\n        }\n        for (auto &p : parent) {\n            int n = p.first;\n            if (parent.find(n + 1) != parent.end()) unite(n, n + 1);\n        }\n        int ans = 0;\n        for (auto &p : sz) ans = max(ans, p.second);\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    unordered_map<int,int> parent;\n    unordered_map<int,int> sz;\n    int find(int x) {\n        int root = x;\n        while (parent[root] != root) root = parent[root];\n        while (parent[x] != x) {\n            int nxt = parent[x];\n            parent[x] = root;\n            x = nxt;\n        }\n        return root;\n    }\n    void unite(int a, int b) {\n        int ra = find(a), rb = find(b);\n        if (ra == rb) return;\n        if (sz[ra] < sz[rb]) swap(ra, rb);\n        parent[rb] = ra;\n        sz[ra] += sz[rb];\n    }\n    int longestConsecutive(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        parent.clear(); sz.clear();\n        for (int n : nums) {\n            if (parent.find(n) == parent.end()) {\n                parent[n] = n;\n                sz[n] = 1;\n            }\n        }\n        for (auto &p : parent) {\n            int n = p.first;\n            if (parent.find(n + 1) != parent.end()) unite(n, n + 1);\n        }\n        int ans = 0;\n        for (auto &p : sz) ans = max(ans, p.second);\n        return ans;\n    }\n};",
+        "python": "class Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        if not nums:\n            return 0\n        parent = {}\n        size = {}\n        for n in set(nums):\n            parent[n] = n\n            size[n] = 1\n        def find(x):\n            while parent[x] != x:\n                parent[x] = parent[parent[x]]\n                x = parent[x]\n            return x\n        def union(a, b):\n            ra, rb = find(a), find(b)\n            if ra == rb:\n                return\n            if size[ra] < size[rb]:\n                ra, rb = rb, ra\n            parent[rb] = ra\n            size[ra] += size[rb]\n        for n in list(parent.keys()):\n            if n + 1 in parent:\n                union(n, n + 1)\n        return max(size.values())",
+        "java": "class Solution {\n    Map<Integer,Integer> parent = new HashMap<>();\n    Map<Integer,Integer> size = new HashMap<>();\n    int find(int x) {\n        int root = x;\n        while (parent.get(root) != root) root = parent.get(root);\n        while (parent.get(x) != x) {\n            int nxt = parent.get(x);\n            parent.put(x, root);\n            x = nxt;\n        }\n        return root;\n    }\n    void union(int a, int b) {\n        int ra = find(a), rb = find(b);\n        if (ra == rb) return;\n        if (size.get(ra) < size.get(rb)) { int t = ra; ra = rb; rb = t; }\n        parent.put(rb, ra);\n        size.put(ra, size.get(ra) + size.get(rb));\n    }\n    public int longestConsecutive(int[] nums) {\n        if (nums.length == 0) return 0;\n        parent.clear(); size.clear();\n        for (int n : nums) {\n            if (!parent.containsKey(n)) {\n                parent.put(n, n);\n                size.put(n, 1);\n            }\n        }\n        for (int n : new HashSet<>(parent.keySet())) {\n            if (parent.containsKey(n + 1)) union(n, n + 1);\n        }\n        int ans = 0;\n        for (int v : size.values()) ans = Math.max(ans, v);\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * alpha(n))",
+        "explanation": "Each insert, find and union is almost O(1) amortized where alpha is inverse Ackermann, so effectively O(n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Parent and size maps store one entry per distinct number."
+      },
+      "dryRunExample": {
+        "input": "[100,4,200,1,3,2]",
+        "steps": [
+          "Make sets for 1,2,3,4,100,200 each size 1",
+          "Union 1-2, 2-3, 3-4 merges into set {1,2,3,4} size 4",
+          "100 and 200 have no n+1 neighbor, stay size 1",
+          "Max size = 4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "Empty array returns 0",
+        "Duplicates must be deduplicated before init to avoid double counting",
+        "Non-consecutive isolated numbers stay size 1",
+        "Long chain with negatives works the same"
+      ]
+    }
+  ]
+}

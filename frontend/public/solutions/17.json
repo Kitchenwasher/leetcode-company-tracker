@@ -1,0 +1,87 @@
+{
+  "questionId": 17,
+  "title": "Letter Combinations of a Phone Number",
+  "difficulty": "Medium",
+  "corePattern": "Backtracking / DFS Enumeration of Cartesian Product",
+  "interviewTips": [
+    "Ask to confirm constraints: digits length 0-4, only digits 2-9 (no 0/1), and whether order of output matters - any order is accepted.",
+    "Trade-off: iterative BFS expansion vs recursive DFS backtracking have same O(4^n * n) time, but DFS uses O(n) recursion stack and mutable path (more memory efficient), while iterative avoids recursion depth concerns and is easier to write iteratively.",
+    "Edge-case tip: explicitly handle empty input returning [] not [\"\"]; remember digits 7 and 9 map to 4 letters, others to 3, so worst case is 4^n combinations."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Iterative Expansion",
+      "tag": "Brute Force",
+      "intuition": "Start with one empty prefix and expand it digit by digit. For each new digit, take every existing partial combination and append each possible letter for that digit, forming a new list. This directly builds the Cartesian product level by level like BFS.",
+      "theory": "This is breadth-first construction of the answer space. Let res hold all combinations for prefix digits[0:i]. Initially res=[\"\"]. For digit d=digits[i] with letters L(d), new_res = {p+c | p in res, c in L(d)}. After processing all n digits, res contains all n-length combinations. Correctness follows by induction on i. No recursion is needed.",
+      "cppCode": "class Solution {\npublic:\n    vector<string> letterCombinations(string digits) {\n        if (digits.empty()) return {};\n        vector<string> mapping = {\"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"};\n        vector<string> res = {\"\"};\n        for (char d : digits) {\n            vector<string> nxt;\n            string letters = mapping[d - '0'];\n            for (string &prefix : res) {\n                for (char c : letters) {\n                    nxt.push_back(prefix + c);\n                }\n            }\n            res = move(nxt);\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<string> letterCombinations(string digits) {\n        if (digits.empty()) return {};\n        vector<string> mapping = {\"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"};\n        vector<string> res = {\"\"};\n        for (char d : digits) {\n            vector<string> nxt;\n            string letters = mapping[d - '0'];\n            for (string &prefix : res) {\n                for (char c : letters) {\n                    nxt.push_back(prefix + c);\n                }\n            }\n            res = move(nxt);\n        }\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def letterCombinations(self, digits: str) -> List[str]:\n        if not digits:\n            return []\n        mapping = {\"2\": \"abc\", \"3\": \"def\", \"4\": \"ghi\", \"5\": \"jkl\", \"6\": \"mno\", \"7\": \"pqrs\", \"8\": \"tuv\", \"9\": \"wxyz\"}\n        res = [\"\"]\n        for d in digits:\n            nxt = []\n            for prefix in res:\n                for c in mapping[d]:\n                    nxt.append(prefix + c)\n            res = nxt\n        return res",
+        "java": "class Solution {\n    public List<String> letterCombinations(String digits) {\n        List<String> res = new ArrayList<>();\n        if (digits == null || digits.length() == 0) return res;\n        String[] mapping = {\"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"};\n        res.add(\"\");\n        for (char d : digits.toCharArray()) {\n            List<String> nxt = new ArrayList<>();\n            String letters = mapping[d - '0'];\n            for (String prefix : res) {\n                for (char c : letters.toCharArray()) {\n                    nxt.add(prefix + c);\n                }\n            }\n            res = nxt;\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * 4^n)",
+        "explanation": "Let n=len(digits). At most 4^n combinations (3^n if no 7/9). Each combination of length n costs O(n) to copy when building strings. Total work is sum over levels, dominated by final level O(n * 4^n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n * 4^n)",
+        "explanation": "Output holds 4^n strings of length n. Auxiliary space is O(n * 4^n) for intermediate lists (can be 2x output at last iteration) plus O(1) extra besides output. No recursion stack."
+      },
+      "dryRunExample": {
+        "input": "digits = \"23\"",
+        "steps": [
+          "mapping: 2->abc, 3->def, res=[\"\"]",
+          "process '2': res=[\"a\",\"b\",\"c\"]",
+          "process '3': expand \"a\"->[\"ad\",\"ae\",\"af\"], \"b\"->[\"bd\",\"be\",\"bf\"], \"c\"->[\"cd\",\"ce\",\"cf\"]",
+          "final res has 3*3=9 combinations"
+        ],
+        "output": "[\"ad\",\"ae\",\"af\",\"bd\",\"be\",\"bf\",\"cd\",\"ce\",\"cf\"]"
+      },
+      "edgeCases": [
+        "Empty string \"\" -> return [] (not [\"\"])",
+        "Single digit \"2\" -> [\"a\",\"b\",\"c\"]",
+        "Digits with 4 letters: \"7\" -> [\"p\",\"q\",\"r\",\"s\"], \"79\" -> 4*4=16 combos",
+        "Max length n=4 with all 7/9 -> 256 combos, string copying cost visible"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Backtracking DFS",
+      "tag": "Optimal",
+      "intuition": "Think of building answers character by character as a decision tree: at position i you must pick one of 3-4 letters for digits[i]. Do depth-first search, maintain a mutable path, recurse to i+1, then undo (backtrack) to try next letter. When path length equals n, you found one complete combination.",
+      "theory": "Backtracking enumerates all root-to-leaf paths in an n-ary decision tree where depth=n and branching factor=|L(digits[i])|. Invariant: path[0:i] is a valid prefix for digits[0:i]. Base case i==n emits a copy of path. Recursive step tries all c in L(digits[i]). Each leaf is visited exactly once, so all and only valid combinations are generated. Using a mutable buffer with push/pop avoids O(n^2) string copying per level.",
+      "cppCode": "class Solution {\npublic:\n    vector<string> letterCombinations(string digits) {\n        if (digits.empty()) return {};\n        vector<string> mapping = {\"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"};\n        vector<string> res;\n        string path;\n        function<void(int)> backtrack = [&](int i) {\n            if (i == (int)digits.size()) {\n                res.push_back(path);\n                return;\n            }\n            string &letters = mapping[digits[i] - '0'];\n            for (char c : letters) {\n                path.push_back(c);\n                backtrack(i + 1);\n                path.pop_back();\n            }\n        };\n        backtrack(0);\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<string> letterCombinations(string digits) {\n        if (digits.empty()) return {};\n        vector<string> mapping = {\"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"};\n        vector<string> res;\n        string path;\n        function<void(int)> backtrack = [&](int i) {\n            if (i == (int)digits.size()) {\n                res.push_back(path);\n                return;\n            }\n            string &letters = mapping[digits[i] - '0'];\n            for (char c : letters) {\n                path.push_back(c);\n                backtrack(i + 1);\n                path.pop_back();\n            }\n        };\n        backtrack(0);\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def letterCombinations(self, digits: str) -> List[str]:\n        if not digits:\n            return []\n        mapping = {\"2\": \"abc\", \"3\": \"def\", \"4\": \"ghi\", \"5\": \"jkl\", \"6\": \"mno\", \"7\": \"pqrs\", \"8\": \"tuv\", \"9\": \"wxyz\"}\n        res = []\n        path = []\n        def backtrack(i: int):\n            if i == len(digits):\n                res.append(\"\".join(path))\n                return\n            for c in mapping[digits[i]]:\n                path.append(c)\n                backtrack(i + 1)\n                path.pop()\n        backtrack(0)\n        return res",
+        "java": "class Solution {\n    private String[] mapping = {\"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"};\n    private List<String> res = new ArrayList<>();\n    private StringBuilder path = new StringBuilder();\n    public List<String> letterCombinations(String digits) {\n        if (digits == null || digits.length() == 0) return res;\n        backtrack(digits, 0);\n        return res;\n    }\n    private void backtrack(String digits, int i) {\n        if (i == digits.length()) {\n            res.add(path.toString());\n            return;\n        }\n        String letters = mapping[digits.charAt(i) - '0'];\n        for (char c : letters.toCharArray()) {\n            path.append(c);\n            backtrack(digits, i + 1);\n            path.deleteCharAt(path.length() - 1);\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * 4^n)",
+        "explanation": "Same enumeration bound: up to 4^n leaves, each leaf requires O(n) to copy path to output. Internal nodes total is O(4^n) as geometric series. Cannot do better as output size itself is that large."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n + n * 4^n)",
+        "explanation": "Output space O(n * 4^n). Auxiliary space is O(n) for recursion stack depth plus mutable path buffer of length n. This is optimal extra space vs iterative which holds two levels."
+      },
+      "dryRunExample": {
+        "input": "digits = \"23\"",
+        "steps": [
+          "backtrack(0) path=[]: try 'a' -> path=[a]",
+          "backtrack(1) path=[a]: try 'd' -> path=[a,d] -> leaf \"ad\", backtrack; try 'e' -> \"ae\"; try 'f' -> \"af\"",
+          "pop to []: try 'b' -> path=[b] -> yields \"bd\",\"be\",\"bf\"",
+          "try 'c' -> path=[c] -> yields \"cd\",\"ce\",\"cf\""
+        ],
+        "output": "[\"ad\",\"ae\",\"af\",\"bd\",\"be\",\"bf\",\"cd\",\"ce\",\"cf\"]"
+      },
+      "edgeCases": [
+        "Empty digits -> [] early return, avoids emitting empty combination",
+        "n=1: recursion depth 1, directly returns letters",
+        "All digits 7/9: branching 4, test stack depth n<=4 safe",
+        "Reuse of Solution object in Java: use instance fields carefully or make them local to avoid leftover state across calls"
+      ]
+    }
+  ]
+}

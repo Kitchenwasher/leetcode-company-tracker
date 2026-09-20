@@ -100,8 +100,8 @@ async function main() {
       console.error(`  ✗ Failed #${q.id}:`, err.message);
       progress.failed.push({ id: q.id, error: err.message, time: new Date().toISOString() });
       fs.writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2));
-      // Wait 3s before next
-      await new Promise(r => setTimeout(r, 3000));
+      console.log(`  Waiting 10s before next problem...`);
+      await new Promise(r => setTimeout(r, 10000));
     }
   }
 

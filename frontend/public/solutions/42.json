@@ -1,0 +1,153 @@
+{
+  "questionId": 42,
+  "title": "Trapping Rain Water",
+  "difficulty": "Hard",
+  "corePattern": "Bounded Height by Min of LeftMax and RightMax",
+  "interviewTips": [
+    "Ask if height values can be negative or very large and whether empty array should return 0",
+    "Trade-off: DP with prefix-suffix is simplest O(n) time O(n) space, Two Pointers achieves O(1) space, Stack processes horizontal layers instead of vertical columns",
+    "Edge-case tip: test monotonic increasing, monotonic decreasing, single bar, two bars, and valley shapes like [2,0,2] and [4,2,0,3,2,5]"
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "Water trapped on top of each position depends only on the tallest bar to its left and tallest bar to its right. If we know both maxima, water is min of them minus current height. Brute force finds those maxima by scanning left and right for every index.",
+      "theory": "For index i, let L(i) = max height[0..i] and R(i) = max height[i..n-1]. Trapped water at i is max(0, min(L(i),R(i)) - height[i]). Summing over all i gives total. Brute force computes L(i) and R(i) with O(n) scan per i, leading to O(n^2) total. Correctness follows because water cannot exceed either side barrier and will fill up to the lower of the two.",
+      "cppCode": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        int n = height.size();\n        int ans = 0;\n        for (int i = 0; i < n; ++i) {\n            int left_max = 0, right_max = 0;\n            for (int j = 0; j <= i; ++j) left_max = max(left_max, height[j]);\n            for (int j = i; j < n; ++j) right_max = max(right_max, height[j]);\n            ans += min(left_max, right_max) - height[i];\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        int n = height.size();\n        int ans = 0;\n        for (int i = 0; i < n; ++i) {\n            int left_max = 0, right_max = 0;\n            for (int j = 0; j <= i; ++j) left_max = max(left_max, height[j]);\n            for (int j = i; j < n; ++j) right_max = max(right_max, height[j]);\n            ans += min(left_max, right_max) - height[i];\n        }\n        return ans;\n    }\n};",
+        "python": "class Solution:\n    def trap(self, height: List[int]) -> int:\n        n = len(height)\n        ans = 0\n        for i in range(n):\n            left_max = 0\n            for j in range(i + 1):\n                left_max = max(left_max, height[j])\n            right_max = 0\n            for j in range(i, n):\n                right_max = max(right_max, height[j])\n            ans += min(left_max, right_max) - height[i]\n        return ans",
+        "java": "class Solution {\n    public int trap(int[] height) {\n        int n = height.length;\n        int ans = 0;\n        for (int i = 0; i < n; i++) {\n            int leftMax = 0, rightMax = 0;\n            for (int j = 0; j <= i; j++) leftMax = Math.max(leftMax, height[j]);\n            for (int j = i; j < n; j++) rightMax = Math.max(rightMax, height[j]);\n            ans += Math.min(leftMax, rightMax) - height[i];\n        }\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "For each of n positions we scan up to n elements to find left and right maxima."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a few variables for maxima and answer, no extra arrays."
+      },
+      "dryRunExample": {
+        "input": "height = [0,1,0,2,1,0,1,3,2,1,2,1]",
+        "steps": [
+          "i=2 height=0: left_max=1 right_max=3 water=1-0=1",
+          "i=4 height=1: left_max=2 right_max=3 water=2-1=1",
+          "i=5 height=0: left_max=2 right_max=3 water=2-0=2",
+          "Sum over all i gives 6"
+        ],
+        "output": "6"
+      },
+      "edgeCases": [
+        "Empty array returns 0",
+        "Single element or two elements trap 0",
+        "Strictly increasing or decreasing traps 0"
+      ]
+    },
+    {
+      "id": "dp-prefix-suffix",
+      "name": "Approach 2: Dynamic Programming with Prefix and Suffix Max",
+      "tag": "Dynamic Programming",
+      "intuition": "Brute force repeatedly recomputes the same left and right maxima. Precompute them once from left to right and right to left, then each position can be answered in O(1).",
+      "theory": "Define leftMax[i] = max(height[0..i]) computed as max(leftMax[i-1], height[i]). Define rightMax[i] = max(height[i..n-1]) computed as max(rightMax[i+1], height[i]). Then water[i] = min(leftMax[i], rightMax[i]) - height[i] which is always >=0. Sum gives answer. This is DP precomputation that removes repeated scans.",
+      "cppCode": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        int n = height.size();\n        if (n == 0) return 0;\n        vector<int> leftMax(n), rightMax(n);\n        leftMax[0] = height[0];\n        for (int i = 1; i < n; ++i) leftMax[i] = max(leftMax[i-1], height[i]);\n        rightMax[n-1] = height[n-1];\n        for (int i = n-2; i >= 0; --i) rightMax[i] = max(rightMax[i+1], height[i]);\n        int ans = 0;\n        for (int i = 0; i < n; ++i) ans += min(leftMax[i], rightMax[i]) - height[i];\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        int n = height.size();\n        if (n == 0) return 0;\n        vector<int> leftMax(n), rightMax(n);\n        leftMax[0] = height[0];\n        for (int i = 1; i < n; ++i) leftMax[i] = max(leftMax[i-1], height[i]);\n        rightMax[n-1] = height[n-1];\n        for (int i = n-2; i >= 0; --i) rightMax[i] = max(rightMax[i+1], height[i]);\n        int ans = 0;\n        for (int i = 0; i < n; ++i) ans += min(leftMax[i], rightMax[i]) - height[i];\n        return ans;\n    }\n};",
+        "python": "class Solution:\n    def trap(self, height: List[int]) -> int:\n        n = len(height)\n        if n == 0:\n            return 0\n        left_max = [0] * n\n        right_max = [0] * n\n        left_max[0] = height[0]\n        for i in range(1, n):\n            left_max[i] = max(left_max[i-1], height[i])\n        right_max[n-1] = height[n-1]\n        for i in range(n-2, -1, -1):\n            right_max[i] = max(right_max[i+1], height[i])\n        ans = 0\n        for i in range(n):\n            ans += min(left_max[i], right_max[i]) - height[i]\n        return ans",
+        "java": "class Solution {\n    public int trap(int[] height) {\n        int n = height.length;\n        if (n == 0) return 0;\n        int[] leftMax = new int[n];\n        int[] rightMax = new int[n];\n        leftMax[0] = height[0];\n        for (int i = 1; i < n; i++) leftMax[i] = Math.max(leftMax[i-1], height[i]);\n        rightMax[n-1] = height[n-1];\n        for (int i = n-2; i >= 0; i--) rightMax[i] = Math.max(rightMax[i+1], height[i]);\n        int ans = 0;\n        for (int i = 0; i < n; i++) ans += Math.min(leftMax[i], rightMax[i]) - height[i];\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Three linear passes: build leftMax, build rightMax, sum water."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Two extra arrays of size n for left and right maxima."
+      },
+      "dryRunExample": {
+        "input": "height = [4,2,0,3,2,5]",
+        "steps": [
+          "left_max = [4,4,4,4,4,5]",
+          "right_max = [5,5,5,5,5,5]",
+          "water = [0,2,4,1,2,0] sum = 9"
+        ],
+        "output": "9"
+      },
+      "edgeCases": [
+        "n < 3 cannot trap water but code still returns 0 correctly",
+        "All equal heights gives zero water",
+        "Large heights still fit in 32-bit int for constraints but use long if needed"
+      ]
+    },
+    {
+      "id": "two-pointers",
+      "name": "Approach 3: Two Pointers with O(1) Space",
+      "tag": "Optimal",
+      "intuition": "We only need min(leftMax, rightMax) at each step. If leftMax is smaller than rightMax, the water at left pointer is decided by leftMax regardless of exact rightMax beyond the right pointer. So we can move the smaller side inward.",
+      "theory": "Maintain left and right pointers with leftMax and rightMax seen so far. Invariant: leftMax = max of height[0..left], rightMax = max of height[right..n-1]. If height[left] < height[right], then min(leftMax,rightMax) for left position is leftMax because rightMax >= height[right] > height[left] and leftMax will be the limiting side, so water[left] = leftMax - height[left] if positive. Symmetrically for the right side. This avoids storing full arrays and is provably equivalent to DP.",
+      "cppCode": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        int n = height.size();\n        int left = 0, right = n - 1;\n        int leftMax = 0, rightMax = 0;\n        int ans = 0;\n        while (left < right) {\n            if (height[left] < height[right]) {\n                if (height[left] >= leftMax) leftMax = height[left];\n                else ans += leftMax - height[left];\n                ++left;\n            } else {\n                if (height[right] >= rightMax) rightMax = height[right];\n                else ans += rightMax - height[right];\n                --right;\n            }\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        int n = height.size();\n        int left = 0, right = n - 1;\n        int leftMax = 0, rightMax = 0;\n        int ans = 0;\n        while (left < right) {\n            if (height[left] < height[right]) {\n                if (height[left] >= leftMax) leftMax = height[left];\n                else ans += leftMax - height[left];\n                ++left;\n            } else {\n                if (height[right] >= rightMax) rightMax = height[right];\n                else ans += rightMax - height[right];\n                --right;\n            }\n        }\n        return ans;\n    }\n};",
+        "python": "class Solution:\n    def trap(self, height: List[int]) -> int:\n        n = len(height)\n        left, right = 0, n - 1\n        left_max, right_max = 0, 0\n        ans = 0\n        while left < right:\n            if height[left] < height[right]:\n                if height[left] >= left_max:\n                    left_max = height[left]\n                else:\n                    ans += left_max - height[left]\n                left += 1\n            else:\n                if height[right] >= right_max:\n                    right_max = height[right]\n                else:\n                    ans += right_max - height[right]\n                right -= 1\n        return ans",
+        "java": "class Solution {\n    public int trap(int[] height) {\n        int left = 0, right = height.length - 1;\n        int leftMax = 0, rightMax = 0;\n        int ans = 0;\n        while (left < right) {\n            if (height[left] < height[right]) {\n                if (height[left] >= leftMax) leftMax = height[left];\n                else ans += leftMax - height[left];\n                left++;\n            } else {\n                if (height[right] >= rightMax) rightMax = height[right];\n                else ans += rightMax - height[right];\n                right--;\n            }\n        }\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Two pointers meet in the middle, each index visited once."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only left, right, leftMax, rightMax and answer variables."
+      },
+      "dryRunExample": {
+        "input": "height = [0,1,0,2,1,0,1,3,2,1,2,1]",
+        "steps": [
+          "left=0 right=11 leftMax=0 rightMax=0: height[left]<height[right] so process left",
+          "left moves inward filling when bar lower than leftMax, right moves when right side smaller",
+          "Pointers converge with total accumulated 6"
+        ],
+        "output": "6"
+      },
+      "edgeCases": [
+        "Empty or size 1 array: while loop never runs, returns 0",
+        "Equal heights on both sides: else branch handles right pointer, still correct",
+        "Plateau values do not trap extra water"
+      ]
+    },
+    {
+      "id": "monotonic-stack",
+      "name": "Approach 4: Monotonic Decreasing Stack",
+      "tag": "Monotonic Stack",
+      "intuition": "Instead of vertical columns, think of water trapped horizontally between bars. Keep a decreasing stack of bar indices. When a higher bar arrives, it forms a valley with previous bars and we can compute the bounded rectangle.",
+      "theory": "Maintain stack of indices with decreasing heights. For current i, while height[i] > height[stack.top], pop top as bottom of valley. If stack becomes empty, no left boundary. Otherwise left boundary is new stack.top, distance = i - left - 1, bounded height = min(height[i], height[left]) - height[bottom]. Add distance * bounded height to answer. Each index pushed and popped at most once, giving linear time. This is classic monotonic stack for next greater element applied to area calculation.",
+      "cppCode": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        int n = height.size();\n        int ans = 0;\n        vector<int> st;\n        for (int i = 0; i < n; ++i) {\n            while (!st.empty() && height[i] > height[st.back()]) {\n                int top = st.back();\n                st.pop_back();\n                if (st.empty()) break;\n                int distance = i - st.back() - 1;\n                int bounded = min(height[i], height[st.back()]) - height[top];\n                ans += distance * bounded;\n            }\n            st.push_back(i);\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        int n = height.size();\n        int ans = 0;\n        vector<int> st;\n        for (int i = 0; i < n; ++i) {\n            while (!st.empty() && height[i] > height[st.back()]) {\n                int top = st.back();\n                st.pop_back();\n                if (st.empty()) break;\n                int distance = i - st.back() - 1;\n                int bounded = min(height[i], height[st.back()]) - height[top];\n                ans += distance * bounded;\n            }\n            st.push_back(i);\n        }\n        return ans;\n    }\n};",
+        "python": "class Solution:\n    def trap(self, height: List[int]) -> int:\n        ans = 0\n        stack = []\n        for i, h in enumerate(height):\n            while stack and h > height[stack[-1]]:\n                top = stack.pop()\n                if not stack:\n                    break\n                distance = i - stack[-1] - 1\n                bounded = min(h, height[stack[-1]]) - height[top]\n                ans += distance * bounded\n            stack.append(i)\n        return ans",
+        "java": "class Solution {\n    public int trap(int[] height) {\n        int ans = 0;\n        java.util.Deque<Integer> st = new java.util.ArrayDeque<>();\n        for (int i = 0; i < height.length; i++) {\n            while (!st.isEmpty() && height[i] > height[st.peek()]) {\n                int top = st.pop();\n                if (st.isEmpty()) break;\n                int distance = i - st.peek() - 1;\n                int bounded = Math.min(height[i], height[st.peek()]) - height[top];\n                ans += distance * bounded;\n            }\n            st.push(i);\n        }\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each bar pushed and popped at most once, inner while runs amortized O(1) per element."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Stack holds indices in worst case of decreasing heights."
+      },
+      "dryRunExample": {
+        "input": "height = [4,2,0,3,2,5]",
+        "steps": [
+          "stack=[0(4),1(2),2(0)]: i=3 h=3 pops 2: distance=1 bounded=2 ans=2, pops 1: distance=2 bounded=1 ans=4",
+          "stack=[0,3]: i=5 h=5 pops 4, pops 3, pops 0 partially, total ans=9"
+        ],
+        "output": "9"
+      },
+      "edgeCases": [
+        "Decreasing heights never trigger pop, ans stays 0",
+        "Increasing heights pop immediately but stack empty after pop so no addition",
+        "Flat bottom valley with equal heights yields bounded=0 correctly"
+      ]
+    }
+  ]
+}

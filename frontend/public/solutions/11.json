@@ -1,0 +1,89 @@
+{
+  "questionId": 11,
+  "title": "Container With Most Water",
+  "difficulty": "Medium",
+  "corePattern": "Two Pointers with Greedy Height Elimination",
+  "interviewTips": [
+    "Clarify constraints: n >= 2, height[i] >= 0, container cannot be tilted, width is j-i, and whether to return max area as integer.",
+    "Trade-off to articulate: Brute force O(n^2) is trivially correct but TLEs; two-pointer O(n) O(1) works because moving the shorter side is the only move that can potentially increase area - be ready to prove it.",
+    "Edge-case tip: Test n=2, all zeros, all equal heights, strictly increasing/decreasing, and large values; note max area <= 1e5 * 1e4 = 1e9 fits in 32-bit signed int."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "Directly simulate the definition: try every pair of lines as left and right walls, compute min height times distance, and keep the maximum. If we check all pairs we cannot miss the optimum.",
+      "theory": "Area is defined as Area(i,j) = min(height[i], height[j]) * (j-i) for i<j. Enumerating all n*(n-1)/2 pairs covers the full search space, so the maximum over enumeration is the answer. No pruning is done, which leads to quadratic time but serves as correctness baseline.",
+      "cppCode": "class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        int n = height.size();\n        int maxArea = 0;\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                int h = min(height[i], height[j]);\n                int area = h * (j - i);\n                maxArea = max(maxArea, area);\n            }\n        }\n        return maxArea;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        int n = height.size();\n        int maxArea = 0;\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                int h = min(height[i], height[j]);\n                int area = h * (j - i);\n                maxArea = max(maxArea, area);\n            }\n        }\n        return maxArea;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxArea(self, height: List[int]) -> int:\n        n = len(height)\n        max_area = 0\n        for i in range(n):\n            for j in range(i + 1, n):\n                h = height[i] if height[i] < height[j] else height[j]\n                area = h * (j - i)\n                if area > max_area:\n                    max_area = area\n        return max_area",
+        "java": "class Solution {\n    public int maxArea(int[] height) {\n        int n = height.length;\n        int maxArea = 0;\n        for (int i = 0; i < n; i++) {\n            for (int j = i + 1; j < n; j++) {\n                int h = Math.min(height[i], height[j]);\n                int area = h * (j - i);\n                maxArea = Math.max(maxArea, area);\n            }\n        }\n        return maxArea;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Double loop checks all n*(n-1)/2 pairs with O(1) work per pair."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only max_area and loop indices are stored, no extra data structures."
+      },
+      "dryRunExample": {
+        "input": "height = [1,8,6,2,5,4,8,3,7]",
+        "steps": [
+          "i=0 (1), j=1 (8): area = min(1,8)*1 = 1, max=1",
+          "i=0 (1), j=8 (7): area = min(1,7)*8 = 8, max stays 8 for all j with i=0",
+          "i=1 (8), j=8 (7): area = min(8,7)*7 = 49, max=49",
+          "Remaining pairs cannot exceed 49, final answer 49"
+        ],
+        "output": "49"
+      },
+      "edgeCases": [
+        "n=2 e.g. [1,1] -> single pair, answer 1",
+        "All zeros e.g. [0,0,0] -> answer 0",
+        "Strictly decreasing e.g. [5,4,3,2,1] -> best is adjacent tall lines",
+        "Large n=1e5 causes TLE, motivates optimal approach"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Two Pointers (Greedy)",
+      "tag": "Optimal",
+      "intuition": "Start with the widest possible container (left=0, right=n-1). Width can only shrink, so to get larger area we must find taller walls. Always move the shorter side inward because keeping the shorter side and moving the taller side can only decrease width with same or smaller limiting height.",
+      "theory": "For pointers l<r, area limited by min(h[l],h[r]). Suppose h[l] < h[r]. For any k with l<k<=r, Area(l,k) = min(h[l],h[k])*(k-l) <= h[l]*(k-l) < h[l]*(r-l) ??? Actually width k-l < r-l, so Area(l,k) <= h[l]*(k-l) < = h[l]*(r-l) ??? Need careful: Since h[l] is min(l,r), Area(l,r)=h[l]*(r-l). Any pair using l with smaller width has height <= h[l], so cannot beat Area(l,r). Thus l can never be part of a better solution with any inner right boundary, so l is safely discarded. Symmetric argument if h[r] <= h[l]. Each step discards one index, n-1 steps find optimum.",
+      "cppCode": "class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        int left = 0, right = (int)height.size() - 1;\n        int maxArea = 0;\n        while (left < right) {\n            int width = right - left;\n            int h = min(height[left], height[right]);\n            maxArea = max(maxArea, h * width);\n            if (height[left] < height[right]) {\n                ++left;\n            } else {\n                --right;\n            }\n        }\n        return maxArea;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        int left = 0, right = (int)height.size() - 1;\n        int maxArea = 0;\n        while (left < right) {\n            int width = right - left;\n            int h = min(height[left], height[right]);\n            maxArea = max(maxArea, h * width);\n            if (height[left] < height[right]) {\n                ++left;\n            } else {\n                --right;\n            }\n        }\n        return maxArea;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxArea(self, height: List[int]) -> int:\n        left, right = 0, len(height) - 1\n        max_area = 0\n        while left < right:\n            width = right - left\n            if height[left] < height[right]:\n                h = height[left]\n                left += 1\n            else:\n                h = height[right]\n                right -= 1\n            area = h * width\n            if area > max_area:\n                max_area = area\n        return max_area",
+        "java": "class Solution {\n    public int maxArea(int[] height) {\n        int left = 0, right = height.length - 1;\n        int maxArea = 0;\n        while (left < right) {\n            int width = right - left;\n            int h = Math.min(height[left], height[right]);\n            maxArea = Math.max(maxArea, h * width);\n            if (height[left] < height[right]) {\n                left++;\n            } else {\n                right--;\n            }\n        }\n        return maxArea;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Two pointers start at ends and move inward once per iteration, at most n-1 iterations with O(1) work each."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only left, right, and maxArea variables are used."
+      },
+      "dryRunExample": {
+        "input": "height = [1,8,6,2,5,4,8,3,7]",
+        "steps": [
+          "left=0(1), right=8(7): width=8, area=1*8=8, max=8, move left (1<7)",
+          "left=1(8), right=8(7): width=7, area=7*7=49, max=49, move right (8>7)",
+          "left=1(8), right=7(3): width=6, area=3*6=18, max=49, move right",
+          "left=1(8), right=6(8): width=5, area=8*5=40, max=49, move right (tie moves right)",
+          "left=1(8), right=5(4): width=4, area=4*4=16, continue shrinking, no larger area found",
+          "Pointers meet, final max=49"
+        ],
+        "output": "49"
+      },
+      "edgeCases": [
+        "n=2 e.g. [1,2] -> one iteration, answer 1",
+        "All equal e.g. [5,5,5,5] -> widest wins, answer 15",
+        "Increasing e.g. [1,2,3,4,5] and decreasing e.g. [5,4,3,2,1] -> correctly moves shorter side",
+        "Contains zeros e.g. [0,2,0] -> zero-height moves skipped correctly, answer 0"
+      ]
+    }
+  ]
+}

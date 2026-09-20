@@ -1,0 +1,154 @@
+{
+  "questionId": 5,
+  "title": "Longest Palindromic Substring",
+  "difficulty": "Medium",
+  "corePattern": "Palindromic Symmetry - Expand Around Center",
+  "interviewTips": [
+    "Clarify: input constraints (n <= 1000?), any single valid answer acceptable when multiple longest palindromes exist, and character set (lowercase vs all ASCII)?",
+    "Trade-off: Expand Around Center O(n^2)/O(1) is expected interview optimal; DP O(n^2)/O(n^2) shows DP skill but wastes space; Manacher O(n)/O(n) is bonus only - mention but don't code unless asked.",
+    "Edge-case tip: handle even vs odd length centers separately, empty/single-char string, all same chars e.g. 'aaaa', and no palindrome longer than 1 e.g. 'abc'."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Check All Substrings",
+      "tag": "Brute Force",
+      "intuition": "Every answer is some s[i:j+1]. Enumerate all O(n^2) substrings and keep the longest one that reads the same forward and backward.",
+      "theory": "There are n*(n+1)/2 substrings. Palindrome check for substring of length k costs O(k). Total O(n^3) time. Only O(1) extra space if checking in-place with two pointers, O(n) if slicing. Correct because we exhaustively examine the entire solution space.",
+      "cppCode": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        int n = s.size();\n        if (n < 2) return s;\n        string best = s.substr(0, 1);\n        for (int i = 0; i < n; ++i) {\n            for (int j = i; j < n; ++j) {\n                int l = i, r = j;\n                bool ok = true;\n                while (l < r) {\n                    if (s[l++] != s[r--]) { ok = false; break; }\n                }\n                if (ok && j - i + 1 > (int)best.size())\n                    best = s.substr(i, j - i + 1);\n            }\n        }\n        return best;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        int n = s.size();\n        if (n < 2) return s;\n        string best = s.substr(0, 1);\n        for (int i = 0; i < n; ++i) {\n            for (int j = i; j < n; ++j) {\n                int l = i, r = j;\n                bool ok = true;\n                while (l < r) {\n                    if (s[l++] != s[r--]) { ok = false; break; }\n                }\n                if (ok && j - i + 1 > (int)best.size())\n                    best = s.substr(i, j - i + 1);\n            }\n        }\n        return best;\n    }\n};",
+        "python": "class Solution:\n    def longestPalindrome(self, s: str) -> str:\n        n = len(s)\n        if n < 2:\n            return s\n        best = s[0]\n        for i in range(n):\n            for j in range(i, n):\n                l, r = i, j\n                ok = True\n                while l < r:\n                    if s[l] != s[r]:\n                        ok = False\n                        break\n                    l += 1\n                    r -= 1\n                if ok and (j - i + 1 > len(best)):\n                    best = s[i:j+1]\n        return best",
+        "java": "class Solution {\n    public String longestPalindrome(String s) {\n        int n = s.length();\n        if (n < 2) return s;\n        String best = s.substring(0, 1);\n        for (int i = 0; i < n; i++) {\n            for (int j = i; j < n; j++) {\n                int l = i, r = j;\n                boolean ok = true;\n                while (l < r) {\n                    if (s.charAt(l++) != s.charAt(r--)) { ok = false; break; }\n                }\n                if (ok && j - i + 1 > best.length())\n                    best = s.substring(i, j + 1);\n            }\n        }\n        return best;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^3)",
+        "explanation": "O(n^2) substrings, each palindrome check up to O(n). n=1000 is too slow."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only indices and best substring pointers, excluding output. O(n) if counting slicing/copy."
+      },
+      "dryRunExample": {
+        "input": "s = \"babad\"",
+        "steps": [
+          "best='b', check i=0: 'b' ok, 'ba' no, 'bab' yes -> best='bab', 'baba' no, 'babad' no",
+          "check i=1: 'a' , 'ab' no, 'aba' yes len 3 tie, keep 'bab', 'abad' no",
+          "check i=2+: no longer palindrome found, return 'bab' (also 'aba' accepted)"
+        ],
+        "output": "\"bab\""
+      },
+      "edgeCases": [
+        "n=0 or 1: return s directly",
+        "All distinct e.g. 'abc': returns s[0]='a'",
+        "All same e.g. 'aaaa': returns whole string"
+      ]
+    },
+    {
+      "id": "dp",
+      "name": "Approach 2: Dynamic Programming by Interval Length",
+      "tag": "Dynamic Programming",
+      "intuition": "A substring s[i..j] is palindrome if ends match and inner substring is palindrome. Build up from short to long intervals and remember results.",
+      "theory": "Define dp[i][j]=true if s[i..j] palindrome. Base: dp[i][i]=true, dp[i][i+1]=(s[i]==s[i+1]). Transition for len>=3: dp[i][j]=(s[i]==s[j] && dp[i+1][j-1]). Fill by increasing length so dp[i+1][j-1] already computed. Track max length start. Time O(n^2), space O(n^2).",
+      "cppCode": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        int n = s.size();\n        if (n < 2) return s;\n        vector<vector<char>> dp(n, vector<char>(n, 0));\n        int start = 0, maxLen = 1;\n        for (int i = 0; i < n; ++i) dp[i][i] = 1;\n        for (int i = 0; i + 1 < n; ++i) {\n            if (s[i] == s[i+1]) { dp[i][i+1] = 1; start = i; maxLen = 2; }\n        }\n        for (int len = 3; len <= n; ++len) {\n            for (int i = 0; i + len - 1 < n; ++i) {\n                int j = i + len - 1;\n                if (s[i] == s[j] && dp[i+1][j-1]) {\n                    dp[i][j] = 1;\n                    if (len > maxLen) { start = i; maxLen = len; }\n                }\n            }\n        }\n        return s.substr(start, maxLen);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        int n = s.size();\n        if (n < 2) return s;\n        vector<vector<char>> dp(n, vector<char>(n, 0));\n        int start = 0, maxLen = 1;\n        for (int i = 0; i < n; ++i) dp[i][i] = 1;\n        for (int i = 0; i + 1 < n; ++i) {\n            if (s[i] == s[i+1]) { dp[i][i+1] = 1; start = i; maxLen = 2; }\n        }\n        for (int len = 3; len <= n; ++len) {\n            for (int i = 0; i + len - 1 < n; ++i) {\n                int j = i + len - 1;\n                if (s[i] == s[j] && dp[i+1][j-1]) {\n                    dp[i][j] = 1;\n                    if (len > maxLen) { start = i; maxLen = len; }\n                }\n            }\n        }\n        return s.substr(start, maxLen);\n    }\n};",
+        "python": "class Solution:\n    def longestPalindrome(self, s: str) -> str:\n        n = len(s)\n        if n < 2:\n            return s\n        dp = [[False]*n for _ in range(n)]\n        start, maxLen = 0, 1\n        for i in range(n):\n            dp[i][i] = True\n        for i in range(n-1):\n            if s[i] == s[i+1]:\n                dp[i][i+1] = True\n                start, maxLen = i, 2\n        for length in range(3, n+1):\n            for i in range(n-length+1):\n                j = i + length - 1\n                if s[i] == s[j] and dp[i+1][j-1]:\n                    dp[i][j] = True\n                    if length > maxLen:\n                        start, maxLen = i, length\n        return s[start:start+maxLen]",
+        "java": "class Solution {\n    public String longestPalindrome(String s) {\n        int n = s.length();\n        if (n < 2) return s;\n        boolean[][] dp = new boolean[n][n];\n        int start = 0, maxLen = 1;\n        for (int i = 0; i < n; i++) dp[i][i] = true;\n        for (int i = 0; i + 1 < n; i++) {\n            if (s.charAt(i) == s.charAt(i+1)) {\n                dp[i][i+1] = true;\n                start = i; maxLen = 2;\n            }\n        }\n        for (int len = 3; len <= n; len++) {\n            for (int i = 0; i + len - 1 < n; i++) {\n                int j = i + len - 1;\n                if (s.charAt(i) == s.charAt(j) && dp[i+1][j-1]) {\n                    dp[i][j] = true;\n                    if (len > maxLen) { start = i; maxLen = len; }\n                }\n            }\n        }\n        return s.substring(start, start + maxLen);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Fill n^2 DP table, each cell O(1) transition."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "n x n boolean table. Can be optimized to O(n) with rolling array but loses start tracking simplicity."
+      },
+      "dryRunExample": {
+        "input": "s = \"cbbd\"",
+        "steps": [
+          "init diag true, check len2: dp[1][2]=true since 'b'=='b', start=1 maxLen=2",
+          "len3: [0,2]='cbb' s0!=s2 false; [1,3]='bbd' s1!=s3 false",
+          "len4: [0,3]='cbbd' s0!=s3 false, answer s[1:3]='bb'"
+        ],
+        "output": "\"bb\""
+      },
+      "edgeCases": [
+        "Even palindrome only e.g. 'cbbd' needs len2 base case",
+        "Odd palindrome e.g. 'aba' uses dp[i+1][j-1] diagonal",
+        "'aaaa' fills entire upper triangle true"
+      ]
+    },
+    {
+      "id": "expand-center",
+      "name": "Approach 3: Expand Around Center",
+      "tag": "Optimal",
+      "intuition": "Every palindrome has a center. Try each of 2n-1 centers (n odd + n-1 even) and expand outward while characters match, keeping the longest expansion.",
+      "theory": "Mirror property: if s[l..r] palindrome, s[l-1..r+1] palindrome iff s[l-1]==s[r+1]. Expanding from center enumerates all palindromes with that center in linear time. Over all centers O(n^2) time, O(1) space. This is interview-optimal due to simplicity and constant space.",
+      "cppCode": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        int n = s.size();\n        if (n < 2) return s;\n        int start = 0, maxLen = 1;\n        auto expand = [&](int l, int r) {\n            while (l >= 0 && r < n && s[l] == s[r]) {\n                if (r - l + 1 > maxLen) { start = l; maxLen = r - l + 1; }\n                --l; ++r;\n            }\n        };\n        for (int i = 0; i < n; ++i) {\n            expand(i, i);\n            expand(i, i + 1);\n        }\n        return s.substr(start, maxLen);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        int n = s.size();\n        if (n < 2) return s;\n        int start = 0, maxLen = 1;\n        auto expand = [&](int l, int r) {\n            while (l >= 0 && r < n && s[l] == s[r]) {\n                if (r - l + 1 > maxLen) { start = l; maxLen = r - l + 1; }\n                --l; ++r;\n            }\n        };\n        for (int i = 0; i < n; ++i) {\n            expand(i, i);\n            expand(i, i + 1);\n        }\n        return s.substr(start, maxLen);\n    }\n};",
+        "python": "class Solution:\n    def longestPalindrome(self, s: str) -> str:\n        n = len(s)\n        if n < 2:\n            return s\n        start, maxLen = 0, 1\n        def expand(l: int, r: int):\n            nonlocal start, maxLen\n            while l >= 0 and r < n and s[l] == s[r]:\n                if r - l + 1 > maxLen:\n                    start, maxLen = l, r - l + 1\n                l -= 1\n                r += 1\n        for i in range(n):\n            expand(i, i)\n            expand(i, i+1)\n        return s[start:start+maxLen]",
+        "java": "class Solution {\n    private int start, maxLen;\n    public String longestPalindrome(String s) {\n        int n = s.length();\n        if (n < 2) return s;\n        start = 0; maxLen = 1;\n        for (int i = 0; i < n; i++) {\n            expand(s, i, i);\n            expand(s, i, i + 1);\n        }\n        return s.substring(start, start + maxLen);\n    }\n    private void expand(String s, int l, int r) {\n        int n = s.length();\n        while (l >= 0 && r < n && s.charAt(l) == s.charAt(r)) {\n            if (r - l + 1 > maxLen) { start = l; maxLen = r - l + 1; }\n            l--; r++;\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "2n-1 centers, each expansion up to O(n) in worst case e.g. all 'a'."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only start, maxLen and two pointers."
+      },
+      "dryRunExample": {
+        "input": "s = \"babad\"",
+        "steps": [
+          "i=0 odd 'b' len1, even 'ba' len0",
+          "i=1 odd expand(1,1): 'a' -> 'bab' match -> 'ababa' fail, maxLen=3 start=0",
+          "i=2 odd expand(2,2): 'b' -> 'aba' match len3 tie, keep start=0",
+          "remaining centers no improvement, return s[0:3]='bab'"
+        ],
+        "output": "\"bab\""
+      },
+      "edgeCases": [
+        "Even length 'bb' only found by expand(i,i+1)",
+        "Single char returns itself",
+        "Entire string palindrome e.g. 'racecar' expands to bounds"
+      ]
+    },
+    {
+      "id": "manacher",
+      "name": "Approach 4: Manacher's Algorithm Linear Time",
+      "tag": "Optimal",
+      "intuition": "Transform string to unify odd/even, then reuse mirror radius to skip redundant expansions. Each position's palindrome radius computed in amortized O(1).",
+      "theory": "Transformed T='^#a#b#...#$' makes every palindrome odd-length. Maintain center C and right boundary R of furthest palindrome. For i<R, mirror m=2*C-i gives p[i]>=min(R-i,p[m]) by symmetry; then expand only beyond R. R only moves forward O(n), so total O(n). Map back: start=(center-maxLen)/2 in original string.",
+      "cppCode": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        if (s.size() < 2) return s;\n        string t = \"^\";\n        for (char c : s) { t += \"#\"; t += c; }\n        t += \"#$\";\n        int n = t.size();\n        vector<int> p(n, 0);\n        int c = 0, r = 0;\n        for (int i = 1; i < n - 1; ++i) {\n            int mir = 2 * c - i;\n            if (i < r) p[i] = min(r - i, p[mir]);\n            while (t[i + 1 + p[i]] == t[i - 1 - p[i]]) ++p[i];\n            if (i + p[i] > r) { c = i; r = i + p[i]; }\n        }\n        int maxLen = 0, center = 0;\n        for (int i = 1; i < n - 1; ++i)\n            if (p[i] > maxLen) { maxLen = p[i]; center = i; }\n        int start = (center - maxLen) / 2;\n        return s.substr(start, maxLen);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        if (s.size() < 2) return s;\n        string t = \"^\";\n        for (char c : s) { t += \"#\"; t += c; }\n        t += \"#$\";\n        int n = t.size();\n        vector<int> p(n, 0);\n        int c = 0, r = 0;\n        for (int i = 1; i < n - 1; ++i) {\n            int mir = 2 * c - i;\n            if (i < r) p[i] = min(r - i, p[mir]);\n            while (t[i + 1 + p[i]] == t[i - 1 - p[i]]) ++p[i];\n            if (i + p[i] > r) { c = i; r = i + p[i]; }\n        }\n        int maxLen = 0, center = 0;\n        for (int i = 1; i < n - 1; ++i)\n            if (p[i] > maxLen) { maxLen = p[i]; center = i; }\n        int start = (center - maxLen) / 2;\n        return s.substr(start, maxLen);\n    }\n};",
+        "python": "class Solution:\n    def longestPalindrome(self, s: str) -> str:\n        if len(s) < 2:\n            return s\n        t = '^#' + '#'.join(s) + '#$'\n        n = len(t)\n        p = [0]*n\n        c = r = 0\n        for i in range(1, n-1):\n            mir = 2*c - i\n            if i < r:\n                p[i] = min(r - i, p[mir])\n            while t[i+1+p[i]] == t[i-1-p[i]]:\n                p[i] += 1\n            if i + p[i] > r:\n                c, r = i, i + p[i]\n        maxLen = max(p)\n        center = p.index(maxLen)\n        start = (center - maxLen)//2\n        return s[start:start+maxLen]",
+        "java": "class Solution {\n    public String longestPalindrome(String s) {\n        if (s.length() < 2) return s;\n        StringBuilder sb = new StringBuilder(\"^\");\n        for (int i = 0; i < s.length(); i++) sb.append(\"#\").append(s.charAt(i));\n        sb.append(\"#$\");\n        String t = sb.toString();\n        int n = t.length();\n        int[] p = new int[n];\n        int c = 0, r = 0;\n        for (int i = 1; i < n - 1; i++) {\n            int mir = 2 * c - i;\n            if (i < r) p[i] = Math.min(r - i, p[mir]);\n            while (t.charAt(i + 1 + p[i]) == t.charAt(i - 1 - p[i])) p[i]++;\n            if (i + p[i] > r) { c = i; r = i + p[i]; }\n        }\n        int maxLen = 0, center = 0;\n        for (int i = 1; i < n - 1; i++) if (p[i] > maxLen) { maxLen = p[i]; center = i; }\n        int start = (center - maxLen) / 2;\n        return s.substring(start, start + maxLen);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each expansion advances R; R moves at most 2n steps, amortized O(1) per center."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Transformed string length 2n+3 and radius array p of same size."
+      },
+      "dryRunExample": {
+        "input": "s = \"babad\"",
+        "steps": [
+          "t='^#b#a#b#a#d#$', init C=0 R=0",
+          "i=2 ('b'): p=1, C=2 R=3; i=4 ('a'): p=3 ('#b#' mirrored) etc.",
+          "max p=3 at center of 'bab' (or 'aba'), start=(center-3)/2=0, return 'bab'"
+        ],
+        "output": "\"bab\""
+      },
+      "edgeCases": [
+        "Sentinels ^ $ prevent bounds checks",
+        "'#' separators handle even 'bb' as odd '#b#b#'",
+        "Long uniform 'a'*1000: R extends once, rest O(1) via mirror"
+      ]
+    }
+  ]
+}

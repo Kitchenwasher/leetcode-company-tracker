@@ -1,0 +1,126 @@
+{
+  "questionId": 14,
+  "title": "Longest Common Prefix",
+  "difficulty": "Easy",
+  "corePattern": "Character-wise Prefix Reduction",
+  "interviewTips": [
+    "Ask if strs can be empty, contain empty strings, or have different lengths and character sets - determines early exits and bounds checks.",
+    "Trade-off: vertical scan is O(S) time with O(1) extra space and early exit, sorting is shortest code but pays sort cost, Trie pays extra space but is ideal for many queries on same set.",
+    "Edge-case tip: answer can be empty string, single string returns itself, and always check index bounds before charAt access to avoid out-of-bounds."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Vertical Scanning",
+      "tag": "Brute Force",
+      "intuition": "If all strings share a prefix, then every string must have the same character at each prefix position. Check column by column using the first string as reference and stop at first mismatch.",
+      "theory": "Let first string be reference of length m and n be number of strings. For column i, compare strs[0][i] against strs[j][i] for all j. If any j is too short or differs, prefix must end before i, so strs[0][:i] is the longest possible. If all columns of first string pass, first string itself is the prefix. This is correct because mismatch at i proves no longer prefix can be common, and no mismatch proves full first string is common.",
+      "cppCode": "class Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        if (strs.empty()) return \"\";\n        for (int i = 0; i < (int)strs[0].size(); ++i) {\n            char c = strs[0][i];\n            for (int j = 1; j < (int)strs.size(); ++j) {\n                if (i >= (int)strs[j].size() || strs[j][i] != c) {\n                    return strs[0].substr(0, i);\n                }\n            }\n        }\n        return strs[0];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        if (strs.empty()) return \"\";\n        for (int i = 0; i < (int)strs[0].size(); ++i) {\n            char c = strs[0][i];\n            for (int j = 1; j < (int)strs.size(); ++j) {\n                if (i >= (int)strs[j].size() || strs[j][i] != c) {\n                    return strs[0].substr(0, i);\n                }\n            }\n        }\n        return strs[0];\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def longestCommonPrefix(self, strs: List[str]) -> str:\n        if not strs:\n            return ''\n        for i in range(len(strs[0])):\n            c = strs[0][i]\n            for s in strs[1:]:\n                if i >= len(s) or s[i] != c:\n                    return strs[0][:i]\n        return strs[0]",
+        "java": "class Solution {\n    public String longestCommonPrefix(String[] strs) {\n        if (strs == null || strs.length == 0) return \"\";\n        for (int i = 0; i < strs[0].length(); i++) {\n            char c = strs[0].charAt(i);\n            for (int j = 1; j < strs.length; j++) {\n                if (i >= strs[j].length() || strs[j].charAt(i) != c) {\n                    return strs[0].substring(0, i);\n                }\n            }\n        }\n        return strs[0];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * m)",
+        "explanation": "n is number of strings, m is length of shortest string. In worst case compare every character of every string up to m. Early exit on mismatch makes it fast in practice."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only indices and one char variable besides output substring. No extra data structure proportional to input."
+      },
+      "dryRunExample": {
+        "input": "['flower','flow','flight']",
+        "steps": [
+          "reference = flower, i=0 char f: flow[0]=f, flight[0]=f -> continue",
+          "i=1 char l: flow[1]=l, flight[1]=l -> continue",
+          "i=2 char o: flow[2]=o, flight[2]=i -> mismatch at flight, return flower[:2]",
+          "result is fl"
+        ],
+        "output": "fl"
+      },
+      "edgeCases": [
+        "Empty array -> return empty string",
+        "Single string ['alone'] -> return alone",
+        "Contains empty string ['', 'abc'] -> return empty string",
+        "No common prefix ['dog','racecar','car'] -> return empty string",
+        "Different lengths where shortest is prefix ['ab','aba','abc'] -> return ab"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Sorting First and Last",
+      "tag": "Optimal",
+      "intuition": "After lexicographic sorting, the most different strings become first and last. Any prefix common to all must be common to these two extremes, so only compare those two.",
+      "theory": "Lexicographic order groups strings by prefix. For any three sorted strings a <= b <= c, if a and c agree on first k chars, b must also agree because its prefix is lexicographically between them. Therefore LCP of whole set equals LCP of min and max strings. Comparing only those two yields answer. Sorting dominates cost.",
+      "cppCode": "class Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        if (strs.empty()) return \"\";\n        sort(strs.begin(), strs.end());\n        string first = strs.front();\n        string last = strs.back();\n        int i = 0;\n        while (i < (int)first.size() && i < (int)last.size() && first[i] == last[i]) {\n            ++i;\n        }\n        return first.substr(0, i);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        if (strs.empty()) return \"\";\n        sort(strs.begin(), strs.end());\n        string first = strs.front();\n        string last = strs.back();\n        int i = 0;\n        while (i < (int)first.size() && i < (int)last.size() && first[i] == last[i]) {\n            ++i;\n        }\n        return first.substr(0, i);\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def longestCommonPrefix(self, strs: List[str]) -> str:\n        if not strs:\n            return ''\n        strs.sort()\n        first = strs[0]\n        last = strs[-1]\n        i = 0\n        while i < len(first) and i < len(last) and first[i] == last[i]:\n            i += 1\n        return first[:i]",
+        "java": "import java.util.Arrays;\nclass Solution {\n    public String longestCommonPrefix(String[] strs) {\n        if (strs == null || strs.length == 0) return \"\";\n        Arrays.sort(strs);\n        String first = strs[0];\n        String last = strs[strs.length - 1];\n        int i = 0;\n        while (i < first.length() && i < last.length() && first.charAt(i) == last.charAt(i)) {\n            i++;\n        }\n        return first.substring(0, i);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n * m + m)",
+        "explanation": "Sorting n strings costs O(n log n) comparisons each up to O(m) char compares, plus O(m) to compare first and last. Concise but slower than vertical scan for large n."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1) or O(log n)",
+        "explanation": "Only indices besides sort. Python Timsort and C++ introsort use O(log n) to O(n) auxiliary space depending on implementation, Java Dual-Pivot uses O(log n) stack."
+      },
+      "dryRunExample": {
+        "input": "['flower','flow','flight']",
+        "steps": [
+          "sort -> ['flight','flow','flower']",
+          "first=flight, last=flower",
+          "compare: f==f, l==l, i==o mismatch at index 2 -> stop",
+          "return first[:2] = fl"
+        ],
+        "output": "fl"
+      },
+      "edgeCases": [
+        "Empty array -> return empty string",
+        "All identical ['test','test'] -> return test",
+        "One empty after sort ['', 'a','b'] -> first is empty -> return empty",
+        "Single element -> first==last -> return that string"
+      ]
+    },
+    {
+      "id": "trie",
+      "name": "Approach 3: Trie Prefix Walk",
+      "tag": "Trie",
+      "intuition": "Insert all strings into a Trie where each edge is a character. The longest common prefix is the deepest path from root that is shared by all strings with no branching.",
+      "theory": "Trie merges common prefixes into shared nodes. Insert each string marking end-of-word. Then walk from root: while current node has exactly one child and is not end of any word and child is shared by all n strings, advance and append char. Stop at branch or word end because that indicates divergence or one string ended. Path collected is LCP.",
+      "cppCode": "struct TrieNode {\n    unordered_map<char, TrieNode*> children;\n    bool is_end = false;\n};\nclass Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        if (strs.empty()) return \"\";\n        TrieNode* root = new TrieNode();\n        for (auto &s : strs) {\n            if (s.empty()) return \"\";\n            TrieNode* node = root;\n            for (char ch : s) {\n                if (!node->children.count(ch)) node->children[ch] = new TrieNode();\n                node = node->children[ch];\n            }\n            node->is_end = true;\n        }\n        string prefix;\n        TrieNode* node = root;\n        while (!node->is_end && node->children.size() == 1) {\n            auto it = node->children.begin();\n            prefix.push_back(it->first);\n            node = it->second;\n        }\n        return prefix;\n    }\n};",
+      "code": {
+        "cpp": "struct TrieNode {\n    unordered_map<char, TrieNode*> children;\n    bool is_end = false;\n};\nclass Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        if (strs.empty()) return \"\";\n        TrieNode* root = new TrieNode();\n        for (auto &s : strs) {\n            if (s.empty()) return \"\";\n            TrieNode* node = root;\n            for (char ch : s) {\n                if (!node->children.count(ch)) node->children[ch] = new TrieNode();\n                node = node->children[ch];\n            }\n            node->is_end = true;\n        }\n        string prefix;\n        TrieNode* node = root;\n        while (!node->is_end && node->children.size() == 1) {\n            auto it = node->children.begin();\n            prefix.push_back(it->first);\n            node = it->second;\n        }\n        return prefix;\n    }\n};",
+        "python": "from typing import List\nclass TrieNode:\n    def __init__(self):\n        self.children = {}\n        self.is_end = False\nclass Solution:\n    def longestCommonPrefix(self, strs: List[str]) -> str:\n        if not strs:\n            return ''\n        root = TrieNode()\n        for s in strs:\n            if s == '':\n                return ''\n            node = root\n            for ch in s:\n                if ch not in node.children:\n                    node.children[ch] = TrieNode()\n                node = node.children[ch]\n            node.is_end = True\n        prefix = []\n        node = root\n        while True:\n            if node.is_end:\n                break\n            if len(node.children) != 1:\n                break\n            ch, nxt = next(iter(node.children.items()))\n            prefix.append(ch)\n            node = nxt\n        return ''.join(prefix)",
+        "java": "import java.util.*;\nclass Solution {\n    static class TrieNode {\n        Map<Character, TrieNode> children = new HashMap<>();\n        boolean isEnd = false;\n    }\n    public String longestCommonPrefix(String[] strs) {\n        if (strs == null || strs.length == 0) return \"\";\n        TrieNode root = new TrieNode();\n        for (String s : strs) {\n            if (s.isEmpty()) return \"\";\n            TrieNode node = root;\n            for (char ch : s.toCharArray()) {\n                node.children.putIfAbsent(ch, new TrieNode());\n                node = node.children.get(ch);\n            }\n            node.isEnd = true;\n        }\n        StringBuilder sb = new StringBuilder();\n        TrieNode node = root;\n        while (!node.isEnd && node.children.size() == 1) {\n            Map.Entry<Character, TrieNode> e = node.children.entrySet().iterator().next();\n            sb.append(e.getKey());\n            node = e.getValue();\n        }\n        return sb.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(S)",
+        "explanation": "S is total characters across all strings. Each char inserted once and prefix walk is at most O(m). Best when many queries reuse Trie, otherwise overhead vs scan."
+      },
+      "spaceComplexity": {
+        "complexity": "O(S)",
+        "explanation": "Trie stores every character node in worst case with no sharing, plus hashmap overhead per node."
+      },
+      "dryRunExample": {
+        "input": "['flower','flow','flight']",
+        "steps": [
+          "insert all: root->f->l shared, then branch o vs i",
+          "walk: f has 1 child, not end -> take f",
+          "l has 1 child, not end -> take l",
+          "next node has 2 children o and i -> stop",
+          "prefix = fl"
+        ],
+        "output": "fl"
+      },
+      "edgeCases": [
+        "Empty string in input -> Trie root child walk still returns empty due to early return",
+        "Single string ['abc'] -> no branching, walk full string -> return abc",
+        "Duplicate strings -> is_end stops correctly at shortest end",
+        "No common prefix -> root has multiple children -> return empty"
+      ]
+    }
+  ]
+}

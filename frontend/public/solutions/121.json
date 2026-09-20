@@ -1,0 +1,131 @@
+{
+  "questionId": 121,
+  "title": "Best Time to Buy and Sell Stock",
+  "difficulty": "Easy",
+  "corePattern": "Greedy Single Pass with Running Minimum - Prefix Minimum State Tracking",
+  "interviewTips": [
+    "Clarify constraints: only one buy-sell transaction allowed, must buy before sell, return 0 if no profit possible, and ask about input size and empty array handling.",
+    "Trade-off discussion: Brute force O(n^2) is simple but fails for large n, DP state machine shows structured thinking, one-pass greedy achieves optimal O(n) time and O(1) space - explain why greedy is safe due to optimal substructure.",
+    "Edge-case tip: explicitly handle empty array, single element, strictly decreasing prices like [7,6,4,3,1] where answer is 0 not negative, and large values to avoid integer overflow in other languages."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "Try every possible pair of buy day i and sell day j where j is after i, compute profit prices[j] - prices[i], and keep the maximum. This directly models the definition of best transaction.",
+      "theory": "For all 0 <= i < j < n, evaluate profit. The answer is max over all pairs and 0 if all profits are negative. Double loop enumerates n*(n-1)/2 pairs, so correctness follows by exhaustive search. No extra state is needed.",
+      "cppCode": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int n = prices.size();\n        int maxProfit = 0;\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                maxProfit = max(maxProfit, prices[j] - prices[i]);\n            }\n        }\n        return maxProfit;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int n = prices.size();\n        int maxProfit = 0;\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                maxProfit = max(maxProfit, prices[j] - prices[i]);\n            }\n        }\n        return maxProfit;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        n = len(prices)\n        max_profit = 0\n        for i in range(n):\n            for j in range(i + 1, n):\n                profit = prices[j] - prices[i]\n                if profit > max_profit:\n                    max_profit = profit\n        return max_profit",
+        "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        int maxProfit = 0;\n        for (int i = 0; i < prices.length; i++) {\n            for (int j = i + 1; j < prices.length; j++) {\n                maxProfit = Math.max(maxProfit, prices[j] - prices[i]);\n            }\n        }\n        return maxProfit;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Two nested loops check all i<j pairs, about n*(n-1)/2 iterations, each O(1) work."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a few integer variables for max profit and loop indices."
+      },
+      "dryRunExample": {
+        "input": "prices = [7,1,5,3,6,4]",
+        "steps": [
+          "i=0 price 7: best sell after is 6, profit -1, max stays 0",
+          "i=1 price 1: pairs give 4,2,5,3, max becomes 5 from buy 1 sell 6",
+          "i=2 price 5: best later is 6 profit 1, max stays 5",
+          "i=3 price 3: best later is 6 profit 3, max stays 5",
+          "i=4 price 6: later only 4 profit negative, max stays 5",
+          "return 5"
+        ],
+        "output": "5"
+      },
+      "edgeCases": [
+        "Empty or single element array returns 0",
+        "Strictly decreasing [7,6,4,3,1] returns 0, never negative",
+        "All same prices [5,5,5] returns 0",
+        "Time limit exceeded for n up to 1e5 due to quadratic time"
+      ]
+    },
+    {
+      "id": "dp",
+      "name": "Approach 2: Dynamic Programming - State Machine and Kadane",
+      "tag": "Dynamic Programming",
+      "intuition": "Think of holding vs not holding stock. Each day you either keep previous decision or transition. Alternatively view price differences as array and find maximum subarray sum, which is Kadane logic.",
+      "theory": "Define hold = max profit when holding one stock, cash = max profit when not holding. Initialize hold = -prices[0], cash = 0. Transition: hold = max(hold, -price), cash = max(cash, hold + price). This encodes at most one buy. Equivalent to Kadane on diff[i] = prices[i] - prices[i-1] with cur = max(0, cur + diff). By induction cash equals optimal profit for prefix.",
+      "cppCode": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        if (prices.empty()) return 0;\n        int hold = -prices[0];\n        int cash = 0;\n        for (size_t i = 1; i < prices.size(); ++i) {\n            hold = max(hold, -prices[i]);\n            cash = max(cash, hold + prices[i]);\n        }\n        return cash;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        if (prices.empty()) return 0;\n        int hold = -prices[0];\n        int cash = 0;\n        for (size_t i = 1; i < prices.size(); ++i) {\n            hold = max(hold, -prices[i]);\n            cash = max(cash, hold + prices[i]);\n        }\n        return cash;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        if not prices:\n            return 0\n        hold = -prices[0]\n        cash = 0\n        for price in prices[1:]:\n            hold = max(hold, -price)\n            cash = max(cash, hold + price)\n        return cash",
+        "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        if (prices == null || prices.length == 0) return 0;\n        int hold = -prices[0];\n        int cash = 0;\n        for (int i = 1; i < prices.length; i++) {\n            hold = Math.max(hold, -prices[i]);\n            cash = Math.max(cash, hold + prices[i]);\n        }\n        return cash;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single linear scan over prices with O(1) transition per element."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two state variables hold and cash, DP array compressed from O(n) to O(1)."
+      },
+      "dryRunExample": {
+        "input": "prices = [7,1,5,3,6,4]",
+        "steps": [
+          "init hold=-7 cash=0",
+          "price 1: hold=max(-7,-1)=-1 cash=max(0,0)=0",
+          "price 5: hold=max(-1,-5)=-1 cash=max(0,4)=4",
+          "price 3: hold=max(-1,-3)=-1 cash=max(4,2)=4",
+          "price 6: hold=-1 cash=max(4,5)=5",
+          "price 4: hold=-1 cash=max(5,3)=5 return 5"
+        ],
+        "output": "5"
+      },
+      "edgeCases": [
+        "Empty array returns 0 without accessing prices[0]",
+        "Single element [5] returns 0, loop does not run",
+        "Decreasing [7,6,4,3,1] keeps cash at 0",
+        "Large n up to 1e5 easily fits linear time"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Optimal One-Pass Greedy with Minimum Price",
+      "tag": "Optimal",
+      "intuition": "Best sell day wants the lowest buy price before it. Scan left to right, remember minimum price seen so far, and profit if sold today. Keep global best.",
+      "theory": "Maintain minPrice = min(prices[0..i]) and maxProfit = max(prices[i] - min prefix). For each i, any optimal transaction ending at or before i either uses current min or earlier best. Updating both in one pass yields optimal by prefix optimality. This is greedy because lowest prefix is always best buy for future sell.",
+      "cppCode": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int minPrice = INT_MAX;\n        int maxProfit = 0;\n        for (int price : prices) {\n            minPrice = min(minPrice, price);\n            maxProfit = max(maxProfit, price - minPrice);\n        }\n        return maxProfit;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int minPrice = INT_MAX;\n        int maxProfit = 0;\n        for (int price : prices) {\n            minPrice = min(minPrice, price);\n            maxProfit = max(maxProfit, price - minPrice);\n        }\n        return maxProfit;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        min_price = float('inf')\n        max_profit = 0\n        for price in prices:\n            if price < min_price:\n                min_price = price\n            elif price - min_price > max_profit:\n                max_profit = price - min_price\n        return max_profit",
+        "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        int minPrice = Integer.MAX_VALUE;\n        int maxProfit = 0;\n        for (int price : prices) {\n            minPrice = Math.min(minPrice, price);\n            maxProfit = Math.max(maxProfit, price - minPrice);\n        }\n        return maxProfit;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One linear pass, constant work per price to update min and best profit."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only minPrice and maxProfit variables regardless of input size."
+      },
+      "dryRunExample": {
+        "input": "prices = [7,1,5,3,6,4]",
+        "steps": [
+          "start min=inf max=0",
+          "7: min=7 max=0",
+          "1: min=1 max=0",
+          "5: min=1 max=4",
+          "3: min=1 max=4",
+          "6: min=1 max=5",
+          "4: min=1 max=5 return 5"
+        ],
+        "output": "5"
+      },
+      "edgeCases": [
+        "Empty array loop skipped returns 0",
+        "Single element [9] min=9 max=0",
+        "Decreasing [5,4,3,2,1] min keeps dropping max stays 0",
+        "Increasing [1,2,3,4,5] profit 4 from first to last"
+      ]
+    }
+  ]
+}

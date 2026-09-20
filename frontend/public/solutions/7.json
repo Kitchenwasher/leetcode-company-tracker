@@ -1,0 +1,87 @@
+{
+  "questionId": 7,
+  "title": "Reverse Integer",
+  "difficulty": "Medium",
+  "corePattern": "Digit Manipulation with Pre-Overflow Guard",
+  "interviewTips": [
+    "Clarify 32-bit signed range: should overflow return 0 or clamp? For this problem return 0 for [-2^31, 2^31-1] violation.",
+    "Trade-off: string reversal is simplest to code but uses O(log x) extra space; arithmetic pop/push is O(1) and shows overflow awareness.",
+    "Edge-case tip: explicitly mention x=0, negative x, trailing zeros e.g. 120 -> 21, and overflow cases 1534236469 and -2147483648 before coding."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: String Reversal with Range Check",
+      "tag": "Brute Force",
+      "intuition": "Reversing decimal digits is just reversing characters. Convert absolute value to string, reverse it, restore sign, then reject if outside 32-bit range.",
+      "theory": "Any integer x has d = O(log10|x|) decimal digits. String conversion yields those digits in order, reversal yields reversed number ignoring leading zeros (which int() drops automatically). Using 64-bit intermediate (Python int / long long / long) lets us detect overflow after the fact by comparing against INT_MIN = -2^31 and INT_MAX = 2^31-1. Correct because reversal is bijective on digit strings except dropped leading zeros which is desired.",
+      "cppCode": "class Solution {\npublic:\n    int reverse(int x) {\n        long long ax = llabs((long long)x);\n        string s = to_string(ax);\n        std::reverse(s.begin(), s.end());\n        long long res = stoll(s);\n        if (x < 0) res = -res;\n        if (res < INT_MIN || res > INT_MAX) return 0;\n        return (int)res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int reverse(int x) {\n        long long ax = llabs((long long)x);\n        string s = to_string(ax);\n        std::reverse(s.begin(), s.end());\n        long long res = stoll(s);\n        if (x < 0) res = -res;\n        if (res < INT_MIN || res > INT_MAX) return 0;\n        return (int)res;\n    }\n};",
+        "python": "class Solution:\n    def reverse(self, x: int) -> int:\n        INT_MIN, INT_MAX = -2**31, 2**31 - 1\n        sign = -1 if x < 0 else 1\n        s = str(abs(x))[::-1]\n        res = sign * int(s)\n        if res < INT_MIN or res > INT_MAX:\n            return 0\n        return res",
+        "java": "class Solution {\n    public int reverse(int x) {\n        long ax = Math.abs((long) x);\n        String s = new StringBuilder(Long.toString(ax)).reverse().toString();\n        long res = Long.parseLong(s);\n        if (x < 0) res = -res;\n        if (res < Integer.MIN_VALUE || res > Integer.MAX_VALUE) return 0;\n        return (int) res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log x)",
+        "explanation": "Number of digits d = floor(log10|x|)+1. Conversion, reversal, and parsing each scan d characters."
+      },
+      "spaceComplexity": {
+        "complexity": "O(log x)",
+        "explanation": "String of d digits plus reversed copy. No other proportional storage."
+      },
+      "dryRunExample": {
+        "input": "x = 123",
+        "steps": [
+          "abs(123) -> '123'",
+          "reverse -> '321'",
+          "parse -> 321, sign positive -> 321",
+          "321 in [-2147483648, 2147483647] -> return 321"
+        ],
+        "output": "321"
+      },
+      "edgeCases": [
+        "x = 0 -> '0' -> 0",
+        "x = 120 -> '021' -> 21 (leading zero dropped)",
+        "x = -123 -> -321",
+        "x = 1534236469 -> reversed 9646324351 > INT_MAX -> 0"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Arithmetic Pop-Push with Pre-Overflow Check",
+      "tag": "Optimal",
+      "intuition": "Build reversed number digit by digit: repeatedly pop last digit with %10 and push with rev = rev*10 + pop. Check overflow BEFORE rev*10 overflows.",
+      "theory": "Invariant: after k steps rev holds reversal of last k digits. To avoid 32-bit overflow on rev*10+pop, guard: if rev > INT_MAX/10 then rev*10 already overflows; if rev == INT_MAX/10 then need pop <= 7 since INT_MAX=2147483647. Symmetrically for negative: rev < INT_MIN/10 or rev == INT_MIN/10 and pop < -8 since INT_MIN=-2147483648. In C++/Java x%10 preserves sign, so single loop handles negatives. In Python we use abs and single positive check. This is exact because overflow condition is linear in rev.",
+      "cppCode": "class Solution {\npublic:\n    int reverse(int x) {\n        int rev = 0;\n        while (x != 0) {\n            int pop = x % 10;\n            x /= 10;\n            if (rev > INT_MAX / 10 || (rev == INT_MAX / 10 && pop > 7)) return 0;\n            if (rev < INT_MIN / 10 || (rev == INT_MIN / 10 && pop < -8)) return 0;\n            rev = rev * 10 + pop;\n        }\n        return rev;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int reverse(int x) {\n        int rev = 0;\n        while (x != 0) {\n            int pop = x % 10;\n            x /= 10;\n            if (rev > INT_MAX / 10 || (rev == INT_MAX / 10 && pop > 7)) return 0;\n            if (rev < INT_MIN / 10 || (rev == INT_MIN / 10 && pop < -8)) return 0;\n            rev = rev * 10 + pop;\n        }\n        return rev;\n    }\n};",
+        "python": "class Solution:\n    def reverse(self, x: int) -> int:\n        INT_MAX = 2**31 - 1\n        sign = -1 if x < 0 else 1\n        x = abs(x)\n        rev = 0\n        while x != 0:\n            pop = x % 10\n            x //= 10\n            if rev > INT_MAX // 10 or (rev == INT_MAX // 10 and pop > 7):\n                return 0\n            rev = rev * 10 + pop\n        return sign * rev",
+        "java": "class Solution {\n    public int reverse(int x) {\n        int rev = 0;\n        while (x != 0) {\n            int pop = x % 10;\n            x /= 10;\n            if (rev > Integer.MAX_VALUE / 10 || (rev == Integer.MAX_VALUE / 10 && pop > 7)) return 0;\n            if (rev < Integer.MIN_VALUE / 10 || (rev == Integer.MIN_VALUE / 10 && pop < -8)) return 0;\n            rev = rev * 10 + pop;\n        }\n        return rev;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log x)",
+        "explanation": "One iteration per decimal digit, d = O(log10|x|) steps, O(1) work per step."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only rev, pop, and x variables, constant extra space."
+      },
+      "dryRunExample": {
+        "input": "x = -123",
+        "steps": [
+          "rev=0, x=-123: pop=-3, rev=0*10-3=-3, x=-12",
+          "pop=-2, rev=-3*10-2=-32, x=-1",
+          "pop=-1, rev=-32*10-1=-321, x=0",
+          "no overflow guard triggered -> return -321"
+        ],
+        "output": "-321"
+      },
+      "edgeCases": [
+        "x = 0 -> loop skipped -> 0",
+        "x = 120 -> rev builds 0->2->21 -> 21",
+        "x = 1534236469 -> guard rev > INT_MAX/10 triggers -> 0",
+        "x = -2147483648 -> guard rev < INT_MIN/10 triggers -> 0"
+      ]
+    }
+  ]
+}

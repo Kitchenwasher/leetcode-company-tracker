@@ -3,8 +3,8 @@
     "questionId": 1,
     "title": "Two Sum",
     "difficulty": "Easy",
-    "corePattern": "Hash Map Lookup & Complement Arithmetic",
-    "approachCount": 3,
+    "corePattern": "Hash Table Complement Lookup",
+    "approachCount": 2,
     "hasSolution": true
   },
   {
@@ -40,11 +40,35 @@
     "hasSolution": true
   },
   {
+    "questionId": 11,
+    "title": "Container With Most Water",
+    "difficulty": "Medium",
+    "corePattern": "Two Pointers with Greedy Height Elimination",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 121,
+    "title": "Best Time to Buy and Sell Stock",
+    "difficulty": "Easy",
+    "corePattern": "Greedy Single Pass with Running Minimum - Prefix Minimum State Tracking",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
     "questionId": 1271,
     "title": "Hexspeak",
     "difficulty": "Easy",
     "corePattern": "Binary Search",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 128,
+    "title": "Longest Consecutive Sequence",
+    "difficulty": "Medium",
+    "corePattern": "Hash Set Sequence Start Detection",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -69,6 +93,22 @@
     "difficulty": "Medium",
     "corePattern": "Trees",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 14,
+    "title": "Longest Common Prefix",
+    "difficulty": "Easy",
+    "corePattern": "Character-wise Prefix Reduction",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 15,
+    "title": "3Sum",
+    "difficulty": "Medium",
+    "corePattern": "Sorting + Fix-One-Element Reduction to 2Sum with Two Pointers",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -104,6 +144,14 @@
     "hasSolution": true
   },
   {
+    "questionId": 17,
+    "title": "Letter Combinations of a Phone Number",
+    "difficulty": "Medium",
+    "corePattern": "Backtracking / DFS Enumeration of Cartesian Product",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 173,
     "title": "Binary Search Tree Iterator",
     "difficulty": "Medium",
@@ -120,10 +168,26 @@
     "hasSolution": true
   },
   {
+    "questionId": 1768,
+    "title": "Merge Strings Alternately",
+    "difficulty": "Easy",
+    "corePattern": "Two Pointers (Alternating Merge / Interleaving)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 1901,
     "title": "Find a Peak Element II",
     "difficulty": "Medium",
     "corePattern": "Binary Search",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 1929,
+    "title": "Concatenation of Array",
+    "difficulty": "Easy",
+    "corePattern": "Array Duplication and Index Mapping",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -141,6 +205,14 @@
     "difficulty": "Medium",
     "corePattern": "Dynamic Programming",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 2,
+    "title": "Add Two Numbers",
+    "difficulty": "Medium",
+    "corePattern": "Linked List Traversal with Carry Simulation using Dummy Head",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -224,6 +296,14 @@
     "hasSolution": true
   },
   {
+    "questionId": 2667,
+    "title": "Create Hello World Function",
+    "difficulty": "Easy",
+    "corePattern": "Factory Function and Closure (First-Class Functions)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 270,
     "title": "Closest Binary Search Tree Value",
     "difficulty": "Easy",
@@ -269,6 +349,14 @@
     "difficulty": "Medium",
     "corePattern": "Binary Search",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 3,
+    "title": "Longest Substring Without Repeating Characters",
+    "difficulty": "Medium",
+    "corePattern": "Sliding Window with Hash Table (Last-Seen Index)",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -395,8 +483,16 @@
     "questionId": 4,
     "title": "Median of Two Sorted Arrays",
     "difficulty": "Hard",
-    "corePattern": "Arrays & Hashing",
-    "approachCount": 2,
+    "corePattern": "Binary Search on Partition Index over Smaller Array",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 42,
+    "title": "Trapping Rain Water",
+    "difficulty": "Hard",
+    "corePattern": "Bounded Height by Min of LeftMax and RightMax",
+    "approachCount": 4,
     "hasSolution": true
   },
   {
@@ -468,6 +564,14 @@
     "title": "Number of Longest Increasing Subsequence",
     "difficulty": "Medium",
     "corePattern": "Dynamic Programming",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 7,
+    "title": "Reverse Integer",
+    "difficulty": "Medium",
+    "corePattern": "Digit Manipulation with Pre-Overflow Guard",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -557,6 +661,22 @@
     "difficulty": "Medium",
     "corePattern": "Binary Search",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 88,
+    "title": "Merge Sorted Array",
+    "difficulty": "Easy",
+    "corePattern": "Reverse Two Pointers - In-Place Merge From The Back",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 9,
+    "title": "Palindrome Number",
+    "difficulty": "Easy",
+    "corePattern": "Math - Number Reversal and Symmetry Check",
+    "approachCount": 3,
     "hasSolution": true
   },
   {

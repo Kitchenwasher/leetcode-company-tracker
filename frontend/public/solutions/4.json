@@ -2,49 +2,118 @@
   "questionId": 4,
   "title": "Median of Two Sorted Arrays",
   "difficulty": "Hard",
-  "corePattern": "Arrays & Hashing",
+  "corePattern": "Binary Search on Partition Index over Smaller Array",
   "interviewTips": [
-    "State the brute-force approach first before presenting the optimal Arrays & Hashing technique.",
-    "Discuss Time and Space complexities upfront before writing code.",
-    "Test on empty inputs and single-element edge cases."
+    "Ask if either array can be empty and confirm total length can be 1, and whether integers can be negative or duplicates.",
+    "Trade-off: O(m+n) merge is simplest and least bug-prone, while O(log(min(m,n))) binary-search partition is expected for Hard with O(1) space.",
+    "Edge-case tip: handle odd vs even total length separately and use -inf/inf sentinels for empty partition sides to avoid index checks."
   ],
   "approaches": [
     {
-      "id": "linear-scan",
-      "name": "Approach 1: Linear Scan (Brute Force)",
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Merge and Sort",
       "tag": "Brute Force",
-      "intuition": "Examine every candidate answer sequentially from the start to the end until a valid match is found.",
-      "theory": "Linear scan tests all N candidates one by one without exploiting monotonicity.",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int linearSearch(const std::vector<int>& nums, int target) {\n        for (int i = 0; i < static_cast<int>(nums.size()); ++i) {\n            if (nums[i] == target) return i;\n        }\n        return -1;\n    }\n};",
+      "intuition": "If we put all elements together and sort them, the median is just the middle element or average of two middles. Correctness is obvious and easy to code first.",
+      "theory": "Concatenate both arrays into one array of size m+n, sort it, then pick index n//2 for odd length or average of n//2-1 and n//2 for even length. Sorting guarantees order, so median definition applies directly.",
+      "cppCode": "class Solution {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        vector<int> merged = nums1;\n        merged.insert(merged.end(), nums2.begin(), nums2.end());\n        sort(merged.begin(), merged.end());\n        int n = merged.size();\n        if (n % 2 == 1) return (double)merged[n / 2];\n        return (merged[n / 2 - 1] + merged[n / 2]) / 2.0;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        vector<int> merged = nums1;\n        merged.insert(merged.end(), nums2.begin(), nums2.end());\n        sort(merged.begin(), merged.end());\n        int n = merged.size();\n        if (n % 2 == 1) return (double)merged[n / 2];\n        return (merged[n / 2 - 1] + merged[n / 2]) / 2.0;\n    }\n};",
+        "python": "class Solution:\n    def findMedianSortedArrays(self, nums1: list[int], nums2: list[int]) -> float:\n        merged = nums1 + nums2\n        merged.sort()\n        n = len(merged)\n        mid = n // 2\n        if n % 2 == 1:\n            return float(merged[mid])\n        return (merged[mid - 1] + merged[mid]) / 2.0",
+        "java": "class Solution {\n    public double findMedianSortedArrays(int[] nums1, int[] nums2) {\n        int m = nums1.length, n = nums2.length;\n        int[] merged = new int[m + n];\n        System.arraycopy(nums1, 0, merged, 0, m);\n        System.arraycopy(nums2, 0, merged, m, n);\n        java.util.Arrays.sort(merged);\n        int total = m + n;\n        if (total % 2 == 1) return (double) merged[total / 2];\n        return (merged[total / 2 - 1] + merged[total / 2]) / 2.0;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Scans up to N elements."
+        "complexity": "O((m+n) log(m+n))",
+        "explanation": "Concatenation is O(m+n) and sorting the combined array dominates with O((m+n) log(m+n))."
       },
       "spaceComplexity": {
-        "complexity": "O(1)",
-        "explanation": "Zero auxiliary space."
+        "complexity": "O(m+n)",
+        "explanation": "Extra merged array stores all m+n elements."
+      },
+      "dryRunExample": {
+        "input": "nums1 = [1,3], nums2 = [2]",
+        "steps": [
+          "Merge: [1,3] + [2] = [1,3,2]",
+          "Sort: [1,2,3]",
+          "n=3 odd, mid=1, return float(2) = 2.0"
+        ],
+        "output": "2.0"
       },
       "edgeCases": [
-        "Target smaller than minimum or larger than maximum."
+        "One array empty: nums1=[], nums2=[1] -> 1.0",
+        "Even total: nums1=[1,2], nums2=[3,4] -> (2+3)/2=2.5",
+        "Duplicates and negatives work because sort handles them"
       ]
     },
     {
-      "id": "binary-search-optimal",
-      "name": "Approach 2: Binary Search (Optimal)",
-      "tag": "Optimal",
-      "intuition": "Because the search space is monotonic (sorted or monotonic predicate), calculate the midpoint `mid = left + (right - left) / 2` and discard half the search space in each step.",
-      "theory": "Halving the search range in each iteration guarantees logarithmic steps: log2(N). Using `left + (right - left) / 2` prevents integer overflow.",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int binarySearch(const std::vector<int>& nums, int target) {\n        int left = 0;\n        int right = nums.size() - 1;\n\n        while (left <= right) {\n            int mid = left + (right - left) / 2; // Prevent (left+right) overflow\n\n            if (nums[mid] == target) {\n                return mid;\n            } else if (nums[mid] < target) {\n                left = mid + 1;\n            } else {\n                right = mid - 1;\n            }\n        }\n\n        return -1; // Not found\n    }\n};",
+      "id": "two-pointer",
+      "name": "Approach 2: Linear Merge with Two Pointers",
+      "tag": "Two Pointers",
+      "intuition": "Since inputs are already sorted, we can merge like in merge-sort and stop when we reach the median position, without storing everything.",
+      "theory": "Let total=m+n, mid1=(total-1)//2 and mid2=total//2 (same for odd, two middles for even). Walk with i,j pointers picking smaller head each step, counting steps. Record values at mid1 and mid2, then average. This simulates merge order in O(m+n) steps.",
+      "cppCode": "class Solution {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        int m = nums1.size(), n = nums2.size();\n        int total = m + n;\n        int mid1 = (total - 1) / 2;\n        int mid2 = total / 2;\n        int i = 0, j = 0, count = -1;\n        int a = 0, b = 0;\n        while (i < m || j < n) {\n            int val;\n            if (j == n || (i < m && nums1[i] <= nums2[j])) {\n                val = nums1[i++];\n            } else {\n                val = nums2[j++];\n            }\n            ++count;\n            if (count == mid1) a = val;\n            if (count == mid2) { b = val; break; }\n        }\n        return (a + b) / 2.0;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        int m = nums1.size(), n = nums2.size();\n        int total = m + n;\n        int mid1 = (total - 1) / 2;\n        int mid2 = total / 2;\n        int i = 0, j = 0, count = -1;\n        int a = 0, b = 0;\n        while (i < m || j < n) {\n            int val;\n            if (j == n || (i < m && nums1[i] <= nums2[j])) {\n                val = nums1[i++];\n            } else {\n                val = nums2[j++];\n            }\n            ++count;\n            if (count == mid1) a = val;\n            if (count == mid2) { b = val; break; }\n        }\n        return (a + b) / 2.0;\n    }\n};",
+        "python": "class Solution:\n    def findMedianSortedArrays(self, nums1: list[int], nums2: list[int]) -> float:\n        m, n = len(nums1), len(nums2)\n        total = m + n\n        mid1 = (total - 1) // 2\n        mid2 = total // 2\n        i = j = 0\n        count = -1\n        a = b = 0\n        while i < m or j < n:\n            if j == n or (i < m and nums1[i] <= nums2[j]):\n                val = nums1[i]\n                i += 1\n            else:\n                val = nums2[j]\n                j += 1\n            count += 1\n            if count == mid1:\n                a = val\n            if count == mid2:\n                b = val\n                break\n        return (a + b) / 2.0",
+        "java": "class Solution {\n    public double findMedianSortedArrays(int[] nums1, int[] nums2) {\n        int m = nums1.length, n = nums2.length;\n        int total = m + n;\n        int mid1 = (total - 1) / 2;\n        int mid2 = total / 2;\n        int i = 0, j = 0, count = -1;\n        int a = 0, b = 0;\n        while (i < m || j < n) {\n            int val;\n            if (j == n || (i < m && nums1[i] <= nums2[j])) {\n                val = nums1[i++];\n            } else {\n                val = nums2[j++];\n            }\n            count++;\n            if (count == mid1) a = val;\n            if (count == mid2) { b = val; break; }\n        }\n        return (a + b) / 2.0;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(log N)",
-        "explanation": "Search interval is halved in every iteration."
+        "complexity": "O(m+n)",
+        "explanation": "In worst case we advance pointers up to median position, at most O((m+n)/2 +1) steps, bounded by O(m+n)."
       },
       "spaceComplexity": {
         "complexity": "O(1)",
-        "explanation": "Constant extra memory."
+        "explanation": "Only a few indices and two median candidates are stored."
+      },
+      "dryRunExample": {
+        "input": "nums1 = [1,3], nums2 = [2]",
+        "steps": [
+          "total=3, mid1=1, mid2=1",
+          "pick 1 (i=1), count=0",
+          "pick 2 (j=1), count=1 -> a=b=2, break",
+          "return (2+2)/2=2.0"
+        ],
+        "output": "2.0"
       },
       "edgeCases": [
-        "Array with 1 element, target not present in array."
+        "One array empty: nums1=[], nums2=[2,3] -> walk only second array",
+        "Even total: nums1=[1,2], nums2=[3,4] -> mid1=1,mid2=2, a=2,b=3 -> 2.5",
+        "All elements in one array smaller than other"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Optimal Binary Search Partition",
+      "tag": "Optimal",
+      "intuition": "Median splits the combined sorted array into left half and right half with all left <= all right. If we cut the small array at i and the large array at j so left sizes sum to half, we only need to find the correct cut with binary search.",
+      "theory": "Ensure nums1 is smaller. Let half=(m+n+1)//2. For partition i in [0..m], j=half-i. Define Aleft,Aright,Bleft,Bright with -inf/inf for out-of-bounds. Correct partition satisfies Aleft<=Bright and Bleft<=Aright. Then odd median is max(Aleft,Bleft), even is (max left + min right)/2. The condition is monotonic in i, so binary search on i finds it in O(log(min(m,n))).",
+      "cppCode": "class Solution {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        if (nums1.size() > nums2.size()) return findMedianSortedArrays(nums2, nums1);\n        int m = nums1.size(), n = nums2.size();\n        int total = m + n;\n        int half = (total + 1) / 2;\n        int l = 0, r = m;\n        while (l <= r) {\n            int i = (l + r) / 2;\n            int j = half - i;\n            int Aleft = (i > 0) ? nums1[i - 1] : INT_MIN;\n            int Aright = (i < m) ? nums1[i] : INT_MAX;\n            int Bleft = (j > 0) ? nums2[j - 1] : INT_MIN;\n            int Bright = (j < n) ? nums2[j] : INT_MAX;\n            if (Aleft <= Bright && Bleft <= Aright) {\n                if (total % 2 == 1) return (double)max(Aleft, Bleft);\n                return (max(Aleft, Bleft) + min(Aright, Bright)) / 2.0;\n            } else if (Aleft > Bright) {\n                r = i - 1;\n            } else {\n                l = i + 1;\n            }\n        }\n        return 0.0;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        if (nums1.size() > nums2.size()) return findMedianSortedArrays(nums2, nums1);\n        int m = nums1.size(), n = nums2.size();\n        int total = m + n;\n        int half = (total + 1) / 2;\n        int l = 0, r = m;\n        while (l <= r) {\n            int i = (l + r) / 2;\n            int j = half - i;\n            int Aleft = (i > 0) ? nums1[i - 1] : INT_MIN;\n            int Aright = (i < m) ? nums1[i] : INT_MAX;\n            int Bleft = (j > 0) ? nums2[j - 1] : INT_MIN;\n            int Bright = (j < n) ? nums2[j] : INT_MAX;\n            if (Aleft <= Bright && Bleft <= Aright) {\n                if (total % 2 == 1) return (double)max(Aleft, Bleft);\n                return (max(Aleft, Bleft) + min(Aright, Bright)) / 2.0;\n            } else if (Aleft > Bright) {\n                r = i - 1;\n            } else {\n                l = i + 1;\n            }\n        }\n        return 0.0;\n    }\n};",
+        "python": "class Solution:\n    def findMedianSortedArrays(self, nums1: list[int], nums2: list[int]) -> float:\n        if len(nums1) > len(nums2):\n            nums1, nums2 = nums2, nums1\n        m, n = len(nums1), len(nums2)\n        total = m + n\n        half = (total + 1) // 2\n        l, r = 0, m\n        while l <= r:\n            i = (l + r) // 2\n            j = half - i\n            Aleft = nums1[i - 1] if i > 0 else float('-inf')\n            Aright = nums1[i] if i < m else float('inf')\n            Bleft = nums2[j - 1] if j > 0 else float('-inf')\n            Bright = nums2[j] if j < n else float('inf')\n            if Aleft <= Bright and Bleft <= Aright:\n                if total % 2 == 1:\n                    return float(max(Aleft, Bleft))\n                return (max(Aleft, Bleft) + min(Aright, Bright)) / 2.0\n            elif Aleft > Bright:\n                r = i - 1\n            else:\n                l = i + 1\n        return 0.0",
+        "java": "class Solution {\n    public double findMedianSortedArrays(int[] nums1, int[] nums2) {\n        if (nums1.length > nums2.length) return findMedianSortedArrays(nums2, nums1);\n        int m = nums1.length, n = nums2.length;\n        int total = m + n;\n        int half = (total + 1) / 2;\n        int l = 0, r = m;\n        while (l <= r) {\n            int i = (l + r) / 2;\n            int j = half - i;\n            int Aleft = (i > 0) ? nums1[i - 1] : Integer.MIN_VALUE;\n            int Aright = (i < m) ? nums1[i] : Integer.MAX_VALUE;\n            int Bleft = (j > 0) ? nums2[j - 1] : Integer.MIN_VALUE;\n            int Bright = (j < n) ? nums2[j] : Integer.MAX_VALUE;\n            if (Aleft <= Bright && Bleft <= Aright) {\n                if (total % 2 == 1) return (double) Math.max(Aleft, Bleft);\n                return (Math.max(Aleft, Bleft) + Math.min(Aright, Bright)) / 2.0;\n            } else if (Aleft > Bright) {\n                r = i - 1;\n            } else {\n                l = i + 1;\n            }\n        }\n        return 0.0;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log(min(m,n)))",
+        "explanation": "Binary search runs over the smaller array of length min(m,n), each step O(1)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only partition indices and four border values are used."
+      },
+      "dryRunExample": {
+        "input": "nums1 = [1,3], nums2 = [2]",
+        "steps": [
+          "Ensure nums1 smaller? swap -> nums1=[2], nums2=[1,3], m=1,n=2,half=2",
+          "l=0,r=1,i=0,j=2: Aleft=-inf,Aright=2,Bleft=3,Bright=inf -> Bleft>Aright so l=1",
+          "i=1,j=1: Aleft=2,Aright=inf,Bleft=1,Bright=3 -> 2<=3 and 1<=inf valid",
+          "total=3 odd -> max(2,1)=2.0"
+        ],
+        "output": "2.0"
+      },
+      "edgeCases": [
+        "Empty small array: nums1=[], nums2=[1,2,3] -> i=0 fixed, j=half",
+        "Even total: nums1=[1,2], nums2=[3,4] -> half=2, partition found, (2+3)/2=2.5",
+        "Large skew: m=1,n=100000, binary search stays logarithmic"
       ]
     }
   ]

@@ -89,35 +89,59 @@ Format strictly as:
       "edgeCases": ["case 1", "case 2"]
     }
   ]
-}`;
+    Be direct, structured, and focused in your reasoning so the complete JSON editorial finishes cleanly.`;
 
     const userPrompt = `Generate a multi-approach editorial for Problem #${id}: "${title}" (${difficulty}) [Topics: ${topics.join(', ')}]. Provide working Python 3, C++, and Java code for each approach.`;
 
     const endpoint = `${ENV.MUSE_API_URL.replace(/\/+$/, '')}/chat/completions`;
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${ENV.MUSE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: ENV.MUSE_MODEL,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        max_tokens: 8192,
-        temperature: 0.2,
-      }),
-    });
+    let data: any = null;
+    let lastError: any = null;
 
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      throw new Error(`Meta Muse API returned HTTP ${response.status}: ${errText}`);
+    // Retry loop with exponential backoff for network or transient errors
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${ENV.MUSE_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: ENV.MUSE_MODEL,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+            max_tokens: 12000,
+            temperature: 0.2,
+          }),
+        });
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => '');
+          throw new Error(`Meta Muse API returned HTTP ${response.status}: ${errText}`);
+        }
+
+        data = (await response.json()) as any;
+        if (data?.choices?.[0]?.message?.content) {
+          break; // Succeeded
+        } else if (data?.choices?.[0]?.finish_reason === 'length') {
+          throw new Error(`Meta Muse token length exceeded (usage: ${JSON.stringify(data?.usage || {})})`);
+        }
+      } catch (err: any) {
+        lastError = err;
+        if (attempt < 3) {
+          const backoff = attempt * 3000;
+          await new Promise((r) => setTimeout(r, backoff));
+        }
+      }
     }
 
-    const data = (await response.json()) as any;
+    if (!data) {
+      throw lastError || new Error('Failed to obtain response from Meta Muse API after 3 attempts.');
+    }
+
     const choice = data?.choices?.[0];
     const rawContent = choice?.message?.content;
 

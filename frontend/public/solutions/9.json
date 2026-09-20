@@ -1,0 +1,127 @@
+{
+  "questionId": 9,
+  "title": "Palindrome Number",
+  "difficulty": "Easy",
+  "corePattern": "Math - Number Reversal and Symmetry Check",
+  "interviewTips": [
+    "Ask if negative numbers can be palindromes and if you must solve without converting to string as a follow-up.",
+    "String two-pointer solution is simplest to code but uses extra space; half-reversal math solution achieves O(1) space and avoids overflow - state this trade-off.",
+    "Call out edge cases upfront: negative numbers, numbers ending in 0 like 10 or 100, single digit, and x = 0 itself."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: String Conversion with Two Pointers",
+      "tag": "Brute Force",
+      "intuition": "A palindrome reads the same forward and backward. If we view the decimal representation as a string, the problem becomes the classic palindrome-string check with two pointers moving inward.",
+      "theory": "Convert x to its decimal string s of length d. Maintain left pointer l=0 and right pointer r=d-1. While l<r compare s[l] and s[r]; on mismatch return false, else move inward. If loop finishes, it is a palindrome. Negative sign '-' naturally fails because s[0]='-' will not match last digit. This takes linear time in number of digits and uses extra space for the string.",
+      "cppCode": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        string s = to_string(x);\n        int l = 0, r = (int)s.size() - 1;\n        while (l < r) {\n            if (s[l++] != s[r--]) return false;\n        }\n        return true;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        string s = to_string(x);\n        int l = 0, r = (int)s.size() - 1;\n        while (l < r) {\n            if (s[l++] != s[r--]) return false;\n        }\n        return true;\n    }\n};",
+        "python": "class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        s = str(x)\n        l, r = 0, len(s) - 1\n        while l < r:\n            if s[l] != s[r]:\n                return False\n            l += 1\n            r -= 1\n        return True",
+        "java": "class Solution {\n    public boolean isPalindrome(int x) {\n        String s = Integer.toString(x);\n        int l = 0, r = s.length() - 1;\n        while (l < r) {\n            if (s.charAt(l++) != s.charAt(r--)) return false;\n        }\n        return true;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log10(x))",
+        "explanation": "Let d be number of decimal digits, d = O(log10(x)). Conversion and two-pointer scan each touch d characters once."
+      },
+      "spaceComplexity": {
+        "complexity": "O(log10(x))",
+        "explanation": "String representation of x stores d characters. Two pointers use O(1) extra."
+      },
+      "dryRunExample": {
+        "input": "x = 121",
+        "steps": [
+          "s = '121', l=0, r=2",
+          "s[0]==s[2]=='1', move to l=1, r=1",
+          "l<r false, loop ends, return true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "x = -121 returns false due to '-' mismatch",
+        "x = 10 returns false, first and last chars differ",
+        "x = 0 and single digits 0-9 return true",
+        "Large 10-digit values work but use string allocation"
+      ]
+    },
+    {
+      "id": "full-reverse",
+      "name": "Approach 2: Full Integer Reversal",
+      "tag": "Math",
+      "intuition": "Instead of strings, build the reversed number mathematically by repeatedly popping the last digit and pushing it onto the reversed result, then compare reversed to original.",
+      "theory": "If x < 0 return false. Save orig = x. Build rev = 0 while x > 0: rev = rev*10 + x%10; x/=10. At the end rev is the digit-reversed value. Return rev == orig. Correct because decimal reversal is bijective; equality holds iff digits are symmetric. Must use 64-bit type for rev in C++/Java because reversed value of e.g. 1999999999 exceeds 32-bit range even though input fits.",
+      "cppCode": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        if (x < 0) return false;\n        long orig = x;\n        long rev = 0;\n        while (x > 0) {\n            rev = rev * 10 + x % 10;\n            x /= 10;\n        }\n        return rev == orig;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        if (x < 0) return false;\n        long orig = x;\n        long rev = 0;\n        while (x > 0) {\n            rev = rev * 10 + x % 10;\n            x /= 10;\n        }\n        return rev == orig;\n    }\n};",
+        "python": "class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        if x < 0:\n            return False\n        orig = x\n        rev = 0\n        while x > 0:\n            rev = rev * 10 + x % 10\n            x //= 10\n        return rev == orig",
+        "java": "class Solution {\n    public boolean isPalindrome(int x) {\n        if (x < 0) return false;\n        long orig = x;\n        long rev = 0;\n        while (x > 0) {\n            rev = rev * 10 + x % 10;\n            x /= 10;\n        }\n        return rev == orig;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log10(x))",
+        "explanation": "Loop runs once per decimal digit, d = O(log10(x)) iterations with O(1) work each."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a few integer variables orig and rev are used, no extra allocation."
+      },
+      "dryRunExample": {
+        "input": "x = 1221",
+        "steps": [
+          "orig=1221, rev=0",
+          "pop 1: rev=1, x=122",
+          "pop 2: rev=12, x=12",
+          "pop 2: rev=122, x=1",
+          "pop 1: rev=1221, x=0",
+          "rev==orig so return true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "x < 0 returns false immediately",
+        "x = 10: rev=1 != 10 returns false",
+        "x = 0: loop skipped, rev=0==orig returns true",
+        "x = 2147483647: rev fits in long, correctly returns false"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Reverse Only Half (Optimal)",
+      "tag": "Optimal",
+      "intuition": "We only need to compare first half to second half. By reversing digits until the reversed half catches up to the remaining half, we can check symmetry without full reversal and without overflow.",
+      "theory": "Early reject: if x<0 or (x%10==0 and x!=0) return false, because no palindrome except 0 ends in 0. Otherwise build rev from trailing digits: while x > rev: rev = rev*10 + x%10; x/=10. When loop ends, x is the leading half and rev is the reversed trailing half. For even length, need x==rev. For odd length, middle digit is in rev, so need x==rev/10. This halves iterations and rev never exceeds 5 digits for 32-bit int, so 32-bit int is safe from overflow.",
+      "cppCode": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        if (x < 0 || (x % 10 == 0 && x != 0)) return false;\n        int rev = 0;\n        while (x > rev) {\n            rev = rev * 10 + x % 10;\n            x /= 10;\n        }\n        return x == rev || x == rev / 10;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        if (x < 0 || (x % 10 == 0 && x != 0)) return false;\n        int rev = 0;\n        while (x > rev) {\n            rev = rev * 10 + x % 10;\n            x /= 10;\n        }\n        return x == rev || x == rev / 10;\n    }\n};",
+        "python": "class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        if x < 0 or (x % 10 == 0 and x != 0):\n            return False\n        rev = 0\n        while x > rev:\n            rev = rev * 10 + x % 10\n            x //= 10\n        return x == rev or x == rev // 10",
+        "java": "class Solution {\n    public boolean isPalindrome(int x) {\n        if (x < 0 || (x % 10 == 0 && x != 0)) return false;\n        int rev = 0;\n        while (x > rev) {\n            rev = rev * 10 + x % 10;\n            x /= 10;\n        }\n        return x == rev || x == rev / 10;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log10(x))",
+        "explanation": "Only half the digits are processed, d/2 iterations where d = O(log10(x)). Asymptotically same as full reversal but ~2x fewer steps."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two integers x and rev are maintained, no string or array."
+      },
+      "dryRunExample": {
+        "input": "x = 12321",
+        "steps": [
+          "rev=0, x=12321",
+          "rev=1, x=1232",
+          "rev=12, x=123",
+          "rev=123, x=12, now x<rev stop",
+          "x=12, rev//10=12, so x==rev//10 true for odd length"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "x = -121 returns false",
+        "x = 10, 100 returns false via trailing-zero check",
+        "x = 0 returns true, x != 0 guard prevents rejecting 0",
+        "Even length 1221: ends with x=12, rev=12, x==rev true",
+        "Odd length 121: ends with x=1, rev=12, x==rev//10 true"
+      ]
+    }
+  ]
+}

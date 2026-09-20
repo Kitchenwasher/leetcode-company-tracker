@@ -1,0 +1,123 @@
+{
+  "questionId": 88,
+  "title": "Merge Sorted Array",
+  "difficulty": "Easy",
+  "corePattern": "Reverse Two Pointers - In-Place Merge From The Back",
+  "interviewTips": [
+    "Clarify that nums1 has size m+n with first m valid and last n zeros as buffer, and you must modify nums1 in-place with void return.",
+    "Trade-off: copy-then-sort is shortest to code but O((m+n) log(m+n)); forward two-pointer is linear but needs O(m) copy; backward two-pointer is linear and O(1).",
+    "Edge-case tip: always test m=0 (nums1 all buffer), n=0 (nothing to do), all nums2 smaller than nums1, and duplicates.",
+    "Explain why forward merge overwrites unprocessed data but backward merge is safe because the buffer is at the end."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Copy Then Sort",
+      "tag": "Brute Force",
+      "intuition": "nums1 already has free space at the end. The simplest idea is to just copy all of nums2 into that tail and then sort the whole array. Sorting fixes the order without thinking about merging logic.",
+      "theory": "After copying, nums1 contains exactly the multiset of the m valid elements plus n elements of nums2. Sorting a multiset yields the sorted merged array. This is correct but ignores that inputs are already sorted, so it does extra work.",
+      "cppCode": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        for (int i = 0; i < n; ++i) nums1[m + i] = nums2[i];\n        sort(nums1.begin(), nums1.end());\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        for (int i = 0; i < n; ++i) nums1[m + i] = nums2[i];\n        sort(nums1.begin(), nums1.end());\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:\n        for i in range(n):\n            nums1[m + i] = nums2[i]\n        nums1.sort()",
+        "java": "import java.util.Arrays;\nclass Solution {\n    public void merge(int[] nums1, int m, int[] nums2, int n) {\n        for (int i = 0; i < n; i++) nums1[m + i] = nums2[i];\n        Arrays.sort(nums1);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O((m+n) log(m+n))",
+        "explanation": "Copying n elements is O(n) and sorting m+n elements dominates with O((m+n) log(m+n))."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "In-place copy and in-place sort, ignoring O(log(m+n)) recursion stack of the sort implementation."
+      },
+      "dryRunExample": {
+        "input": "nums1=[1,2,3,0,0,0], m=3, nums2=[2,5,6], n=3",
+        "steps": [
+          "Copy nums2 into tail: nums1 becomes [1,2,3,2,5,6]",
+          "Sort nums1: [1,2,2,3,5,6]"
+        ],
+        "output": "nums1=[1,2,2,3,5,6]"
+      },
+      "edgeCases": [
+        "m=0, n=1: nums1=[0], nums2=[1] -> copy then sort to [1]",
+        "n=0: no copy, sort leaves first m elements unchanged",
+        "Duplicates like nums1=[1,2,3,0,0,0], nums2=[2,5,6] handled by sort stability"
+      ]
+    },
+    {
+      "id": "extra-space",
+      "name": "Approach 2: Forward Two Pointers With Copy",
+      "tag": "Two Pointers",
+      "intuition": "This is the classic merge step of merge sort. Use two front pointers p1 for nums1 and p2 for nums2, always write the smaller one next. Because writing to nums1 front would overwrite unread values, first copy the m valid elements aside.",
+      "theory": "Let A be the copy of first m of nums1 and B be nums2, both sorted. Maintaining p1,p2,p invariant that nums1[0:p] holds the sorted merge of A[0:p1] and B[0:p2] proves correctness by induction. Each step appends min of remaining heads, which is the next smallest overall. Leftover tail is appended at end.",
+      "cppCode": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        vector<int> nums1Copy(nums1.begin(), nums1.begin() + m);\n        int p1 = 0, p2 = 0, p = 0;\n        while (p1 < m && p2 < n) {\n            if (nums1Copy[p1] <= nums2[p2]) nums1[p++] = nums1Copy[p1++];\n            else nums1[p++] = nums2[p2++];\n        }\n        while (p1 < m) nums1[p++] = nums1Copy[p1++];\n        while (p2 < n) nums1[p++] = nums2[p2++];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        vector<int> nums1Copy(nums1.begin(), nums1.begin() + m);\n        int p1 = 0, p2 = 0, p = 0;\n        while (p1 < m && p2 < n) {\n            if (nums1Copy[p1] <= nums2[p2]) nums1[p++] = nums1Copy[p1++];\n            else nums1[p++] = nums2[p2++];\n        }\n        while (p1 < m) nums1[p++] = nums1Copy[p1++];\n        while (p2 < n) nums1[p++] = nums2[p2++];\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:\n        nums1Copy = nums1[:m]\n        p1 = 0\n        p2 = 0\n        p = 0\n        while p1 < m and p2 < n:\n            if nums1Copy[p1] <= nums2[p2]:\n                nums1[p] = nums1Copy[p1]\n                p1 += 1\n            else:\n                nums1[p] = nums2[p2]\n                p2 += 1\n            p += 1\n        while p1 < m:\n            nums1[p] = nums1Copy[p1]\n            p1 += 1\n            p += 1\n        while p2 < n:\n            nums1[p] = nums2[p2]\n            p2 += 1\n            p += 1",
+        "java": "import java.util.Arrays;\nclass Solution {\n    public void merge(int[] nums1, int m, int[] nums2, int n) {\n        int[] nums1Copy = Arrays.copyOf(nums1, m);\n        int p1 = 0, p2 = 0, p = 0;\n        while (p1 < m && p2 < n) {\n            if (nums1Copy[p1] <= nums2[p2]) nums1[p++] = nums1Copy[p1++];\n            else nums1[p++] = nums2[p2++];\n        }\n        while (p1 < m) nums1[p++] = nums1Copy[p1++];\n        while (p2 < n) nums1[p++] = nums2[p2++];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m+n)",
+        "explanation": "Each of the m+n elements is read once and written once with O(1) comparison."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m)",
+        "explanation": "Extra copy of first m elements of nums1 to avoid overwrite."
+      },
+      "dryRunExample": {
+        "input": "nums1=[1,2,3,0,0,0], m=3, nums2=[2,5,6], n=3",
+        "steps": [
+          "Copy: nums1Copy=[1,2,3], p1=0,p2=0,p=0",
+          "1<=2 -> write 1, p1=1,p=1 => [1,0,0,0,0,0]",
+          "2<=2 -> write 2, p1=2,p=2 => [1,2,0,0,0,0]",
+          "3>2 -> write 2, p2=1,p=3 => [1,2,2,0,0,0]",
+          "3<=5 -> write 3, p1=3,p=4 => [1,2,2,3,0,0]",
+          "Drain nums2: write 5,6 => [1,2,2,3,5,6]"
+        ],
+        "output": "nums1=[1,2,2,3,5,6]"
+      },
+      "edgeCases": [
+        "m=0: copy empty, second while loop copies all of nums2",
+        "n=0: first loop never runs, first drain copies back original m elements",
+        "All nums2 smaller: e.g. nums1=[4,5,6,0,0,0], nums2=[1,2,3] -> p2 drains first then p1 drains"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Reverse Two Pointers In-Place",
+      "tag": "Optimal",
+      "intuition": "The buffer is at the end of nums1, so fill it from the back. Compare the largest remaining elements of both arrays and place the larger at the end. Nothing unread is ever overwritten because the write pointer only moves into empty buffer or already-moved positions.",
+      "theory": "Let p1=m-1, p2=n-1, p=m+n-1. Invariant: suffix nums1[p+1:] holds the largest elements in sorted order. Each step picks max(nums1[p1], nums2[p2]) as the next largest among remaining, so placing it at p preserves sortedness. When p2 exhausted, remaining nums1 prefix is already in place. This achieves linear time with no extra array.",
+      "cppCode": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        int p1 = m - 1, p2 = n - 1, p = m + n - 1;\n        while (p2 >= 0) {\n            if (p1 >= 0 && nums1[p1] > nums2[p2]) nums1[p--] = nums1[p1--];\n            else nums1[p--] = nums2[p2--];\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        int p1 = m - 1, p2 = n - 1, p = m + n - 1;\n        while (p2 >= 0) {\n            if (p1 >= 0 && nums1[p1] > nums2[p2]) nums1[p--] = nums1[p1--];\n            else nums1[p--] = nums2[p2--];\n        }\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:\n        p1 = m - 1\n        p2 = n - 1\n        p = m + n - 1\n        while p2 >= 0:\n            if p1 >= 0 and nums1[p1] > nums2[p2]:\n                nums1[p] = nums1[p1]\n                p1 -= 1\n            else:\n                nums1[p] = nums2[p2]\n                p2 -= 1\n            p -= 1",
+        "java": "class Solution {\n    public void merge(int[] nums1, int m, int[] nums2, int n) {\n        int p1 = m - 1, p2 = n - 1, p = m + n - 1;\n        while (p2 >= 0) {\n            if (p1 >= 0 && nums1[p1] > nums2[p2]) nums1[p--] = nums1[p1--];\n            else nums1[p--] = nums2[p2--];\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m+n)",
+        "explanation": "Each iteration decrements p and either p1 or p2, so at most m+n iterations with O(1) work each."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only three integer pointers, merging in-place from the back."
+      },
+      "dryRunExample": {
+        "input": "nums1=[1,2,3,0,0,0], m=3, nums2=[2,5,6], n=3",
+        "steps": [
+          "p1=2(3), p2=2(6), p=5: 3<=6 write 6 => [1,2,3,0,0,6], p2=1,p=4",
+          "p1=2(3), p2=1(5), p=4: 3<=5 write 5 => [1,2,3,0,5,6], p2=0,p=3",
+          "p1=2(3), p2=0(2), p=3: 3>2 write 3 => [1,2,3,3,5,6], p1=1,p=2",
+          "p1=1(2), p2=0(2), p=2: 2<=2 write 2 => [1,2,2,3,5,6], p2=-1 stop"
+        ],
+        "output": "nums1=[1,2,2,3,5,6]"
+      },
+      "edgeCases": [
+        "m=0: p1=-1, loop copies all nums2 into nums1",
+        "n=0: p2=-1 initially, loop skipped, nums1 unchanged",
+        "nums2 all smaller: e.g. nums1=[4,5,6,0,0,0], nums2=[1,2,3] -> largest always from nums1 until p1 exhausted then drains nums2 to front",
+        "Negative numbers and duplicates work with > vs <= logic"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "questionId": 1768,
+  "title": "Merge Strings Alternately",
+  "difficulty": "Easy",
+  "corePattern": "Two Pointers (Alternating Merge / Interleaving)",
+  "interviewTips": [
+    "Ask clarifying questions: can word1 or word2 be empty, what are max lengths, is input ASCII lowercase only or general Unicode, and should you always start with word1?",
+    "Trade-off to discuss: naive string concatenation with + in a loop is O((n+m)^2) due to immutability in Python/Java, versus StringBuilder / list + join / reserve which is O(n+m).",
+    "Edge-case tip: explicitly walk through unequal lengths and empty-string cases, and confirm the remainder of the longer string is appended unchanged in order."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Two Pointers with Tail Append",
+      "tag": "Brute Force",
+      "intuition": "Walk both strings together from the left. At each step take one char from word1 then one char from word2. When the shorter string runs out, the loop stops and whatever is left in the longer string is appended as-is. This directly simulates the definition of alternating merge.",
+      "theory": "Maintain two indices i for word1 and j for word2. While both are in bounds, append word1[i] then word2[j] and advance both. This interleaves the common prefix of length 2*min(n,m). After the loop at least one index reached the end, so append word1[i:] and word2[j:] - one of them is empty. Correctness follows because every position k < min(n,m) contributes word1[k], word2[k] in order, and positions beyond min(n,m) are exactly the suffix of the longer string preserved in order.",
+      "cppCode": "class Solution {\npublic:\n    string mergeAlternately(string word1, string word2) {\n        int i = 0, j = 0;\n        string res;\n        res.reserve(word1.size() + word2.size());\n        while (i < (int)word1.size() && j < (int)word2.size()) {\n            res.push_back(word1[i++]);\n            res.push_back(word2[j++]);\n        }\n        res.append(word1.substr(i));\n        res.append(word2.substr(j));\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string mergeAlternately(string word1, string word2) {\n        int i = 0, j = 0;\n        string res;\n        res.reserve(word1.size() + word2.size());\n        while (i < (int)word1.size() && j < (int)word2.size()) {\n            res.push_back(word1[i++]);\n            res.push_back(word2[j++]);\n        }\n        res.append(word1.substr(i));\n        res.append(word2.substr(j));\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def mergeAlternately(self, word1: str, word2: str) -> str:\n        i = j = 0\n        res = []\n        while i < len(word1) and j < len(word2):\n            res.append(word1[i])\n            i += 1\n            res.append(word2[j])\n            j += 1\n        res.append(word1[i:])\n        res.append(word2[j:])\n        return ''.join(res)",
+        "java": "class Solution {\n    public String mergeAlternately(String word1, String word2) {\n        int i = 0, j = 0;\n        StringBuilder sb = new StringBuilder();\n        while (i < word1.length() && j < word2.length()) {\n            sb.append(word1.charAt(i++));\n            sb.append(word2.charAt(j++));\n        }\n        sb.append(word1.substring(i));\n        sb.append(word2.substring(j));\n        return sb.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n + m)",
+        "explanation": "Each character from word1 of length n and word2 of length m is visited and appended exactly once. Tail substrings are O(n+m) copy."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n + m)",
+        "explanation": "Output string of size n+m is required. Extra auxiliary space is O(1) besides output if using reserve / StringBuilder, or O(n+m) for Python list buffer that is joined."
+      },
+      "dryRunExample": {
+        "input": "word1 = 'abc', word2 = 'pqr'",
+        "steps": [
+          "i=0,j=0: take a then p -> res=[a,p]",
+          "i=1,j=1: take b then q -> res=[a,p,b,q]",
+          "i=2,j=2: take c then r -> res=[a,p,b,q,c,r]",
+          "loop ends, both tails empty, join -> apbqcr"
+        ],
+        "output": "'apbqcr'"
+      },
+      "edgeCases": [
+        "One empty string: word1='', word2='pqrs' returns 'pqrs' via tail append.",
+        "Different lengths: word1='ab', word2='pqrs' interleaves 'apbq' then appends 'rs' -> 'apbqrs'.",
+        "Single chars: word1='a', word2='z' returns 'az'."
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Single-Pass Interleaving by Index",
+      "tag": "Optimal",
+      "intuition": "Instead of two pointers plus a tail phase, use one index i that runs to the length of the longer string. At position i, if word1 still has a character, take it, then if word2 still has a character, take it. This does interleaving and tail handling in a single uniform loop.",
+      "theory": "Let n = max(len(word1), len(word2)). For each i in [0,n), the algorithm emits word1[i] if i < len(word1) followed by word2[i] if i < len(word2). For i < min(len1,len2) this emits the pair in alternating order. For i >= min(len1,len2) only the longer string satisfies the bound, so its remaining characters are emitted in order. This is exactly the required merge. It uses one loop and no substring slicing, which is cleaner and avoids a second phase.",
+      "cppCode": "class Solution {\npublic:\n    string mergeAlternately(string word1, string word2) {\n        string res;\n        res.reserve(word1.size() + word2.size());\n        int n = max(word1.size(), word2.size());\n        for (int i = 0; i < n; ++i) {\n            if (i < (int)word1.size()) res.push_back(word1[i]);\n            if (i < (int)word2.size()) res.push_back(word2[i]);\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string mergeAlternately(string word1, string word2) {\n        string res;\n        res.reserve(word1.size() + word2.size());\n        int n = max(word1.size(), word2.size());\n        for (int i = 0; i < n; ++i) {\n            if (i < (int)word1.size()) res.push_back(word1[i]);\n            if (i < (int)word2.size()) res.push_back(word2[i]);\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def mergeAlternately(self, word1: str, word2: str) -> str:\n        n = max(len(word1), len(word2))\n        res = []\n        for i in range(n):\n            if i < len(word1):\n                res.append(word1[i])\n            if i < len(word2):\n                res.append(word2[i])\n        return ''.join(res)",
+        "java": "class Solution {\n    public String mergeAlternately(String word1, String word2) {\n        StringBuilder sb = new StringBuilder();\n        int n = Math.max(word1.length(), word2.length());\n        for (int i = 0; i < n; i++) {\n            if (i < word1.length()) sb.append(word1.charAt(i));\n            if (i < word2.length()) sb.append(word2.charAt(i));\n        }\n        return sb.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n + m)",
+        "explanation": "Loop runs max(n,m) times with O(1) work per iteration, total character appends n+m."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n + m)",
+        "explanation": "Output of size n+m. No extra structures besides output buffer; O(1) auxiliary."
+      },
+      "dryRunExample": {
+        "input": "word1 = 'ab', word2 = 'pqrs'",
+        "steps": [
+          "n = max(2,4) = 4",
+          "i=0: take a then p -> [a,p]",
+          "i=1: take b then q -> [a,p,b,q]",
+          "i=2: word1 out of range, take r -> [a,p,b,q,r]",
+          "i=3: word1 out of range, take s -> [a,p,b,q,r,s] -> apbqrs"
+        ],
+        "output": "'apbqrs'"
+      },
+      "edgeCases": [
+        "word1 longer: word1='abcd', word2='pq' returns 'apbqcd' with tail c,d from single loop.",
+        "Both empty: word1='', word2='' loop runs 0 times returns ''.",
+        "Large skew: word1 length 1, word2 length 100000 still linear and correct."
+      ]
+    }
+  ]
+}

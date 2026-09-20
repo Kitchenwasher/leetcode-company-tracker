@@ -1,0 +1,129 @@
+{
+  "questionId": 15,
+  "title": "3Sum",
+  "difficulty": "Medium",
+  "corePattern": "Sorting + Fix-One-Element Reduction to 2Sum with Two Pointers",
+  "interviewTips": [
+    "Clarify: should output unique triplets only, order of triplets and numbers inside does not matter, and how to handle fewer than 3 elements?",
+    "Trade-off: brute force O(n^3) vs hashmap O(n^2) time + O(n) space vs sorted two-pointers O(n^2) time + O(1) extra space - sorting enables O(1) duplicate skipping.",
+    "Edge-case tip: explicitly discuss duplicate skipping for i, left and right pointers, early break when nums[i] > 0, and all-zeros input [0,0,0,0].",
+    "Complexity tip: sorting dominates setup O(n log n), then outer loop O(n) * inner two-pointer O(n) = O(n^2) total; state that output size can be O(n^2) in worst case."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with Sorting for Deduplication",
+      "tag": "Brute Force",
+      "intuition": "Try every triplet i < j < k, check if sum is zero, and deduplicate by sorting each found triplet and storing in a set.",
+      "theory": "There are C(n,3) = O(n^3) triplets. For each we do O(1) sum check and O(1) sort of 3 elements. Canonical sorted form ensures [-1,0,1] and [0,-1,1] map to same key, so a hash set removes duplicates. Finally convert set to list.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        int n = nums.size();\n        set<vector<int>> uniq;\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                for (int k = j + 1; k < n; ++k) {\n                    if (nums[i] + nums[j] + nums[k] == 0) {\n                        vector<int> t = {nums[i], nums[j], nums[k]};\n                        sort(t.begin(), t.end());\n                        uniq.insert(t);\n                    }\n                }\n            }\n        }\n        return vector<vector<int>>(uniq.begin(), uniq.end());\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        int n = nums.size();\n        set<vector<int>> uniq;\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                for (int k = j + 1; k < n; ++k) {\n                    if (nums[i] + nums[j] + nums[k] == 0) {\n                        vector<int> t = {nums[i], nums[j], nums[k]};\n                        sort(t.begin(), t.end());\n                        uniq.insert(t);\n                    }\n                }\n            }\n        }\n        return vector<vector<int>>(uniq.begin(), uniq.end());\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def threeSum(self, nums: List[int]) -> List[List[int]]:\n        n = len(nums)\n        result_set = set()\n        for i in range(n):\n            for j in range(i + 1, n):\n                for k in range(j + 1, n):\n                    if nums[i] + nums[j] + nums[k] == 0:\n                        triplet = tuple(sorted([nums[i], nums[j], nums[k]]))\n                        result_set.add(triplet)\n        return [list(t) for t in result_set]",
+        "java": "class Solution {\n    public List<List<Integer>> threeSum(int[] nums) {\n        int n = nums.length;\n        Set<List<Integer>> uniq = new HashSet<>();\n        for (int i = 0; i < n; i++) {\n            for (int j = i + 1; j < n; j++) {\n                for (int k = j + 1; k < n; k++) {\n                    if (nums[i] + nums[j] + nums[k] == 0) {\n                        List<Integer> t = Arrays.asList(nums[i], nums[j], nums[k]);\n                        Collections.sort(t);\n                        uniq.add(t);\n                    }\n                }\n            }\n        }\n        return new ArrayList<>(uniq);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^3)",
+        "explanation": "Triple nested loops enumerate O(n^3) triplets, each sum check and 3-element sort is O(1)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(k)",
+        "explanation": "Extra space for set of unique triplets where k is number of unique triplets; sorting triplet is O(1). Excluding output, O(k) for deduplication."
+      },
+      "dryRunExample": {
+        "input": "nums = [-1,0,1,2,-1,-4]",
+        "steps": [
+          "Enumerate i=0(-1), j=1(0), k=2(1): sum 0 -> add [-1,0,1]",
+          "i=0(-1), j=1(0), k=4(-1): sum -2 -> skip",
+          "i=0(-1), j=3(2), k=4(-1): sum 0 -> add [-1,-1,2] (sorted)",
+          "Continue all C(6,3)=20 combos, set dedupes duplicate [-1,0,1]",
+          "Convert set to list"
+        ],
+        "output": "[[-1,-1,2],[-1,0,1]] (order may vary)"
+      },
+      "edgeCases": [
+        "n < 3: return []",
+        "All zeros [0,0,0,0]: single triplet [0,0,0] after dedup",
+        "No solution e.g. [1,2,3]: return []",
+        "Heavy duplicates e.g. [-2,-2,0,0,2,2]: set prevents duplicate outputs"
+      ]
+    },
+    {
+      "id": "hashmap",
+      "name": "Approach 2: Sort + Fix First + HashSet for 2Sum",
+      "tag": "Hash Table",
+      "intuition": "Sort to handle duplicates easily, fix nums[i] as first element, then solve 2Sum for target = -nums[i] on suffix using a hash set in one pass.",
+      "theory": "After sorting, outer loop fixes i and skips duplicate nums[i]. For each i, scan j > i maintaining seen set of values. Complement = -nums[i]-nums[j]; if complement in seen, we found a triplet. Skip duplicate j values after a hit to keep uniqueness. Sorting makes duplicate skipping O(1) and guarantees canonical order nums[i] <= complement <= nums[j] when found via prior seen elements.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        int n = nums.size();\n        vector<vector<int>> res;\n        for (int i = 0; i < n - 2; ++i) {\n            if (i > 0 && nums[i] == nums[i - 1]) continue;\n            unordered_set<int> seen;\n            for (int j = i + 1; j < n; ++j) {\n                int complement = -nums[i] - nums[j];\n                if (seen.count(complement)) {\n                    res.push_back({nums[i], complement, nums[j]});\n                    while (j + 1 < n && nums[j] == nums[j + 1]) ++j;\n                }\n                seen.insert(nums[j]);\n            }\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        int n = nums.size();\n        vector<vector<int>> res;\n        for (int i = 0; i < n - 2; ++i) {\n            if (i > 0 && nums[i] == nums[i - 1]) continue;\n            unordered_set<int> seen;\n            for (int j = i + 1; j < n; ++j) {\n                int complement = -nums[i] - nums[j];\n                if (seen.count(complement)) {\n                    res.push_back({nums[i], complement, nums[j]});\n                    while (j + 1 < n && nums[j] == nums[j + 1]) ++j;\n                }\n                seen.insert(nums[j]);\n            }\n        }\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def threeSum(self, nums: List[int]) -> List[List[int]]:\n        nums.sort()\n        n = len(nums)\n        res = []\n        for i in range(n - 2):\n            if i > 0 and nums[i] == nums[i - 1]:\n                continue\n            seen = set()\n            j = i + 1\n            while j < n:\n                complement = -nums[i] - nums[j]\n                if complement in seen:\n                    res.append([nums[i], complement, nums[j]])\n                    while j + 1 < n and nums[j] == nums[j + 1]:\n                        j += 1\n                seen.add(nums[j])\n                j += 1\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> threeSum(int[] nums) {\n        Arrays.sort(nums);\n        int n = nums.length;\n        List<List<Integer>> res = new ArrayList<>();\n        for (int i = 0; i < n - 2; i++) {\n            if (i > 0 && nums[i] == nums[i - 1]) continue;\n            Set<Integer> seen = new HashSet<>();\n            for (int j = i + 1; j < n; j++) {\n                int complement = -nums[i] - nums[j];\n                if (seen.contains(complement)) {\n                    res.add(Arrays.asList(nums[i], complement, nums[j]));\n                    while (j + 1 < n && nums[j] == nums[j + 1]) j++;\n                }\n                seen.add(nums[j]);\n            }\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Sorting O(n log n) + outer loop O(n) * inner scan O(n) with O(1) hash ops = O(n^2) total."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "O(n) for hash set per outer iteration (reused) plus O(log n) to O(n) for sort depending on implementation; output excluded."
+      },
+      "dryRunExample": {
+        "input": "nums = [-1,0,1,2,-1,-4] sorted to [-4,-1,-1,0,1,2]",
+        "steps": [
+          "i=0 val -4: seen={}, scan j=1..5, no complement match -> no triplet",
+          "i=1 val -1: seen={}: j=2(-1) comp=2 not in seen, seen={-1}; j=3(0) comp=1 not in seen, seen={-1,0}; j=4(1) comp=0 in seen -> add [-1,0,1]; j=5(2) comp=-1 in seen -> add [-1,-1,2]",
+          "i=2 val -1 duplicate of i=1 -> skip",
+          "i=3 val 0: scan remainder finds nothing",
+          "Return collected list"
+        ],
+        "output": "[[-1,0,1],[-1,-1,2]]"
+      },
+      "edgeCases": [
+        "Duplicate i values: skip to avoid duplicate triplets",
+        "Duplicate j values: skip forward after hit",
+        "Target overflow: in Java/C++ use long or careful int range; Python unbounded",
+        "[0,0,0,0]: i=0 finds [0,0,0], i>=1 skipped as duplicates"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Sort + Two Pointers",
+      "tag": "Optimal",
+      "intuition": "Sort the array, fix one index i, then use left/right pointers moving toward each other to find pairs summing to -nums[i] in linear time.",
+      "theory": "Sorting enables the classic 2Sum-II two-pointer technique: for fixed i, if nums[i]+nums[l]+nums[r] < 0 need larger sum so l++, if > 0 need smaller sum so r--, if ==0 record and move both while skipping duplicates. Skipping duplicate i and duplicate l/r guarantees uniqueness. Early break when nums[i] > 0 because sorted suffix cannot sum to zero.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        int n = nums.size();\n        vector<vector<int>> res;\n        for (int i = 0; i < n - 2; ++i) {\n            if (i > 0 && nums[i] == nums[i - 1]) continue;\n            if (nums[i] > 0) break;\n            int l = i + 1, r = n - 1;\n            while (l < r) {\n                int s = nums[i] + nums[l] + nums[r];\n                if (s == 0) {\n                    res.push_back({nums[i], nums[l], nums[r]});\n                    while (l < r && nums[l] == nums[l + 1]) ++l;\n                    while (l < r && nums[r] == nums[r - 1]) --r;\n                    ++l; --r;\n                } else if (s < 0) {\n                    ++l;\n                } else {\n                    --r;\n                }\n            }\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        int n = nums.size();\n        vector<vector<int>> res;\n        for (int i = 0; i < n - 2; ++i) {\n            if (i > 0 && nums[i] == nums[i - 1]) continue;\n            if (nums[i] > 0) break;\n            int l = i + 1, r = n - 1;\n            while (l < r) {\n                int s = nums[i] + nums[l] + nums[r];\n                if (s == 0) {\n                    res.push_back({nums[i], nums[l], nums[r]});\n                    while (l < r && nums[l] == nums[l + 1]) ++l;\n                    while (l < r && nums[r] == nums[r - 1]) --r;\n                    ++l; --r;\n                } else if (s < 0) {\n                    ++l;\n                } else {\n                    --r;\n                }\n            }\n        }\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def threeSum(self, nums: List[int]) -> List[List[int]]:\n        nums.sort()\n        n = len(nums)\n        res = []\n        for i in range(n - 2):\n            if i > 0 and nums[i] == nums[i - 1]:\n                continue\n            if nums[i] > 0:\n                break\n            l, r = i + 1, n - 1\n            while l < r:\n                s = nums[i] + nums[l] + nums[r]\n                if s == 0:\n                    res.append([nums[i], nums[l], nums[r]])\n                    while l < r and nums[l] == nums[l + 1]:\n                        l += 1\n                    while l < r and nums[r] == nums[r - 1]:\n                        r -= 1\n                    l += 1\n                    r -= 1\n                elif s < 0:\n                    l += 1\n                else:\n                    r -= 1\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> threeSum(int[] nums) {\n        Arrays.sort(nums);\n        int n = nums.length;\n        List<List<Integer>> res = new ArrayList<>();\n        for (int i = 0; i < n - 2; i++) {\n            if (i > 0 && nums[i] == nums[i - 1]) continue;\n            if (nums[i] > 0) break;\n            int l = i + 1, r = n - 1;\n            while (l < r) {\n                int s = nums[i] + nums[l] + nums[r];\n                if (s == 0) {\n                    res.add(Arrays.asList(nums[i], nums[l], nums[r]));\n                    while (l < r && nums[l] == nums[l + 1]) l++;\n                    while (l < r && nums[r] == nums[r - 1]) r--;\n                    l++; r--;\n                } else if (s < 0) {\n                    l++;\n                } else {\n                    r--;\n                }\n            }\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Sorting O(n log n) + for each of O(n) fixed i, two-pointer scan is O(n) worst case, total O(n^2)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1) extra, O(log n) to O(n) with sort",
+        "explanation": "Only constant pointers besides output; sorting uses O(log n) stack in Java/Python or O(log n) introsort in C++; output space excluded, otherwise O(k) for results."
+      },
+      "dryRunExample": {
+        "input": "nums = [-1,0,1,2,-1,-4] sorted to [-4,-1,-1,0,1,2]",
+        "steps": [
+          "i=0 (-4): l=1(-1) r=5(2) s=-3 <0 -> l++ ... no zero, move to i=1",
+          "i=1 (-1): l=2(-1) r=5(2) s=0 -> add [-1,-1,2], l=3(0) r=4(1)",
+          "Still i=1: l=3(0) r=4(1) s=0 -> add [-1,0,1], l=4 r=3 stop",
+          "i=2 (-1) duplicate -> skip, i=3 (0): l=4(1) r=5(2) s=3 >0 -> r-- until l>=r",
+          "Return [[-1,-1,2],[-1,0,1]]"
+        ],
+        "output": "[[-1,-1,2],[-1,0,1]]"
+      },
+      "edgeCases": [
+        "n < 3: loop does not run, return []",
+        "nums[i] > 0: break early, remaining triplets all positive",
+        "All zeros [0,0,0]: l/r dedup leaves single [0,0,0]",
+        "No triplet e.g. [1,2,-2,-1]: returns []",
+        "Integer overflow in C++/Java when summing: values within [-1e5,1e5] safe in int, but use long if constraints larger"
+      ]
+    }
+  ]
+}

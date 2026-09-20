@@ -1,0 +1,85 @@
+{
+  "questionId": 2667,
+  "title": "Create Hello World Function",
+  "difficulty": "Easy",
+  "corePattern": "Factory Function and Closure (First-Class Functions)",
+  "interviewTips": [
+    "Ask whether the returned function must ignore all arguments and always return exactly \"Hello World\" with that casing and spacing?",
+    "Trade-off to discuss: explicit named inner function is more readable and stack-trace friendly vs concise lambda which is shorter but equivalent in O(1) time and space.",
+    "Confirm testing expectations: multiple invocations, calls with zero / many / varied-type args, and strict equality check on the returned string."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Closure with Named Inner Function",
+      "tag": "Brute Force",
+      "intuition": "We need a factory that makes a function. Create an outer function that defines and returns a separate named inner function which always returns the constant string \"Hello World\" regardless of inputs.",
+      "theory": "This relies on first-class functions and lexical closure. The inner function closes over its defining scope but needs no captured variables since the return value is a constant. The outer factory does O(1) work to allocate and return the function object; each invocation of the returned function does O(1) work to return a constant string. No loops or extra state are needed.",
+      "cppCode": "#include <functional>\n#include <string>\nclass Solution {\npublic:\n    std::function<std::string()> createHelloWorld() {\n        std::function<std::string()> inner = []() -> std::string {\n            return \"Hello World\";\n        };\n        return inner;\n    }\n};",
+      "code": {
+        "cpp": "#include <functional>\n#include <string>\nclass Solution {\npublic:\n    std::function<std::string()> createHelloWorld() {\n        std::function<std::string()> inner = []() -> std::string {\n            return \"Hello World\";\n        };\n        return inner;\n    }\n};",
+        "python": "class Solution:\n    def createHelloWorld(self):\n        def inner(*args, **kwargs):\n            return \"Hello World\"\n        return inner",
+        "java": "import java.util.function.Supplier;\nclass Solution {\n    public Supplier<String> createHelloWorld() {\n        Supplier<String> inner = new Supplier<String>() {\n            @Override\n            public String get() {\n                return \"Hello World\";\n            }\n        };\n        return inner;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Factory creates one function object in constant time; each call of the returned function returns a constant string in constant time."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only one function object and one constant string are allocated; no input-dependent storage."
+      },
+      "dryRunExample": {
+        "input": "f = createHelloWorld(); f(); f({}, null, 123)",
+        "steps": [
+          "Call createHelloWorld() -> defines inner function and returns its reference as f",
+          "Call f() with no args -> inner executes and returns \"Hello World\"",
+          "Call f({}, null, 123) with extra args -> args are ignored (*args/**kwargs or ...args) and still returns \"Hello World\""
+        ],
+        "output": "\"Hello World\""
+      },
+      "edgeCases": [
+        "No arguments: f() must still return \"Hello World\"",
+        "Extra arguments of any type/count: f(1,2,3), f(null, {}, \"x\") must be ignored",
+        "Multiple calls on same returned function must consistently return same string",
+        "Exact string match: case, space, and no trailing newline required"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Concise Lambda Factory",
+      "tag": "Optimal",
+      "intuition": "The named inner function is boilerplate. Directly return an anonymous lambda / arrow function that ignores its rest parameters and returns \"Hello World\" — same behavior with minimal code.",
+      "theory": "Identical closure semantics but using lambda expression syntax. In JS: () => \"Hello World\" or (...args) => \"Hello World\". In Python: lambda *args, **kwargs: \"Hello World\". In C++: [](){ return \"Hello World\"; }. In Java: () -> \"Hello World\". The lambda is a function value created in O(1) time that captures nothing and returns a constant, so time and space remain O(1) with less indirection.",
+      "cppCode": "#include <string>\nclass Solution {\npublic:\n    auto createHelloWorld() {\n        return []() { return std::string(\"Hello World\"); };\n    }\n};",
+      "code": {
+        "cpp": "#include <string>\nclass Solution {\npublic:\n    auto createHelloWorld() {\n        return []() { return std::string(\"Hello World\"); };\n    }\n};",
+        "python": "class Solution:\n    def createHelloWorld(self):\n        return lambda *args, **kwargs: \"Hello World\"",
+        "java": "import java.util.function.Supplier;\nclass Solution {\n    public Supplier<String> createHelloWorld() {\n        return () -> \"Hello World\";\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Single lambda allocation on factory call and constant-time return on each invocation; no iteration over arguments."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only the lambda/closure object is stored; it captures no variables so overhead is constant."
+      },
+      "dryRunExample": {
+        "input": "f = createHelloWorld(); f(\"a\", \"b\"); f()",
+        "steps": [
+          "Call createHelloWorld() -> directly returns lambda () => \"Hello World\" as f",
+          "Call f(\"a\", \"b\") -> rest args collected but unused, returns \"Hello World\"",
+          "Call f() again -> still returns \"Hello World\", proving stateless idempotence"
+        ],
+        "output": "\"Hello World\""
+      },
+      "edgeCases": [
+        "Variadic calls: function must accept ...args / *args to avoid arity errors in JS/Python",
+        "Repeated factory calls: createHelloWorld() twice should give independent but equivalent functions",
+        "Strict equality: return must be primitive string \"Hello World\", not String object or with extra whitespace",
+        "No side effects: lambda must not mutate external state or depend on closure variables"
+      ]
+    }
+  ]
+}
