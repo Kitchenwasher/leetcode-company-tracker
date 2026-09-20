@@ -109,7 +109,11 @@ async function main() {
         const solContent = JSON.parse(fs.readFileSync(path.join(solutionsDir, file), 'utf-8'));
         await prisma.solution.upsert({
           where: { questionId: qId },
-          update: {},
+          update: {
+            corePattern: solContent.corePattern || 'Algorithmic Pattern & Invariant',
+            interviewTips: JSON.stringify(solContent.interviewTips || []),
+            approaches: JSON.stringify(solContent.approaches || []),
+          },
           create: {
             questionId: qId,
             corePattern: solContent.corePattern || 'Algorithmic Pattern & Invariant',

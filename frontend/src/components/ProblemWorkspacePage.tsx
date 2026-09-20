@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, UserProgressItem, ProblemStatus, Difficulty } from '../types';
 import { QuestionSolution, SolutionApproach } from '../types/solution';
+import { questionsApi } from '../api/questionsApi';
 import { WhiteboardCanvas } from './WhiteboardCanvas';
 import { CppPlayground } from './CppPlayground';
 import { useAuth } from '../context/AuthContext';
@@ -46,11 +47,15 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
   const [leftTab, setLeftTab] = useState<'theory' | 'notes' | 'srs' | 'companies'>('theory');
   const [rightTab, setRightTab] = useState<'runner' | 'whiteboard' | 'scratchpad'>('runner');
 
-  // Solution data
+  // Solution data & Multi-Language support
   const [solutionData, setSolutionData] = useState<QuestionSolution | null>(null);
   const [selectedApproachIndex, setSelectedApproachIndex] = useState<number>(0);
   const [isLoadingSolution, setIsLoadingSolution] = useState<boolean>(false);
   const [copiedSolutionCode, setCopiedSolutionCode] = useState<boolean>(false);
+  const [solutionLanguage, setSolutionLanguage] = useState<'python' | 'cpp' | 'java'>(() => {
+    return (localStorage.getItem('cheatcode_preferred_lang') as 'python' | 'cpp' | 'java') || 'python';
+  });
+  const [isGeneratingAi, setIsGeneratingAi] = useState<boolean>(false);
 
   // Scratchpad state
   const [codeLang, setCodeLang] = useState<string>(initialProgress.codeSnippet?.lang || 'cpp');
@@ -67,19 +72,37 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
   const prevQuestion = currentIndex > 0 ? allQuestions[currentIndex - 1] : null;
   const nextQuestion = currentIndex < allQuestions.length - 1 ? allQuestions[currentIndex + 1] : null;
 
-  // Load C++ multi-approach solutions
+  // Load multi-approach solutions with automatic AI fallback
   useEffect(() => {
     let isMounted = true;
     const loadSolution = async () => {
       try {
         setIsLoadingSolution(true);
-        const res = await fetch(`/solutions/${q.id}.json`);
-        if (!res.ok) throw new Error('Solution not available');
-        const data: QuestionSolution = await res.json();
+        let data: QuestionSolution | null = null;
+
+        // 1. Try pre-baked static solution
+        try {
+          const res = await fetch(`/solutions/${q.id}.json`);
+          if (res.ok) {
+            data = await res.json();
+          }
+        } catch {}
+
+        // 2. If not found or empty approaches, fallback to backend API (or AI generation)
+        if (!data || !data.approaches || data.approaches.length === 0) {
+          try {
+            data = await questionsApi.getSolution(q.id);
+          } catch {}
+        }
+
         if (isMounted) {
-          setSolutionData(data);
-          const optimalIdx = data.approaches.findIndex((a) => a.tag === 'Optimal');
-          setSelectedApproachIndex(optimalIdx !== -1 ? optimalIdx : 0);
+          if (data && data.approaches && data.approaches.length > 0) {
+            setSolutionData(data);
+            const optimalIdx = data.approaches.findIndex((a) => a.tag === 'Optimal');
+            setSelectedApproachIndex(optimalIdx !== -1 ? optimalIdx : 0);
+          } else {
+            setSolutionData(null);
+          }
           setIsLoadingSolution(false);
         }
       } catch {
@@ -223,6 +246,35 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
     setCopiedSolutionCode(true);
     sounds.playClick();
     setTimeout(() => setCopiedSolutionCode(false), 2000);
+  };
+
+  const handleGenerateWithAi = async () => {
+    try {
+      setIsGeneratingAi(true);
+      sounds.playClick();
+      const freshSolution = await questionsApi.generateAiSolution(q.id);
+      if (freshSolution && freshSolution.approaches && freshSolution.approaches.length > 0) {
+        setSolutionData(freshSolution);
+        const optimalIdx = freshSolution.approaches.findIndex((a) => a.tag === 'Optimal');
+        setSelectedApproachIndex(optimalIdx !== -1 ? optimalIdx : 0);
+      }
+    } catch (err) {
+      console.error('Failed to generate AI solution:', err);
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
+
+  const getActiveApproachCode = (app?: SolutionApproach): string => {
+    if (!app) return '// No code available';
+    if (app.code) {
+      if (solutionLanguage === 'python' && app.code.python) return app.code.python;
+      if (solutionLanguage === 'cpp' && app.code.cpp) return app.code.cpp;
+      if (solutionLanguage === 'java' && app.code.java) return app.code.java;
+      const firstAvailable = Object.values(app.code).find((c) => Boolean(c));
+      if (firstAvailable) return firstAvailable;
+    }
+    return app.cppCode || '// Code implementation';
   };
 
   const handleCopyScratchpadCode = () => {
@@ -451,23 +503,66 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
             {/* TAB 1: C++ MULTI-APPROACH SOLUTIONS & THEORY */}
             {leftTab === 'theory' && (
               <div className="space-y-5">
-                {/* Core Pattern Pill */}
+                {/* Core Pattern Pill & AI Action */}
                 {solutionData && (
-                  <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-surfaceElevated border border-border">
+                  <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-surfaceElevated border border-border">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
+                      <Sparkles className="w-4 h-4 text-primary shrink-0" />
                       <span className="text-xs font-bold text-primary">
                         Pattern: {solutionData.corePattern}
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono text-textMuted">
-                      Google C++ Style Guide Compliant
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleGenerateWithAi}
+                        disabled={isGeneratingAi}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+                        title="Generate or refresh solution using Meta Muse AI"
+                      >
+                        <Sparkles className={`w-3.5 h-3.5 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+                        <span>{isGeneratingAi ? 'Meta AI Generating...' : '✨ Ask Meta AI'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty / Loading State for Editorial */}
+                {(!solutionData || isLoadingSolution || isGeneratingAi) && (
+                  <div className="p-8 rounded-2xl bg-surfaceElevated border border-border flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                      <Sparkles className={`w-6 h-6 ${isLoadingSolution || isGeneratingAi ? 'animate-spin' : ''}`} />
+                    </div>
+                    <div className="space-y-1 max-w-md">
+                      <h3 className="text-sm font-bold text-white">
+                        {isGeneratingAi
+                          ? 'Generating FAANG-Grade Editorial with Meta Muse...'
+                          : isLoadingSolution
+                          ? 'Retrieving Problem Solution...'
+                          : 'No Pre-Baked Solution Available'}
+                      </h3>
+                      <p className="text-xs text-textMuted leading-relaxed">
+                        {isGeneratingAi
+                          ? 'Meta Muse Spark 1.3 is formulating multi-approach algorithms, complexity derivations, and multi-language code...'
+                          : isLoadingSolution
+                          ? 'Checking database and static solutions...'
+                          : 'Generate an instant, gold-standard multi-approach editorial with C++, Python, and Java code.'}
+                      </p>
+                    </div>
+                    {!isLoadingSolution && (
+                      <button
+                        onClick={handleGenerateWithAi}
+                        disabled={isGeneratingAi}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primaryHover text-black font-bold text-xs shadow-terminal-glow transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <Sparkles className={`w-4 h-4 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+                        <span>{isGeneratingAi ? 'Generating...' : '✨ Generate with Meta Muse AI'}</span>
+                      </button>
+                    )}
                   </div>
                 )}
 
                 {/* Approach Switcher Buttons */}
-                {solutionData && solutionData.approaches.length > 0 && (
+                {solutionData && solutionData.approaches && solutionData.approaches.length > 0 && !isGeneratingAi && (
                   <div className="flex flex-wrap gap-2">
                     {solutionData.approaches.map((app, idx) => (
                       <button
@@ -476,7 +571,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                           sounds.playClick();
                           setSelectedApproachIndex(idx);
                         }}
-                        className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+                        className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
                           selectedApproachIndex === idx
                             ? 'bg-primary text-black font-bold shadow-md border border-primary'
                             : 'bg-surfaceElevated hover:bg-border border border-border text-textMuted hover:text-textPrimary'
@@ -500,7 +595,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                 )}
 
                 {/* Active Approach Deep Dive */}
-                {currentApproach && (
+                {currentApproach && !isGeneratingAi && (
                   <div className="space-y-4">
                     {/* Complexity Cards */}
                     <div className="grid grid-cols-2 gap-3">
@@ -546,23 +641,52 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                       )}
                     </div>
 
-                    {/* C++ Code Display */}
+                    {/* Multi-Language Code Display */}
                     <div className="rounded-xl bg-surfaceElevated border border-border overflow-hidden">
-                      <div className="p-3 bg-surfaceElevated border-b border-border flex items-center justify-between">
-                        <span className="text-xs font-bold text-textSecondary font-mono flex items-center gap-1.5">
-                          <Code2 className="w-3.5 h-3.5 text-primary" />
-                          Production C++ Implementation
-                        </span>
+                      <div className="p-3 bg-surfaceElevated border-b border-border flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xs font-bold text-textSecondary font-mono flex items-center gap-1.5">
+                            <Code2 className="w-3.5 h-3.5 text-primary" />
+                            Implementation
+                          </span>
+
+                          {/* Language Switcher Tabs */}
+                          <div className="flex items-center bg-background p-0.5 rounded-lg border border-border">
+                            {(['python', 'cpp', 'java'] as const).map((lang) => {
+                              const hasLang = Boolean(currentApproach.code?.[lang] || (lang === 'cpp' && currentApproach.cppCode));
+                              return (
+                                <button
+                                  key={lang}
+                                  onClick={() => {
+                                    sounds.playClick();
+                                    setSolutionLanguage(lang);
+                                    localStorage.setItem('cheatcode_preferred_lang', lang);
+                                  }}
+                                  className={`px-2.5 py-0.5 rounded text-[10px] font-semibold transition-all cursor-pointer ${
+                                    solutionLanguage === lang
+                                      ? 'bg-primary text-black font-bold shadow-sm'
+                                      : hasLang
+                                      ? 'text-textMuted hover:text-textPrimary'
+                                      : 'text-textMuted/40 hover:text-textMuted'
+                                  }`}
+                                >
+                                  {lang === 'python' ? 'Python 3' : lang === 'cpp' ? 'C++' : 'Java'}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
                         <button
-                          onClick={() => handleCopySolutionCode(currentApproach.cppCode)}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surfaceElevated hover:bg-slate-700 text-textSecondary text-xs transition-colors"
+                          onClick={() => handleCopySolutionCode(getActiveApproachCode(currentApproach))}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface hover:bg-slate-700 text-textSecondary text-xs transition-colors cursor-pointer"
                         >
                           {copiedSolutionCode ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5" />}
                           <span>{copiedSolutionCode ? 'Copied' : 'Copy'}</span>
                         </button>
                       </div>
-                      <pre className="p-4 text-xs font-mono text-primary overflow-x-auto leading-relaxed max-h-72">
-                        <code>{currentApproach.cppCode}</code>
+                      <pre className="p-4 text-xs font-mono text-primary overflow-x-auto leading-relaxed max-h-80">
+                        <code>{getActiveApproachCode(currentApproach)}</code>
                       </pre>
                     </div>
 

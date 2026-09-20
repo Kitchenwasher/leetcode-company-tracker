@@ -8,5 +8,6 @@ router.get('/', optionalAuth, QuestionController.getQuestions);
 router.get('/companies', QuestionController.getCompanies);
 router.get('/:id', optionalAuth, QuestionController.getQuestionById);
 router.get('/:id/solution', QuestionController.getSolution);
+router.post('/:id/ai-solution', QuestionController.generateAiSolution);
 
 export default router;

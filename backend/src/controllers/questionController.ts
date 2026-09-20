@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db.js';
+import { AiSolutionService } from '../services/aiSolutionService.js';
 
 export class QuestionController {
   static async getQuestions(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -220,21 +221,117 @@ export class QuestionController {
         return;
       }
 
-      const solution = await prisma.solution.findUnique({
-        where: { questionId: id },
+      const forceRegenerate = req.query.regenerate === 'true';
+
+      if (!forceRegenerate) {
+        const solution = await prisma.solution.findUnique({
+          where: { questionId: id },
+        });
+
+        if (solution) {
+          res.json({
+            questionId: solution.questionId,
+            corePattern: solution.corePattern,
+            interviewTips: JSON.parse(solution.interviewTips || '[]'),
+            approaches: JSON.parse(solution.approaches || '[]'),
+          });
+          return;
+        }
+      }
+
+      // Not cached or regeneration requested: Generate with Meta Muse AI
+      const question = await prisma.question.findUnique({
+        where: { id },
       });
 
-      if (!solution) {
-        res.status(404).json({ error: 'Solution not available for this problem' });
+      if (!question) {
+        res.status(404).json({ error: 'Question not found' });
         return;
       }
 
-      res.json({
-        questionId: solution.questionId,
-        corePattern: solution.corePattern,
-        interviewTips: JSON.parse(solution.interviewTips || '[]'),
-        approaches: JSON.parse(solution.approaches || '[]'),
+      let topics: string[] = [];
+      try {
+        topics = JSON.parse(question.topics);
+      } catch {
+        topics = [];
+      }
+
+      const aiSolution = await AiSolutionService.generateSolution({
+        id: question.id,
+        title: question.title,
+        difficulty: question.difficulty,
+        topics,
       });
+
+      // Cache permanently in Neon PostgreSQL
+      await prisma.solution.upsert({
+        where: { questionId: id },
+        update: {
+          corePattern: aiSolution.corePattern,
+          interviewTips: JSON.stringify(aiSolution.interviewTips),
+          approaches: JSON.stringify(aiSolution.approaches),
+        },
+        create: {
+          questionId: id,
+          corePattern: aiSolution.corePattern,
+          interviewTips: JSON.stringify(aiSolution.interviewTips),
+          approaches: JSON.stringify(aiSolution.approaches),
+        },
+      });
+
+      res.json(aiSolution);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async generateAiSolution(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const id = parseInt(String(req.params.id), 10);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid question ID' });
+        return;
+      }
+
+      const question = await prisma.question.findUnique({
+        where: { id },
+      });
+
+      if (!question) {
+        res.status(404).json({ error: 'Question not found' });
+        return;
+      }
+
+      let topics: string[] = [];
+      try {
+        topics = JSON.parse(question.topics);
+      } catch {
+        topics = [];
+      }
+
+      const aiSolution = await AiSolutionService.generateSolution({
+        id: question.id,
+        title: question.title,
+        difficulty: question.difficulty,
+        topics,
+      });
+
+      await prisma.solution.upsert({
+        where: { questionId: id },
+        update: {
+          corePattern: aiSolution.corePattern,
+          interviewTips: JSON.stringify(aiSolution.interviewTips),
+          approaches: JSON.stringify(aiSolution.approaches),
+        },
+        create: {
+          questionId: id,
+          corePattern: aiSolution.corePattern,
+          interviewTips: JSON.stringify(aiSolution.interviewTips),
+          approaches: JSON.stringify(aiSolution.approaches),
+        },
+      });
+
+      res.json(aiSolution);
     } catch (err) {
       next(err);
     }

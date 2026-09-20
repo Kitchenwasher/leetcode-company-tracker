@@ -34,4 +34,9 @@ export const ENV = {
   // Buy Me a Coffee Gateway
   BMC_WEBHOOK_SECRET: process.env.BMC_WEBHOOK_SECRET || '105509fc00258be02142f120fa6311291af80ccc17357b69c9045f32ab2e1ef7680bc642676cbbfe',
   BMC_CREATOR_PAGE: process.env.BMC_CREATOR_PAGE || 'https://buymeacoffee.com/cheatcode69',
+
+  // Meta Muse LLM (Contributor Tier)
+  MUSE_API_KEY: process.env.MUSE_API_KEY || 'LLM_1611329520586286_g-veMmNkfLODJLJu3eUWqyCJEv4',
+  MUSE_API_URL: process.env.MUSE_API_URL || 'https://api.meta.ai/v1',
+  MUSE_MODEL: process.env.MUSE_MODEL || 'muse-spark-1.3-contributor',
 };

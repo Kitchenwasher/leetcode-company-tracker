@@ -9,7 +9,13 @@ export interface SolutionApproach {
   tag: 'Brute Force' | 'Better' | 'Optimal' | 'Alternative';
   intuition: string; // Step-by-step thinking of how this idea develops
   theory: string; // Algorithmic theory, invariants, proofs
-  cppCode: string; // Clean C++ code with includes and line comments
+  cppCode: string; // Clean C++ code with includes and line comments (backwards compatibility)
+  code?: {
+    cpp?: string;
+    python?: string;
+    java?: string;
+    typescript?: string;
+  };
   timeComplexity: ComplexityInfo;
   spaceComplexity: ComplexityInfo;
   dryRunExample?: {

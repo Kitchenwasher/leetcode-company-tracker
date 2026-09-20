@@ -33,8 +33,13 @@ export const questionsApi = {
     return res.data;
   },
 
-  getSolution: async (id: number | string): Promise<QuestionSolution> => {
-    const res = await api.get<QuestionSolution>(`/questions/${id}/solution`);
+  getSolution: async (id: number | string, forceRegenerate: boolean = false): Promise<QuestionSolution> => {
+    const res = await api.get<QuestionSolution>(`/questions/${id}/solution${forceRegenerate ? '?regenerate=true' : ''}`);
+    return res.data;
+  },
+
+  generateAiSolution: async (id: number | string): Promise<QuestionSolution> => {
+    const res = await api.post<QuestionSolution>(`/questions/${id}/ai-solution`);
     return res.data;
   },
 
