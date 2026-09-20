@@ -156,6 +156,8 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
       setBottomTab('result');
       sounds.playClick();
 
+      const currentCode = editorRef.current?.getValue() ?? code;
+
       const payloadTestcases = testcases.map((tc) => ({
         input: tc.input,
         expected: tc.expected,
@@ -163,11 +165,16 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
 
       const res = await judgeApi.runCode({
         language,
-        code,
+        code: currentCode,
         testcases: payloadTestcases,
       });
 
       setExecResult(res);
+
+      if (res.results && res.results.length > 0) {
+        const firstFailIdx = res.results.findIndex((r) => !r.passed);
+        setSelectedCaseIdx(firstFailIdx !== -1 ? firstFailIdx : 0);
+      }
 
       if (res.status === 'Accepted') {
         sounds.playSuccess();
@@ -193,6 +200,8 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
       setBottomTab('result');
       sounds.playClick();
 
+      const currentCode = editorRef.current?.getValue() ?? code;
+
       const payloadTestcases = testcases.map((tc) => ({
         input: tc.input,
         expected: tc.expected,
@@ -200,12 +209,17 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
 
       const res = await judgeApi.submitCode({
         language,
-        code,
+        code: currentCode,
         testcases: payloadTestcases,
         questionId: q.id,
       });
 
       setExecResult(res);
+
+      if (res.results && res.results.length > 0) {
+        const firstFailIdx = res.results.findIndex((r) => !r.passed);
+        setSelectedCaseIdx(firstFailIdx !== -1 ? firstFailIdx : 0);
+      }
 
       if (res.status === 'Accepted') {
         sounds.playSuccess();
@@ -548,7 +562,22 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
                   {/* Compile Error Output */}
                   {execResult.compileError && (
                     <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono whitespace-pre-wrap">
+                      <div className="font-bold mb-1 flex items-center gap-1.5 text-amber-400">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        <span>Compilation Error</span>
+                      </div>
                       {execResult.compileError}
+                    </div>
+                  )}
+
+                  {/* Stderr / Runtime Error Output */}
+                  {execResult.stderr && !execResult.compileError && execResult.status !== 'Accepted' && (
+                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono whitespace-pre-wrap">
+                      <div className="font-bold mb-1 flex items-center gap-1.5 text-rose-400">
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>Runtime / Execution Error</span>
+                      </div>
+                      {execResult.stderr}
                     </div>
                   )}
 
@@ -570,41 +599,53 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
                           <button
                             key={r.caseIndex || idx}
                             onClick={() => setSelectedCaseIdx(idx)}
-                            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold border ${
+                            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer ${
                               selectedCaseIdx === idx
-                                ? 'bg-surface border-primary text-white font-bold'
-                                : 'bg-surfaceElevated border-border text-textMuted hover:text-white'
+                                ? r.passed
+                                  ? 'bg-emerald-500/20 border-emerald-500 text-white font-bold shadow-sm'
+                                  : 'bg-rose-500/20 border-rose-500 text-white font-bold shadow-sm'
+                                : r.passed
+                                ? 'bg-surfaceElevated border-border text-textMuted hover:text-white'
+                                : 'bg-rose-950/20 border-rose-800/40 text-rose-300 hover:text-white'
                             }`}
                           >
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${
+                              className={`w-2 h-2 rounded-full ${
                                 r.passed ? 'bg-emerald-400' : 'bg-rose-400'
                               }`}
                             />
                             <span>Case {idx + 1}</span>
+                            <span className={`text-[10px] ml-0.5 ${r.passed ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              ({r.passed ? 'Passed' : 'Failed'})
+                            </span>
                           </button>
                         ))}
                       </div>
 
                       {currentResultItem && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs font-mono">
-                          <div className="p-2 bg-background border border-border rounded-lg">
-                            <span className="text-[10px] text-textMuted block font-sans">Input</span>
-                            <span className="text-slate-300 whitespace-pre-wrap">{currentResultItem.input}</span>
+                          <div className="p-2.5 bg-background border border-border rounded-lg">
+                            <span className="text-[10px] text-textMuted block font-sans mb-1">Input</span>
+                            <span className="text-slate-300 whitespace-pre-wrap break-all">{currentResultItem.input}</span>
                           </div>
-                          <div className="p-2 bg-background border border-border rounded-lg">
-                            <span className="text-[10px] text-textMuted block font-sans">Output</span>
+                          <div className="p-2.5 bg-background border border-border rounded-lg">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] text-textMuted font-sans">Output</span>
+                              <span className={`text-[10px] font-bold ${currentResultItem.passed ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {currentResultItem.passed ? 'Passed' : 'Wrong Answer'}
+                              </span>
+                            </div>
                             <span
-                              className={`whitespace-pre-wrap font-bold ${
+                              className={`whitespace-pre-wrap font-bold break-all ${
                                 currentResultItem.passed ? 'text-emerald-400' : 'text-rose-400'
                               }`}
                             >
                               {currentResultItem.output || currentResultItem.error || 'void'}
                             </span>
                           </div>
-                          <div className="p-2 bg-background border border-border rounded-lg">
-                            <span className="text-[10px] text-textMuted block font-sans">Expected</span>
-                            <span className="text-primary whitespace-pre-wrap">{currentResultItem.expected || '—'}</span>
+                          <div className="p-2.5 bg-background border border-border rounded-lg">
+                            <span className="text-[10px] text-textMuted block font-sans mb-1">Expected</span>
+                            <span className="text-primary whitespace-pre-wrap break-all">{currentResultItem.expected || '—'}</span>
                           </div>
                         </div>
                       )}
