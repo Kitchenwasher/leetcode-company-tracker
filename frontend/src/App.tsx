@@ -556,6 +556,13 @@ export const App: React.FC = () => {
     sounds.playClick();
   }, []);
 
+  const handleSelectCompany = useCallback((slug: string) => {
+    setStore((prev) => {
+      if (prev.selectedCompany?.toLowerCase() === slug.toLowerCase()) return prev;
+      return { ...prev, selectedCompany: slug };
+    });
+  }, []);
+
   const activeCompanyMeta = companiesDict[store.selectedCompany || 'google'];
 
   return (
@@ -639,7 +646,7 @@ export const App: React.FC = () => {
                   onUpdateStatus={handleUpdateStatus}
                   onToggleFavorite={handleToggleFavorite}
                   onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
-                  onSelectCompany={(slug) => setStore((prev) => ({ ...prev, selectedCompany: slug }))}
+                  onSelectCompany={handleSelectCompany}
                 />
               </AppSidebarLayout>
             </ProtectedRoute>
@@ -664,7 +671,7 @@ export const App: React.FC = () => {
                   companies={companiesDict}
                   questions={allQuestions}
                   onSelectCompany={(slug) => {
-                    setStore((prev) => ({ ...prev, selectedCompany: slug }));
+                    handleSelectCompany(slug);
                     navigate(`/questions?company=${encodeURIComponent(slug.toLowerCase())}`);
                   }}
                 />

@@ -24,6 +24,7 @@ import { UserStoreState } from '../types';
 import { sounds } from '../utils/sound';
 import { QuickThemePopover } from './ThemeToolkit';
 import { useAuth } from '../context/AuthContext';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface AppSidebarLayoutProps {
   children: React.ReactNode;
@@ -451,7 +452,9 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
             backgroundRepeat: 'no-repeat',
           }}
         >
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

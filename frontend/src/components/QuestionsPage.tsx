@@ -246,12 +246,6 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
   const rawCompany = searchParams.get('company');
   const selectedCompany = rawCompany ? rawCompany.toLowerCase() : 'all';
 
-  // Sync selectedCompany into store when updated
-  useEffect(() => {
-    if (selectedCompany && selectedCompany !== 'all' && onSelectCompany) {
-      onSelectCompany(selectedCompany);
-    }
-  }, [selectedCompany, onSelectCompany]);
   const selectedDifficulty = (searchParams.get('difficulty') as Difficulty | 'all') || 'all';
   const selectedTopic = searchParams.get('topic') || 'all';
   const selectedStatus = (searchParams.get('status') as ProblemStatus | 'favorite' | 'due-review' | 'all') || 'all';
@@ -263,23 +257,34 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
   const pageSize = 50;
 
-  // Helper to update search params
+  // Helper to update search params safely without dependency on previous searchParams object
   const updateFilters = useCallback(
     (patch: Record<string, string | number | undefined | null>) => {
-      const next = new URLSearchParams(searchParams);
-      Object.entries(patch).forEach(([key, val]) => {
-        if (val === undefined || val === null || val === '' || val === 'all' || (key === 'page' && val === 1)) {
-          next.delete(key);
-        } else {
-          next.set(key, String(val));
-        }
-      });
-      if (!('page' in patch)) {
-        next.delete('page');
-      }
-      setSearchParams(next, { replace: true });
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          Object.entries(patch).forEach(([key, val]) => {
+            if (
+              val === undefined ||
+              val === null ||
+              val === '' ||
+              val === 'all' ||
+              (key === 'page' && val === 1)
+            ) {
+              next.delete(key);
+            } else {
+              next.set(key, String(val));
+            }
+          });
+          if (!('page' in patch)) {
+            next.delete('page');
+          }
+          return next;
+        },
+        { replace: true }
+      );
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   // Distinct topics list from all questions
@@ -351,7 +356,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
         const getFreq = (item: Question) => {
           if (selectedCompany !== 'all') {
             const compKey = selectedCompany.toLowerCase();
-            const compObj = item.companies[compKey] || item.companies[selectedCompany] || {};
+            const compObj = (item.companies && (item.companies[compKey] || item.companies[selectedCompany])) || {};
             const str =
               compObj.all ||
               compObj['thirty-days'] ||
@@ -359,13 +364,13 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
               compObj['six-months'] ||
               compObj['more-than-six-months'] ||
               '0.0%';
-            return parseFloat(str.replace('%', '')) || 0;
+            return parseFloat(String(str).replace('%', '')) || 0;
           }
           return Object.keys(item.companies || {}).length;
         };
 
         const getAcc = (item: Question) => {
-          return parseFloat(item.acceptance.replace('%', '')) || 0;
+          return parseFloat(String(item.acceptance || '0').replace('%', '')) || 0;
         };
 
         let comparison = 0;
@@ -377,18 +382,18 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
             comparison = getAcc(a) - getAcc(b);
             break;
           case 'id':
-            comparison = Number(a.id) - Number(b.id);
+            comparison = (Number(a.id) || 0) - (Number(b.id) || 0);
             break;
           case 'title':
-            comparison = a.title.localeCompare(b.title);
+            comparison = (a.title || '').localeCompare(b.title || '');
             break;
           case 'difficulty': {
             const rank: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
-            comparison = rank[a.difficulty] - rank[b.difficulty];
+            comparison = (rank[a.difficulty] || 2) - (rank[b.difficulty] || 2);
             break;
           }
           default:
-            comparison = Number(a.id) - Number(b.id);
+            comparison = (Number(a.id) || 0) - (Number(b.id) || 0);
         }
 
         if (comparison !== 0) {
@@ -396,7 +401,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
         }
 
         // Stable secondary tie-breaker by problem ID ascending
-        return Number(a.id) - Number(b.id);
+        return (Number(a.id) || 0) - (Number(b.id) || 0);
       });
   }, [
     questions,
