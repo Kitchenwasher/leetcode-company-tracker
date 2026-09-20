@@ -1,0 +1,83 @@
+{
+  "questionId": 125,
+  "title": "Valid Palindrome",
+  "difficulty": "Easy",
+  "corePattern": "Two Pointers with On-the-Fly Filtering",
+  "interviewTips": [
+    "Ask what counts as valid: only alphanumeric characters case-insensitive, all other characters ignored",
+    "Trade-off to discuss: extra O(n) string for simplicity vs O(1) two-pointer scan for optimal space",
+    "Edge-case tip: empty string or string with only non-alphanumerics like '., ' is a valid palindrome"
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Filter and Reverse",
+      "tag": "Brute Force",
+      "intuition": "First normalize the string by keeping only alphanumeric characters in lowercase, then check if it reads the same forward and backward.",
+      "theory": "Build a cleaned string t containing lowercased alphanumerics from s. A string is a palindrome iff t equals reverse(t). This separates cleaning from checking, making logic trivially correct at cost of extra storage for t and its reverse.",
+      "cppCode": "class Solution {\npublic:\n    bool isPalindrome(string s) {\n        string filtered;\n        for (char c : s) {\n            if (isalnum((unsigned char)c)) filtered += tolower((unsigned char)c);\n        }\n        string rev = filtered;\n        reverse(rev.begin(), rev.end());\n        return filtered == rev;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isPalindrome(string s) {\n        string filtered;\n        for (char c : s) {\n            if (isalnum((unsigned char)c)) filtered += tolower((unsigned char)c);\n        }\n        string rev = filtered;\n        reverse(rev.begin(), rev.end());\n        return filtered == rev;\n    }\n};",
+        "python": "class Solution:\n    def isPalindrome(self, s: str) -> bool:\n        filtered = ''.join(ch.lower() for ch in s if ch.isalnum())\n        return filtered == filtered[::-1]",
+        "java": "class Solution {\n    public boolean isPalindrome(String s) {\n        StringBuilder sb = new StringBuilder();\n        for (char c : s.toCharArray()) {\n            if (Character.isLetterOrDigit(c)) sb.append(Character.toLowerCase(c));\n        }\n        String filtered = sb.toString();\n        String rev = sb.reverse().toString();\n        return filtered.equals(rev);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass to filter n characters plus O(n) to reverse and compare, linear overall."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Stores filtered string and its reverse, both up to n length in worst case."
+      },
+      "dryRunExample": {
+        "input": "s = A man, a plan, a canal: Panama",
+        "steps": [
+          "filter to amanaplanacanalpanama",
+          "reverse to amanaplanacanalpanama",
+          "forward equals reverse so return true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "empty string returns true",
+        "string with only spaces and punctuation like '., ' returns true",
+        "single alphanumeric like 'a' or '0P' handling case-insensitivity"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Two Pointers with Skipping",
+      "tag": "Optimal",
+      "intuition": "Compare characters from both ends moving inward, skipping non-alphanumerics on the fly without building a new string.",
+      "theory": "Maintain left l at start and right r at end. Advance l past non-alphanumerics and retreat r past non-alphanumerics, then compare lowercased s[l] and s[r]. If any mismatch, not a palindrome. If pointers cross, it is a palindrome. This checks the same filtered sequence implicitly in O(1) extra space.",
+      "cppCode": "class Solution {\npublic:\n    bool isPalindrome(string s) {\n        int l = 0, r = (int)s.size() - 1;\n        while (l < r) {\n            while (l < r && !isalnum((unsigned char)s[l])) l++;\n            while (l < r && !isalnum((unsigned char)s[r])) r--;\n            if (tolower((unsigned char)s[l]) != tolower((unsigned char)s[r])) return false;\n            l++; r--;\n        }\n        return true;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isPalindrome(string s) {\n        int l = 0, r = (int)s.size() - 1;\n        while (l < r) {\n            while (l < r && !isalnum((unsigned char)s[l])) l++;\n            while (l < r && !isalnum((unsigned char)s[r])) r--;\n            if (tolower((unsigned char)s[l]) != tolower((unsigned char)s[r])) return false;\n            l++; r--;\n        }\n        return true;\n    }\n};",
+        "python": "class Solution:\n    def isPalindrome(self, s: str) -> bool:\n        l, r = 0, len(s) - 1\n        while l < r:\n            while l < r and not s[l].isalnum():\n                l += 1\n            while l < r and not s[r].isalnum():\n                r -= 1\n            if s[l].lower() != s[r].lower():\n                return False\n            l += 1\n            r -= 1\n        return True",
+        "java": "class Solution {\n    public boolean isPalindrome(String s) {\n        int l = 0, r = s.length() - 1;\n        while (l < r) {\n            while (l < r && !Character.isLetterOrDigit(s.charAt(l))) l++;\n            while (l < r && !Character.isLetterOrDigit(s.charAt(r))) r--;\n            if (Character.toLowerCase(s.charAt(l)) != Character.toLowerCase(s.charAt(r))) return false;\n            l++; r--;\n        }\n        return true;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each character visited at most once by left or right pointer, linear scan."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two indices and constant temporaries, no extra string."
+      },
+      "dryRunExample": {
+        "input": "s = A man, a plan, a canal: Panama",
+        "steps": [
+          "l=0 A vs r=29 a -> match, move inward",
+          "skip spaces and commas and colon symmetrically",
+          "all mirrored pairs m-m, a-a, n-n match until pointers cross -> return true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "racecar returns true",
+        "race a car returns false due to middle mismatch",
+        "0P returns false because 0 != p, while empty and punctuation-only return true"
+      ]
+    }
+  ]
+}

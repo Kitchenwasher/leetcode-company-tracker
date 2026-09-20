@@ -1,0 +1,85 @@
+{
+  "questionId": 36,
+  "title": "Valid Sudoku",
+  "difficulty": "Medium",
+  "corePattern": "Hash Set Validation with Partitioned Constraints (Row / Column / Box Direct Addressing)",
+  "interviewTips": [
+    "Ask if board is always 9x9 with only '1'-'9' and '.' - you only check current validity, not solvability.",
+    "Trade-off: three-pass boolean arrays are clearest to explain; single-pass bitmask with 27 integers is fastest and most space-efficient.",
+    "Edge-case tip: always skip '.'; box index is (i/3)*3 + j/3 and digit index is c - '1'; test duplicate in same box but different rows and columns."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Three-Pass Validation with Hash Sets",
+      "tag": "Brute Force",
+      "intuition": "Check Sudoku rules separately: every row must have no duplicates, every column must have no duplicates, every 3x3 box must have no duplicates. Use a fresh set for each unit and fail fast on repeat.",
+      "theory": "A valid board means 27 independent units (9 rows + 9 columns + 9 boxes) each contain distinct digits ignoring '.'. Validating each unit with a hash set is correct because duplicates are exactly set collisions. Three passes visit each cell three times: 9 rows x 9 cells + 9 cols x 9 cells + 9 boxes x 9 cells = 243 operations, which is constant for 9x9 and O(N^2) for general NxN.",
+      "cppCode": "class Solution {\npublic:\n    bool isValidSudoku(vector<vector<char>>& board) {\n        for (int i = 0; i < 9; ++i) {\n            bool seen[9] = {false};\n            for (int j = 0; j < 9; ++j) {\n                if (board[i][j] == '.') continue;\n                int d = board[i][j] - '1';\n                if (seen[d]) return false;\n                seen[d] = true;\n            }\n        }\n        for (int j = 0; j < 9; ++j) {\n            bool seen[9] = {false};\n            for (int i = 0; i < 9; ++i) {\n                if (board[i][j] == '.') continue;\n                int d = board[i][j] - '1';\n                if (seen[d]) return false;\n                seen[d] = true;\n            }\n        }\n        for (int bi = 0; bi < 3; ++bi) {\n            for (int bj = 0; bj < 3; ++bj) {\n                bool seen[9] = {false};\n                for (int i = bi*3; i < bi*3+3; ++i) {\n                    for (int j = bj*3; j < bj*3+3; ++j) {\n                        if (board[i][j] == '.') continue;\n                        int d = board[i][j] - '1';\n                        if (seen[d]) return false;\n                        seen[d] = true;\n                    }\n                }\n            }\n        }\n        return true;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isValidSudoku(vector<vector<char>>& board) {\n        for (int i = 0; i < 9; ++i) {\n            bool seen[9] = {false};\n            for (int j = 0; j < 9; ++j) {\n                if (board[i][j] == '.') continue;\n                int d = board[i][j] - '1';\n                if (seen[d]) return false;\n                seen[d] = true;\n            }\n        }\n        for (int j = 0; j < 9; ++j) {\n            bool seen[9] = {false};\n            for (int i = 0; i < 9; ++i) {\n                if (board[i][j] == '.') continue;\n                int d = board[i][j] - '1';\n                if (seen[d]) return false;\n                seen[d] = true;\n            }\n        }\n        for (int bi = 0; bi < 3; ++bi) {\n            for (int bj = 0; bj < 3; ++bj) {\n                bool seen[9] = {false};\n                for (int i = bi*3; i < bi*3+3; ++i) {\n                    for (int j = bj*3; j < bj*3+3; ++j) {\n                        if (board[i][j] == '.') continue;\n                        int d = board[i][j] - '1';\n                        if (seen[d]) return false;\n                        seen[d] = true;\n                    }\n                }\n            }\n        }\n        return true;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def isValidSudoku(self, board: List[List[str]]) -> bool:\n        for i in range(9):\n            seen = set()\n            for j in range(9):\n                c = board[i][j]\n                if c == '.':\n                    continue\n                if c in seen:\n                    return False\n                seen.add(c)\n        for j in range(9):\n            seen = set()\n            for i in range(9):\n                c = board[i][j]\n                if c == '.':\n                    continue\n                if c in seen:\n                    return False\n                seen.add(c)\n        for bi in range(3):\n            for bj in range(3):\n                seen = set()\n                for i in range(bi*3, bi*3+3):\n                    for j in range(bj*3, bj*3+3):\n                        c = board[i][j]\n                        if c == '.':\n                            continue\n                        if c in seen:\n                            return False\n                        seen.add(c)\n        return True",
+        "java": "class Solution {\n    public boolean isValidSudoku(char[][] board) {\n        for (int i = 0; i < 9; i++) {\n            boolean[] seen = new boolean[9];\n            for (int j = 0; j < 9; j++) {\n                if (board[i][j] == '.') continue;\n                int d = board[i][j] - '1';\n                if (seen[d]) return false;\n                seen[d] = true;\n            }\n        }\n        for (int j = 0; j < 9; j++) {\n            boolean[] seen = new boolean[9];\n            for (int i = 0; i < 9; i++) {\n                if (board[i][j] == '.') continue;\n                int d = board[i][j] - '1';\n                if (seen[d]) return false;\n                seen[d] = true;\n            }\n        }\n        for (int bi = 0; bi < 3; bi++) {\n            for (int bj = 0; bj < 3; bj++) {\n                boolean[] seen = new boolean[9];\n                for (int i = bi*3; i < bi*3+3; i++) {\n                    for (int j = bj*3; j < bj*3+3; j++) {\n                        if (board[i][j] == '.') continue;\n                        int d = board[i][j] - '1';\n                        if (seen[d]) return false;\n                        seen[d] = true;\n                    }\n                }\n            }\n        }\n        return true;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Fixed 9x9 board visits 81 cells three times = 243 operations. In general for NxN board it is O(N^2)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only one set or boolean array of size up to 9 per unit, reused across units."
+      },
+      "dryRunExample": {
+        "input": "board[0][0]='5', board[0][1]='3', board[0][2]='.', board[1][0]='6' ... with duplicate '8' in column",
+        "steps": [
+          "Row pass: rows 0-8 have no internal duplicates, continue.",
+          "Column pass: column 2 finds '8' at row 1 and again at row 2 -> collision.",
+          "Return false immediately without checking boxes."
+        ],
+        "output": "false"
+      },
+      "edgeCases": [
+        "All '.' empty board -> true",
+        "Duplicate in row but different boxes -> false",
+        "Duplicate in column but different boxes -> false",
+        "Duplicate in 3x3 box but different rows and columns -> false"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Single Pass with Bitmask Direct Addressing",
+      "tag": "Optimal",
+      "intuition": "Track row, column, and box constraints together in one scan. Each digit 1-9 maps to one bit; three integer arrays rows[9], cols[9], boxes[9] record which digits have been seen. Box index is (i/3)*3 + j/3.",
+      "theory": "Digits are limited to 9 values, so a 9-bit integer is a perfect hash set with O(1) insert and lookup via bitwise AND/OR. For cell (i,j) with bit = 1 << (c-'1') and b = (i/3)*3 + j/3, validity requires bit not already present in rows[i], cols[j], boxes[b]. If present, board is invalid; otherwise set the bit. Single traversal maintains invariant that masks exactly represent seen digits so far.",
+      "cppCode": "class Solution {\npublic:\n    bool isValidSudoku(vector<vector<char>>& board) {\n        int rows[9] = {0}, cols[9] = {0}, boxes[9] = {0};\n        for (int i = 0; i < 9; ++i) {\n            for (int j = 0; j < 9; ++j) {\n                if (board[i][j] == '.') continue;\n                int bit = 1 << (board[i][j] - '1');\n                int b = (i / 3) * 3 + j / 3;\n                if ((rows[i] & bit) || (cols[j] & bit) || (boxes[b] & bit)) return false;\n                rows[i] |= bit;\n                cols[j] |= bit;\n                boxes[b] |= bit;\n            }\n        }\n        return true;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isValidSudoku(vector<vector<char>>& board) {\n        int rows[9] = {0}, cols[9] = {0}, boxes[9] = {0};\n        for (int i = 0; i < 9; ++i) {\n            for (int j = 0; j < 9; ++j) {\n                if (board[i][j] == '.') continue;\n                int bit = 1 << (board[i][j] - '1');\n                int b = (i / 3) * 3 + j / 3;\n                if ((rows[i] & bit) || (cols[j] & bit) || (boxes[b] & bit)) return false;\n                rows[i] |= bit;\n                cols[j] |= bit;\n                boxes[b] |= bit;\n            }\n        }\n        return true;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def isValidSudoku(self, board: List[List[str]]) -> bool:\n        rows = [0] * 9\n        cols = [0] * 9\n        boxes = [0] * 9\n        for i in range(9):\n            for j in range(9):\n                c = board[i][j]\n                if c == '.':\n                    continue\n                bit = 1 << (ord(c) - ord('1'))\n                b = (i // 3) * 3 + j // 3\n                if (rows[i] & bit) or (cols[j] & bit) or (boxes[b] & bit):\n                    return False\n                rows[i] |= bit\n                cols[j] |= bit\n                boxes[b] |= bit\n        return True",
+        "java": "class Solution {\n    public boolean isValidSudoku(char[][] board) {\n        int[] rows = new int[9];\n        int[] cols = new int[9];\n        int[] boxes = new int[9];\n        for (int i = 0; i < 9; i++) {\n            for (int j = 0; j < 9; j++) {\n                if (board[i][j] == '.') continue;\n                int bit = 1 << (board[i][j] - '1');\n                int b = (i / 3) * 3 + j / 3;\n                if ((rows[i] & bit) != 0 || (cols[j] & bit) != 0 || (boxes[b] & bit) != 0) return false;\n                rows[i] |= bit;\n                cols[j] |= bit;\n                boxes[b] |= bit;\n            }\n        }\n        return true;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Single scan of 81 cells with O(1) bit operations per cell. Generally O(N^2) for NxN board."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Three arrays of 9 integers (27 ints) for row/col/box masks, independent of board content."
+      },
+      "dryRunExample": {
+        "input": "board with valid prefix, cell (0,2)='8', cell (1,2)='8' in same box and column",
+        "steps": [
+          "Process (0,2): bit=1<<7, b=1, rows[0], cols[2], boxes[1] do not have bit -> set them.",
+          "Process (1,2): bit=1<<7, b=1, cols[2] already has bit and boxes[1] already has bit -> collision.",
+          "Return false."
+        ],
+        "output": "false"
+      },
+      "edgeCases": [
+        "Sparse board with single digit -> true",
+        "'.' cells must not set bits",
+        "Same digit in different boxes, rows, cols is allowed -> true",
+        "Full valid board with no '.' -> true if all constraints hold"
+      ]
+    }
+  ]
+}

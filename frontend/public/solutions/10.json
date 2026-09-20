@@ -1,0 +1,126 @@
+{
+  "questionId": 10,
+  "title": "Regular Expression Matching",
+  "difficulty": "Hard",
+  "corePattern": "Dynamic Programming over String Indices with Star Branching",
+  "interviewTips": [
+    "Ask if pattern is always valid: every star has a preceding element, only '.' and '*' are special.",
+    "Trade-off: brute force recursion is simple but exponential, memoization gives O(m*n) with recursion overhead, bottom-up DP gives O(m*n) iteratively and is most robust for interviews.",
+    "Edge-case tip: empty string vs patterns like 'a*', 'a*b*', '.*' and trailing stars require careful base case handling."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Recursion",
+      "tag": "Brute Force",
+      "intuition": "Match s[i:] against p[j:] recursively. If next pattern char is star, try zero occurrence by skipping it, or one-or-more by consuming one char of s if first chars match. Otherwise require first char match and advance both.",
+      "theory": "Define dfs(i,j) as whether suffixes s[i:] and p[j:] match. Let first = i<m and (p[j]==s[i] or p[j]=='.'). If p[j+1]=='*', then dfs(i,j)=dfs(i,j+2) or (first and dfs(i+1,j)). Else dfs(i,j)=first and dfs(i+1,j+1). Base case j==n returns i==m. This explores all star choices.",
+      "cppCode": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        return dfs(s, p, 0, 0);\n    }\nprivate:\n    bool dfs(const string& s, const string& p, int i, int j) {\n        if (j == (int)p.size()) return i == (int)s.size();\n        bool first = i < (int)s.size() && (p[j] == s[i] || p[j] == '.');\n        if (j + 1 < (int)p.size() && p[j + 1] == '*') {\n            return dfs(s, p, i, j + 2) || (first && dfs(s, p, i + 1, j));\n        }\n        return first && dfs(s, p, i + 1, j + 1);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        return dfs(s, p, 0, 0);\n    }\nprivate:\n    bool dfs(const string& s, const string& p, int i, int j) {\n        if (j == (int)p.size()) return i == (int)s.size();\n        bool first = i < (int)s.size() && (p[j] == s[i] || p[j] == '.');\n        if (j + 1 < (int)p.size() && p[j + 1] == '*') {\n            return dfs(s, p, i, j + 2) || (first && dfs(s, p, i + 1, j));\n        }\n        return first && dfs(s, p, i + 1, j + 1);\n    }\n};",
+        "python": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        def dfs(i: int, j: int) -> bool:\n            if j == len(p):\n                return i == len(s)\n            first = i < len(s) and (p[j] == s[i] or p[j] == '.')\n            if j + 1 < len(p) and p[j + 1] == '*':\n                return dfs(i, j + 2) or (first and dfs(i + 1, j))\n            return first and dfs(i + 1, j + 1)\n        return dfs(0, 0)",
+        "java": "class Solution {\n    public boolean isMatch(String s, String p) {\n        return dfs(s, p, 0, 0);\n    }\n    private boolean dfs(String s, String p, int i, int j) {\n        if (j == p.length()) return i == s.length();\n        boolean first = i < s.length() && (p.charAt(j) == s.charAt(i) || p.charAt(j) == '.');\n        if (j + 1 < p.length() && p.charAt(j + 1) == '*') {\n            return dfs(s, p, i, j + 2) || (first && dfs(s, p, i + 1, j));\n        }\n        return first && dfs(s, p, i + 1, j + 1);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(2^(m+n))",
+        "explanation": "Each star creates two branches (skip vs consume), leading to exponential number of states in worst case like s=aaaa, p=a*a*a*a*. m=|s|, n=|p|."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m+n)",
+        "explanation": "Recursion depth at most m+n due to advancing i or j along call stack, no memo table."
+      },
+      "dryRunExample": {
+        "input": "s='aa', p='a*'",
+        "steps": [
+          "dfs(0,0): first=true and p[1]==*, try dfs(0,2)",
+          "dfs(0,2): j==n but i!=m, returns false",
+          "backtrack: try first and dfs(1,0)",
+          "dfs(1,0): first=true, try dfs(1,2)=false, then dfs(2,0)",
+          "dfs(2,0): try dfs(2,2)=true via zero occurrence, returns true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "Empty s and empty p returns true",
+        "s='a', p='ab*' returns true via zero b",
+        "s='ab', p='.*' returns true via dot-star consuming all",
+        "Stack overflow on long inputs due to exponential calls"
+      ]
+    },
+    {
+      "id": "memoized-recursion",
+      "name": "Approach 2: Top-Down DP with Memoization",
+      "tag": "Memoization",
+      "intuition": "Same recursion as brute force but many (i,j) states repeat. Cache result of dfs(i,j) so each pair is computed once.",
+      "theory": "Number of distinct states is (m+1)*(n+1). Each state does O(1) work: check first match and at most two recursive calls. Memoization converts exponential recursion DAG into polynomial DP. Correctness follows from optimal substructure of suffix matching.",
+      "cppCode": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        int m = s.size(), n = p.size();\n        vector<vector<int>> memo(m + 1, vector<int>(n + 1, -1));\n        return dfs(s, p, 0, 0, memo);\n    }\nprivate:\n    bool dfs(const string& s, const string& p, int i, int j, vector<vector<int>>& memo) {\n        if (j == (int)p.size()) return i == (int)s.size();\n        if (memo[i][j] != -1) return memo[i][j];\n        bool first = i < (int)s.size() && (p[j] == s[i] || p[j] == '.');\n        bool ans;\n        if (j + 1 < (int)p.size() && p[j + 1] == '*') {\n            ans = dfs(s, p, i, j + 2, memo) || (first && dfs(s, p, i + 1, j, memo));\n        } else {\n            ans = first && dfs(s, p, i + 1, j + 1, memo);\n        }\n        memo[i][j] = ans;\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        int m = s.size(), n = p.size();\n        vector<vector<int>> memo(m + 1, vector<int>(n + 1, -1));\n        return dfs(s, p, 0, 0, memo);\n    }\nprivate:\n    bool dfs(const string& s, const string& p, int i, int j, vector<vector<int>>& memo) {\n        if (j == (int)p.size()) return i == (int)s.size();\n        if (memo[i][j] != -1) return memo[i][j];\n        bool first = i < (int)s.size() && (p[j] == s[i] || p[j] == '.');\n        bool ans;\n        if (j + 1 < (int)p.size() && p[j + 1] == '*') {\n            ans = dfs(s, p, i, j + 2, memo) || (first && dfs(s, p, i + 1, j, memo));\n        } else {\n            ans = first && dfs(s, p, i + 1, j + 1, memo);\n        }\n        memo[i][j] = ans;\n        return ans;\n    }\n};",
+        "python": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        from functools import lru_cache\n        @lru_cache(maxsize=None)\n        def dfs(i: int, j: int) -> bool:\n            if j == len(p):\n                return i == len(s)\n            first = i < len(s) and (p[j] == s[i] or p[j] == '.')\n            if j + 1 < len(p) and p[j + 1] == '*':\n                return dfs(i, j + 2) or (first and dfs(i + 1, j))\n            return first and dfs(i + 1, j + 1)\n        return dfs(0, 0)",
+        "java": "class Solution {\n    public boolean isMatch(String s, String p) {\n        Boolean[][] memo = new Boolean[s.length() + 1][p.length() + 1];\n        return dfs(s, p, 0, 0, memo);\n    }\n    private boolean dfs(String s, String p, int i, int j, Boolean[][] memo) {\n        if (j == p.length()) return i == s.length();\n        if (memo[i][j] != null) return memo[i][j];\n        boolean first = i < s.length() && (p.charAt(j) == s.charAt(i) || p.charAt(j) == '.');\n        boolean ans;\n        if (j + 1 < p.length() && p.charAt(j + 1) == '*') {\n            ans = dfs(s, p, i, j + 2, memo) || (first && dfs(s, p, i + 1, j, memo));\n        } else {\n            ans = first && dfs(s, p, i + 1, j + 1, memo);\n        }\n        memo[i][j] = ans;\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "At most (m+1)*(n+1) states, each computed once with O(1) work. m=|s|, n=|p|."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Memo table of size (m+1)*(n+1) plus recursion stack O(m+n)."
+      },
+      "dryRunExample": {
+        "input": "s='ab', p='.*'",
+        "steps": [
+          "dfs(0,0): first=true, star case needs dfs(0,2) or dfs(1,0)",
+          "dfs(0,2): j==n, i!=m => false, memo[0][2]=false",
+          "dfs(1,0): first=true, needs dfs(1,2) or dfs(2,0)",
+          "dfs(1,2)=false, dfs(2,0) needs dfs(2,2)=true => true propagates back"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "s empty, p='a*b*c*' => true via all zero occurrences",
+        "s='a', p='.*..' => false, dot-star cannot fix length mismatch",
+        "p ending with star, s longer than fixed prefix",
+        "Overlapping subproblems like '.*.*' benefit most from memo"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Bottom-Up DP Table",
+      "tag": "Optimal",
+      "intuition": "Fill dp[i][j] = whether s[i:] matches p[j:] backwards from end to start, so dependencies dp[i][j+2], dp[i+1][j], dp[i+1][j+1] are already known.",
+      "theory": "Same recurrence as recursion but evaluated iteratively in reverse order. Base dp[m][n]=true, dp[m][j] handles patterns that can match empty via stars. Iteration i from m down to 0, j from n-1 down to 0 guarantees needed future states are computed. Avoids recursion overhead and is optimal for production.",
+      "cppCode": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        int m = s.size(), n = p.size();\n        vector<vector<char>> dp(m + 1, vector<char>(n + 1, false));\n        dp[m][n] = true;\n        for (int i = m; i >= 0; --i) {\n            for (int j = n - 1; j >= 0; --j) {\n                bool first = i < m && (p[j] == s[i] || p[j] == '.');\n                if (j + 1 < n && p[j + 1] == '*') {\n                    dp[i][j] = dp[i][j + 2] || (first && dp[i + 1][j]);\n                } else {\n                    dp[i][j] = first && dp[i + 1][j + 1];\n                }\n            }\n        }\n        return dp[0][0];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        int m = s.size(), n = p.size();\n        vector<vector<char>> dp(m + 1, vector<char>(n + 1, false));\n        dp[m][n] = true;\n        for (int i = m; i >= 0; --i) {\n            for (int j = n - 1; j >= 0; --j) {\n                bool first = i < m && (p[j] == s[i] || p[j] == '.');\n                if (j + 1 < n && p[j + 1] == '*') {\n                    dp[i][j] = dp[i][j + 2] || (first && dp[i + 1][j]);\n                } else {\n                    dp[i][j] = first && dp[i + 1][j + 1];\n                }\n            }\n        }\n        return dp[0][0];\n    }\n};",
+        "python": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        m, n = len(s), len(p)\n        dp = [[False] * (n + 1) for _ in range(m + 1)]\n        dp[m][n] = True\n        for i in range(m, -1, -1):\n            for j in range(n - 1, -1, -1):\n                first = i < m and (p[j] == s[i] or p[j] == '.')\n                if j + 1 < n and p[j + 1] == '*':\n                    dp[i][j] = dp[i][j + 2] or (first and dp[i + 1][j])\n                else:\n                    dp[i][j] = first and dp[i + 1][j + 1]\n        return dp[0][0]",
+        "java": "class Solution {\n    public boolean isMatch(String s, String p) {\n        int m = s.length(), n = p.length();\n        boolean[][] dp = new boolean[m + 1][n + 1];\n        dp[m][n] = true;\n        for (int i = m; i >= 0; i--) {\n            for (int j = n - 1; j >= 0; j--) {\n                boolean first = i < m && (p.charAt(j) == s.charAt(i) || p.charAt(j) == '.');\n                if (j + 1 < n && p.charAt(j + 1) == '*') {\n                    dp[i][j] = dp[i][j + 2] || (first && dp[i + 1][j]);\n                } else {\n                    dp[i][j] = first && dp[i + 1][j + 1];\n                }\n            }\n        }\n        return dp[0][0];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Double loop over (m+1)*(n+1) table with O(1) transition per cell."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Full 2D boolean table. Can be optimized to O(n) by keeping only rows i and i+1 since transition uses current row j+2 and next row, but 2D is clearer and expected."
+      },
+      "dryRunExample": {
+        "input": "s='aab', p='c*a*b'",
+        "steps": [
+          "dp[3][3]=true base",
+          "row i=3: patterns with stars can match empty, e.g. dp[3][1] for a* is true",
+          "i=2,b vs b: dp[2][4]=true propagates",
+          "i=1,a vs a*: dp[1][1]=dp[1][3] or dp[2][1]=true",
+          "i=0,a vs c*a*: zero c then a* matches => dp[0][0]=true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "s empty, p empty => true",
+        "s='mississippi', p='mis*is*p*.' => false, classic LeetCode case",
+        "p='.*' matches any s including empty",
+        "p with consecutive stars is invalid per constraints but code safely handles j+1 check"
+      ]
+    }
+  ]
+}

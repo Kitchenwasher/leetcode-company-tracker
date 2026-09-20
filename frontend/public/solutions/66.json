@@ -1,0 +1,83 @@
+{
+  "questionId": 66,
+  "title": "Plus One",
+  "difficulty": "Easy",
+  "corePattern": "Right-to-Left Array Simulation with Carry Propagation",
+  "interviewTips": [
+    "Ask if input can be empty and if leading zeros are possible, and whether to modify in-place or return new array",
+    "Trade-off: converting to integer overflows for large n, while digit-by-digit simulation is O(n) and safe for arbitrary length",
+    "Edge-case tip: all 9s like [9,9,9] requires growing array to [1,0,0,0] - handle carry out of most significant digit"
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force - Right-to-Left Carry Simulation",
+      "tag": "Brute Force",
+      "intuition": "Add one like in elementary school: start at last digit, if it is less than 9 just increment and finish, otherwise set to 0 and carry to the left. If carry falls off the front, prepend 1.",
+      "theory": "Digits are big-endian base-10. Adding 1 affects only a suffix of trailing 9s. We propagate carry leftwards: digits[i] = (digits[i] + carry) % 10, carry = (digits[i] + carry) // 10. Since initial increment is 1, we can early exit on first non-9. If every digit was 9, mathematical result needs n+1 digits: 1 followed by n zeros.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> plusOne(vector<int>& digits) {\n        int n = digits.size();\n        for (int i = n - 1; i >= 0; --i) {\n            if (digits[i] < 9) {\n                digits[i]++;\n                return digits;\n            }\n            digits[i] = 0;\n        }\n        vector<int> ans(n + 1, 0);\n        ans[0] = 1;\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> plusOne(vector<int>& digits) {\n        int n = digits.size();\n        for (int i = n - 1; i >= 0; --i) {\n            if (digits[i] < 9) {\n                digits[i]++;\n                return digits;\n            }\n            digits[i] = 0;\n        }\n        vector<int> ans(n + 1, 0);\n        ans[0] = 1;\n        return ans;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def plusOne(self, digits: List[int]) -> List[int]:\n        n = len(digits)\n        for i in range(n - 1, -1, -1):\n            if digits[i] < 9:\n                digits[i] += 1\n                return digits\n            digits[i] = 0\n        return [1] + [0] * n",
+        "java": "class Solution {\n    public int[] plusOne(int[] digits) {\n        int n = digits.length;\n        for (int i = n - 1; i >= 0; i--) {\n            if (digits[i] < 9) {\n                digits[i]++;\n                return digits;\n            }\n            digits[i] = 0;\n        }\n        int[] res = new int[n + 1];\n        res[0] = 1;\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Worst case scan all n digits once when input is all 9s, best case O(1) when last digit is not 9."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "In-place update using O(1) extra space, excluding O(n) output for new array only in all-9s overflow case."
+      },
+      "dryRunExample": {
+        "input": "digits = [1,2,3]",
+        "steps": [
+          "i=2: digits[2]=3 < 9, increment to 4 and return",
+          "no carry propagation needed"
+        ],
+        "output": "[1,2,4]"
+      },
+      "edgeCases": [
+        "[9,9,9] -> [1,0,0,0] requires new array",
+        "[0] -> [1]",
+        "[9] -> [1,0]",
+        "[1,9,9] -> [2,0,0]"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal - Rightmost Non-Nine Pivot",
+      "tag": "Optimal",
+      "intuition": "Only trailing 9s become 0. Find the rightmost digit that is not 9, increment it once, and zero everything to its right. If no such digit exists, the number was 10^n - 1.",
+      "theory": "Let k be index of last non-9. Then result = prefix[0..k-1] + (digits[k]+1) + zeros(k+1..n-1). This is mathematically equivalent to addition with carry but separates the search phase from the write phase, making correctness obvious and minimizing writes to exactly the suffix. If k = -1, answer is 1 followed by n zeros.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> plusOne(vector<int>& digits) {\n        int n = digits.size();\n        int i = n - 1;\n        while (i >= 0 && digits[i] == 9) {\n            i--;\n        }\n        if (i < 0) {\n            vector<int> ans(n + 1, 0);\n            ans[0] = 1;\n            return ans;\n        }\n        digits[i]++;\n        for (int j = i + 1; j < n; ++j) {\n            digits[j] = 0;\n        }\n        return digits;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> plusOne(vector<int>& digits) {\n        int n = digits.size();\n        int i = n - 1;\n        while (i >= 0 && digits[i] == 9) {\n            i--;\n        }\n        if (i < 0) {\n            vector<int> ans(n + 1, 0);\n            ans[0] = 1;\n            return ans;\n        }\n        digits[i]++;\n        for (int j = i + 1; j < n; ++j) {\n            digits[j] = 0;\n        }\n        return digits;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def plusOne(self, digits: List[int]) -> List[int]:\n        n = len(digits)\n        i = n - 1\n        while i >= 0 and digits[i] == 9:\n            i -= 1\n        if i == -1:\n            return [1] + [0] * n\n        digits[i] += 1\n        for j in range(i + 1, n):\n            digits[j] = 0\n        return digits",
+        "java": "class Solution {\n    public int[] plusOne(int[] digits) {\n        int n = digits.length;\n        int i = n - 1;\n        while (i >= 0 && digits[i] == 9) {\n            i--;\n        }\n        if (i < 0) {\n            int[] res = new int[n + 1];\n            res[0] = 1;\n            return res;\n        }\n        digits[i]++;\n        for (int j = i + 1; j < n; j++) {\n            digits[j] = 0;\n        }\n        return digits;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One backward scan to find pivot plus one forward zeroing of trailing 9s, at most 2n steps so linear."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "O(1) auxiliary space in-place, O(n) output only when all digits are 9."
+      },
+      "dryRunExample": {
+        "input": "digits = [9,9,9]",
+        "steps": [
+          "scan from right: i=2,1,0 all 9, so i becomes -1",
+          "i==-1 means overflow, return [1,0,0,0]"
+        ],
+        "output": "[1,0,0,0]"
+      },
+      "edgeCases": [
+        "[9,9,9] -> [1,0,0,0] pivot not found",
+        "[8,9,9] -> [9,0,0] pivot at index 0",
+        "[0] -> [1] pivot at index 0",
+        "[1,2,9] -> [1,3,0]"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "questionId": 68,
+  "title": "Text Justification",
+  "difficulty": "Hard",
+  "corePattern": "Greedy Line Packing and Simulation",
+  "interviewTips": [
+    "Clarify last line and single-word lines are left-justified with single spaces between words plus trailing spaces, while other lines are fully justified.",
+    "Clarify space distribution rule: total slack divided evenly between gaps, remainder distributed one extra to leftmost gaps.",
+    "Trade-off: round-robin distribution is intuitive but does extra loops, divmod computes gaps in O(1) per gap; both are linear in output size, edge cases are single word, exact fit, and last line."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Greedy Packing with Round-Robin Spaces",
+      "tag": "Brute Force",
+      "intuition": "Pack as many words as fit with single spaces, then if fully justified, start with one space per gap and hand out remaining spaces one by one from left to right cyclically until maxWidth is reached.",
+      "theory": "Greedy is optimal for packing because taking more words can only reduce line count and never hurts justification. For a line with words i..j-1, let chars = sum len(words). If last line or single word, join with single space and pad right. Otherwise gaps = numWords-1, totalSpaces = maxWidth-chars >= gaps. Initialize spaces[g]=1 for all gaps, remaining = totalSpaces-gaps, then repeatedly add 1 to spaces[idx] cycling idx. This simulates even distribution and puts extra on left because left indices are visited first.",
+      "cppCode": "class Solution {\npublic:\n    vector<string> fullJustify(vector<string>& words, int maxWidth) {\n        vector<string> res;\n        int n = words.size();\n        int i = 0;\n        while (i < n) {\n            int j = i;\n            int lineLen = 0;\n            while (j < n && lineLen + (int)words[j].size() + (j - i) <= maxWidth) {\n                lineLen += words[j].size();\n                ++j;\n            }\n            int numWords = j - i;\n            string line;\n            if (j == n || numWords == 1) {\n                for (int k = i; k < j; ++k) {\n                    if (k > i) line += ' ';\n                    line += words[k];\n                }\n                line += string(maxWidth - line.size(), ' ');\n            } else {\n                int gaps = numWords - 1;\n                int totalSpaces = maxWidth - lineLen;\n                vector<int> spaces(gaps, 1);\n                int remaining = totalSpaces - gaps;\n                int idx = 0;\n                while (remaining-- > 0) {\n                    spaces[idx]++;\n                    idx = (idx + 1) % gaps;\n                }\n                for (int k = i; k < j - 1; ++k) {\n                    line += words[k];\n                    line += string(spaces[k - i], ' ');\n                }\n                line += words[j - 1];\n            }\n            res.push_back(line);\n            i = j;\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<string> fullJustify(vector<string>& words, int maxWidth) {\n        vector<string> res;\n        int n = words.size();\n        int i = 0;\n        while (i < n) {\n            int j = i;\n            int lineLen = 0;\n            while (j < n && lineLen + (int)words[j].size() + (j - i) <= maxWidth) {\n                lineLen += words[j].size();\n                ++j;\n            }\n            int numWords = j - i;\n            string line;\n            if (j == n || numWords == 1) {\n                for (int k = i; k < j; ++k) {\n                    if (k > i) line += ' ';\n                    line += words[k];\n                }\n                line += string(maxWidth - line.size(), ' ');\n            } else {\n                int gaps = numWords - 1;\n                int totalSpaces = maxWidth - lineLen;\n                vector<int> spaces(gaps, 1);\n                int remaining = totalSpaces - gaps;\n                int idx = 0;\n                while (remaining-- > 0) {\n                    spaces[idx]++;\n                    idx = (idx + 1) % gaps;\n                }\n                for (int k = i; k < j - 1; ++k) {\n                    line += words[k];\n                    line += string(spaces[k - i], ' ');\n                }\n                line += words[j - 1];\n            }\n            res.push_back(line);\n            i = j;\n        }\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def fullJustify(self, words: List[str], maxWidth: int) -> List[str]:\n        res = []\n        i = 0\n        n = len(words)\n        while i < n:\n            j = i\n            line_len = 0\n            while j < n and line_len + len(words[j]) + (j - i) <= maxWidth:\n                line_len += len(words[j])\n                j += 1\n            num_words = j - i\n            if j == n or num_words == 1:\n                line = ' '.join(words[i:j])\n                line += ' ' * (maxWidth - len(line))\n            else:\n                gaps = num_words - 1\n                total_spaces = maxWidth - line_len\n                spaces = [1] * gaps\n                remaining = total_spaces - gaps\n                idx = 0\n                while remaining > 0:\n                    spaces[idx] += 1\n                    remaining -= 1\n                    idx = (idx + 1) % gaps\n                line = ''\n                for k in range(gaps):\n                    line += words[i + k] + ' ' * spaces[k]\n                line += words[j - 1]\n            res.append(line)\n            i = j\n        return res",
+        "java": "class Solution {\n    public List<String> fullJustify(String[] words, int maxWidth) {\n        List<String> res = new ArrayList<>();\n        int n = words.length;\n        int i = 0;\n        while (i < n) {\n            int j = i;\n            int lineLen = 0;\n            while (j < n && lineLen + words[j].length() + (j - i) <= maxWidth) {\n                lineLen += words[j].length();\n                j++;\n            }\n            int numWords = j - i;\n            StringBuilder sb = new StringBuilder();\n            if (j == n || numWords == 1) {\n                for (int k = i; k < j; k++) {\n                    if (k > i) sb.append(' ');\n                    sb.append(words[k]);\n                }\n                while (sb.length() < maxWidth) sb.append(' ');\n            } else {\n                int gaps = numWords - 1;\n                int totalSpaces = maxWidth - lineLen;\n                int[] spaces = new int[gaps];\n                for (int g = 0; g < gaps; g++) spaces[g] = 1;\n                int remaining = totalSpaces - gaps;\n                int idx = 0;\n                while (remaining-- > 0) {\n                    spaces[idx]++;\n                    idx = (idx + 1) % gaps;\n                }\n                for (int k = i; k < j - 1; k++) {\n                    sb.append(words[k]);\n                    for (int s = 0; s < spaces[k - i]; s++) sb.append(' ');\n                }\n                sb.append(words[j - 1]);\n            }\n            res.add(sb.toString());\n            i = j;\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n + L * maxWidth)",
+        "explanation": "n is number of words, L is number of lines. Each word length counted once for packing, each output character built once. Round-robin loop iterates totalSpaces times which is bounded by maxWidth per line."
+      },
+      "spaceComplexity": {
+        "complexity": "O(maxWidth)",
+        "explanation": "Extra spaces array per line of size gaps and current line builder, excluding output list which is L * maxWidth characters."
+      },
+      "dryRunExample": {
+        "input": "words=[This,is,an,example,of,text,justification.], maxWidth=16",
+        "steps": [
+          "i=0: try This(4)+1+is(2)+1+an(3)=11 fits, +1+example(7)=19 >16 so j=3, chars=9, gaps=2, totalSpaces=7, base [1,1] remaining 5 -> distribute round-robin -> [4,3] => This----is---an",
+          "i=3: example(7)+1+of(2)+1+text(4)=16 fits, +1+justification.(14)>16 so j=6, chars=13, gaps=2, totalSpaces=3 -> [2,1] => example--of-text",
+          "i=6: j==n last line => join with single space and pad right => justification. + two spaces"
+        ],
+        "output": "lines: [This    is    an | example  of text | justification.  ] each length 16"
+      },
+      "edgeCases": [
+        "Single word line: e.g., words=[a], maxWidth=1 or long word equals maxWidth -> left-justify and pad, avoid division by zero.",
+        "Last line with multiple words: must use single spaces plus trailing pad, not full justification.",
+        "Exact fit line: totalSpaces equals gaps, no extra distribution needed."
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Greedy with Divmod Distribution",
+      "tag": "Optimal",
+      "intuition": "Same greedy packing, but compute spaces per gap directly with division: each gap gets base spaces, first extra gaps get one more. No simulation loop needed.",
+      "theory": "For fully justified line, totalSpaces = maxWidth - chars must be split into gaps slots. Let q = totalSpaces // gaps, r = totalSpaces % gaps. Then first r gaps get q+1 spaces, rest get q spaces. This is exactly even distribution with left bias. Correct because q*gaps + r = totalSpaces and 0 <= r < gaps. Last line and single-word case handled separately with left justification. Packing condition lineLen + len(words[j]) + (j-i) <= maxWidth ensures at least one space between words if multiple words.",
+      "cppCode": "class Solution {\npublic:\n    vector<string> fullJustify(vector<string>& words, int maxWidth) {\n        vector<string> res;\n        int n = words.size();\n        int i = 0;\n        while (i < n) {\n            int j = i;\n            int lineLen = 0;\n            while (j < n && lineLen + (int)words[j].size() + (j - i) <= maxWidth) {\n                lineLen += words[j].size();\n                ++j;\n            }\n            int numWords = j - i;\n            string line;\n            if (j == n || numWords == 1) {\n                for (int k = i; k < j; ++k) {\n                    if (k > i) line += ' ';\n                    line += words[k];\n                }\n                line += string(maxWidth - line.size(), ' ');\n            } else {\n                int totalSpaces = maxWidth - lineLen;\n                int gaps = numWords - 1;\n                int q = totalSpaces / gaps;\n                int r = totalSpaces % gaps;\n                for (int k = i; k < j - 1; ++k) {\n                    line += words[k];\n                    line += string(q + ((k - i) < r ? 1 : 0), ' ');\n                }\n                line += words[j - 1];\n            }\n            res.push_back(line);\n            i = j;\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<string> fullJustify(vector<string>& words, int maxWidth) {\n        vector<string> res;\n        int n = words.size();\n        int i = 0;\n        while (i < n) {\n            int j = i;\n            int lineLen = 0;\n            while (j < n && lineLen + (int)words[j].size() + (j - i) <= maxWidth) {\n                lineLen += words[j].size();\n                ++j;\n            }\n            int numWords = j - i;\n            string line;\n            if (j == n || numWords == 1) {\n                for (int k = i; k < j; ++k) {\n                    if (k > i) line += ' ';\n                    line += words[k];\n                }\n                line += string(maxWidth - line.size(), ' ');\n            } else {\n                int totalSpaces = maxWidth - lineLen;\n                int gaps = numWords - 1;\n                int q = totalSpaces / gaps;\n                int r = totalSpaces % gaps;\n                for (int k = i; k < j - 1; ++k) {\n                    line += words[k];\n                    line += string(q + ((k - i) < r ? 1 : 0), ' ');\n                }\n                line += words[j - 1];\n            }\n            res.push_back(line);\n            i = j;\n        }\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def fullJustify(self, words: List[str], maxWidth: int) -> List[str]:\n        res = []\n        i = 0\n        n = len(words)\n        while i < n:\n            j = i\n            line_len = 0\n            while j < n and line_len + len(words[j]) + (j - i) <= maxWidth:\n                line_len += len(words[j])\n                j += 1\n            num_words = j - i\n            if j == n or num_words == 1:\n                line = ' '.join(words[i:j])\n                line += ' ' * (maxWidth - len(line))\n            else:\n                total_spaces = maxWidth - line_len\n                gaps = num_words - 1\n                q, r = divmod(total_spaces, gaps)\n                line = ''\n                for k in range(gaps):\n                    line += words[i + k]\n                    line += ' ' * (q + (1 if k < r else 0))\n                line += words[j - 1]\n            res.append(line)\n            i = j\n        return res",
+        "java": "class Solution {\n    public List<String> fullJustify(String[] words, int maxWidth) {\n        List<String> res = new ArrayList<>();\n        int n = words.length;\n        int i = 0;\n        while (i < n) {\n            int j = i;\n            int lineLen = 0;\n            while (j < n && lineLen + words[j].length() + (j - i) <= maxWidth) {\n                lineLen += words[j].length();\n                j++;\n            }\n            int numWords = j - i;\n            StringBuilder sb = new StringBuilder();\n            if (j == n || numWords == 1) {\n                for (int k = i; k < j; k++) {\n                    if (k > i) sb.append(' ');\n                    sb.append(words[k]);\n                }\n                while (sb.length() < maxWidth) sb.append(' ');\n            } else {\n                int totalSpaces = maxWidth - lineLen;\n                int gaps = numWords - 1;\n                int q = totalSpaces / gaps;\n                int r = totalSpaces % gaps;\n                for (int k = i; k < j - 1; k++) {\n                    sb.append(words[k]);\n                    int cnt = q + ((k - i) < r ? 1 : 0);\n                    for (int s = 0; s < cnt; s++) sb.append(' ');\n                }\n                sb.append(words[j - 1]);\n            }\n            res.add(sb.toString());\n            i = j;\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n + L * maxWidth)",
+        "explanation": "Each word visited once to determine line boundaries, each output character written once. Divmod gives O(1) per gap instead of looping over spaces."
+      },
+      "spaceComplexity": {
+        "complexity": "O(maxWidth)",
+        "explanation": "Only current line builder of size maxWidth besides output; no per-gap auxiliary array needed."
+      },
+      "dryRunExample": {
+        "input": "words=[What,must,be,acknowledgment,shall,be], maxWidth=16",
+        "steps": [
+          "i=0: What(4)+1+must(4)+1+be(2)=13 fits, +1+acknowledgment(14)>16 so j=3, chars=10, totalSpaces=6, gaps=2, q=3 r=0 => What---must---be",
+          "i=3: acknowledgment(14) alone, single word line => acknowledgment-- + pad to 16? actually 14 +2 spaces",
+          "i=4: last line shall be => shall-be + padding => shall be        (4 trailing spaces)"
+        ],
+        "output": "lines: [What   must   be | acknowledgment  | shall be        ]"
+      },
+      "edgeCases": [
+        "maxWidth equals longest word length: every line is single word plus zero pad.",
+        "Words exactly fill line with single spaces: q=1 r=0, no extra spaces.",
+        "Last line single word: pad trailing spaces to maxWidth, ensure length check."
+      ]
+    }
+  ]
+}

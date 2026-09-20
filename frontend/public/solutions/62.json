@@ -1,0 +1,121 @@
+{
+  "questionId": 62,
+  "title": "Unique Paths",
+  "difficulty": "Medium",
+  "corePattern": "Grid Counting DP and Combinatorics (nCr)",
+  "interviewTips": [
+    "Ask about constraints and overflow: m,n <= 100 fits in 32-bit answer but factorials overflow, so need iterative multiply-divide or long.",
+    "Trade-off: DP is extensible to obstacles and is expected follow-up to Unique Paths II, while combinatorics is O(1) space but only works for empty grid.",
+    "Edge-case tip: single row or single column always has 1 path, including m=1, n=1; confirm movement is only right and down."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Recursion",
+      "tag": "Brute Force",
+      "intuition": "From each cell you can only go right or down. Try both choices recursively and sum the number of ways to reach the target. Base case is reaching bottom-right which counts as 1 path.",
+      "theory": "This explores the full binary decision tree of moves. At each cell (r,c) the count is f(r,c) = f(r+1,c) + f(r,c+1). It is correct by exhaustive enumeration but recomputes overlapping subproblems many times, leading to exponential time.",
+      "cppCode": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        return dfs(0, 0, m, n);\n    }\nprivate:\n    int dfs(int r, int c, int m, int n) {\n        if (r == m - 1 && c == n - 1) return 1;\n        if (r >= m || c >= n) return 0;\n        return dfs(r + 1, c, m, n) + dfs(r, c + 1, m, n);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        return dfs(0, 0, m, n);\n    }\nprivate:\n    int dfs(int r, int c, int m, int n) {\n        if (r == m - 1 && c == n - 1) return 1;\n        if (r >= m || c >= n) return 0;\n        return dfs(r + 1, c, m, n) + dfs(r, c + 1, m, n);\n    }\n};",
+        "python": "class Solution:\n    def uniquePaths(self, m: int, n: int) -> int:\n        def dfs(r, c):\n            if r == m - 1 and c == n - 1:\n                return 1\n            if r >= m or c >= n:\n                return 0\n            return dfs(r + 1, c) + dfs(r, c + 1)\n        return dfs(0, 0)",
+        "java": "class Solution {\n    public int uniquePaths(int m, int n) {\n        return dfs(0, 0, m, n);\n    }\n    private int dfs(int r, int c, int m, int n) {\n        if (r == m - 1 && c == n - 1) return 1;\n        if (r >= m || c >= n) return 0;\n        return dfs(r + 1, c, m, n) + dfs(r, c + 1, m, n);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(2^(m+n))",
+        "explanation": "Each cell branches into 2 calls and path length is m+n-2, so number of recursive calls is exponential in grid size."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m+n)",
+        "explanation": "Recursion stack depth equals max path length m+n-2 for down plus right moves."
+      },
+      "dryRunExample": {
+        "input": "m=3, n=2",
+        "steps": [
+          "start at (0,0), branch down to (1,0) and right to (0,1)",
+          "expand (1,0) -> (2,0)+(1,1), expand (0,1) -> (1,1) terminal-adjacent",
+          "paths found: (0,0)->(1,0)->(2,0)->(2,1), (0,0)->(1,0)->(1,1)->(2,1), (0,0)->(0,1)->(1,1)->(2,1)",
+          "sum = 3"
+        ],
+        "output": "3"
+      },
+      "edgeCases": [
+        "m=1, n=1 returns 1, base case immediately hit",
+        "m=1 or n=1 returns 1, only one straight line path",
+        "TLE for m,n > ~15 due to exponential blowup"
+      ]
+    },
+    {
+      "id": "dp-1d",
+      "name": "Approach 2: Dynamic Programming with 1D Array",
+      "tag": "Dynamic Programming",
+      "intuition": "Number of ways to reach a cell is sum of ways from top and left. First row and first column are all 1 because there is only one straight path. Fill row by row reusing one array.",
+      "theory": "Optimal substructure: dp[i][j] = dp[i-1][j] + dp[i][j-1] with dp[0][*]=dp[*][0]=1. Since current row only needs previous row, compress to 1D: dp[j] += dp[j-1] where dp[j] holds previous row value before update and dp[j-1] holds current row value. Iterate m-1 times over n columns.",
+      "cppCode": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        vector<int> dp(n, 1);\n        for (int i = 1; i < m; ++i) {\n            for (int j = 1; j < n; ++j) {\n                dp[j] += dp[j - 1];\n            }\n        }\n        return dp[n - 1];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        vector<int> dp(n, 1);\n        for (int i = 1; i < m; ++i) {\n            for (int j = 1; j < n; ++j) {\n                dp[j] += dp[j - 1];\n            }\n        }\n        return dp[n - 1];\n    }\n};",
+        "python": "class Solution:\n    def uniquePaths(self, m: int, n: int) -> int:\n        dp = [1] * n\n        for i in range(1, m):\n            for j in range(1, n):\n                dp[j] += dp[j - 1]\n        return dp[n - 1]",
+        "java": "class Solution {\n    public int uniquePaths(int m, int n) {\n        int[] dp = new int[n];\n        for (int j = 0; j < n; j++) dp[j] = 1;\n        for (int i = 1; i < m; i++) {\n            for (int j = 1; j < n; j++) {\n                dp[j] += dp[j - 1];\n            }\n        }\n        return dp[n - 1];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m*n)",
+        "explanation": "Each of m*n cells computed once with O(1) addition."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Only one row of size n stored; can also use O(min(m,n)) by iterating over smaller dimension."
+      },
+      "dryRunExample": {
+        "input": "m=3, n=7",
+        "steps": [
+          "init dp=[1,1,1,1,1,1,1] for row 0",
+          "row 1: dp becomes [1,2,3,4,5,6,7]",
+          "row 2: j=1 ->3, j=2->6, j=3->10, j=4->15, j=5->21, j=6->28",
+          "result dp[6]=28"
+        ],
+        "output": "28"
+      },
+      "edgeCases": [
+        "m=1 or n=1 returns 1 without loop execution",
+        "m=100, n=100 fits in 32-bit signed int, no overflow in DP addition",
+        "Large m with small n still efficient if you choose dimension min for array size"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Combinatorics Formula",
+      "tag": "Optimal",
+      "intuition": "Every path needs exactly m-1 downs and n-1 rights in any order, total N=m+n-2 moves. Choosing positions of downs (or rights) among N determines the path. Answer is binomial coefficient C(N, min(m-1,n-1)).",
+      "theory": "Number of sequences with m-1 D and n-1 R is N choose m-1 = N! / ((m-1)! (n-1)!). Compute iteratively as res = product_{i=1..k} (N-k+i)/i with k=min(m-1,n-1) to keep intermediate divisible and avoid factorial overflow. Division at each step is exact, using 64-bit for safety.",
+      "cppCode": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        long long N = m + n - 2;\n        long long k = min(m - 1, n - 1);\n        long long res = 1;\n        for (long long i = 1; i <= k; ++i) {\n            res = res * (N - k + i) / i;\n        }\n        return (int)res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        long long N = m + n - 2;\n        long long k = min(m - 1, n - 1);\n        long long res = 1;\n        for (long long i = 1; i <= k; ++i) {\n            res = res * (N - k + i) / i;\n        }\n        return (int)res;\n    }\n};",
+        "python": "class Solution:\n    def uniquePaths(self, m: int, n: int) -> int:\n        N = m + n - 2\n        k = min(m - 1, n - 1)\n        res = 1\n        for i in range(1, k + 1):\n            res = res * (N - k + i) // i\n        return res",
+        "java": "class Solution {\n    public int uniquePaths(int m, int n) {\n        int N = m + n - 2;\n        int k = Math.min(m - 1, n - 1);\n        long res = 1;\n        for (int i = 1; i <= k; i++) {\n            res = res * (N - k + i) / i;\n        }\n        return (int)res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(min(m,n))",
+        "explanation": "Single loop of k = min(m-1,n-1) iterations with O(1) multiply and divide."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a few integer variables used."
+      },
+      "dryRunExample": {
+        "input": "m=3, n=7",
+        "steps": [
+          "N=8, k=min(2,6)=2",
+          "i=1: res=1*(7)/1=7",
+          "i=2: res=7*(8)/2=28",
+          "result 28 equals C(8,2)"
+        ],
+        "output": "28"
+      },
+      "edgeCases": [
+        "m=1 or n=1 gives N=m+n-2, k=0, loop skipped, returns 1",
+        "m=3, n=2 gives C(3,1)=3",
+        "Avoid computing factorials directly to prevent overflow; multiply then divide each iteration"
+      ]
+    }
+  ]
+}

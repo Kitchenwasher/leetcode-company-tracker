@@ -1,0 +1,128 @@
+{
+  "questionId": 78,
+  "title": "Subsets",
+  "difficulty": "Medium",
+  "corePattern": "Power Set Enumeration via Backtracking and Bitmasking",
+  "interviewTips": [
+    "Clarify constraints: Are all numbers distinct? Problem guarantees distinct integers, so no duplicate-subset handling needed unlike Subsets II.",
+    "Trade-off: Backtracking vs Iterative vs Bitmask all cost O(2^n * n) time; choose backtracking for interview clarity, iterative for simplicity, bitmask for direct index-to-subset mapping.",
+    "Edge-case tip: Empty input must return [[]] not [], and emphasize output size is 2^n — discuss why exponential output dominates complexity analysis."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Backtracking (DFS Include-or-Explore)",
+      "tag": "Backtracking",
+      "intuition": "Each element has two choices: include it or skip it. Do a depth-first search that builds a current path, records it as a valid subset, then tries adding each remaining element one by one and recurses.",
+      "theory": "We maintain start index to avoid revisiting earlier elements and generating permutations. At each call we add a copy of path to answer (all lengths are valid). Then for i from start to n-1 we push nums[i], recurse with i+1, and pop to backtrack. This enumerates the full decision tree with exactly 2^n nodes, each node corresponds to one subset.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        vector<vector<int>> res;\n        vector<int> path;\n        backtrack(nums, 0, path, res);\n        return res;\n    }\nprivate:\n    void backtrack(vector<int>& nums, int start, vector<int>& path, vector<vector<int>>& res) {\n        res.push_back(path);\n        for (int i = start; i < (int)nums.size(); ++i) {\n            path.push_back(nums[i]);\n            backtrack(nums, i + 1, path, res);\n            path.pop_back();\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        vector<vector<int>> res;\n        vector<int> path;\n        backtrack(nums, 0, path, res);\n        return res;\n    }\nprivate:\n    void backtrack(vector<int>& nums, int start, vector<int>& path, vector<vector<int>>& res) {\n        res.push_back(path);\n        for (int i = start; i < (int)nums.size(); ++i) {\n            path.push_back(nums[i]);\n            backtrack(nums, i + 1, path, res);\n            path.pop_back();\n        }\n    }\n};",
+        "python": "class Solution:\n    def subsets(self, nums: List[int]) -> List[List[int]]:\n        res = []\n        def backtrack(start: int, path: List[int]):\n            res.append(path[:])\n            for i in range(start, len(nums)):\n                path.append(nums[i])\n                backtrack(i + 1, path)\n                path.pop()\n        backtrack(0, [])\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> subsets(int[] nums) {\n        List<List<Integer>> res = new ArrayList<>();\n        backtrack(nums, 0, new ArrayList<>(), res);\n        return res;\n    }\n    private void backtrack(int[] nums, int start, List<Integer> path, List<List<Integer>> res) {\n        res.add(new ArrayList<>(path));\n        for (int i = start; i < nums.length; i++) {\n            path.add(nums[i]);\n            backtrack(nums, i + 1, path, res);\n            path.remove(path.size() - 1);\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(2^n * n)",
+        "explanation": "There are 2^n subsets. Copying each path of average length n/2 costs O(n), so total O(2^n * n). Recursion visits each subset once."
+      },
+      "spaceComplexity": {
+        "complexity": "O(2^n * n)",
+        "explanation": "Output stores 2^n subsets totaling O(2^n * n) integers. Auxiliary space is O(n) for recursion depth and path, plus O(2^n * n) for answer."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3]",
+        "steps": [
+          "start path=[] -> add []",
+          "pick 1 -> path=[1] -> add [1]",
+          "pick 2 -> path=[1,2] -> add [1,2]",
+          "pick 3 -> path=[1,2,3] -> add [1,2,3], backtrack",
+          "back to [1] pick 3 -> add [1,3], backtrack",
+          "back to [] pick 2 -> add [2], then [2,3]",
+          "back to [] pick 3 -> add [3]"
+        ],
+        "output": "[[],[1],[1,2],[1,2,3],[1,3],[2],[2,3],[3]] (any order)"
+      },
+      "edgeCases": [
+        "n=0 -> return [[]]",
+        "n=1 e.g. [0] -> [[],[0]]",
+        "Negative numbers work identically, no sorting needed"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Iterative Cascading (Optimal)",
+      "tag": "Optimal",
+      "intuition": "Start with only the empty set. For each new number, duplicate all existing subsets and append the number to the copies. This cascades the power set size from 1 to 2 to 4 to 8.",
+      "theory": "Invariant: after processing first k numbers, res contains all 2^k subsets of nums[0..k-1]. When processing nums[k], every subset of first k+1 elements either excludes nums[k] (already in res) or includes it (existing subset + nums[k]). So we snapshot size n=res.size() and for i in 0..n-1 push copy with new element. No recursion needed.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        vector<vector<int>> res = {{}};\n        for (int num : nums) {\n            int n = res.size();\n            for (int i = 0; i < n; ++i) {\n                res.push_back(res[i]);\n                res.back().push_back(num);\n            }\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        vector<vector<int>> res = {{}};\n        for (int num : nums) {\n            int n = res.size();\n            for (int i = 0; i < n; ++i) {\n                res.push_back(res[i]);\n                res.back().push_back(num);\n            }\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def subsets(self, nums: List[int]) -> List[List[int]]:\n        res = [[]]\n        for num in nums:\n            res += [curr + [num] for curr in res]\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> subsets(int[] nums) {\n        List<List<Integer>> res = new ArrayList<>();\n        res.add(new ArrayList<>());\n        for (int num : nums) {\n            int n = res.size();\n            for (int i = 0; i < n; i++) {\n                List<Integer> cur = new ArrayList<>(res.get(i));\n                cur.add(num);\n                res.add(cur);\n            }\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(2^n * n)",
+        "explanation": "Each of n iterations doubles list: total copies sum_{k} 2^k = 2^{n+1}. Each copy costs O(k) average, bounded by O(2^n * n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(2^n * n)",
+        "explanation": "Output dominates. Auxiliary extra is O(1) besides output if we count copying cost as output construction; iterative uses no recursion stack."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3]",
+        "steps": [
+          "res=[[]]",
+          "num=1 -> duplicate []+[1] => [[],[1]]",
+          "num=2 -> duplicate +[2] => [[],[1],[2],[1,2]]",
+          "num=3 -> duplicate +[3] => [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]"
+        ],
+        "output": "[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]"
+      },
+      "edgeCases": [
+        "Empty nums returns [[]] without loop",
+        "Single element doubles once correctly",
+        "Must snapshot n=res.size() before inner loop or infinite growth"
+      ]
+    },
+    {
+      "id": "bitmask",
+      "name": "Approach 3: Bit Manipulation (Bitmask Enumeration)",
+      "tag": "Bit Manipulation",
+      "intuition": "Number subsets from 0 to 2^n -1. Write the number in binary: bit i = 1 means include nums[i]. Each mask directly encodes one subset.",
+      "theory": "There is a bijection between n-bit integers and subsets of an n-element set. For mask in [0, 2^n), subset = {nums[i] | mask & (1<<i) != 0}. Iterate all masks and build subsets by testing bits. n <= 10 per constraints so 1<<n fits in int; for larger n use 1LL or iterative method.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        int n = nums.size();\n        int total = 1 << n;\n        vector<vector<int>> res;\n        res.reserve(total);\n        for (int mask = 0; mask < total; ++mask) {\n            vector<int> subset;\n            for (int i = 0; i < n; ++i) {\n                if (mask & (1 << i)) subset.push_back(nums[i]);\n            }\n            res.push_back(move(subset));\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        int n = nums.size();\n        int total = 1 << n;\n        vector<vector<int>> res;\n        res.reserve(total);\n        for (int mask = 0; mask < total; ++mask) {\n            vector<int> subset;\n            for (int i = 0; i < n; ++i) {\n                if (mask & (1 << i)) subset.push_back(nums[i]);\n            }\n            res.push_back(move(subset));\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def subsets(self, nums: List[int]) -> List[List[int]]:\n        n = len(nums)\n        res = []\n        for mask in range(1 << n):\n            subset = [nums[i] for i in range(n) if mask & (1 << i)]\n            res.append(subset)\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> subsets(int[] nums) {\n        int n = nums.length;\n        int total = 1 << n;\n        List<List<Integer>> res = new ArrayList<>(total);\n        for (int mask = 0; mask < total; mask++) {\n            List<Integer> subset = new ArrayList<>();\n            for (int i = 0; i < n; i++) {\n                if ((mask & (1 << i)) != 0) subset.add(nums[i]);\n            }\n            res.add(subset);\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(2^n * n)",
+        "explanation": "2^n masks, each scans n bits to build subset, so O(n * 2^n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(2^n * n)",
+        "explanation": "Output storage dominates. Extra working space O(n) per subset built temporarily."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3]",
+        "steps": [
+          "mask 0=000 -> []",
+          "mask 1=001 -> [1]",
+          "mask 2=010 -> [2]",
+          "mask 3=011 -> [1,2]",
+          "mask 4=100 -> [3]",
+          "mask 5=101 -> [1,3]",
+          "mask 6=110 -> [2,3]",
+          "mask 7=111 -> [1,2,3]"
+        ],
+        "output": "[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]"
+      },
+      "edgeCases": [
+        "n=0 -> total=1 -> [[]]",
+        "n=10 max -> 1024 masks fits int",
+        "For n>=31 shift overflows int, need long or backtracking"
+      ]
+    }
+  ]
+}

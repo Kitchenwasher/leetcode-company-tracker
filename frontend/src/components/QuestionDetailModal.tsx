@@ -10,7 +10,7 @@ import {
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/sound';
 import { WhiteboardCanvas } from './WhiteboardCanvas';
-import { CppPlayground } from './CppPlayground';
+import { CodeEditorRunner } from './CodeEditorRunner';
 
 interface QuestionDetailModalProps {
   question: Question;
@@ -540,19 +540,19 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 Intuition & Notes
               </button>
               <button
-                onClick={() => setActiveTab('code')}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
-                  activeTab === 'code'
+                onClick={() => setActiveTab('runner')}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
+                  activeTab === 'runner'
                     ? 'border-primary text-primary'
                     : 'border-transparent text-textMuted hover:text-textPrimary'
                 }`}
               >
                 <Code2 className="w-3.5 h-3.5" />
-                Code Scratchpad
+                <span>Code Editor & Runner</span>
               </button>
               <button
                 onClick={() => setActiveTab('whiteboard')}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                   activeTab === 'whiteboard'
                     ? 'border-primary text-primary'
                     : 'border-transparent text-textMuted hover:text-textPrimary'
@@ -562,19 +562,8 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 <span>Whiteboard Canvas</span>
               </button>
               <button
-                onClick={() => setActiveTab('runner')}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
-                  activeTab === 'runner'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-textMuted hover:text-textPrimary'
-                }`}
-              >
-                <Zap className="w-3.5 h-3.5 text-primary" />
-                <span>C++ Code Scratchpad</span>
-              </button>
-              <button
                 onClick={() => setActiveTab('companies')}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                   activeTab === 'companies'
                     ? 'border-primary text-primary'
                     : 'border-transparent text-textMuted hover:text-textPrimary'
@@ -943,14 +932,15 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
             </div>
           )}
 
-          {/* TAB CONTENT: IN-BROWSER C++ RUNNER */}
+          {/* TAB CONTENT: IN-BROWSER CODE EDITOR & RUNNER */}
           {activeTab === 'runner' && (
-            <div className="space-y-2">
-              <CppPlayground
-                initialCode={currentApproach?.cppCode || codeText || undefined}
-                questionTitle={q.title}
-                onSendToNotes={(code) => {
-                  setNotes((prev) => prev + '\n\n```cpp\n' + code + '\n```');
+            <div className="h-[520px]">
+              <CodeEditorRunner
+                question={q}
+                currentApproach={currentApproach}
+                onSolved={() => handleSetStatus('solved')}
+                onSendToNotes={(codeSnippet) => {
+                  setNotes((prev) => prev + '\n\n```\n' + codeSnippet + '\n```');
                   setActiveTab('notes');
                   sounds.playSuccess();
                 }}

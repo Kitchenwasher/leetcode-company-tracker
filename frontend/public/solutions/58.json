@@ -1,0 +1,83 @@
+{
+  "questionId": 58,
+  "title": "Length of Last Word",
+  "difficulty": "Easy",
+  "corePattern": "Reverse Traversal / String Parsing from End",
+  "interviewTips": [
+    "Ask if input can have leading, trailing, or multiple consecutive spaces — e.g., 'Hello World   ' vs '   fly me   to   the moon  '.",
+    "Trade-off: split() is concise but uses O(n) extra space for words array; reverse scan is O(1) space and optimal — mention this proactively.",
+    "Edge-case tip: single word with no spaces, all spaces constraint-wise not possible but trailing spaces are guaranteed test; ensure you skip trailing spaces first then count."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Split and Take Last",
+      "tag": "Brute Force",
+      "intuition": "A word is defined as maximal non-space characters. If we split the string by spaces, the answer is simply the length of the last token. Python split() and C++ stringstream operator>> and Java trim+split automatically ignore extra spaces.",
+      "theory": "Tokenize the string on whitespace delimiter. Let tokens be t0..tk-1 after discarding empty tokens caused by multiple spaces. By definition last word is tk-1, so answer is len(tk-1). Scanning for delimiters is linear, but storing all tokens costs extra space proportional to input.",
+      "cppCode": "class Solution {\npublic:\n    int lengthOfLastWord(string s) {\n        stringstream ss(s);\n        string word, last;\n        while (ss >> word) {\n            last = word;\n        }\n        return last.length();\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int lengthOfLastWord(string s) {\n        stringstream ss(s);\n        string word, last;\n        while (ss >> word) {\n            last = word;\n        }\n        return last.length();\n    }\n};",
+        "python": "class Solution:\n    def lengthOfLastWord(self, s: str) -> int:\n        return len(s.split()[-1])",
+        "java": "class Solution {\n    public int lengthOfLastWord(String s) {\n        String[] words = s.trim().split(\"\\\\s+\");\n        return words[words.length - 1].length();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass over n characters to find delimiters and build tokens. n = s.length()."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Stores split words array / tokens in worst case (e.g., single word or many words) copying O(n) characters."
+      },
+      "dryRunExample": {
+        "input": "s = 'Hello World'",
+        "steps": [
+          "split by spaces -> ['Hello', 'World']",
+          "take last token -> 'World'",
+          "len('World') -> 5"
+        ],
+        "output": "5"
+      },
+      "edgeCases": [
+        "Trailing spaces: 'Hello World   ' -> split ignores empties, last='World' -> 5",
+        "Single word: 'a' -> ['a'] -> 1",
+        "Multiple spaces between: 'a   b' -> ['a','b'] -> 1"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Reverse Scan with Two Phases",
+      "tag": "Optimal",
+      "intuition": "We only need the last word, so start from the end. First skip trailing spaces, then count characters until next space or start of string. No splitting or extra storage needed.",
+      "theory": "Let i = n-1. Invariant 1: suffix (i+1..n-1) is all spaces to skip. Decrement i while s[i]==' '. Invariant 2: now i points at end of last word. Count len while i>=0 and s[i]!=' ', decrementing i. When loop stops, len equals maximal non-space suffix length, which is definition of last word length.",
+      "cppCode": "class Solution {\npublic:\n    int lengthOfLastWord(string s) {\n        int i = (int)s.size() - 1;\n        while (i >= 0 && s[i] == ' ') i--;\n        int len = 0;\n        while (i >= 0 && s[i] != ' ') {\n            len++;\n            i--;\n        }\n        return len;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int lengthOfLastWord(string s) {\n        int i = (int)s.size() - 1;\n        while (i >= 0 && s[i] == ' ') i--;\n        int len = 0;\n        while (i >= 0 && s[i] != ' ') {\n            len++;\n            i--;\n        }\n        return len;\n    }\n};",
+        "python": "class Solution:\n    def lengthOfLastWord(self, s: str) -> int:\n        i = len(s) - 1\n        while i >= 0 and s[i] == ' ':\n            i -= 1\n        length = 0\n        while i >= 0 and s[i] != ' ':\n            length += 1\n            i -= 1\n        return length",
+        "java": "class Solution {\n    public int lengthOfLastWord(String s) {\n        int i = s.length() - 1;\n        while (i >= 0 && s.charAt(i) == ' ') i--;\n        int len = 0;\n        while (i >= 0 && s.charAt(i) != ' ') {\n            len++;\n            i--;\n        }\n        return len;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "At most one backward pass over n characters; worst case single word scans whole string, best case short last word is O(k) where k is trailing spaces + last word length."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two integer pointers/counters, no copy of string or token array."
+      },
+      "dryRunExample": {
+        "input": "s = '   fly me   to   the moon  '",
+        "steps": [
+          "i=26 at end, skip trailing spaces -> i=25 at 'n' of moon",
+          "count: m-o-o-n -> len=1,2,3,4, i moves to space before moon",
+          "stop at space, return 4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "Trailing spaces: 'Hello World   ' -> skip 3 spaces then count 5",
+        "Single char: 'a' -> no skip, count 1",
+        "Leading spaces + one word: '   a' -> skip 0 trailing, count 1"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "questionId": 61,
+  "title": "Rotate List",
+  "difficulty": "Medium",
+  "corePattern": "Circular Linking with Modulo Reduction",
+  "interviewTips": [
+    "Clarify: can k be larger than list length? Yes, up to 2e9, so ask if you should use k % n.",
+    "Trade-off: repeated single-step rotation is simple but O(n*k); closing the list into a ring achieves O(n) in one pass.",
+    "Edge-case tip: handle empty list, single node, k==0, and k % n == 0 early; ensure you break the circle to avoid cycles."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Single-Step Rotation",
+      "tag": "Brute Force",
+      "intuition": "Rotating right by 1 means moving the last node to the front. Repeat this operation k times to get rotation by k. Use modulo to avoid useless full cycles.",
+      "theory": "For each of k_eff = k % n rotations, traverse to find tail and its predecessor prev. Detach tail via prev.next = None and prepend it via tail.next = head. After k_eff iterations the head points to the rotated list. Each iteration costs O(n) traversal, total O(n * k_eff).",
+      "cppCode": "class Solution {\npublic:\n    ListNode* rotateRight(ListNode* head, int k) {\n        if (!head || !head->next || k == 0) return head;\n        int n = 1;\n        ListNode* tail = head;\n        while (tail->next) { tail = tail->next; n++; }\n        k %= n;\n        if (k == 0) return head;\n        for (int i = 0; i < k; ++i) {\n            ListNode* prev = nullptr;\n            ListNode* cur = head;\n            while (cur->next) { prev = cur; cur = cur->next; }\n            prev->next = nullptr;\n            cur->next = head;\n            head = cur;\n        }\n        return head;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* rotateRight(ListNode* head, int k) {\n        if (!head || !head->next || k == 0) return head;\n        int n = 1;\n        ListNode* tail = head;\n        while (tail->next) { tail = tail->next; n++; }\n        k %= n;\n        if (k == 0) return head;\n        for (int i = 0; i < k; ++i) {\n            ListNode* prev = nullptr;\n            ListNode* cur = head;\n            while (cur->next) { prev = cur; cur = cur->next; }\n            prev->next = nullptr;\n            cur->next = head;\n            head = cur;\n        }\n        return head;\n    }\n};",
+        "python": "class Solution:\n    def rotateRight(self, head, k):\n        if not head or not head.next or k == 0:\n            return head\n        n = 1\n        tail = head\n        while tail.next:\n            tail = tail.next\n            n += 1\n        k %= n\n        if k == 0:\n            return head\n        for _ in range(k):\n            prev = None\n            cur = head\n            while cur.next:\n                prev = cur\n                cur = cur.next\n            prev.next = None\n            cur.next = head\n            head = cur\n        return head",
+        "java": "class Solution {\n    public ListNode rotateRight(ListNode head, int k) {\n        if (head == null || head.next == null || k == 0) return head;\n        int n = 1;\n        ListNode tail = head;\n        while (tail.next != null) { tail = tail.next; n++; }\n        k %= n;\n        if (k == 0) return head;\n        for (int i = 0; i < k; i++) {\n            ListNode prev = null;\n            ListNode cur = head;\n            while (cur.next != null) { prev = cur; cur = cur.next; }\n            prev.next = null;\n            cur.next = head;\n            head = cur;\n        }\n        return head;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * (k % n))",
+        "explanation": "Compute length in O(n), then up to k % n rotations each scanning O(n) to find tail. Worst case O(n^2) when k % n ~ n."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a few pointers prev, cur, tail are used, no extra allocation."
+      },
+      "dryRunExample": {
+        "input": "head = [1,2,3,4,5], k = 2",
+        "steps": [
+          "n=5, k% n =2",
+          "iter1: find tail 5, prev 4, move 5 to front -> [5,1,2,3,4]",
+          "iter2: find tail 4, prev 3, move 4 to front -> [4,5,1,2,3]"
+        ],
+        "output": "[4,5,1,2,3]"
+      },
+      "edgeCases": [
+        "Empty list or single node: return head directly",
+        "k == 0 or k % n == 0: no rotation needed",
+        "k >> n e.g. [0,1,2], k=4: modulo reduces to 1 rotation"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Close Into Ring and Break",
+      "tag": "Optimal",
+      "intuition": "Right rotation by k moves the last k nodes to front. If we connect tail to head to form a circle, the new head is n-k steps from old head and new tail is just before it. Cut the circle there.",
+      "theory": "Traverse once to get length n and tail. Link tail.next = head to make circular list. Let k %= n. If k==0 break circle and return. Otherwise newTail is at position n-k-1 from head (0-indexed), newHead = newTail.next. Set newTail.next = None to break ring. This is one pass O(n) and uses two-pointer walk to the break point.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* rotateRight(ListNode* head, int k) {\n        if (!head || !head->next || k == 0) return head;\n        ListNode* tail = head;\n        int n = 1;\n        while (tail->next) { tail = tail->next; n++; }\n        tail->next = head;\n        k %= n;\n        if (k == 0) { tail->next = nullptr; return head; }\n        ListNode* newTail = head;\n        for (int i = 0; i < n - k - 1; ++i) newTail = newTail->next;\n        ListNode* newHead = newTail->next;\n        newTail->next = nullptr;\n        return newHead;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* rotateRight(ListNode* head, int k) {\n        if (!head || !head->next || k == 0) return head;\n        ListNode* tail = head;\n        int n = 1;\n        while (tail->next) { tail = tail->next; n++; }\n        tail->next = head;\n        k %= n;\n        if (k == 0) { tail->next = nullptr; return head; }\n        ListNode* newTail = head;\n        for (int i = 0; i < n - k - 1; ++i) newTail = newTail->next;\n        ListNode* newHead = newTail->next;\n        newTail->next = nullptr;\n        return newHead;\n    }\n};",
+        "python": "class Solution:\n    def rotateRight(self, head, k):\n        if not head or not head.next or k == 0:\n            return head\n        tail = head\n        n = 1\n        while tail.next:\n            tail = tail.next\n            n += 1\n        tail.next = head\n        k %= n\n        if k == 0:\n            tail.next = None\n            return head\n        newTail = head\n        for _ in range(n - k - 1):\n            newTail = newTail.next\n        newHead = newTail.next\n        newTail.next = None\n        return newHead",
+        "java": "class Solution {\n    public ListNode rotateRight(ListNode head, int k) {\n        if (head == null || head.next == null || k == 0) return head;\n        ListNode tail = head;\n        int n = 1;\n        while (tail.next != null) { tail = tail.next; n++; }\n        tail.next = head;\n        k %= n;\n        if (k == 0) { tail.next = null; return head; }\n        ListNode newTail = head;\n        for (int i = 0; i < n - k - 1; i++) newTail = newTail.next;\n        ListNode newHead = newTail.next;\n        newTail.next = null;\n        return newHead;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One traversal to find length and tail O(n), plus walk of n-k-1 steps to new tail O(n). Total linear."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only pointers tail, newTail, newHead are used, in-place relinking."
+      },
+      "dryRunExample": {
+        "input": "head = [1,2,3,4,5], k = 2",
+        "steps": [
+          "Traverse: n=5, tail=5, link 5->1 to form circle: 1->2->3->4->5->1...",
+          "k% n =2, need newTail at n-k-1=2 steps from head: 1->2->3, so newTail=3",
+          "newHead=4, break 3->null, return 4->5->1->2->3"
+        ],
+        "output": "[4,5,1,2,3]"
+      },
+      "edgeCases": [
+        "head null or single node: return head",
+        "k % n == 0: must break circle before return to avoid cycle",
+        "n-k-1 == 0 when newTail is old head, e.g. [1,2], k=1 -> [2,1]"
+      ]
+    }
+  ]
+}

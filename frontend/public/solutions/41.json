@@ -1,0 +1,117 @@
+{
+  "questionId": 41,
+  "title": "First Missing Positive",
+  "difficulty": "Hard",
+  "corePattern": "In-Place Hashing / Cyclic Sort (Index as Hash Key)",
+  "interviewTips": [
+    "Ask if O(n) time and O(1) extra space is required - this rules out hash set and sorting and points to index-as-hash.",
+    "Trade-off: hash set is simplest O(n) time O(n) space, sorting is O(n log n) time O(1) space, cyclic placement is optimal O(n) time O(1) space but mutates input.",
+    "Edge cases to mention: all negatives and zeros, duplicates, out-of-range large values, [1] -> 2, and [1,2,...,n] -> n+1."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Check 1..n+1",
+      "tag": "Brute Force",
+      "intuition": "By pigeonhole principle the answer must be in range 1 to n+1. Try k=1,2,3... and linearly scan to see if k exists, return first missing.",
+      "theory": "With n numbers, the set {1..n+1} has n+1 values so at least one is missing. Checking each candidate with a linear scan is correct but repeats work, leading to quadratic time.",
+      "cppCode": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        int n = nums.size();\n        for (int k = 1; k <= n + 1; ++k) {\n            bool found = false;\n            for (int x : nums) if (x == k) { found = true; break; }\n            if (!found) return k;\n        }\n        return n + 1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        int n = nums.size();\n        for (int k = 1; k <= n + 1; ++k) {\n            bool found = false;\n            for (int x : nums) if (x == k) { found = true; break; }\n            if (!found) return k;\n        }\n        return n + 1;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def firstMissingPositive(self, nums: List[int]) -> int:\n        n = len(nums)\n        for k in range(1, n + 2):\n            found = False\n            for x in nums:\n                if x == k:\n                    found = True\n                    break\n            if not found:\n                return k\n        return n + 1",
+        "java": "class Solution {\n    public int firstMissingPositive(int[] nums) {\n        int n = nums.length;\n        for (int k = 1; k <= n + 1; k++) {\n            boolean found = false;\n            for (int x : nums) if (x == k) { found = true; break; }\n            if (!found) return k;\n        }\n        return n + 1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Up to n+1 candidates, each requires O(n) scan in worst case."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a few variables besides input."
+      },
+      "dryRunExample": {
+        "input": "nums = [3,4,-1,1]",
+        "steps": [
+          "k=1: scan finds 1 -> continue",
+          "k=2: scan finds no 2 -> return 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "All negatives e.g. [-5,-1] -> 1",
+        "Full prefix [1,2,3] -> 4",
+        "TLE for n=1e5 due to quadratic time"
+      ]
+    },
+    {
+      "id": "sorting",
+      "name": "Approach 2: Sorting + Single Scan",
+      "tag": "Sorting",
+      "intuition": "Sort the array so all positives appear in order, then sweep once tracking the smallest expected missing value.",
+      "theory": "After sorting, duplicates and non-positives can be skipped. Maintain miss starting at 1: if x < miss skip, if x == miss increment miss, if x > miss we found gap and can stop.",
+      "cppCode": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        int miss = 1;\n        for (int x : nums) {\n            if (x < miss) continue;\n            else if (x == miss) ++miss;\n            else if (x > miss) break;\n        }\n        return miss;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        int miss = 1;\n        for (int x : nums) {\n            if (x < miss) continue;\n            else if (x == miss) ++miss;\n            else if (x > miss) break;\n        }\n        return miss;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def firstMissingPositive(self, nums: List[int]) -> int:\n        nums.sort()\n        miss = 1\n        for x in nums:\n            if x < miss:\n                continue\n            elif x == miss:\n                miss += 1\n            else:\n                break\n        return miss",
+        "java": "import java.util.Arrays;\nclass Solution {\n    public int firstMissingPositive(int[] nums) {\n        Arrays.sort(nums);\n        int miss = 1;\n        for (int x : nums) {\n            if (x < miss) continue;\n            else if (x == miss) miss++;\n            else if (x > miss) break;\n        }\n        return miss;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "Dominated by sorting; single linear scan after."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "In-place sort aside from stack; strictly O(log n) stack in C++/Java and O(n) in Python Timsort."
+      },
+      "dryRunExample": {
+        "input": "nums = [3,4,-1,1]",
+        "steps": [
+          "sorted -> [-1,1,3,4]",
+          "miss=1 sees -1 skip, sees 1 -> miss=2, sees 3 > 2 -> break",
+          "return 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "Duplicates e.g. [1,1,2,2] -> 3 correctly skipped",
+        "Large out-of-range e.g. [1000,-1] -> 1",
+        "Already sorted [1,2,3] -> 4"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Index as Hash (Cyclic Placement)",
+      "tag": "Optimal",
+      "intuition": "Use array index itself as hash: value v in [1,n] belongs at index v-1. Swap each such value to its home, then first index i where nums[i] != i+1 is answer.",
+      "theory": "If nums[i] is in [1,n] and not already at correct place, swap it with nums[nums[i]-1]. Each swap places at least one element correctly, so total swaps O(n). After placement, presence of k is equivalent to nums[k-1]==k. Values <=0 or >n are ignored as they can never be answer except via gap.",
+      "cppCode": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        int n = nums.size();\n        for (int i = 0; i < n; ++i) {\n            while (nums[i] >= 1 && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {\n                swap(nums[i], nums[nums[i] - 1]);\n            }\n        }\n        for (int i = 0; i < n; ++i) {\n            if (nums[i] != i + 1) return i + 1;\n        }\n        return n + 1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        int n = nums.size();\n        for (int i = 0; i < n; ++i) {\n            while (nums[i] >= 1 && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {\n                swap(nums[i], nums[nums[i] - 1]);\n            }\n        }\n        for (int i = 0; i < n; ++i) {\n            if (nums[i] != i + 1) return i + 1;\n        }\n        return n + 1;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def firstMissingPositive(self, nums: List[int]) -> int:\n        n = len(nums)\n        for i in range(n):\n            while 1 <= nums[i] <= n and nums[nums[i] - 1] != nums[i]:\n                j = nums[i] - 1\n                nums[i], nums[j] = nums[j], nums[i]\n        for i in range(n):\n            if nums[i] != i + 1:\n                return i + 1\n        return n + 1",
+        "java": "class Solution {\n    public int firstMissingPositive(int[] nums) {\n        int n = nums.length;\n        for (int i = 0; i < n; i++) {\n            while (nums[i] >= 1 && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {\n                int j = nums[i] - 1;\n                int tmp = nums[i];\n                nums[i] = nums[j];\n                nums[j] = tmp;\n            }\n        }\n        for (int i = 0; i < n; i++) {\n            if (nums[i] != i + 1) return i + 1;\n        }\n        return n + 1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each index visited once and each swap fixes at least one position, so total swaps and checks are linear."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "In-place rearrangement using only constant extra variables."
+      },
+      "dryRunExample": {
+        "input": "nums = [3,4,-1,1]",
+        "steps": [
+          "i=0 val 3 swap to index2 -> [ -1,4,3,1 ] then -1 out of range stop",
+          "i=1 val 4 swap to index3 -> [-1,1,3,4] then swap index1 with index0 -> [1,-1,3,4]",
+          "scan: index0 ok, index1 has -1 !=2 -> return 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "Empty concept n=0 -> 1, single [0] -> 1, single [1] -> 2",
+        "Duplicates [1,1] must check nums[target]!=nums[i] to avoid infinite loop",
+        "Out-of-range [7,8,9,11,12] -> 1"
+      ]
+    }
+  ]
+}

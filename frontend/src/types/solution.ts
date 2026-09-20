@@ -15,6 +15,7 @@ export interface SolutionApproach {
     python?: string;
     java?: string;
     typescript?: string;
+    javascript?: string;
   };
   timeComplexity: ComplexityInfo;
   spaceComplexity: ComplexityInfo;

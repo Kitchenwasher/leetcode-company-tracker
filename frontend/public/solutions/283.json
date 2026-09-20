@@ -1,0 +1,123 @@
+{
+  "questionId": 283,
+  "title": "Move Zeroes",
+  "difficulty": "Easy",
+  "corePattern": "Two Pointers - Stable In-Place Partition",
+  "interviewTips": [
+    "Ask if solution must be in-place with O(1) extra space and if relative order of non-zero elements must be preserved.",
+    "Trade-off: extra array is simplest but uses O(n) space, two-pass overwrite plus zero-fill is O(1) space, single-pass swap is O(1) space with minimal operations and one traversal.",
+    "Check edge cases: empty array, single element, all zeros, no zeros, and cases like [0,1] and [1,0] to verify stability."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Extra Array Copy",
+      "tag": "Brute Force",
+      "intuition": "Filter out non-zeros preserving order into a new array, then copy them back to front and fill rest with zeros.",
+      "theory": "Stability comes from iterating left to right and appending only non-zeros. Rewriting the original array with that filtered list followed by zeros yields correct result. Uses extra storage proportional to input.",
+      "cppCode": "class Solution {\npublic:\n    void moveZeroes(vector<int>& nums) {\n        vector<int> tmp;\n        for (int x : nums) if (x != 0) tmp.push_back(x);\n        int m = tmp.size();\n        for (int i = 0; i < m; ++i) nums[i] = tmp[i];\n        for (int i = m; i < (int)nums.size(); ++i) nums[i] = 0;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void moveZeroes(vector<int>& nums) {\n        vector<int> tmp;\n        for (int x : nums) if (x != 0) tmp.push_back(x);\n        int m = tmp.size();\n        for (int i = 0; i < m; ++i) nums[i] = tmp[i];\n        for (int i = m; i < (int)nums.size(); ++i) nums[i] = 0;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def moveZeroes(self, nums: List[int]) -> None:\n        tmp = [x for x in nums if x != 0]\n        m = len(tmp)\n        for i in range(m):\n            nums[i] = tmp[i]\n        for i in range(m, len(nums)):\n            nums[i] = 0",
+        "java": "class Solution {\n    public void moveZeroes(int[] nums) {\n        int n = nums.length;\n        int[] tmp = new int[n];\n        int m = 0;\n        for (int x : nums) if (x != 0) tmp[m++] = x;\n        for (int i = 0; i < m; i++) nums[i] = tmp[i];\n        for (int i = m; i < n; i++) nums[i] = 0;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One pass to filter non-zeros plus one pass to rewrite array, each linear."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Extra array holds up to n non-zero elements in worst case with no zeros."
+      },
+      "dryRunExample": {
+        "input": "nums = [0,1,0,3,12]",
+        "steps": [
+          "filter non-zeros -> tmp = [1,3,12]",
+          "copy back -> nums = [1,3,12,3,12]",
+          "fill zeros from index 3 -> nums = [1,3,12,0,0]"
+        ],
+        "output": "[1,3,12,0,0]"
+      },
+      "edgeCases": [
+        "All zeros -> tmp empty, entire array filled with zeros",
+        "No zeros -> copy is identity",
+        "Single element [0] or [1] stays same"
+      ]
+    },
+    {
+      "id": "two-pass",
+      "name": "Approach 2: Two-Pass In-Place Compaction",
+      "tag": "In-Place",
+      "intuition": "Compact all non-zeros to front in place using a write pointer, then fill tail with zeros.",
+      "theory": "Maintain insertPos as next position for a non-zero. Reading left to right preserves order. Since insertPos never overtakes read index, overwrites are safe. Second pass fills remaining slots with zeros to complete partition.",
+      "cppCode": "class Solution {\npublic:\n    void moveZeroes(vector<int>& nums) {\n        int insertPos = 0;\n        for (int x : nums) {\n            if (x != 0) nums[insertPos++] = x;\n        }\n        for (int i = insertPos; i < (int)nums.size(); ++i) nums[i] = 0;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void moveZeroes(vector<int>& nums) {\n        int insertPos = 0;\n        for (int x : nums) {\n            if (x != 0) nums[insertPos++] = x;\n        }\n        for (int i = insertPos; i < (int)nums.size(); ++i) nums[i] = 0;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def moveZeroes(self, nums: List[int]) -> None:\n        insertPos = 0\n        for x in nums:\n            if x != 0:\n                nums[insertPos] = x\n                insertPos += 1\n        for i in range(insertPos, len(nums)):\n            nums[i] = 0",
+        "java": "class Solution {\n    public void moveZeroes(int[] nums) {\n        int insertPos = 0;\n        for (int x : nums) {\n            if (x != 0) nums[insertPos++] = x;\n        }\n        for (int i = insertPos; i < nums.length; i++) nums[i] = 0;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "First pass compacts non-zeros, second pass fills zeros, total 2n operations worst case."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only insertPos pointer used, in-place modification."
+      },
+      "dryRunExample": {
+        "input": "nums = [0,1,0,3,12]",
+        "steps": [
+          "insertPos=0, skip 0",
+          "see 1 -> nums[0]=1, insertPos=1",
+          "skip 0",
+          "see 3 -> nums[1]=3, insertPos=2",
+          "see 12 -> nums[2]=12, insertPos=3",
+          "fill indices 3,4 with 0"
+        ],
+        "output": "[1,3,12,0,0]"
+      },
+      "edgeCases": [
+        "All zeros -> insertPos stays 0, whole array zeroed",
+        "Already partitioned [1,2,0,0] -> second pass only rewrites zeros",
+        "Large array with one non-zero still O(n)"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Single-Pass Swap with Slow-Fast Pointers",
+      "tag": "Optimal",
+      "intuition": "Use slow pointer for last non-zero boundary and fast pointer to scan, swapping each non-zero forward only when needed.",
+      "theory": "Invariant: elements before lastNonZero are non-zeros in original order, elements between lastNonZero and i are zeros. When nums[i] is non-zero, swapping with lastNonZero extends non-zero prefix by one. Self-swap when i equals lastNonZero is harmless and can be skipped. Single traversal maintains stability.",
+      "cppCode": "class Solution {\npublic:\n    void moveZeroes(vector<int>& nums) {\n        int lastNonZero = 0;\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            if (nums[i] != 0) {\n                swap(nums[lastNonZero++], nums[i]);\n            }\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void moveZeroes(vector<int>& nums) {\n        int lastNonZero = 0;\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            if (nums[i] != 0) {\n                swap(nums[lastNonZero++], nums[i]);\n            }\n        }\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def moveZeroes(self, nums: List[int]) -> None:\n        lastNonZero = 0\n        for i in range(len(nums)):\n            if nums[i] != 0:\n                nums[lastNonZero], nums[i] = nums[i], nums[lastNonZero]\n                lastNonZero += 1",
+        "java": "class Solution {\n    public void moveZeroes(int[] nums) {\n        int lastNonZero = 0;\n        for (int i = 0; i < nums.length; i++) {\n            if (nums[i] != 0) {\n                int tmp = nums[lastNonZero];\n                nums[lastNonZero] = nums[i];\n                nums[i] = tmp;\n                lastNonZero++;\n            }\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single linear scan with O(1) swap per non-zero element."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two indices used, all swaps in place."
+      },
+      "dryRunExample": {
+        "input": "nums = [0,1,0,3,12]",
+        "steps": [
+          "lastNonZero=0, i=0 val 0 skip",
+          "i=1 val 1 swap indices 0,1 -> [1,0,0,3,12], lastNonZero=1",
+          "i=2 val 0 skip",
+          "i=3 val 3 swap indices 1,3 -> [1,3,0,0,12], lastNonZero=2",
+          "i=4 val 12 swap indices 2,4 -> [1,3,12,0,0], lastNonZero=3"
+        ],
+        "output": "[1,3,12,0,0]"
+      },
+      "edgeCases": [
+        "No zeros -> only self-swaps, array unchanged",
+        "All zeros -> no swaps",
+        "Interleaved [0,1,0,2,0,3] correctly compacts to [1,2,3,0,0,0]"
+      ]
+    }
+  ]
+}

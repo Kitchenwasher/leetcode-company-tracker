@@ -1,0 +1,121 @@
+{
+  "questionId": 189,
+  "title": "Rotate Array",
+  "difficulty": "Medium",
+  "corePattern": "In-place Array Rotation via Reversal and Cyclic Permutation",
+  "interviewTips": [
+    "Ask if k can be larger than n, negative, or zero, and whether rotation is left or right and must be in-place with O(1) extra space.",
+    "Trade-off: extra array is simplest O(n) space, reversal is optimal O(n) time O(1) space and cache-friendly, cyclic replacement is also O(1) space but has more complex index math.",
+    "Edge-case tip: always do k %= n first, handle n == 0 or n == 1 early, and verify k == 0 does nothing to avoid invalid reverse ranges."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with Extra Array",
+      "tag": "Brute Force",
+      "intuition": "Each element at index i moves to (i + k) % n after right rotation. If we can use extra space, just compute destination directly into a new array then copy back.",
+      "theory": "Right rotation by k is a permutation p(i) = (i + k) % n. Applying p to all n elements in a separate output array avoids overwrite conflicts. Normalizing k by k %= n handles k >= n. Copy-back makes operation in-place from caller perspective.",
+      "cppCode": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        int n = nums.size();\n        if (n == 0) return;\n        k %= n;\n        if (k == 0) return;\n        vector<int> rotated(n);\n        for (int i = 0; i < n; ++i) rotated[(i + k) % n] = nums[i];\n        nums = rotated;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        int n = nums.size();\n        if (n == 0) return;\n        k %= n;\n        if (k == 0) return;\n        vector<int> rotated(n);\n        for (int i = 0; i < n; ++i) rotated[(i + k) % n] = nums[i];\n        nums = rotated;\n    }\n};",
+        "python": "class Solution:\n    def rotate(self, nums: List[int], k: int) -> None:\n        n = len(nums)\n        if n == 0:\n            return\n        k %= n\n        if k == 0:\n            return\n        rotated = [0] * n\n        for i in range(n):\n            rotated[(i + k) % n] = nums[i]\n        for i in range(n):\n            nums[i] = rotated[i]",
+        "java": "class Solution {\n    public void rotate(int[] nums, int k) {\n        int n = nums.length;\n        if (n == 0) return;\n        k %= n;\n        if (k == 0) return;\n        int[] rotated = new int[n];\n        for (int i = 0; i < n; i++) rotated[(i + k) % n] = nums[i];\n        System.arraycopy(rotated, 0, nums, 0, n);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One pass to place n elements into rotated array plus one pass to copy back, both linear."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Extra array rotated of size n to avoid overwriting during moves."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3,4,5,6,7], k = 3",
+        "steps": [
+          "k %= 7 = 3",
+          "rotated[(i+3)%7] = nums[i] for all i => rotated = [5,6,7,1,2,3,4]",
+          "copy back to nums"
+        ],
+        "output": "[5,6,7,1,2,3,4]"
+      },
+      "edgeCases": [
+        "n == 0: return immediately to avoid modulo by zero",
+        "k % n == 0: array unchanged",
+        "k > n: e.g., n=3 k=4 same as k=1",
+        "n == 1: no change"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Three-Step Reversal",
+      "tag": "Optimal",
+      "intuition": "Reversing the whole array puts the last k elements at front but in reversed order. Reversing the two blocks separately fixes their internal order.",
+      "theory": "Let n be length and k %= n. Operation is: reverse[0,n-1], then reverse[0,k-1], then reverse[k,n-1]. Reversal is its own inverse and this composition equals right rotation. Proof by index mapping: after full reverse element at i goes to n-1-i, then block reverses restore correct rotated order. Each element moved twice, total O(n) with O(1) space.",
+      "cppCode": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        int n = nums.size();\n        if (n <= 1) return;\n        k %= n;\n        if (k == 0) return;\n        reverse(nums.begin(), nums.end());\n        reverse(nums.begin(), nums.begin() + k);\n        reverse(nums.begin() + k, nums.end());\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        int n = nums.size();\n        if (n <= 1) return;\n        k %= n;\n        if (k == 0) return;\n        reverse(nums.begin(), nums.end());\n        reverse(nums.begin(), nums.begin() + k);\n        reverse(nums.begin() + k, nums.end());\n    }\n};",
+        "python": "class Solution:\n    def rotate(self, nums: List[int], k: int) -> None:\n        n = len(nums)\n        if n <= 1:\n            return\n        k %= n\n        if k == 0:\n            return\n        self.reverse(nums, 0, n - 1)\n        self.reverse(nums, 0, k - 1)\n        self.reverse(nums, k, n - 1)\n    def reverse(self, nums: List[int], l: int, r: int) -> None:\n        while l < r:\n            nums[l], nums[r] = nums[r], nums[l]\n            l += 1\n            r -= 1",
+        "java": "class Solution {\n    public void rotate(int[] nums, int k) {\n        int n = nums.length;\n        if (n <= 1) return;\n        k %= n;\n        if (k == 0) return;\n        reverse(nums, 0, n - 1);\n        reverse(nums, 0, k - 1);\n        reverse(nums, k, n - 1);\n    }\n    private void reverse(int[] nums, int l, int r) {\n        while (l < r) {\n            int tmp = nums[l];\n            nums[l++] = nums[r];\n            nums[r--] = tmp;\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Three linear reversals: n + k + (n-k) = 2n operations, so O(n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a few index variables and in-place swaps, no extra array."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3,4,5,6,7], k = 3",
+        "steps": [
+          "reverse all => [7,6,5,4,3,2,1]",
+          "reverse first k=3 => [5,6,7,4,3,2,1]",
+          "reverse rest => [5,6,7,1,2,3,4]"
+        ],
+        "output": "[5,6,7,1,2,3,4]"
+      },
+      "edgeCases": [
+        "k == 0 after modulo: skip to avoid reverse with r = -1",
+        "n <= 1: nothing to do",
+        "k == n or multiple of n: unchanged",
+        "k = n-1: single left shift equivalent"
+      ]
+    },
+    {
+      "id": "cyclic-replacement",
+      "name": "Approach 3: Cyclic Replacements",
+      "tag": "In-Place Alternative",
+      "intuition": "Follow the chain i -> (i+k)%n moving each value forward, holding one displaced value in a temp variable until the cycle closes, then start a new cycle.",
+      "theory": "Rotation decomposes into gcd(n,k) disjoint cycles each of length n / gcd(n,k). Starting from each unvisited start, walk the cycle saving prev and writing it to nxt = (cur+k)%n. Count moved elements; when count == n all cycles done. Each element written exactly once.",
+      "cppCode": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        int n = nums.size();\n        if (n <= 1) return;\n        k %= n;\n        if (k == 0) return;\n        int count = 0;\n        for (int start = 0; count < n; ++start) {\n            int cur = start;\n            int prev = nums[start];\n            do {\n                int nxt = (cur + k) % n;\n                swap(nums[nxt], prev);\n                cur = nxt;\n                ++count;\n            } while (cur != start);\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        int n = nums.size();\n        if (n <= 1) return;\n        k %= n;\n        if (k == 0) return;\n        int count = 0;\n        for (int start = 0; count < n; ++start) {\n            int cur = start;\n            int prev = nums[start];\n            do {\n                int nxt = (cur + k) % n;\n                swap(nums[nxt], prev);\n                cur = nxt;\n                ++count;\n            } while (cur != start);\n        }\n    }\n};",
+        "python": "class Solution:\n    def rotate(self, nums: List[int], k: int) -> None:\n        n = len(nums)\n        if n <= 1:\n            return\n        k %= n\n        if k == 0:\n            return\n        count = 0\n        start = 0\n        while count < n:\n            cur = start\n            prev = nums[start]\n            while True:\n                nxt = (cur + k) % n\n                nums[nxt], prev = prev, nums[nxt]\n                cur = nxt\n                count += 1\n                if cur == start:\n                    break\n            start += 1",
+        "java": "class Solution {\n    public void rotate(int[] nums, int k) {\n        int n = nums.length;\n        if (n <= 1) return;\n        k %= n;\n        if (k == 0) return;\n        int count = 0;\n        for (int start = 0; count < n; start++) {\n            int cur = start;\n            int prev = nums[start];\n            do {\n                int nxt = (cur + k) % n;\n                int tmp = nums[nxt];\n                nums[nxt] = prev;\n                prev = tmp;\n                cur = nxt;\n                count++;\n            } while (cur != start);\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each of n elements is moved exactly once across all cycles, outer loop runs gcd(n,k) times."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only temp variables prev, cur, nxt, count and start are used."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3,4,5,6], k = 2",
+        "steps": [
+          "start=0 cycle: 0->2->4->0 moves 1,3,5",
+          "start=1 cycle: 1->3->5->1 moves 2,4,6",
+          "count==6 done"
+        ],
+        "output": "[5,6,1,2,3,4]"
+      },
+      "edgeCases": [
+        "gcd(n,k) > 1 requires multiple starts, single cycle not enough",
+        "k == 0: must early return else infinite loop",
+        "n == 0 or 1: no work",
+        "large k normalized by modulo"
+      ]
+    }
+  ]
+}

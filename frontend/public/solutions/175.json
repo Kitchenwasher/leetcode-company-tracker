@@ -1,0 +1,84 @@
+{
+  "questionId": 175,
+  "title": "Combine Two Tables",
+  "difficulty": "Easy",
+  "corePattern": "Left Outer Join",
+  "interviewTips": [
+    "Ask if every Person must appear even without a matching Address - this distinguishes LEFT JOIN from INNER JOIN.",
+    "Clarify join key is Person.personId = Address.personId and what to do if one person has multiple addresses or none.",
+    "Trade-off: application-side nested loops vs DB LEFT JOIN - DB uses indexes and hash join and preserves NULLs automatically."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Nested-Loop Join",
+      "tag": "Brute Force",
+      "intuition": "For each person scan all addresses to find a match, emitting NULLs when no match is found. This mimics a nested-loop join without an index and shows why INNER JOIN alone is wrong.",
+      "theory": "Cartesian check of N persons x M addresses. If Address.personId equals Person.personId emit combined row, otherwise emit person with NULL city and state. Addresses with no person are ignored. This is logically equivalent to LEFT JOIN but costs O(N*M) comparisons.",
+      "cppCode": "#include <vector>\n#include <string>\n#include <optional>\nclass Solution {\npublic:\n    struct Person {int personId; std::string firstName; std::string lastName;};\n    struct Address {int addressId; int personId; std::string city; std::string state;};\n    struct Row {std::string firstName; std::string lastName; std::optional<std::string> city; std::optional<std::string> state;};\n    // SQL equivalent: SELECT p.firstName, p.lastName, a.city, a.state FROM Person p LEFT JOIN Address a ON p.personId = a.personId\n    std::vector<Row> combineTables(std::vector<Person> persons, std::vector<Address> addresses) {\n        std::vector<Row> res;\n        for (auto &p : persons) {\n            bool found = false;\n            for (auto &a : addresses) {\n                if (a.personId == p.personId) {\n                    res.push_back({p.firstName, p.lastName, a.city, a.state});\n                    found = true;\n                    break;\n                }\n            }\n            if (!found) res.push_back({p.firstName, p.lastName, std::nullopt, std::nullopt});\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "#include <vector>\n#include <string>\n#include <optional>\nclass Solution {\npublic:\n    struct Person {int personId; std::string firstName; std::string lastName;};\n    struct Address {int addressId; int personId; std::string city; std::string state;};\n    struct Row {std::string firstName; std::string lastName; std::optional<std::string> city; std::optional<std::string> state;};\n    // SQL equivalent: SELECT p.firstName, p.lastName, a.city, a.state FROM Person p LEFT JOIN Address a ON p.personId = a.personId\n    std::vector<Row> combineTables(std::vector<Person> persons, std::vector<Address> addresses) {\n        std::vector<Row> res;\n        for (auto &p : persons) {\n            bool found = false;\n            for (auto &a : addresses) {\n                if (a.personId == p.personId) {\n                    res.push_back({p.firstName, p.lastName, a.city, a.state});\n                    found = true;\n                    break;\n                }\n            }\n            if (!found) res.push_back({p.firstName, p.lastName, std::nullopt, std::nullopt});\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    # SQL equivalent: SELECT p.firstName, p.lastName, a.city, a.state FROM Person p LEFT JOIN Address a ON p.personId = a.personId\n    def combineTables(self, persons, addresses):\n        result = []\n        for p in persons:\n            found = False\n            for a in addresses:\n                if a['personId'] == p['personId']:\n                    result.append((p['firstName'], p['lastName'], a['city'], a['state']))\n                    found = True\n                    break\n            if not found:\n                result.append((p['firstName'], p['lastName'], None, None))\n        return result",
+        "java": "import java.util.*;\nclass Solution {\n    static class Person {int personId; String firstName; String lastName; Person(int id, String f, String l){personId=id; firstName=f; lastName=l;}}\n    static class Address {int addressId; int personId; String city; String state; Address(int aid, int pid, String c, String s){addressId=aid; personId=pid; city=c; state=s;}}\n    static class Row {String firstName; String lastName; String city; String state; Row(String f, String l, String c, String s){firstName=f; lastName=l; city=c; state=s;}}\n    // SQL equivalent: SELECT p.firstName, p.lastName, a.city, a.state FROM Person p LEFT JOIN Address a ON p.personId = a.personId\n    public List<Row> combineTables(List<Person> persons, List<Address> addresses) {\n        List<Row> res = new ArrayList<>();\n        for (Person p : persons) {\n            boolean found = false;\n            for (Address a : addresses) {\n                if (a.personId == p.personId) {\n                    res.add(new Row(p.firstName, p.lastName, a.city, a.state));\n                    found = true;\n                    break;\n                }\n            }\n            if (!found) res.add(new Row(p.firstName, p.lastName, null, null));\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N * M)",
+        "explanation": "Each of N persons scans up to M addresses for equality on personId, no index or hash used."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Stores one output row per person plus O(1) extra loop state."
+      },
+      "dryRunExample": {
+        "input": "Person: (1, Allen, Wang), (2, Bob, Alice); Address: (1, 2, New York City, New York)",
+        "steps": [
+          "p=1 Allen Wang scans Address 1: 2 != 1 so no match -> emit (Allen, Wang, null, null)",
+          "p=2 Bob Alice scans Address 1: 2 == 2 match -> emit (Bob, Alice, New York City, New York)",
+          "Address rows with no person are never emitted"
+        ],
+        "output": "(Allen, Wang, null, null), (Bob, Alice, New York City, New York)"
+      },
+      "edgeCases": [
+        "Person with no address must return null city and state, not be dropped",
+        "Address with personId not in Person is ignored",
+        "Empty Person returns empty result, empty Address returns all persons with nulls"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal LEFT JOIN",
+      "tag": "Optimal",
+      "intuition": "Let the database preserve all left rows. LEFT JOIN Person to Address on personId automatically keeps persons without addresses and fills city and state with NULL.",
+      "theory": "LEFT OUTER JOIN is the relational operator for optional relationship. DB executes it via hash or indexed lookup in O(N+M) instead of nested loops. Equivalent application code builds a hash map from personId to address for O(1) lookup. INNER JOIN would incorrectly filter out persons without addresses.",
+      "cppCode": "#include <vector>\n#include <string>\n#include <optional>\n#include <unordered_map>\nclass Solution {\npublic:\n    struct Person {int personId; std::string firstName; std::string lastName;};\n    struct Address {int addressId; int personId; std::string city; std::string state;};\n    struct Row {std::string firstName; std::string lastName; std::optional<std::string> city; std::optional<std::string> state;};\n    // SQL optimal: SELECT p.firstName, p.lastName, a.city, a.state FROM Person p LEFT JOIN Address a ON p.personId = a.personId\n    std::vector<Row> combineTables(std::vector<Person> persons, std::vector<Address> addresses) {\n        std::unordered_map<int, Address> mp;\n        for (auto &a : addresses) if (!mp.count(a.personId)) mp[a.personId] = a;\n        std::vector<Row> res;\n        res.reserve(persons.size());\n        for (auto &p : persons) {\n            auto it = mp.find(p.personId);\n            if (it == mp.end()) res.push_back({p.firstName, p.lastName, std::nullopt, std::nullopt});\n            else res.push_back({p.firstName, p.lastName, it->second.city, it->second.state});\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "#include <vector>\n#include <string>\n#include <optional>\n#include <unordered_map>\nclass Solution {\npublic:\n    struct Person {int personId; std::string firstName; std::string lastName;};\n    struct Address {int addressId; int personId; std::string city; std::string state;};\n    struct Row {std::string firstName; std::string lastName; std::optional<std::string> city; std::optional<std::string> state;};\n    // SQL optimal: SELECT p.firstName, p.lastName, a.city, a.state FROM Person p LEFT JOIN Address a ON p.personId = a.personId\n    std::vector<Row> combineTables(std::vector<Person> persons, std::vector<Address> addresses) {\n        std::unordered_map<int, Address> mp;\n        for (auto &a : addresses) if (!mp.count(a.personId)) mp[a.personId] = a;\n        std::vector<Row> res;\n        res.reserve(persons.size());\n        for (auto &p : persons) {\n            auto it = mp.find(p.personId);\n            if (it == mp.end()) res.push_back({p.firstName, p.lastName, std::nullopt, std::nullopt});\n            else res.push_back({p.firstName, p.lastName, it->second.city, it->second.state});\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    # SQL optimal: SELECT p.firstName, p.lastName, a.city, a.state FROM Person p LEFT JOIN Address a ON p.personId = a.personId\n    def combineTables(self, persons, addresses):\n        addr_by_pid = {}\n        for a in addresses:\n            if a['personId'] not in addr_by_pid:\n                addr_by_pid[a['personId']] = a\n        res = []\n        for p in persons:\n            a = addr_by_pid.get(p['personId'])\n            if a is None:\n                res.append((p['firstName'], p['lastName'], None, None))\n            else:\n                res.append((p['firstName'], p['lastName'], a['city'], a['state']))\n        return res",
+        "java": "import java.util.*;\nclass Solution {\n    static class Person {int personId; String firstName; String lastName; Person(int id, String f, String l){personId=id; firstName=f; lastName=l;}}\n    static class Address {int addressId; int personId; String city; String state; Address(int aid, int pid, String c, String s){addressId=aid; personId=pid; city=c; state=s;}}\n    static class Row {String firstName; String lastName; String city; String state; Row(String f, String l, String c, String s){firstName=f; lastName=l; city=c; state=s;}}\n    // SQL optimal: SELECT p.firstName, p.lastName, a.city, a.state FROM Person p LEFT JOIN Address a ON p.personId = a.personId\n    public List<Row> combineTables(List<Person> persons, List<Address> addresses) {\n        Map<Integer, Address> mp = new HashMap<>();\n        for (Address a : addresses) mp.putIfAbsent(a.personId, a);\n        List<Row> res = new ArrayList<>();\n        for (Person p : persons) {\n            Address a = mp.get(p.personId);\n            if (a == null) res.add(new Row(p.firstName, p.lastName, null, null));\n            else res.add(new Row(p.firstName, p.lastName, a.city, a.state));\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N + M)",
+        "explanation": "Hash map build over M addresses plus single pass over N persons; in SQL engine hash or index join gives same linear behavior."
+      },
+      "spaceComplexity": {
+        "complexity": "O(M)",
+        "explanation": "Hash map of addresses by personId plus O(N) output; SQL itself needs only O(N) output."
+      },
+      "dryRunExample": {
+        "input": "Person: (1, Allen, Wang), (2, Bob, Alice); Address: (1, 2, New York City, New York)",
+        "steps": [
+          "Build map: {2 -> (New York City, New York)}",
+          "Lookup 1: miss -> (Allen, Wang, null, null)",
+          "Lookup 2: hit -> (Bob, Alice, New York City, New York)",
+          "SQL LEFT JOIN does same preservation automatically"
+        ],
+        "output": "(Allen, Wang, null, null), (Bob, Alice, New York City, New York)"
+      },
+      "edgeCases": [
+        "Missing address yields NULL city and state via LEFT JOIN",
+        "Multiple addresses for same person yields multiple rows in pure SQL, first-row only in map version",
+        "NULL handling: do not use WHERE a.personId = p.personId after LEFT JOIN as it converts to INNER JOIN"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "questionId": 75,
+  "title": "Sort Colors",
+  "difficulty": "Medium",
+  "corePattern": "Dutch National Flag - Three-Way Partitioning with Two Pointers",
+  "interviewTips": [
+    "Ask if in-place with O(1) extra space and single pass is required, and whether values are guaranteed to be only 0, 1, 2.",
+    "Trade-off: built-in sort is shortest but O(n log n); counting is O(n) with two passes; Dutch Flag is O(n) with one pass and O(1) space - state this progression explicitly.",
+    "Edge-case tip: walk through [2,0,1] and [1,0] to show why mid should not advance after swapping with high, and why loop condition is mid <= high not mid < high."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Built-in Sort",
+      "tag": "Brute Force",
+      "intuition": "Since we just need sorted order of 0s, 1s, 2s, any correct sort works. The simplest baseline is to delegate to the language sort.",
+      "theory": "Comparison sort orders the array by standard integer comparison. It is correct because sorting is exactly the required output. It takes O(n log n) time and O(1) or O(n) extra space depending on implementation, and does not exploit that values are only 0,1,2.",
+      "cppCode": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def sortColors(self, nums: List[int]) -> None:\n        nums.sort()",
+        "java": "class Solution {\n    public void sortColors(int[] nums) {\n        Arrays.sort(nums);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "Dominant cost is comparison sort over n elements."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1) to O(n)",
+        "explanation": "Python Timsort and Java Dual-Pivot need O(n) worst-case temp; C++ introsort is O(log n). In-place from caller perspective ignoring sort internals."
+      },
+      "dryRunExample": {
+        "input": "[2,0,2,1,1,0]",
+        "steps": [
+          "call sort",
+          "sorted order places all 0s first, then 1s, then 2s",
+          "array becomes [0,0,1,1,2,2]"
+        ],
+        "output": "[0,0,1,1,2,2]"
+      },
+      "edgeCases": [
+        "empty array stays empty",
+        "single element [1] unchanged",
+        "already sorted [0,0,1,2] unchanged",
+        "all same [2,2,2] unchanged"
+      ]
+    },
+    {
+      "id": "counting",
+      "name": "Approach 2: Counting Sort (Two-Pass)",
+      "tag": "Counting",
+      "intuition": "Values are only 0,1,2, so count how many of each exist, then overwrite the array with that many 0s followed by 1s followed by 2s.",
+      "theory": "First pass tallies frequencies c0,c1,c2. Second pass reconstructs sorted array deterministically. This is counting sort specialized to k=3. It is O(n) because each pass is linear, and correct because any sorted array of 0s,1s,2s is fully described by its counts.",
+      "cppCode": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        int c0 = 0, c1 = 0, c2 = 0;\n        for (int x : nums) {\n            if (x == 0) c0++;\n            else if (x == 1) c1++;\n            else c2++;\n        }\n        for (int i = 0; i < (int)nums.size(); i++) {\n            if (i < c0) nums[i] = 0;\n            else if (i < c0 + c1) nums[i] = 1;\n            else nums[i] = 2;\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        int c0 = 0, c1 = 0, c2 = 0;\n        for (int x : nums) {\n            if (x == 0) c0++;\n            else if (x == 1) c1++;\n            else c2++;\n        }\n        for (int i = 0; i < (int)nums.size(); i++) {\n            if (i < c0) nums[i] = 0;\n            else if (i < c0 + c1) nums[i] = 1;\n            else nums[i] = 2;\n        }\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def sortColors(self, nums: List[int]) -> None:\n        c0 = c1 = c2 = 0\n        for x in nums:\n            if x == 0:\n                c0 += 1\n            elif x == 1:\n                c1 += 1\n            else:\n                c2 += 1\n        for i in range(len(nums)):\n            if i < c0:\n                nums[i] = 0\n            elif i < c0 + c1:\n                nums[i] = 1\n            else:\n                nums[i] = 2",
+        "java": "class Solution {\n    public void sortColors(int[] nums) {\n        int c0 = 0, c1 = 0, c2 = 0;\n        for (int x : nums) {\n            if (x == 0) c0++;\n            else if (x == 1) c1++;\n            else c2++;\n        }\n        for (int i = 0; i < nums.length; i++) {\n            if (i < c0) nums[i] = 0;\n            else if (i < c0 + c1) nums[i] = 1;\n            else nums[i] = 2;\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One pass to count plus one pass to rewrite, 2*n operations."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only three integer counters regardless of n."
+      },
+      "dryRunExample": {
+        "input": "[2,0,2,1,1,0]",
+        "steps": [
+          "count: c0=2, c1=2, c2=2",
+          "indices 0-1 fill 0 -> [0,0,2,1,1,0]",
+          "indices 2-3 fill 1 -> [0,0,1,1,1,0]",
+          "indices 4-5 fill 2 -> [0,0,1,1,2,2]"
+        ],
+        "output": "[0,0,1,1,2,2]"
+      },
+      "edgeCases": [
+        "[0] -> c0=1 no change",
+        "[2,1,0] -> c0=c1=c2=1 -> [0,1,2]",
+        "[1,1,1] -> only c1 nonzero",
+        "large n with all 0s still O(n)"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Dutch National Flag (One-Pass Three Pointers)",
+      "tag": "Optimal",
+      "intuition": "Maintain three regions in one scan: [0,low) are 0s, [low,mid) are 1s, (high,end] are 2s, [mid,high] is unknown. Move mid forward, swapping 0s to front and 2s to back.",
+      "theory": "Invariant partitioning guarantees correctness. If nums[mid]==0 swap with low and advance both; if 1 just advance mid; if 2 swap with high and decrement high without advancing mid because swapped-in element is unexamined. Each step shrinks unknown region, so loop ends with fully partitioned array in one pass.",
+      "cppCode": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        int low = 0, mid = 0, high = (int)nums.size() - 1;\n        while (mid <= high) {\n            if (nums[mid] == 0) {\n                swap(nums[low], nums[mid]);\n                low++;\n                mid++;\n            } else if (nums[mid] == 1) {\n                mid++;\n            } else {\n                swap(nums[mid], nums[high]);\n                high--;\n            }\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        int low = 0, mid = 0, high = (int)nums.size() - 1;\n        while (mid <= high) {\n            if (nums[mid] == 0) {\n                swap(nums[low], nums[mid]);\n                low++;\n                mid++;\n            } else if (nums[mid] == 1) {\n                mid++;\n            } else {\n                swap(nums[mid], nums[high]);\n                high--;\n            }\n        }\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def sortColors(self, nums: List[int]) -> None:\n        low, mid, high = 0, 0, len(nums) - 1\n        while mid <= high:\n            if nums[mid] == 0:\n                nums[low], nums[mid] = nums[mid], nums[low]\n                low += 1\n                mid += 1\n            elif nums[mid] == 1:\n                mid += 1\n            else:\n                nums[mid], nums[high] = nums[high], nums[mid]\n                high -= 1",
+        "java": "class Solution {\n    public void sortColors(int[] nums) {\n        int low = 0, mid = 0, high = nums.length - 1;\n        while (mid <= high) {\n            if (nums[mid] == 0) {\n                int t = nums[low];\n                nums[low] = nums[mid];\n                nums[mid] = t;\n                low++;\n                mid++;\n            } else if (nums[mid] == 1) {\n                mid++;\n            } else {\n                int t = nums[mid];\n                nums[mid] = nums[high];\n                nums[high] = t;\n                high--;\n            }\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single scan: mid moves forward at most n times and high moves backward at most n times, each element visited at most twice."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only three pointers low, mid, high plus constant temp for swap."
+      },
+      "dryRunExample": {
+        "input": "[2,0,2,1,1,0]",
+        "steps": [
+          "low=0 mid=0 high=5 nums[mid]=2 swap mid-high -> [0,0,2,1,1,2] high=4",
+          "nums[mid]=0 swap low-mid -> [0,0,2,1,1,2] low=1 mid=1",
+          "nums[mid]=0 swap low-mid -> low=2 mid=2",
+          "nums[mid]=2 swap mid-high -> [0,0,1,1,2,2] high=3",
+          "nums[mid]=1 mid=3",
+          "nums[mid]=1 mid=4 loop ends mid>high"
+        ],
+        "output": "[0,0,1,1,2,2]"
+      },
+      "edgeCases": [
+        "[0] -> swap with itself, done",
+        "[2,0] -> swap to [0,2]",
+        "[1,1,1] -> mid just scans, no swaps",
+        "[2,2,0,0] -> tests not advancing mid after swap with high"
+      ]
+    }
+  ]
+}

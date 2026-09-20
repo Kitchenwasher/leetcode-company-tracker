@@ -1,0 +1,86 @@
+{
+  "questionId": 25,
+  "title": "Reverse Nodes in k-Group",
+  "difficulty": "Hard",
+  "corePattern": "Dummy Node plus In-Place Linked List Group Reversal",
+  "interviewTips": [
+    "Ask what to do when remaining nodes are fewer than k - they must stay in original order.",
+    "Clarify edge cases k equals 1, empty list, k larger than length, and whether O(1) extra space is required.",
+    "Trade-off: counting length first is simple but needs two passes, probing kth on the fly plus in-place reversal is one pass O(1) space."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Stack Based Group Reversal",
+      "tag": "Brute Force",
+      "intuition": "If we could hold k nodes at a time, reversing them is just popping a stack. Check that k nodes remain, push them, then pop to relink in reverse order.",
+      "theory": "Use a dummy head to simplify relinking. For each group, first walk k steps to verify a full group exists. If yes, push k nodes onto a stack or vector, advance curr to next group, then pop to append reversed order after prev. Link prev.next to curr for the tail. Repeat until fewer than k remain. Each node is pushed and popped once.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* reverseKGroup(ListNode* head, int k) {\n        ListNode dummy(0, head);\n        ListNode* prev = &dummy;\n        ListNode* curr = head;\n        while (curr) {\n            ListNode* tail = curr;\n            int count = 0;\n            while (tail && count < k) {\n                tail = tail->next;\n                ++count;\n            }\n            if (count < k) break;\n            vector<ListNode*> st;\n            for (int i = 0; i < k; ++i) {\n                st.push_back(curr);\n                curr = curr->next;\n            }\n            while (!st.empty()) {\n                prev->next = st.back();\n                st.pop_back();\n                prev = prev->next;\n            }\n            prev->next = curr;\n        }\n        return dummy.next;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* reverseKGroup(ListNode* head, int k) {\n        ListNode dummy(0, head);\n        ListNode* prev = &dummy;\n        ListNode* curr = head;\n        while (curr) {\n            ListNode* tail = curr;\n            int count = 0;\n            while (tail && count < k) {\n                tail = tail->next;\n                ++count;\n            }\n            if (count < k) break;\n            vector<ListNode*> st;\n            for (int i = 0; i < k; ++i) {\n                st.push_back(curr);\n                curr = curr->next;\n            }\n            while (!st.empty()) {\n                prev->next = st.back();\n                st.pop_back();\n                prev = prev->next;\n            }\n            prev->next = curr;\n        }\n        return dummy.next;\n    }\n};",
+        "python": "class Solution:\n    def reverseKGroup(self, head, k):\n        dummy = ListNode(0, head)\n        prev = dummy\n        curr = head\n        while curr:\n            tail = curr\n            count = 0\n            while tail and count < k:\n                tail = tail.next\n                count += 1\n            if count < k:\n                break\n            stack = []\n            for _ in range(k):\n                stack.append(curr)\n                curr = curr.next\n            while stack:\n                prev.next = stack.pop()\n                prev = prev.next\n            prev.next = curr\n        return dummy.next",
+        "java": "class Solution {\n    public ListNode reverseKGroup(ListNode head, int k) {\n        ListNode dummy = new ListNode(0, head);\n        ListNode prev = dummy;\n        ListNode curr = head;\n        while (curr != null) {\n            ListNode tail = curr;\n            int count = 0;\n            while (tail != null && count < k) {\n                tail = tail.next;\n                count++;\n            }\n            if (count < k) break;\n            Deque<ListNode> stack = new ArrayDeque<>();\n            for (int i = 0; i < k; i++) {\n                stack.push(curr);\n                curr = curr.next;\n            }\n            while (!stack.isEmpty()) {\n                prev.next = stack.pop();\n                prev = prev.next;\n            }\n            prev.next = curr;\n        }\n        return dummy.next;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each node is visited once for counting, once for push, once for pop. Total O(n) for n nodes."
+      },
+      "spaceComplexity": {
+        "complexity": "O(k)",
+        "explanation": "Stack or vector holds at most k node pointers per group."
+      },
+      "dryRunExample": {
+        "input": "head = [1,2,3,4,5], k = 2",
+        "steps": [
+          "dummy->1->2->3->4->5, prev=dummy, curr=1",
+          "count 2 nodes from 1, push [1,2], curr=3, pop to get prev->2->1, prev=1, 1->3",
+          "count 2 nodes from 3, push [3,4], curr=5, pop to get 1->4->3, prev=3, 3->5",
+          "only 1 node from 5 < k, break, return dummy.next"
+        ],
+        "output": "[2,1,4,3,5]"
+      },
+      "edgeCases": [
+        "k == 1 returns original list unchanged",
+        "k > length returns original list unchanged",
+        "empty list returns null",
+        "length exactly multiple of k reverses all groups"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Iterative In-Place O(1) Space Reversal",
+      "tag": "Optimal",
+      "intuition": "Reverse pointers directly without a stack by standard linked-list reversal confined to k nodes, stitching groups with a dummy and groupPrev pointer.",
+      "theory": "Keep groupPrev as tail of previous processed part. Find kth node by moving k steps from groupPrev; if null, done. Let groupNext = kth.next and reverse k nodes starting at groupPrev.next with prev initialized to groupNext. After reversal, groupPrev.next becomes kth (new head) and old head becomes new groupPrev for next iteration. This is in-place and single pass.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* reverseKGroup(ListNode* head, int k) {\n        ListNode dummy(0, head);\n        ListNode* groupPrev = &dummy;\n        while (true) {\n            ListNode* kth = groupPrev;\n            for (int i = 0; i < k; ++i) {\n                kth = kth->next;\n                if (!kth) return dummy.next;\n            }\n            ListNode* groupNext = kth->next;\n            ListNode* prev = groupNext;\n            ListNode* curr = groupPrev->next;\n            for (int i = 0; i < k; ++i) {\n                ListNode* nxt = curr->next;\n                curr->next = prev;\n                prev = curr;\n                curr = nxt;\n            }\n            ListNode* tmp = groupPrev->next;\n            groupPrev->next = kth;\n            groupPrev = tmp;\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* reverseKGroup(ListNode* head, int k) {\n        ListNode dummy(0, head);\n        ListNode* groupPrev = &dummy;\n        while (true) {\n            ListNode* kth = groupPrev;\n            for (int i = 0; i < k; ++i) {\n                kth = kth->next;\n                if (!kth) return dummy.next;\n            }\n            ListNode* groupNext = kth->next;\n            ListNode* prev = groupNext;\n            ListNode* curr = groupPrev->next;\n            for (int i = 0; i < k; ++i) {\n                ListNode* nxt = curr->next;\n                curr->next = prev;\n                prev = curr;\n                curr = nxt;\n            }\n            ListNode* tmp = groupPrev->next;\n            groupPrev->next = kth;\n            groupPrev = tmp;\n        }\n    }\n};",
+        "python": "class Solution:\n    def reverseKGroup(self, head, k):\n        dummy = ListNode(0, head)\n        groupPrev = dummy\n        while True:\n            kth = groupPrev\n            for _ in range(k):\n                kth = kth.next\n                if not kth:\n                    return dummy.next\n            groupNext = kth.next\n            prev = groupNext\n            curr = groupPrev.next\n            for _ in range(k):\n                nxt = curr.next\n                curr.next = prev\n                prev = curr\n                curr = nxt\n            tmp = groupPrev.next\n            groupPrev.next = kth\n            groupPrev = tmp",
+        "java": "class Solution {\n    public ListNode reverseKGroup(ListNode head, int k) {\n        ListNode dummy = new ListNode(0, head);\n        ListNode groupPrev = dummy;\n        while (true) {\n            ListNode kth = groupPrev;\n            for (int i = 0; i < k; i++) {\n                kth = kth.next;\n                if (kth == null) return dummy.next;\n            }\n            ListNode groupNext = kth.next;\n            ListNode prev = groupNext;\n            ListNode curr = groupPrev.next;\n            for (int i = 0; i < k; i++) {\n                ListNode nxt = curr.next;\n                curr.next = prev;\n                prev = curr;\n                curr = nxt;\n            }\n            ListNode tmp = groupPrev.next;\n            groupPrev.next = kth;\n            groupPrev = tmp;\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each node is visited to find kth and once to reverse, total O(n) time."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a constant number of pointers used, no extra stack or recursion."
+      },
+      "dryRunExample": {
+        "input": "head = [1,2,3,4,5], k = 3",
+        "steps": [
+          "groupPrev=dummy, kth=3 found, groupNext=4",
+          "reverse [1,2,3] with prev=4: 1->4, 2->1, 3->2, link dummy->3, groupPrev=1",
+          "from groupPrev=1 try to move 3 steps: 1->4->5->null fails, return dummy.next"
+        ],
+        "output": "[3,2,1,4,5]"
+      },
+      "edgeCases": [
+        "k == 1 no pointer change but loop still correct",
+        "remaining nodes < k left untouched via early return",
+        "single node list with k > 1 unchanged",
+        "k equals length reverses entire list"
+      ]
+    }
+  ]
+}

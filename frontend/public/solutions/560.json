@@ -1,0 +1,86 @@
+{
+  "questionId": 560,
+  "title": "Subarray Sum Equals K",
+  "difficulty": "Medium",
+  "corePattern": "Prefix Sum with Hash Map Frequency Counting",
+  "interviewTips": [
+    "Clarify: can nums contain negatives and zeros? If only positives, sliding window works, but with negatives you must use prefix sums — ask this explicitly.",
+    "Trade-off: Brute force is O(1) space but O(n^2) time; prefix-sum + hash map trades O(n) space for O(n) time by turning subarray sum query sum(j+1..i)=k into prefix[i]-prefix[j]=k lookup.",
+    "Edge-case tip: mention prefix sum 0 with frequency 1 upfront to count subarrays starting at index 0, and test k=0 with zeros e.g. [0,0,0] and negative numbers e.g. [1,-1,0]."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Enumeration",
+      "tag": "Brute Force",
+      "intuition": "Every subarray is defined by a start i and end j. Fix i and expand j while maintaining running sum; whenever running sum equals k we found a valid subarray. This directly checks the definition without any preprocessing.",
+      "theory": "For each start index i, iterate end index j >= i and maintain cur = sum(nums[i..j]) incrementally as cur += nums[j]. If cur == k increment answer. This enumerates all n*(n+1)/2 subarrays. Correct because all pairs (i,j) are visited and sum is computed exactly. No extra data structure needed, but repeated work causes quadratic time.",
+      "cppCode": "class Solution {\npublic:\n    int subarraySum(vector<int>& nums, int k) {\n        int n = nums.size();\n        int count = 0;\n        for (int i = 0; i < n; ++i) {\n            int sum = 0;\n            for (int j = i; j < n; ++j) {\n                sum += nums[j];\n                if (sum == k) ++count;\n            }\n        }\n        return count;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int subarraySum(vector<int>& nums, int k) {\n        int n = nums.size();\n        int count = 0;\n        for (int i = 0; i < n; ++i) {\n            int sum = 0;\n            for (int j = i; j < n; ++j) {\n                sum += nums[j];\n                if (sum == k) ++count;\n            }\n        }\n        return count;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def subarraySum(self, nums: List[int], k: int) -> int:\n        n = len(nums)\n        count = 0\n        for i in range(n):\n            s = 0\n            for j in range(i, n):\n                s += nums[j]\n                if s == k:\n                    count += 1\n        return count",
+        "java": "class Solution {\n    public int subarraySum(int[] nums, int k) {\n        int count = 0;\n        for (int i = 0; i < nums.length; i++) {\n            int sum = 0;\n            for (int j = i; j < nums.length; j++) {\n                sum += nums[j];\n                if (sum == k) count++;\n            }\n        }\n        return count;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "n start positions, each expands up to n ends. Each inner step is O(1) update and compare, so total ~n^2/2 operations."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only running sum and counters besides input, no extra proportional storage."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,1,1], k = 2",
+        "steps": [
+          "i=0: s=1 (j=0, no), s=2 (j=1, count=1), s=3 (j=2, no)",
+          "i=1: s=1 (j=1, no), s=2 (j=2, count=2)",
+          "i=2: s=1 (j=2, no)",
+          "return 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "Single element equal to k: [5], k=5 -> 1; not equal: [5], k=3 -> 0",
+        "Negative numbers: [1,-1,0], k=0 -> 3 ([1,-1], [1,-1,0], [0]) must be counted",
+        "All zeros with k=0: [0,0,0] -> 6, tests counting of all subarrays"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Prefix Sum + Hash Map",
+      "tag": "Optimal",
+      "intuition": "Sum of subarray (j+1..i) = prefix[i] - prefix[j]. So we need prefix[j] = prefix[i] - k. While scanning left to right, keep how many times each prefix sum has occurred; for current prefix, the number of valid j is exactly freq[prefix - k].",
+      "theory": "Define prefix[0]=0, prefix[i+1]=sum(nums[0..i]). Subarray (l..r) sums to k iff prefix[r+1]-prefix[l]=k iff prefix[l]=prefix[r+1]-k. Iterate r in order, maintain hash map freq of all prefix[l] for l <= r+1 seen so far. Query freq[prefix-k] in O(1) and then insert current prefix. Initialize freq[0]=1 to allow l=0. This counts each valid start exactly once. Works with negatives because it does not assume monotonicity, unlike two-pointers/sliding window.",
+      "cppCode": "class Solution {\npublic:\n    int subarraySum(vector<int>& nums, int k) {\n        unordered_map<int, int> freq;\n        freq.reserve(nums.size() * 2);\n        freq[0] = 1;\n        int prefix = 0;\n        int count = 0;\n        for (int x : nums) {\n            prefix += x;\n            auto it = freq.find(prefix - k);\n            if (it != freq.end()) count += it->second;\n            ++freq[prefix];\n        }\n        return count;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int subarraySum(vector<int>& nums, int k) {\n        unordered_map<int, int> freq;\n        freq.reserve(nums.size() * 2);\n        freq[0] = 1;\n        int prefix = 0;\n        int count = 0;\n        for (int x : nums) {\n            prefix += x;\n            auto it = freq.find(prefix - k);\n            if (it != freq.end()) count += it->second;\n            ++freq[prefix];\n        }\n        return count;\n    }\n};",
+        "python": "from typing import List\nfrom collections import defaultdict\nclass Solution:\n    def subarraySum(self, nums: List[int], k: int) -> int:\n        freq = defaultdict(int)\n        freq[0] = 1\n        prefix = 0\n        count = 0\n        for x in nums:\n            prefix += x\n            count += freq[prefix - k]\n            freq[prefix] += 1\n        return count",
+        "java": "import java.util.*;\nclass Solution {\n    public int subarraySum(int[] nums, int k) {\n        Map<Integer, Integer> freq = new HashMap<>();\n        freq.put(0, 1);\n        int prefix = 0;\n        int count = 0;\n        for (int x : nums) {\n            prefix += x;\n            count += freq.getOrDefault(prefix - k, 0);\n            freq.put(prefix, freq.getOrDefault(prefix, 0) + 1);\n        }\n        return count;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass over n elements, each hash map lookup and update is O(1) average."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Hash map stores up to n+1 distinct prefix sums in worst case."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,1,1], k = 2",
+        "steps": [
+          "init freq={0:1}, prefix=0, count=0",
+          "x=1: prefix=1, need 1-2=-1 -> freq[-1]=0, count=0, freq={0:1,1:1}",
+          "x=1: prefix=2, need 2-2=0 -> freq[0]=1, count=1, freq={0:1,1:1,2:1}",
+          "x=1: prefix=3, need 3-2=1 -> freq[1]=1, count=2",
+          "return 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "Subarray from index 0: [1,2,3], k=3 -> needs freq[0]=1 to count [1,2]",
+        "k=0 with zeros/negatives: [0,0,0], k=0 -> 6; [1,-1,0], k=0 -> 3",
+        "No match and large values: [1000000000,1], k=2 -> 0; watch int range but constraints fit 32-bit prefix (n*1e3 up to 2e7)"
+      ]
+    }
+  ]
+}

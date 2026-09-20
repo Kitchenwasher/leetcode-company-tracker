@@ -1,0 +1,87 @@
+{
+  "questionId": 394,
+  "title": "Decode String",
+  "difficulty": "Medium",
+  "corePattern": "Stack for Nested Structures and Recursion for Bracket Matching",
+  "interviewTips": [
+    "Ask if k can have multiple digits like 100[ab] and if nesting can be deep, to confirm you need curNum = curNum*10 + digit.",
+    "Trade-off: two-stack iterative avoids recursion depth limits and is easy to trace, recursion with shared index is cleaner but uses call stack O(depth).",
+    "Edge-case tip: always reset curNum after '[' and handle plain letters outside brackets like 2[abc]3[cd]ef."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Two Stacks Iterative",
+      "tag": "Stack",
+      "intuition": "Brackets are LIFO: when we see '[' we save what we have built so far and the repeat count, then start fresh inside. When we see ']' we pop and expand.",
+      "theory": "Maintain numStack for k and strStack for previous built string. curNum accumulates multi-digit numbers. curStr accumulates current level characters. On '[' push state and reset. On ']' pop repeat r and prev, set curStr = prev + curStr*r. Each character processed once, stack depth equals nesting depth.",
+      "cppCode": "class Solution {\npublic:\n    string decodeString(string s) {\n        stack<int> numStack;\n        stack<string> strStack;\n        string curStr = \"\";\n        int curNum = 0;\n        for (char ch : s) {\n            if (isdigit(ch)) curNum = curNum * 10 + (ch - '0');\n            else if (ch == '[') { numStack.push(curNum); strStack.push(curStr); curNum = 0; curStr = \"\"; }\n            else if (ch == ']') { int r = numStack.top(); numStack.pop(); string prev = strStack.top(); strStack.pop(); string tmp = \"\"; for (int i = 0; i < r; i++) tmp += curStr; curStr = prev + tmp; }\n            else curStr += ch;\n        }\n        return curStr;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string decodeString(string s) {\n        stack<int> numStack;\n        stack<string> strStack;\n        string curStr = \"\";\n        int curNum = 0;\n        for (char ch : s) {\n            if (isdigit(ch)) curNum = curNum * 10 + (ch - '0');\n            else if (ch == '[') { numStack.push(curNum); strStack.push(curStr); curNum = 0; curStr = \"\"; }\n            else if (ch == ']') { int r = numStack.top(); numStack.pop(); string prev = strStack.top(); strStack.pop(); string tmp = \"\"; for (int i = 0; i < r; i++) tmp += curStr; curStr = prev + tmp; }\n            else curStr += ch;\n        }\n        return curStr;\n    }\n};",
+        "python": "class Solution:\n    def decodeString(self, s: str) -> str:\n        num_stack = []\n        str_stack = []\n        cur_num = 0\n        cur_str = ''\n        for ch in s:\n            if ch.isdigit():\n                cur_num = cur_num * 10 + int(ch)\n            elif ch == '[':\n                num_stack.append(cur_num)\n                str_stack.append(cur_str)\n                cur_num = 0\n                cur_str = ''\n            elif ch == ']':\n                repeat = num_stack.pop()\n                prev = str_stack.pop()\n                cur_str = prev + cur_str * repeat\n            else:\n                cur_str += ch\n        return cur_str",
+        "java": "class Solution {\n    public String decodeString(String s) {\n        Stack<Integer> numStack = new Stack<>();\n        Stack<StringBuilder> strStack = new Stack<>();\n        StringBuilder curStr = new StringBuilder();\n        int curNum = 0;\n        for (char ch : s.toCharArray()) {\n            if (Character.isDigit(ch)) curNum = curNum * 10 + (ch - '0');\n            else if (ch == '[') { numStack.push(curNum); strStack.push(curStr); curNum = 0; curStr = new StringBuilder(); }\n            else if (ch == ']') { int r = numStack.pop(); StringBuilder prev = strStack.pop(); for (int i = 0; i < r; i++) prev.append(curStr); curStr = prev; }\n            else curStr.append(ch);\n        }\n        return curStr.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N)",
+        "explanation": "N is length of decoded output plus input scan. Each input char processed once, each output char built once via repetition. In worst case repeated copying dominates but amortized linear in output size."
+      },
+      "spaceComplexity": {
+        "complexity": "O(D + N)",
+        "explanation": "D is nesting depth for two stacks, N is decoded output length stored in curStr and stack strings."
+      },
+      "dryRunExample": {
+        "input": "s = 3[a2[c]]",
+        "steps": [
+          "curNum=3, see '[': push 3 and '': reset",
+          "curStr='a', curNum=2, see '[': push 2 and 'a': reset",
+          "curStr='c', see ']': pop 2,'a' -> curStr='a'+'cc'='acc'",
+          "see ']': pop 3,'' -> curStr=''+'acc'*3='accaccacc'"
+        ],
+        "output": "accaccacc"
+      },
+      "edgeCases": [
+        "Single letters without brackets: abc returns abc",
+        "Multi-digit k: 100[ab] handled by curNum*10+digit",
+        "Deep nesting: 3[a2[b2[c]]] stack depth grows correctly",
+        "Trailing letters: 2[abc]3[cd]ef appends ef after stacks empty"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Recursion with Shared Index",
+      "tag": "Optimal",
+      "intuition": "Encoded string is a recursive grammar: expr := letters + k[expr]. Parse with a pointer; on '[' recurse to decode inner, on ']' return to caller.",
+      "theory": "Use global index i over s. dfs() builds res for current level: accumulate num for digits, on '[' advance i and call dfs() for inner, append inner*num, on ']' advance i and return res to parent, else append letter. Recursion depth equals bracket nesting depth, naturally matching structure.",
+      "cppCode": "class Solution {\npublic:\n    int idx = 0;\n    string decodeString(string s) { idx = 0; return dfs(s); }\n    string dfs(string &s) {\n        string res = \"\";\n        int num = 0;\n        while (idx < (int)s.size()) {\n            char ch = s[idx];\n            if (isdigit(ch)) { num = num * 10 + (ch - '0'); idx++; }\n            else if (ch == '[') { idx++; string inner = dfs(s); for (int i = 0; i < num; i++) res += inner; num = 0; }\n            else if (ch == ']') { idx++; return res; }\n            else { res += ch; idx++; }\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int idx = 0;\n    string decodeString(string s) { idx = 0; return dfs(s); }\n    string dfs(string &s) {\n        string res = \"\";\n        int num = 0;\n        while (idx < (int)s.size()) {\n            char ch = s[idx];\n            if (isdigit(ch)) { num = num * 10 + (ch - '0'); idx++; }\n            else if (ch == '[') { idx++; string inner = dfs(s); for (int i = 0; i < num; i++) res += inner; num = 0; }\n            else if (ch == ']') { idx++; return res; }\n            else { res += ch; idx++; }\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def decodeString(self, s: str) -> str:\n        self.i = 0\n        def dfs():\n            res = ''\n            num = 0\n            while self.i < len(s):\n                ch = s[self.i]\n                if ch.isdigit():\n                    num = num * 10 + int(ch)\n                    self.i += 1\n                elif ch == '[':\n                    self.i += 1\n                    inner = dfs()\n                    res += inner * num\n                    num = 0\n                elif ch == ']':\n                    self.i += 1\n                    return res\n                else:\n                    res += ch\n                    self.i += 1\n            return res\n        return dfs()",
+        "java": "class Solution {\n    int idx = 0;\n    public String decodeString(String s) { idx = 0; return dfs(s); }\n    private String dfs(String s) {\n        StringBuilder res = new StringBuilder();\n        int num = 0;\n        while (idx < s.length()) {\n            char ch = s.charAt(idx);\n            if (Character.isDigit(ch)) { num = num * 10 + (ch - '0'); idx++; }\n            else if (ch == '[') { idx++; String inner = dfs(s); for (int i = 0; i < num; i++) res.append(inner); num = 0; }\n            else if (ch == ']') { idx++; return res.toString(); }\n            else { res.append(ch); idx++; }\n        }\n        return res.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Each character in s visited once via idx pointer, output built by repeating inner strings. Total time linear in decoded length."
+      },
+      "spaceComplexity": {
+        "complexity": "O(D + N)",
+        "explanation": "D is max nesting depth for recursion call stack, N is output string size. No explicit stacks needed."
+      },
+      "dryRunExample": {
+        "input": "s = 3[a]2[bc]",
+        "steps": [
+          "dfs level0: num=3, '[' -> recurse",
+          "inner dfs returns 'a', level0 res='aaa'",
+          "num=2, '[' -> recurse returns 'bc', res='aaa'+'bcbc'",
+          "end of string return 'aaabcbc'"
+        ],
+        "output": "aaabcbc"
+      },
+      "edgeCases": [
+        "No brackets: abcd returns directly without recursion",
+        "Nested empty-like: 2[3[a]b] inner returns aaab then outer repeats",
+        "k=1 and k=300 boundaries",
+        "Adjacent blocks: 2[ab]3[cd] handled sequentially in same dfs level"
+      ]
+    }
+  ]
+}

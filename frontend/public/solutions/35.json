@@ -2,49 +2,81 @@
   "questionId": 35,
   "title": "Search Insert Position",
   "difficulty": "Easy",
-  "corePattern": "Binary Search",
+  "corePattern": "Binary Search - Lower Bound",
   "interviewTips": [
-    "State the brute-force approach first before presenting the optimal Binary Search technique.",
-    "Discuss Time and Space complexities upfront before writing code.",
-    "Test on empty inputs and single-element edge cases."
+    "Ask if array is sorted ascending and has distinct values - this confirms binary search lower_bound applies",
+    "Trade-off: linear scan is simpler but O(n); binary search gives O(log n) with same O(1) space and is expected",
+    "Edge-case tip: handle target smaller than all elements (return 0) and larger than all (return n); verify loop invariant and mid overflow avoidance"
   ],
   "approaches": [
     {
-      "id": "linear-scan",
-      "name": "Approach 1: Linear Scan (Brute Force)",
+      "id": "brute-force",
+      "name": "Approach 1: Linear Scan",
       "tag": "Brute Force",
-      "intuition": "Examine every candidate answer sequentially from the start to the end until a valid match is found.",
-      "theory": "Linear scan tests all N candidates one by one without exploiting monotonicity.",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int linearSearch(const std::vector<int>& nums, int target) {\n        for (int i = 0; i < static_cast<int>(nums.size()); ++i) {\n            if (nums[i] == target) return i;\n        }\n        return -1;\n    }\n};",
+      "intuition": "Since array is sorted, the answer is the first index i where nums[i] >= target. Scan left to right and return that i, otherwise return n.",
+      "theory": "Sorted order guarantees all elements before the first >= target are < target and all after are > target. This is exactly the lower_bound definition. Linear scan checks each element once, so it finds the insertion point in order. If no element satisfies nums[i] >= target, target is larger than all elements and belongs at the end (index n).",
+      "cppCode": "class Solution {\npublic:\n    int searchInsert(vector<int>& nums, int target) {\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            if (nums[i] >= target) return i;\n        }\n        return (int)nums.size();\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int searchInsert(vector<int>& nums, int target) {\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            if (nums[i] >= target) return i;\n        }\n        return (int)nums.size();\n    }\n};",
+        "python": "class Solution:\n    def searchInsert(self, nums: List[int], target: int) -> int:\n        for i, x in enumerate(nums):\n            if x >= target:\n                return i\n        return len(nums)",
+        "java": "class Solution {\n    public int searchInsert(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) {\n            if (nums[i] >= target) return i;\n        }\n        return nums.length;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Scans up to N elements."
+        "complexity": "O(n)",
+        "explanation": "We visit each element at most once in worst case when target is larger than all elements."
       },
       "spaceComplexity": {
         "complexity": "O(1)",
-        "explanation": "Zero auxiliary space."
+        "explanation": "Only index variable used, no extra storage."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,3,5,6], target = 2",
+        "steps": [
+          "i=0, nums[0]=1 < 2 continue",
+          "i=1, nums[1]=3 >= 2 return 1"
+        ],
+        "output": "1"
       },
       "edgeCases": [
-        "Target smaller than minimum or larger than maximum."
+        "target <= nums[0] returns 0",
+        "target > nums[n-1] returns n",
+        "single element array: returns 0 or 1 correctly"
       ]
     },
     {
-      "id": "binary-search-optimal",
-      "name": "Approach 2: Binary Search (Optimal)",
+      "id": "optimal",
+      "name": "Approach 2: Binary Search Lower Bound",
       "tag": "Optimal",
-      "intuition": "Because the search space is monotonic (sorted or monotonic predicate), calculate the midpoint `mid = left + (right - left) / 2` and discard half the search space in each step.",
-      "theory": "Halving the search range in each iteration guarantees logarithmic steps: log2(N). Using `left + (right - left) / 2` prevents integer overflow.",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int binarySearch(const std::vector<int>& nums, int target) {\n        int left = 0;\n        int right = nums.size() - 1;\n\n        while (left <= right) {\n            int mid = left + (right - left) / 2; // Prevent (left+right) overflow\n\n            if (nums[mid] == target) {\n                return mid;\n            } else if (nums[mid] < target) {\n                left = mid + 1;\n            } else {\n                right = mid - 1;\n            }\n        }\n\n        return -1; // Not found\n    }\n};",
+      "intuition": "Because array is sorted, we can discard half the search space per step. Maintain candidate answer ans=n and shrink [left, right] to find first position with nums[mid] >= target.",
+      "theory": "Classic lower_bound binary search. Invariant: answer lies in [left, right+1]. Let mid=(left+right)/2. If nums[mid] >= target, mid is a valid candidate, so set ans=mid and search left half right=mid-1. Else nums[mid] < target, answer must be to the right, so left=mid+1. Loop ends when left>right and ans is the smallest index with nums[ans] >= target, or n if none. Halving each iteration gives logarithmic time.",
+      "cppCode": "class Solution {\npublic:\n    int searchInsert(vector<int>& nums, int target) {\n        int left = 0, right = (int)nums.size() - 1;\n        int ans = (int)nums.size();\n        while (left <= right) {\n            int mid = left + (right - left) / 2;\n            if (nums[mid] >= target) {\n                ans = mid;\n                right = mid - 1;\n            } else {\n                left = mid + 1;\n            }\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int searchInsert(vector<int>& nums, int target) {\n        int left = 0, right = (int)nums.size() - 1;\n        int ans = (int)nums.size();\n        while (left <= right) {\n            int mid = left + (right - left) / 2;\n            if (nums[mid] >= target) {\n                ans = mid;\n                right = mid - 1;\n            } else {\n                left = mid + 1;\n            }\n        }\n        return ans;\n    }\n};",
+        "python": "class Solution:\n    def searchInsert(self, nums: List[int], target: int) -> int:\n        left, right = 0, len(nums) - 1\n        ans = len(nums)\n        while left <= right:\n            mid = (left + right) // 2\n            if nums[mid] >= target:\n                ans = mid\n                right = mid - 1\n            else:\n                left = mid + 1\n        return ans",
+        "java": "class Solution {\n    public int searchInsert(int[] nums, int target) {\n        int left = 0, right = nums.length - 1;\n        int ans = nums.length;\n        while (left <= right) {\n            int mid = left + (right - left) / 2;\n            if (nums[mid] >= target) {\n                ans = mid;\n                right = mid - 1;\n            } else {\n                left = mid + 1;\n            }\n        }\n        return ans;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(log N)",
-        "explanation": "Search interval is halved in every iteration."
+        "complexity": "O(log n)",
+        "explanation": "Search space halves each iteration, at most log2(n)+1 comparisons."
       },
       "spaceComplexity": {
         "complexity": "O(1)",
-        "explanation": "Constant extra memory."
+        "explanation": "Only left, right, mid, ans pointers used."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,3,5,6], target = 2",
+        "steps": [
+          "left=0,right=3,ans=4,mid=1,nums[1]=3>=2 => ans=1,right=0",
+          "left=0,right=0,mid=0,nums[0]=1<2 => left=1",
+          "left=1>right=0 stop, return ans=1"
+        ],
+        "output": "1"
       },
       "edgeCases": [
-        "Array with 1 element, target not present in array."
+        "target=7 on [1,3,5,6] returns 4 (ans never updated)",
+        "target=0 on [1,3,5,6] returns 0",
+        "target present e.g. 5 returns its index 2",
+        "n=1: works for target smaller, equal, larger"
       ]
     }
   ]

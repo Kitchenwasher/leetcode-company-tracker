@@ -1,0 +1,121 @@
+{
+  "questionId": 347,
+  "title": "Top K Frequent Elements",
+  "difficulty": "Medium",
+  "corePattern": "Frequency Counting + Top-K Selection (Hash Map with Sorting / Heap / Bucket Sort)",
+  "interviewTips": [
+    "Clarify: can answer be in any order? Is k always valid (1 <= k <= distinct count)? Are ties broken arbitrarily?",
+    "Trade-off: Sorting is simplest O(n log n), min-heap of size k is O(n log k) and good for streaming, bucket sort is optimal O(n) when frequencies bounded by n.",
+    "Edge cases: k equals number of distinct elements, n=1, all frequencies equal, negative numbers, large n with small k."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Count + Sort",
+      "tag": "Brute Force",
+      "intuition": "Count how many times each number appears, then sort distinct numbers by frequency descending and take first k.",
+      "theory": "Use hash map to get frequency in O(n). There are m <= n distinct keys. Sorting m pairs by frequency costs O(m log m). Slicing top k gives answer. Simple and correct because ordering by frequency directly defines top k frequent elements.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        unordered_map<int,int> count;\n        for (int x : nums) count[x]++;\n        vector<pair<int,int>> items(count.begin(), count.end());\n        sort(items.begin(), items.end(), [](const auto& a, const auto& b){ return a.second > b.second; });\n        vector<int> res;\n        for (int i = 0; i < k; ++i) res.push_back(items[i].first);\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        unordered_map<int,int> count;\n        for (int x : nums) count[x]++;\n        vector<pair<int,int>> items(count.begin(), count.end());\n        sort(items.begin(), items.end(), [](const auto& a, const auto& b){ return a.second > b.second; });\n        vector<int> res;\n        for (int i = 0; i < k; ++i) res.push_back(items[i].first);\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def topKFrequent(self, nums: List[int], k: int) -> List[int]:\n        from collections import Counter\n        count = Counter(nums)\n        sorted_items = sorted(count.items(), key=lambda x: x[1], reverse=True)\n        return [num for num, _ in sorted_items[:k]]",
+        "java": "class Solution {\n    public int[] topKFrequent(int[] nums, int k) {\n        Map<Integer, Integer> count = new HashMap<>();\n        for (int x : nums) count.put(x, count.getOrDefault(x, 0) + 1);\n        List<Map.Entry<Integer, Integer>> list = new ArrayList<>(count.entrySet());\n        list.sort((a, b) -> b.getValue() - a.getValue());\n        int[] res = new int[k];\n        for (int i = 0; i < k; i++) res[i] = list.get(i).getKey();\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "O(n) to count, O(m log m) to sort m distinct elements where m <= n, so worst O(n log n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Hash map stores up to n distinct counts plus array of pairs for sorting."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,1,1,2,2,3], k = 2",
+        "steps": [
+          "count = {1:3, 2:2, 3:1}",
+          "sorted by freq desc = [(1,3), (2,2), (3,1)]",
+          "take first k=2 keys => [1,2]"
+        ],
+        "output": "[1,2]"
+      },
+      "edgeCases": [
+        "n=1, k=1 returns the single element",
+        "All elements same frequency, any k of them valid",
+        "k equals distinct count returns all distinct keys"
+      ]
+    },
+    {
+      "id": "heap",
+      "name": "Approach 2: Count + Min-Heap of Size K",
+      "tag": "Heap",
+      "intuition": "We only need top k, not full order. Keep a min-heap of size k keyed by frequency so the smallest among top k is at the top and can be evicted.",
+      "theory": "Count frequencies in O(n). Iterate over m distinct entries, push (freq, num) into min-heap. If heap size exceeds k, pop smallest. Invariant: heap always holds k largest frequencies seen so far. At end heap contains top k. Pop to output. Heap operations are O(log k) over m entries.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        unordered_map<int,int> count;\n        for (int x : nums) count[x]++;\n        priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;\n        for (auto &p : count) {\n            pq.push({p.second, p.first});\n            if ((int)pq.size() > k) pq.pop();\n        }\n        vector<int> res;\n        while (!pq.empty()) { res.push_back(pq.top().second); pq.pop(); }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        unordered_map<int,int> count;\n        for (int x : nums) count[x]++;\n        priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;\n        for (auto &p : count) {\n            pq.push({p.second, p.first});\n            if ((int)pq.size() > k) pq.pop();\n        }\n        vector<int> res;\n        while (!pq.empty()) { res.push_back(pq.top().second); pq.pop(); }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def topKFrequent(self, nums: List[int], k: int) -> List[int]:\n        from collections import Counter\n        import heapq\n        count = Counter(nums)\n        heap = []\n        for num, freq in count.items():\n            heapq.heappush(heap, (freq, num))\n            if len(heap) > k:\n                heapq.heappop(heap)\n        return [num for freq, num in heap]",
+        "java": "class Solution {\n    public int[] topKFrequent(int[] nums, int k) {\n        Map<Integer, Integer> count = new HashMap<>();\n        for (int x : nums) count.put(x, count.getOrDefault(x, 0) + 1);\n        PriorityQueue<Map.Entry<Integer, Integer>> pq = new PriorityQueue<>((a, b) -> a.getValue() - b.getValue());\n        for (Map.Entry<Integer, Integer> e : count.entrySet()) {\n            pq.offer(e);\n            if (pq.size() > k) pq.poll();\n        }\n        int[] res = new int[k];\n        for (int i = 0; i < k; i++) res[i] = pq.poll().getKey();\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log k)",
+        "explanation": "O(n) counting + O(m log k) heap pushes/pops for m distinct elements. Better than sorting when k << m."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "O(m) for hash map + O(k) for heap, overall O(n)."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,1,1,2,2,3], k = 2",
+        "steps": [
+          "count = {1:3, 2:2, 3:1}",
+          "push (3,1) => heap [(3,1)]",
+          "push (2,2) => heap [(2,2),(3,1)]",
+          "push (1,3) => heap [(1,3),(3,1),(2,2)] then pop (1,3) => [(2,2),(3,1)]",
+          "output keys [2,1] in any order"
+        ],
+        "output": "[1,2] (any order)"
+      },
+      "edgeCases": [
+        "k=1 keeps only max frequency via heap size 1",
+        "k equals distinct count: heap never pops",
+        "Large n with small k shows best speedup vs sorting"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Bucket Sort by Frequency",
+      "tag": "Optimal",
+      "intuition": "Frequency of any value is between 1 and n. Use frequency as index into buckets to avoid comparison sorting.",
+      "theory": "Count frequencies O(n). Create buckets array of size n+1 where buckets[f] holds all numbers with frequency f. This is counting-sort over frequency domain. Then scan buckets from n down to 1 collecting numbers until k collected. Each number placed once and scanned once, so linear. Correct because higher index means higher frequency.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        unordered_map<int,int> count;\n        for (int x : nums) count[x]++;\n        vector<vector<int>> buckets(nums.size() + 1);\n        for (auto &p : count) buckets[p.second].push_back(p.first);\n        vector<int> res;\n        for (int i = (int)buckets.size() - 1; i >= 0 && (int)res.size() < k; --i) {\n            for (int x : buckets[i]) {\n                res.push_back(x);\n                if ((int)res.size() == k) break;\n            }\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        unordered_map<int,int> count;\n        for (int x : nums) count[x]++;\n        vector<vector<int>> buckets(nums.size() + 1);\n        for (auto &p : count) buckets[p.second].push_back(p.first);\n        vector<int> res;\n        for (int i = (int)buckets.size() - 1; i >= 0 && (int)res.size() < k; --i) {\n            for (int x : buckets[i]) {\n                res.push_back(x);\n                if ((int)res.size() == k) break;\n            }\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def topKFrequent(self, nums: List[int], k: int) -> List[int]:\n        from collections import Counter\n        from typing import List\n        count = Counter(nums)\n        buckets: List[List[int]] = [[] for _ in range(len(nums) + 1)]\n        for num, freq in count.items():\n            buckets[freq].append(num)\n        res = []\n        for freq in range(len(nums), 0, -1):\n            for num in buckets[freq]:\n                res.append(num)\n                if len(res) == k:\n                    return res\n        return res",
+        "java": "class Solution {\n    public int[] topKFrequent(int[] nums, int k) {\n        Map<Integer, Integer> count = new HashMap<>();\n        for (int x : nums) count.put(x, count.getOrDefault(x, 0) + 1);\n        List<Integer>[] buckets = new List[nums.length + 1];\n        for (int i = 0; i < buckets.length; i++) buckets[i] = new ArrayList<>();\n        for (Map.Entry<Integer, Integer> e : count.entrySet()) buckets[e.getValue()].add(e.getKey());\n        int[] res = new int[k];\n        int idx = 0;\n        for (int i = buckets.length - 1; i >= 0 && idx < k; i--) {\n            for (int x : buckets[i]) {\n                res[idx++] = x;\n                if (idx == k) break;\n            }\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Counting O(n), distributing into buckets O(m), scanning buckets O(n). Total linear."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Hash map O(m) plus buckets holding m elements total plus O(n) bucket array."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,1,1,2,2,3], k = 2",
+        "steps": [
+          "count = {1:3, 2:2, 3:1}",
+          "buckets[3]=[1], buckets[2]=[2], buckets[1]=[3], others empty",
+          "scan i=6..4 empty, i=3 => take 1 => res [1]",
+          "i=2 => take 2 => res [1,2] size==k stop"
+        ],
+        "output": "[1,2]"
+      },
+      "edgeCases": [
+        "Single distinct value with freq n uses buckets[n]",
+        "All distinct (freq 1): buckets[1] has n items, take any k",
+        "k=distinct count requires scanning down to freq 1"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "questionId": 23,
+  "title": "Merge k Sorted Lists",
+  "difficulty": "Hard",
+  "corePattern": "K-Way Merge via Min-Heap and Divide and Conquer",
+  "interviewTips": [
+    "Clarify constraints: what are k (number of lists) vs N (total nodes)? Are lists possibly empty or null? Should you reuse existing nodes or create new ones?",
+    "Trade-off: Brute-force sort is O(N log N) and simple but ignores sortedness; Heap is O(N log k) with O(k) extra space and streams results; Divide-and-Conquer is O(N log k) with O(1) heap space but O(log k) recursion stack and reuses pointers.",
+    "Edge-case tip: handle lists = [] vs [null], single list, lists with one element, duplicate values (heap comparator must not compare ListNode objects directly), and avoid cycles by advancing pointers correctly."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Collect All Values and Sort",
+      "tag": "Brute Force",
+      "intuition": "Ignore that each list is sorted, dump every value into an array, sort it, then rebuild a new sorted linked list.",
+      "theory": "If there are N total nodes, collecting is O(N). Sorting dominates at O(N log N). Rebuilding is O(N). This is correct because sorted array order equals merged sorted list order. It uses O(N) extra space for values plus O(N) for new nodes and does not exploit k-way sorted structure.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        vector<int> vals;\n        for (auto head : lists) {\n            while (head) {\n                vals.push_back(head->val);\n                head = head->next;\n            }\n        }\n        sort(vals.begin(), vals.end());\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        for (int v : vals) {\n            cur->next = new ListNode(v);\n            cur = cur->next;\n        }\n        return dummy.next;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        vector<int> vals;\n        for (auto head : lists) {\n            while (head) {\n                vals.push_back(head->val);\n                head = head->next;\n            }\n        }\n        sort(vals.begin(), vals.end());\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        for (int v : vals) {\n            cur->next = new ListNode(v);\n            cur = cur->next;\n        }\n        return dummy.next;\n    }\n};",
+        "python": "from typing import List, Optional\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\nclass Solution:\n    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:\n        vals = []\n        for head in lists:\n            while head:\n                vals.append(head.val)\n                head = head.next\n        vals.sort()\n        dummy = ListNode(0)\n        cur = dummy\n        for v in vals:\n            cur.next = ListNode(v)\n            cur = cur.next\n        return dummy.next",
+        "java": "class Solution {\n    public ListNode mergeKLists(ListNode[] lists) {\n        List<Integer> vals = new ArrayList<>();\n        for (ListNode head : lists) {\n            while (head != null) {\n                vals.add(head.val);\n                head = head.next;\n            }\n        }\n        Collections.sort(vals);\n        ListNode dummy = new ListNode(0);\n        ListNode cur = dummy;\n        for (int v : vals) {\n            cur.next = new ListNode(v);\n            cur = cur.next;\n        }\n        return dummy.next;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N log N)",
+        "explanation": "N is total nodes. Collect O(N) + sort O(N log N) + rebuild O(N)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N)",
+        "explanation": "O(N) for values array plus O(N) for new output nodes (or O(N) if counting output)."
+      },
+      "dryRunExample": {
+        "input": "lists = [[1,4,5],[1,3,4],[2,6]]",
+        "steps": [
+          "Collect values: [1,4,5,1,3,4,2,6]",
+          "Sort values: [1,1,2,3,4,4,5,6]",
+          "Rebuild linked list node by node from sorted array"
+        ],
+        "output": "[1,1,2,3,4,4,5,6]"
+      },
+      "edgeCases": [
+        "lists = [] returns null",
+        "lists = [null] returns null",
+        "k=1 single sorted list returns copy of that list"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Min-Heap K-Way Merge",
+      "tag": "Optimal",
+      "intuition": "The merged head is always the minimum among current heads of k lists. Maintain those k candidates in a min-heap, repeatedly pop min and push its next.",
+      "theory": "This is classic k-way merge / tournament sort. Heap size <= k. Each of N nodes is pushed and popped once at O(log k) cost, so O(N log k). We splice original nodes (no new allocations except dummy) giving O(k) auxiliary space. Tie-break by list index to avoid comparing nodes when values equal.",
+      "cppCode": "class Solution {\npublic:\n    struct Cmp {\n        bool operator()(ListNode* a, ListNode* b) {\n            return a->val > b->val;\n        }\n    };\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        priority_queue<ListNode*, vector<ListNode*>, Cmp> pq;\n        for (auto h : lists) if (h) pq.push(h);\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        while (!pq.empty()) {\n            ListNode* node = pq.top(); pq.pop();\n            cur->next = node;\n            cur = cur->next;\n            if (node->next) pq.push(node->next);\n        }\n        return dummy.next;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    struct Cmp {\n        bool operator()(ListNode* a, ListNode* b) {\n            return a->val > b->val;\n        }\n    };\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        priority_queue<ListNode*, vector<ListNode*>, Cmp> pq;\n        for (auto h : lists) if (h) pq.push(h);\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        while (!pq.empty()) {\n            ListNode* node = pq.top(); pq.pop();\n            cur->next = node;\n            cur = cur->next;\n            if (node->next) pq.push(node->next);\n        }\n        return dummy.next;\n    }\n};",
+        "python": "import heapq\nfrom typing import List, Optional\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\nclass Solution:\n    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:\n        heap = []\n        for i, head in enumerate(lists):\n            if head:\n                heapq.heappush(heap, (head.val, i, head))\n        dummy = ListNode(0)\n        cur = dummy\n        while heap:\n            _, i, node = heapq.heappop(heap)\n            cur.next = node\n            cur = cur.next\n            if node.next:\n                heapq.heappush(heap, (node.next.val, i, node.next))\n        return dummy.next",
+        "java": "import java.util.PriorityQueue;\nclass Solution {\n    public ListNode mergeKLists(ListNode[] lists) {\n        PriorityQueue<ListNode> pq = new PriorityQueue<>((a, b) -> a.val - b.val);\n        for (ListNode h : lists) if (h != null) pq.offer(h);\n        ListNode dummy = new ListNode(0);\n        ListNode cur = dummy;\n        while (!pq.isEmpty()) {\n            ListNode node = pq.poll();\n            cur.next = node;\n            cur = cur.next;\n            if (node.next != null) pq.offer(node.next);\n        }\n        return dummy.next;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N log k)",
+        "explanation": "Each of N nodes pushed/popped once from heap of size at most k, each heap op O(log k)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(k)",
+        "explanation": "Heap holds at most one node per list. Output reuses input nodes, O(1) extra besides heap."
+      },
+      "dryRunExample": {
+        "input": "lists = [[1,4,5],[1,3,4],[2,6]]",
+        "steps": [
+          "heap=[1(a),1(b),2(c)] pop 1(a)->push 4(a) heap=[1(b),2(c),4(a)]",
+          "pop 1(b)->push 3(b) heap=[2(c),3(b),4(a)]",
+          "pop 2(c)->push 6(c) heap=[3(b),4(a),6(c)]",
+          "pop 3,4,4,5,6 in order, splicing nodes"
+        ],
+        "output": "[1,1,2,3,4,4,5,6]"
+      },
+      "edgeCases": [
+        "All lists empty -> heap empty -> return null",
+        "Duplicate values across lists require stable comparator",
+        "Large k with many empty lists: only non-null heads pushed"
+      ]
+    },
+    {
+      "id": "divide-conquer",
+      "name": "Approach 3: Divide and Conquer Pairwise Merge",
+      "tag": "Divide and Conquer",
+      "intuition": "Merge lists two at a time like merge sort: repeatedly merge pairs with increasing interval until one list remains.",
+      "theory": "Merging two sorted lists of total length m is O(m). There are log k levels, each level processes all N nodes once, so O(N log k). Iterative interval doubling avoids recursion depth and achieves O(1) extra space besides output (recursion version uses O(log k) stack). Reuses nodes via standard two-list merge.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* mergeTwo(ListNode* a, ListNode* b) {\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        while (a && b) {\n            if (a->val <= b->val) { cur->next = a; a = a->next; }\n            else { cur->next = b; b = b->next; }\n            cur = cur->next;\n        }\n        cur->next = a ? a : b;\n        return dummy.next;\n    }\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        if (lists.empty()) return nullptr;\n        int n = lists.size();\n        for (int interval = 1; interval < n; interval *= 2) {\n            for (int i = 0; i + interval < n; i += interval * 2) {\n                lists[i] = mergeTwo(lists[i], lists[i + interval]);\n            }\n        }\n        return lists[0];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* mergeTwo(ListNode* a, ListNode* b) {\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        while (a && b) {\n            if (a->val <= b->val) { cur->next = a; a = a->next; }\n            else { cur->next = b; b = b->next; }\n            cur = cur->next;\n        }\n        cur->next = a ? a : b;\n        return dummy.next;\n    }\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        if (lists.empty()) return nullptr;\n        int n = lists.size();\n        for (int interval = 1; interval < n; interval *= 2) {\n            for (int i = 0; i + interval < n; i += interval * 2) {\n                lists[i] = mergeTwo(lists[i], lists[i + interval]);\n            }\n        }\n        return lists[0];\n    }\n};",
+        "python": "from typing import List, Optional\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\nclass Solution:\n    def mergeTwo(self, a: Optional[ListNode], b: Optional[ListNode]) -> Optional[ListNode]:\n        dummy = ListNode(0)\n        cur = dummy\n        while a and b:\n            if a.val <= b.val:\n                cur.next = a\n                a = a.next\n            else:\n                cur.next = b\n                b = b.next\n            cur = cur.next\n        cur.next = a if a else b\n        return dummy.next\n    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:\n        if not lists:\n            return None\n        interval = 1\n        n = len(lists)\n        while interval < n:\n            for i in range(0, n - interval, interval * 2):\n                lists[i] = self.mergeTwo(lists[i], lists[i + interval])\n            interval *= 2\n        return lists[0]",
+        "java": "class Solution {\n    private ListNode mergeTwo(ListNode a, ListNode b) {\n        ListNode dummy = new ListNode(0);\n        ListNode cur = dummy;\n        while (a != null && b != null) {\n            if (a.val <= b.val) { cur.next = a; a = a.next; }\n            else { cur.next = b; b = b.next; }\n            cur = cur.next;\n        }\n        cur.next = (a != null) ? a : b;\n        return dummy.next;\n    }\n    public ListNode mergeKLists(ListNode[] lists) {\n        if (lists.length == 0) return null;\n        int n = lists.length;\n        for (int interval = 1; interval < n; interval *= 2) {\n            for (int i = 0; i + interval < n; i += interval * 2) {\n                lists[i] = mergeTwo(lists[i], lists[i + interval]);\n            }\n        }\n        return lists[0];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N log k)",
+        "explanation": "log k merge rounds, each round merges all N nodes once via linear two-list merges."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Iterative version uses O(1) extra besides output (recursive version O(log k) stack). Nodes reused."
+      },
+      "dryRunExample": {
+        "input": "lists = [[1,4,5],[1,3,4],[2,6]]",
+        "steps": [
+          "interval=1: merge [1,4,5]+[1,3,4]=[1,1,3,4,4,5], [2,6] stays",
+          "interval=2: merge [1,1,3,4,4,5]+[2,6]=[1,1,2,3,4,4,5,6]",
+          "return lists[0]"
+        ],
+        "output": "[1,1,2,3,4,4,5,6]"
+      },
+      "edgeCases": [
+        "lists = [] returns null without accessing lists[0]",
+        "Odd k leaves last list unpaired in a round",
+        "k=10000 with empty lists still O(k log k) loop overhead but no node work"
+      ]
+    }
+  ]
+}

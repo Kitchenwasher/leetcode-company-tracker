@@ -1,0 +1,85 @@
+{
+  "questionId": 124,
+  "title": "Binary Tree Maximum Path Sum",
+  "difficulty": "Hard",
+  "corePattern": "DP on Trees - Post-order DFS with Max Single-Path Gain",
+  "interviewTips": [
+    "Clarify path definition: any non-empty sequence of parent-child connected nodes, can start/end anywhere, not necessarily through root, and node values can be negative.",
+    "Trade-off: recomputing downward paths for every node is O(N^2); reusing post-order results computes both through-path and upward gain in one DFS for O(N) time.",
+    "Edge-case tip: all-negative tree answer is the least-negative single node, so clamp child contributions with max(0, gain) but never clamp global answer to 0; also watch recursion depth on skewed tree."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force - Every Node as Highest Point",
+      "tag": "Brute Force",
+      "intuition": "Every valid path has a unique highest node closest to root. If we fix each node as the highest point, the best path through it is node value plus best downward extension to left and right. Trying all nodes and taking the maximum must find the optimum.",
+      "theory": "Define down(u) as max sum of a path starting at u going down (must include u). Then down(null)=0 and down(u)=u.val+max(0,down(u.left),down(u.right)). For node u as highest, candidate(u)=u.val+max(0,down(u.left))+max(0,down(u.right)). Brute force computes down() from scratch with a fresh DFS for every u, then visits every u via a second traversal to evaluate candidate(u). Correct but recomputes overlapping subproblems.",
+      "cppCode": "class Solution {\npublic:\n    int maxPathSum(TreeNode* root) {\n        ans = INT_MIN;\n        traverse(root);\n        return ans;\n    }\nprivate:\n    int ans;\n    int maxDown(TreeNode* node) {\n        if (!node) return 0;\n        int left = maxDown(node->left);\n        int right = maxDown(node->right);\n        return node->val + std::max({0, left, right});\n    }\n    void traverse(TreeNode* node) {\n        if (!node) return;\n        int left = maxDown(node->left);\n        int right = maxDown(node->right);\n        ans = std::max(ans, node->val + std::max(0, left) + std::max(0, right));\n        traverse(node->left);\n        traverse(node->right);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxPathSum(TreeNode* root) {\n        ans = INT_MIN;\n        traverse(root);\n        return ans;\n    }\nprivate:\n    int ans;\n    int maxDown(TreeNode* node) {\n        if (!node) return 0;\n        int left = maxDown(node->left);\n        int right = maxDown(node->right);\n        return node->val + std::max({0, left, right});\n    }\n    void traverse(TreeNode* node) {\n        if (!node) return;\n        int left = maxDown(node->left);\n        int right = maxDown(node->right);\n        ans = std::max(ans, node->val + std::max(0, left) + std::max(0, right));\n        traverse(node->left);\n        traverse(node->right);\n    }\n};",
+        "python": "class Solution:\n    def maxPathSum(self, root):\n        self.ans = float('-inf')\n        def maxDown(node):\n            if not node:\n                return 0\n            left = maxDown(node.left)\n            right = maxDown(node.right)\n            return node.val + max(0, left, right)\n        def traverse(node):\n            if not node:\n                return\n            left = maxDown(node.left)\n            right = maxDown(node.right)\n            self.ans = max(self.ans, node.val + max(0, left) + max(0, right))\n            traverse(node.left)\n            traverse(node.right)\n        traverse(root)\n        return int(self.ans)",
+        "java": "class Solution {\n    private int ans;\n    public int maxPathSum(TreeNode root) {\n        ans = Integer.MIN_VALUE;\n        traverse(root);\n        return ans;\n    }\n    private int maxDown(TreeNode node) {\n        if (node == null) return 0;\n        int left = maxDown(node.left);\n        int right = maxDown(node.right);\n        return node.val + Math.max(0, Math.max(left, right));\n    }\n    private void traverse(TreeNode node) {\n        if (node == null) return;\n        int left = maxDown(node.left);\n        int right = maxDown(node.right);\n        ans = Math.max(ans, node.val + Math.max(0, left) + Math.max(0, right));\n        traverse(node.left);\n        traverse(node.right);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N^2)",
+        "explanation": "We visit N nodes in traverse(), and for each we run maxDown() over its subtree. Worst case skewed tree gives N+(N-1)+...+1 = O(N^2); balanced tree still O(N log N) average but O(N^2) worst-case bound."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Recursion stack for traverse plus maxDown can reach height H, O(N) worst case skewed, O(log N) balanced. No extra data structures besides O(1) variables."
+      },
+      "dryRunExample": {
+        "input": "root = [1,2,3]",
+        "steps": [
+          "traverse(1): maxDown(2)=2, maxDown(3)=3, candidate=1+2+3=6, ans=6",
+          "traverse(2): maxDown(null)=0 both sides, candidate=2, ans stays 6",
+          "traverse(3): candidate=3, ans stays 6"
+        ],
+        "output": "6"
+      },
+      "edgeCases": [
+        "Single node [-3]: maxDown null =0, candidate=-3, answer -3",
+        "All negative [-10,-20,-30]: must return -10, not 0, so global init to -inf is critical",
+        "Skewed chain [2,-1,3,-2]: worst-case O(N^2) behavior and deep recursion"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Post-Order DFS with Global Best",
+      "tag": "Optimal",
+      "intuition": "In one bottom-up pass we can return to parent the best single-sided gain starting at current node, while also updating a global answer with the best V-shaped path through current node that uses both children. Negative child gains are pruned to 0.",
+      "theory": "Post-order dfs(u) returns max gain of a path starting at u going down to one side: max(0,dfs(left)), max(0,dfs(right)) are pruned child gains, through-path = u.val+left+right updates global best, return value = u.val+max(left,right). This is Tree DP: return value is the state needed by parent, global best captures paths that cannot be extended upward because they fork. Each node visited once.",
+      "cppCode": "class Solution {\npublic:\n    int maxPathSum(TreeNode* root) {\n        best = INT_MIN;\n        dfs(root);\n        return best;\n    }\nprivate:\n    int best;\n    int dfs(TreeNode* node) {\n        if (!node) return 0;\n        int left = std::max(0, dfs(node->left));\n        int right = std::max(0, dfs(node->right));\n        best = std::max(best, node->val + left + right);\n        return node->val + std::max(left, right);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxPathSum(TreeNode* root) {\n        best = INT_MIN;\n        dfs(root);\n        return best;\n    }\nprivate:\n    int best;\n    int dfs(TreeNode* node) {\n        if (!node) return 0;\n        int left = std::max(0, dfs(node->left));\n        int right = std::max(0, dfs(node->right));\n        best = std::max(best, node->val + left + right);\n        return node->val + std::max(left, right);\n    }\n};",
+        "python": "class Solution:\n    def maxPathSum(self, root):\n        self.best = float('-inf')\n        def dfs(node):\n            if not node:\n                return 0\n            left = max(0, dfs(node.left))\n            right = max(0, dfs(node.right))\n            self.best = max(self.best, node.val + left + right)\n            return node.val + max(left, right)\n        dfs(root)\n        return int(self.best)",
+        "java": "class Solution {\n    private int best;\n    public int maxPathSum(TreeNode root) {\n        best = Integer.MIN_VALUE;\n        dfs(root);\n        return best;\n    }\n    private int dfs(TreeNode node) {\n        if (node == null) return 0;\n        int left = Math.max(0, dfs(node.left));\n        int right = Math.max(0, dfs(node.right));\n        best = Math.max(best, node.val + left + right);\n        return node.val + Math.max(left, right);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N)",
+        "explanation": "Each node visited exactly once in post-order, O(1) work per node to combine left/right gains and update global best."
+      },
+      "spaceComplexity": {
+        "complexity": "O(H)",
+        "explanation": "Recursion stack height H, O(N) worst-case skewed tree, O(log N) balanced tree. Global best uses O(1) extra space."
+      },
+      "dryRunExample": {
+        "input": "root = [-10,9,20,null,null,15,7]",
+        "steps": [
+          "dfs(9): left=0,right=0, best=9, return 9",
+          "dfs(15): best=max(9,15)=15, return 15",
+          "dfs(7): best=max(15,7)=15, return 7",
+          "dfs(20): left=15,right=7, through=20+15+7=42, best=42, return 20+15=35",
+          "dfs(-10): left=9,right=35, through=-10+9+35=34, best stays 42, return -10+35=25"
+        ],
+        "output": "42"
+      },
+      "edgeCases": [
+        "Single node [-3]: left=0,right=0, best=-3, return -3",
+        "All negative [-2,-1,-3]: pruned gains 0, best tracks max single node -1",
+        "Path not through root: e.g., [-10,9,20,null,null,15,7] best in right subtree, global variable captures it"
+      ]
+    }
+  ]
+}

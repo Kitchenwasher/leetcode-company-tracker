@@ -1,0 +1,88 @@
+{
+  "questionId": 100,
+  "title": "Same Tree",
+  "difficulty": "Easy",
+  "corePattern": "Synchronous Tree Traversal - Simultaneous DFS/BFS Comparison",
+  "interviewTips": [
+    "Ask clarifier: Are empty trees (both null) considered same? Yes. What defines sameness - both structure and values must match exactly?",
+    "Trade-off: Recursive DFS is shortest to write but uses O(h) call stack and can overflow on skewed tree of 10^4+ depth; iterative BFS/DFS uses explicit queue/stack and is safer for production.",
+    "Edge-case tip: Check nulls before accessing val to avoid NPE; check both structure mismatch (one null, one not) and value mismatch separately; test [1,2] vs [1,null,2] which looks similar but structure differs."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Recursive DFS (Preorder Comparison)",
+      "tag": "Brute Force",
+      "intuition": "Two trees are same if roots have same value and left subtrees are same and right subtrees are same. This is naturally recursive: compare pair (p,q), then recurse on (p.left,q.left) and (p.right,q.right). Base cases handle nulls.",
+      "theory": "This is a synchronous preorder traversal of both trees. At each pair we enforce three invariants: 1) both null -> true, 2) exactly one null -> false (structure differs), 3) values differ -> false. Otherwise the answer is conjunction of left and right results. It visits each node pair at most once, short-circuits on first mismatch via &&.",
+      "cppCode": "class Solution {\npublic:\n    bool isSameTree(TreeNode* p, TreeNode* q) {\n        if (!p && !q) return true;\n        if (!p || !q) return false;\n        if (p->val != q->val) return false;\n        return isSameTree(p->left, q->left) && isSameTree(p->right, q->right);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isSameTree(TreeNode* p, TreeNode* q) {\n        if (!p && !q) return true;\n        if (!p || !q) return false;\n        if (p->val != q->val) return false;\n        return isSameTree(p->left, q->left) && isSameTree(p->right, q->right);\n    }\n};",
+        "python": "from typing import Optional\nclass Solution:\n    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:\n        if not p and not q:\n            return True\n        if not p or not q:\n            return False\n        if p.val != q.val:\n            return False\n        return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)",
+        "java": "class Solution {\n    public boolean isSameTree(TreeNode p, TreeNode q) {\n        if (p == null && q == null) return true;\n        if (p == null || q == null) return false;\n        if (p.val != q.val) return false;\n        return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each node pair visited once where n is min number of nodes, worst-case total nodes in both trees. Early exit on mismatch gives O(k) best case."
+      },
+      "spaceComplexity": {
+        "complexity": "O(h)",
+        "explanation": "Recursion call stack depth equals tree height h. O(log n) for balanced, O(n) for skewed chain. No extra data structure."
+      },
+      "dryRunExample": {
+        "input": "p = [1,2,3], q = [1,2,3]",
+        "steps": [
+          "compare (1,1): both non-null, vals equal 1==1",
+          "recurse left: compare (2,2): vals equal 2==2, both leaves -> true",
+          "recurse right: compare (3,3): vals equal 3==3, both leaves -> true",
+          "combine: true && true = true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "Both null: p=[], q=[] -> true",
+        "One null: p=[1], q=[] -> false",
+        "Same values different structure: p=[1,2], q=[1,null,2] -> false",
+        "Same structure different values: p=[1,2,1], q=[1,1,2] -> false",
+        "Skewed chain depth 10000: recursion may overflow in some languages"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Iterative BFS with Queue",
+      "tag": "Optimal",
+      "intuition": "Process both trees level by level in lockstep. Keep a queue of pairs (a,b) to compare. Pop a pair, apply same null/value checks as recursion, then enqueue (a.left,b.left) and (a.right,b.right). If queue drains with no mismatch, trees are identical.",
+      "theory": "This is synchronous breadth-first traversal. Pairing nodes guarantees structural alignment is checked explicitly, including null placeholders. Unlike recursion it uses heap-allocated queue, avoiding call-stack overflow. Order can be BFS (queue) or DFS (stack) - correctness is identical because all pairs must match regardless of order. Short-circuits immediately on first structural or value mismatch.",
+      "cppCode": "class Solution {\npublic:\n    bool isSameTree(TreeNode* p, TreeNode* q) {\n        queue<pair<TreeNode*, TreeNode*>> que;\n        que.push({p, q});\n        while (!que.empty()) {\n            auto [a, b] = que.front(); que.pop();\n            if (!a && !b) continue;\n            if (!a || !b) return false;\n            if (a->val != b->val) return false;\n            que.push({a->left, b->left});\n            que.push({a->right, b->right});\n        }\n        return true;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isSameTree(TreeNode* p, TreeNode* q) {\n        queue<pair<TreeNode*, TreeNode*>> que;\n        que.push({p, q});\n        while (!que.empty()) {\n            auto [a, b] = que.front(); que.pop();\n            if (!a && !b) continue;\n            if (!a || !b) return false;\n            if (a->val != b->val) return false;\n            que.push({a->left, b->left});\n            que.push({a->right, b->right});\n        }\n        return true;\n    }\n};",
+        "python": "from collections import deque\nfrom typing import Optional\nclass Solution:\n    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:\n        queue = deque([(p, q)])\n        while queue:\n            a, b = queue.popleft()\n            if not a and not b:\n                continue\n            if not a or not b:\n                return False\n            if a.val != b.val:\n                return False\n            queue.append((a.left, b.left))\n            queue.append((a.right, b.right))\n        return True",
+        "java": "class Solution {\n    public boolean isSameTree(TreeNode p, TreeNode q) {\n        Queue<TreeNode> q1 = new LinkedList<>();\n        Queue<TreeNode> q2 = new LinkedList<>();\n        q1.offer(p);\n        q2.offer(q);\n        while (!q1.isEmpty() && !q2.isEmpty()) {\n            TreeNode a = q1.poll();\n            TreeNode b = q2.poll();\n            if (a == null && b == null) continue;\n            if (a == null || b == null) return false;\n            if (a.val != b.val) return false;\n            q1.offer(a.left);\n            q1.offer(a.right);\n            q2.offer(b.left);\n            q2.offer(b.right);\n        }\n        return q1.isEmpty() && q2.isEmpty();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each pair dequeued and compared once. n is total nodes visited. O(n) worst case, early exit on mismatch."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Queue holds at most one full level (width w). Worst O(n) for complete tree last level ~n/2, best O(1) for skewed chain. No recursion stack."
+      },
+      "dryRunExample": {
+        "input": "p = [1,2], q = [1,null,2]",
+        "steps": [
+          "queue=[(1,1)]: pop (1,1), vals 1==1, push (2,null) and (null,2)",
+          "pop (2,null): one null one not -> return false",
+          "short-circuit, never process (null,2)"
+        ],
+        "output": "false"
+      },
+      "edgeCases": [
+        "Both null: queue starts [(null,null)] -> continue -> true",
+        "Single node same: p=[1], q=[1] -> true",
+        "Single node diff val: p=[1], q=[2] -> false",
+        "Asymmetric nulls at depth: p=[1,2,3], q=[1,2,null] -> false on (3,null) pair",
+        "Large balanced tree: queue memory ~ O(n/2) at last level, acceptable"
+      ]
+    }
+  ]
+}

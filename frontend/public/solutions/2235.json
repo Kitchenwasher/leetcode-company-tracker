@@ -1,0 +1,84 @@
+{
+  "questionId": 2235,
+  "title": "Add Two Integers",
+  "difficulty": "Easy",
+  "corePattern": "Math - Direct Arithmetic and Bit Manipulation",
+  "interviewTips": [
+    "Ask if you are allowed to use the + operator or must implement addition manually with bitwise logic.",
+    "Trade-off: direct + is O(1) and optimal in practice, bitwise XOR-AND loop is O(log M) and shows understanding of how adders work but is slower.",
+    "Edge-case tip: verify negative numbers, zero, and 32-bit overflow behavior, especially Python infinite-precision ints vs fixed 32-bit int in C++ and Java."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Direct Addition with Plus Operator",
+      "tag": "Brute Force",
+      "intuition": "Adding two integers is a primitive CPU operation, so just return num1 + num2 directly. This is the intended solution for this Easy problem.",
+      "theory": "Integer addition in hardware is constant time for fixed-width types. The language runtime maps + to a single ADD instruction. No extra data structures or loops are needed, so time and space are both constant.",
+      "cppCode": "class Solution {\npublic:\n    int sum(int num1, int num2) {\n        return num1 + num2;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int sum(int num1, int num2) {\n        return num1 + num2;\n    }\n};",
+        "python": "class Solution:\n    def sum(self, num1: int, num2: int) -> int:\n        return num1 + num2",
+        "java": "class Solution {\n    public int sum(int num1, int num2) {\n        return num1 + num2;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Single arithmetic operation, independent of input values."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only uses a few integer variables, no extra allocation."
+      },
+      "dryRunExample": {
+        "input": "num1 = 12, num2 = 5",
+        "steps": [
+          "Evaluate num1 + num2",
+          "12 + 5 = 17",
+          "Return 17"
+        ],
+        "output": "17"
+      },
+      "edgeCases": [
+        "num1 = -100, num2 = 100 gives 0 with sign cancellation",
+        "num1 = 0, num2 = 0 gives 0",
+        "Both negative: num1 = -5, num2 = -7 gives -12"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Bitwise Addition without Plus",
+      "tag": "Optimal",
+      "intuition": "Simulate a binary adder: XOR gives sum without carry, AND shifted left gives carry. Repeat until carry becomes zero.",
+      "theory": "For bits a,b: a ^ b is sum ignoring carry, (a & b) << 1 is carry. Replacing a with a ^ b and b with carry and iterating propagates carries like ripple-carry adder. Terminates in at most 32 iterations for 32-bit ints. In Python mask to 32 bits with 0xFFFFFFFF to emulate fixed-width two complement and convert back at end.",
+      "cppCode": "class Solution {\npublic:\n    int sum(int num1, int num2) {\n        while (num2 != 0) {\n            int carry = (num1 & num2) << 1;\n            num1 = num1 ^ num2;\n            num2 = carry;\n        }\n        return num1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int sum(int num1, int num2) {\n        while (num2 != 0) {\n            int carry = (num1 & num2) << 1;\n            num1 = num1 ^ num2;\n            num2 = carry;\n        }\n        return num1;\n    }\n};",
+        "python": "class Solution:\n    def sum(self, num1: int, num2: int) -> int:\n        MASK = 0xFFFFFFFF\n        MAX_INT = 0x7FFFFFFF\n        num1 &= MASK\n        num2 &= MASK\n        while num2 != 0:\n            carry = ((num1 & num2) << 1) & MASK\n            num1 = (num1 ^ num2) & MASK\n            num2 = carry\n        return num1 if num1 <= MAX_INT else ~(num1 ^ MASK)",
+        "java": "class Solution {\n    public int sum(int num1, int num2) {\n        while (num2 != 0) {\n            int carry = (num1 & num2) << 1;\n            num1 = num1 ^ num2;\n            num2 = carry;\n        }\n        return num1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log M)",
+        "explanation": "At most number of bits iterations, up to 32 for 32-bit int, where M is max absolute value. Each iteration is O(1) bitwise ops."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two integer variables num1 and carry, no extra memory."
+      },
+      "dryRunExample": {
+        "input": "num1 = 12, num2 = 5",
+        "steps": [
+          "12=1100, 5=0101: xor=1001(9), carry=(0100<<1)=1000(8)",
+          "9=1001, 8=1000: xor=0001(1), carry=(1000<<1)=10000(16)",
+          "1=00001, 16=10000: xor=10001(17), carry=0",
+          "carry 0, return 17"
+        ],
+        "output": "17"
+      },
+      "edgeCases": [
+        "Negative carry chain: -1 + 1 loops until carry clears, returns 0",
+        "Zero: 0 + 0 returns immediately with no loop",
+        "Python needs mask or negative inputs loop forever due to infinite sign extension"
+      ]
+    }
+  ]
+}

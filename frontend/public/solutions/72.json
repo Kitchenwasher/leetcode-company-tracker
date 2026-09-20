@@ -2,49 +2,120 @@
   "questionId": 72,
   "title": "Edit Distance",
   "difficulty": "Medium",
-  "corePattern": "Dynamic Programming",
+  "corePattern": "2D Dynamic Programming on Strings - Alignment DP",
   "interviewTips": [
-    "State the brute-force approach first before presenting the optimal Dynamic Programming technique.",
-    "Discuss Time and Space complexities upfront before writing code.",
-    "Test on empty inputs and single-element edge cases."
+    "Clarify allowed operations: insert, delete, replace each cost 1, and ask if operations are on word1 to word2 or either direction.",
+    "Trade-off: 2D DP is easiest to explain and reconstruct path, 1D DP is optimal for memory; mention only needing previous row.",
+    "Edge-case tip: handle empty strings first, and discuss swapping to make DP width equal to shorter string for O(min(m,n)) space."
   ],
   "approaches": [
     {
-      "id": "recursion-brute-force",
-      "name": "Approach 1: Recursive Formulation (Brute Force)",
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Recursion",
       "tag": "Brute Force",
-      "intuition": "Break the problem down into overlapping subproblems. For each choice at the current state, branch recursively into smaller subproblems.",
-      "theory": "Without memoization, overlapping subproblems are re-evaluated exponentially, resulting in an O(2^N) or O(K^N) recursion tree.",
-      "cppCode": "// Conceptual Recursive Formulation for: Edit Distance\n#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int solveRecursively(int n /*, ...args */) {\n        // Base case\n        if (n <= 0) return 0;\n\n        // Recursive transition exploring choices\n        int result = 0;\n        // result = std::max(result, solveRecursively(n - 1) + ...);\n        return result;\n    }\n};",
+      "intuition": "Compare first unmatched characters of suffixes. If equal, skip both with no cost. If different, try all three operations: delete from word1, insert into word1, replace, each costs 1 plus best of remainder. This explores all edit sequences.",
+      "theory": "Define f(i,j) as edit distance of suffixes word1[i:] and word2[j:]. Base: if i==m return n-j (insert rest), if j==n return m-i (delete rest). Transition: if word1[i]==word2[j] then f(i+1,j+1), else 1+min(f(i+1,j), f(i,j+1), f(i+1,j+1)). Recursion branches up to 3 ways, leading to exponential overlapping subproblems.",
+      "cppCode": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        return dfs(word1, word2, 0, 0);\n    }\nprivate:\n    int dfs(string &a, string &b, int i, int j) {\n        if (i == (int)a.size()) return (int)b.size() - j;\n        if (j == (int)b.size()) return (int)a.size() - i;\n        if (a[i] == b[j]) return dfs(a, b, i + 1, j + 1);\n        int insertOp = dfs(a, b, i, j + 1);\n        int deleteOp = dfs(a, b, i + 1, j);\n        int replaceOp = dfs(a, b, i + 1, j + 1);\n        return 1 + min({insertOp, deleteOp, replaceOp});\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        return dfs(word1, word2, 0, 0);\n    }\nprivate:\n    int dfs(string &a, string &b, int i, int j) {\n        if (i == (int)a.size()) return (int)b.size() - j;\n        if (j == (int)b.size()) return (int)a.size() - i;\n        if (a[i] == b[j]) return dfs(a, b, i + 1, j + 1);\n        int insertOp = dfs(a, b, i, j + 1);\n        int deleteOp = dfs(a, b, i + 1, j);\n        int replaceOp = dfs(a, b, i + 1, j + 1);\n        return 1 + min({insertOp, deleteOp, replaceOp});\n    }\n};",
+        "python": "class Solution:\n    def minDistance(self, word1: str, word2: str) -> int:\n        def dfs(i: int, j: int) -> int:\n            if i == len(word1):\n                return len(word2) - j\n            if j == len(word2):\n                return len(word1) - i\n            if word1[i] == word2[j]:\n                return dfs(i + 1, j + 1)\n            insert = dfs(i, j + 1)\n            delete = dfs(i + 1, j)\n            replace = dfs(i + 1, j + 1)\n            return 1 + min(insert, delete, replace)\n        import sys\n        sys.setrecursionlimit(10000)\n        return dfs(0, 0)",
+        "java": "class Solution {\n    public int minDistance(String word1, String word2) {\n        return dfs(word1, word2, 0, 0);\n    }\n    private int dfs(String a, String b, int i, int j) {\n        if (i == a.length()) return b.length() - j;\n        if (j == b.length()) return a.length() - i;\n        if (a.charAt(i) == b.charAt(j)) return dfs(a, b, i + 1, j + 1);\n        int insertOp = dfs(a, b, i, j + 1);\n        int deleteOp = dfs(a, b, i + 1, j);\n        int replaceOp = dfs(a, b, i + 1, j + 1);\n        return 1 + Math.min(insertOp, Math.min(deleteOp, replaceOp));\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(2^N)",
-        "explanation": "Exponential branching recursion tree without memoization."
+        "complexity": "O(3^(m+n))",
+        "explanation": "Each mismatched state branches into 3 calls (insert, delete, replace). In worst case with all chars different, recursion tree size is exponential in m+n. No memoization so same (i,j) recomputed many times."
       },
       "spaceComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Recursion call stack depth."
+        "complexity": "O(m+n)",
+        "explanation": "Recursion stack depth at most m+n along any path, no extra memo table."
+      },
+      "dryRunExample": {
+        "input": "word1 = horse, word2 = ros",
+        "steps": [
+          "dfs(0,0): h vs r mismatch -> try delete h, insert r, replace h->r",
+          "Best path is replace/insert/delete exploration, e.g., horse -> rorse (replace h) -> rose (delete r) -> ros (delete e)",
+          "Equal chars cause free diagonal moves without cost",
+          "Minimum over all branches evaluates to 3"
+        ],
+        "output": "3"
       },
       "edgeCases": [
-        "Base cases at n = 0 and n = 1."
+        "One or both strings empty: answer is length of other string",
+        "Identical strings: answer 0 via always-equal fast path",
+        "Single char vs long string: TLE due to exponential blowup, motivates memoization"
       ]
     },
     {
-      "id": "dp-tabulation-optimal",
-      "name": "Approach 2: Dynamic Programming (Bottom-Up Tabulation)",
-      "tag": "Optimal",
-      "intuition": "Identify the optimal substructure and dependency direction. Build a DP table starting from the base cases to avoid redundant recalculation.",
-      "theory": "DP table satisfies optimal substructure: each state `dp[i]` is computed from previously solved subproblems in O(1) or O(K) transitions.",
-      "cppCode": "#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int solve(const std::vector<int>& input) {\n        int n = input.size();\n        if (n == 0) return 0;\n\n        // dp[i] stores optimal answer for prefix of length i\n        std::vector<int> dp(n + 1, 0);\n\n        for (int i = 1; i <= n; ++i) {\n            // Transition: dp[i] = optimal choice from prior states\n            dp[i] = dp[i - 1] + input[i - 1];\n        }\n\n        return dp[n];\n    }\n};",
+      "id": "memoization",
+      "name": "Approach 2: Top-Down DP with Memoization",
+      "tag": "Top-Down DP",
+      "intuition": "Same recursion as brute force but cache result of each (i,j) pair. Number of distinct states is only (m+1)*(n+1), so each is computed once.",
+      "theory": "Overlapping subproblems: many paths reach same (i,j). Store f(i,j) in memo table initialized to -1/unvisited. On entry check memo, on exit save. Correctness follows from optimal substructure: optimal edit for prefixes/suffixes composes from optimal edits of smaller suffixes plus one operation. Converts exponential recursion to polynomial DAG traversal.",
+      "cppCode": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        int m = word1.size(), n = word2.size();\n        vector<vector<int>> memo(m + 1, vector<int>(n + 1, -1));\n        return dfs(word1, word2, 0, 0, memo);\n    }\nprivate:\n    int dfs(string &a, string &b, int i, int j, vector<vector<int>> &memo) {\n        if (i == (int)a.size()) return (int)b.size() - j;\n        if (j == (int)b.size()) return (int)a.size() - i;\n        if (memo[i][j] != -1) return memo[i][j];\n        if (a[i] == b[j]) return memo[i][j] = dfs(a, b, i + 1, j + 1, memo);\n        int insertOp = dfs(a, b, i, j + 1, memo);\n        int deleteOp = dfs(a, b, i + 1, j, memo);\n        int replaceOp = dfs(a, b, i + 1, j + 1, memo);\n        return memo[i][j] = 1 + min({insertOp, deleteOp, replaceOp});\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        int m = word1.size(), n = word2.size();\n        vector<vector<int>> memo(m + 1, vector<int>(n + 1, -1));\n        return dfs(word1, word2, 0, 0, memo);\n    }\nprivate:\n    int dfs(string &a, string &b, int i, int j, vector<vector<int>> &memo) {\n        if (i == (int)a.size()) return (int)b.size() - j;\n        if (j == (int)b.size()) return (int)a.size() - i;\n        if (memo[i][j] != -1) return memo[i][j];\n        if (a[i] == b[j]) return memo[i][j] = dfs(a, b, i + 1, j + 1, memo);\n        int insertOp = dfs(a, b, i, j + 1, memo);\n        int deleteOp = dfs(a, b, i + 1, j, memo);\n        int replaceOp = dfs(a, b, i + 1, j + 1, memo);\n        return memo[i][j] = 1 + min({insertOp, deleteOp, replaceOp});\n    }\n};",
+        "python": "class Solution:\n    def minDistance(self, word1: str, word2: str) -> int:\n        from functools import lru_cache\n        @lru_cache(maxsize=None)\n        def dfs(i: int, j: int) -> int:\n            if i == len(word1):\n                return len(word2) - j\n            if j == len(word2):\n                return len(word1) - i\n            if word1[i] == word2[j]:\n                return dfs(i + 1, j + 1)\n            return 1 + min(dfs(i + 1, j), dfs(i, j + 1), dfs(i + 1, j + 1))\n        return dfs(0, 0)",
+        "java": "class Solution {\n    private Integer[][] memo;\n    public int minDistance(String word1, String word2) {\n        memo = new Integer[word1.length() + 1][word2.length() + 1];\n        return dfs(word1, word2, 0, 0);\n    }\n    private int dfs(String a, String b, int i, int j) {\n        if (i == a.length()) return b.length() - j;\n        if (j == b.length()) return a.length() - i;\n        if (memo[i][j] != null) return memo[i][j];\n        if (a.charAt(i) == b.charAt(j)) return memo[i][j] = dfs(a, b, i + 1, j + 1);\n        int insertOp = dfs(a, b, i, j + 1);\n        int deleteOp = dfs(a, b, i + 1, j);\n        int replaceOp = dfs(a, b, i + 1, j + 1);\n        return memo[i][j] = 1 + Math.min(insertOp, Math.min(deleteOp, replaceOp));\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Computes each table entry once with constant transitions."
+        "complexity": "O(m*n)",
+        "explanation": "There are (m+1)*(n+1) states, each does O(1) work excluding recursive calls due to memo hit. So total time linear in state count."
       },
       "spaceComplexity": {
-        "complexity": "O(N) or O(1)",
-        "explanation": "Can often be space-optimized by storing only the previous state."
+        "complexity": "O(m*n)",
+        "explanation": "Memo table of size (m+1)*(n+1) plus recursion stack O(m+n) in worst case."
+      },
+      "dryRunExample": {
+        "input": "word1 = horse, word2 = ros",
+        "steps": [
+          "dfs(0,0) mismatch -> needs dfs(1,0), dfs(0,1), dfs(1,1)",
+          "Memo ensures dfs(2,1) etc. reached via multiple paths computed once",
+          "Base rows: dfs(5,j)=3-j, dfs(i,3)=5-i",
+          "Filled bottom-up via recursion unwinding yields 3"
+        ],
+        "output": "3"
       },
       "edgeCases": [
-        "Empty input, negative inputs, large numbers requiring long long."
+        "Empty string: base case returns immediately without table fill",
+        "Long strings up to 500: recursion depth up to 1000 may overflow in C++/Java, consider iterative",
+        "All same chars: linear diagonal chain, memo still O(m*n) worst but fast path"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Bottom-Up DP with Space Optimization",
+      "tag": "Optimal",
+      "intuition": "Build dp for prefixes: dp[i][j] is distance between first i chars of word1 and first j chars of word2. If last chars equal, inherit diagonal; else take 1 plus best of delete, insert, replace. Only previous row needed, so compress to 1D.",
+      "theory": "Prefix optimal substructure mirrors suffix version. Initialization: dp[i][0]=i (delete all), dp[0][j]=j (insert all). Recurrence: if word1[i-1]==word2[j-1] then dp[i][j]=dp[i-1][j-1] else dp[i][j]=1+min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) corresponding to delete, insert, replace. Iterate i=1..m, j=1..n. Space optimization keeps prev and curr rows; swapping to make n=min(m,n) gives O(min(m,n)) memory. Time remains O(m*n).",
+      "cppCode": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        int m = word1.size(), n = word2.size();\n        if (n > m) { swap(word1, word2); swap(m, n); }\n        vector<int> prev(n + 1), curr(n + 1);\n        for (int j = 0; j <= n; ++j) prev[j] = j;\n        for (int i = 1; i <= m; ++i) {\n            curr[0] = i;\n            for (int j = 1; j <= n; ++j) {\n                if (word1[i - 1] == word2[j - 1]) curr[j] = prev[j - 1];\n                else curr[j] = 1 + min({prev[j], curr[j - 1], prev[j - 1]});\n            }\n            prev.swap(curr);\n        }\n        return prev[n];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        int m = word1.size(), n = word2.size();\n        if (n > m) { swap(word1, word2); swap(m, n); }\n        vector<int> prev(n + 1), curr(n + 1);\n        for (int j = 0; j <= n; ++j) prev[j] = j;\n        for (int i = 1; i <= m; ++i) {\n            curr[0] = i;\n            for (int j = 1; j <= n; ++j) {\n                if (word1[i - 1] == word2[j - 1]) curr[j] = prev[j - 1];\n                else curr[j] = 1 + min({prev[j], curr[j - 1], prev[j - 1]});\n            }\n            prev.swap(curr);\n        }\n        return prev[n];\n    }\n};",
+        "python": "class Solution:\n    def minDistance(self, word1: str, word2: str) -> int:\n        m, n = len(word1), len(word2)\n        if n > m:\n            word1, word2 = word2, word1\n            m, n = n, m\n        prev = list(range(n + 1))\n        for i in range(1, m + 1):\n            curr = [i] + [0] * n\n            for j in range(1, n + 1):\n                if word1[i - 1] == word2[j - 1]:\n                    curr[j] = prev[j - 1]\n                else:\n                    curr[j] = 1 + min(prev[j], curr[j - 1], prev[j - 1])\n            prev = curr\n        return prev[n]",
+        "java": "class Solution {\n    public int minDistance(String word1, String word2) {\n        if (word2.length() > word1.length()) {\n            String tmp = word1; word1 = word2; word2 = tmp;\n        }\n        int m = word1.length(), n = word2.length();\n        int[] prev = new int[n + 1];\n        int[] curr = new int[n + 1];\n        for (int j = 0; j <= n; j++) prev[j] = j;\n        for (int i = 1; i <= m; i++) {\n            curr[0] = i;\n            for (int j = 1; j <= n; j++) {\n                if (word1.charAt(i - 1) == word2.charAt(j - 1)) curr[j] = prev[j - 1];\n                else curr[j] = 1 + Math.min(prev[j], Math.min(curr[j - 1], prev[j - 1]));\n            }\n            int[] t = prev; prev = curr; curr = t;\n        }\n        return prev[n];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m*n)",
+        "explanation": "Double loop over m rows and n columns, each cell O(1). Optimal for this problem as all prefix pairs may be needed."
+      },
+      "spaceComplexity": {
+        "complexity": "O(min(m,n))",
+        "explanation": "Only two 1D arrays of length min(m,n)+1 are kept (previous row and current row). Swapping ensures width is the shorter string."
+      },
+      "dryRunExample": {
+        "input": "word1 = horse, word2 = ros",
+        "steps": [
+          "Ensure n=3 (ros) is width: prev=[0,1,2,3]",
+          "i=1 h: curr=[1,1,2,3]",
+          "i=2 o: curr=[2,2,1,2]",
+          "i=3 r: curr=[3,2,2,2], i=4 s: curr=[4,3,3,2], i=5 e: curr=[5,4,4,3]",
+          "Answer prev[3]=3"
+        ],
+        "output": "3"
+      },
+      "edgeCases": [
+        "Empty word: loop skipped, returns prev[n] which is other length",
+        "word1 shorter than word2: swap ensures minimal memory without changing answer (distance symmetric)",
+        "Identical strings: diagonal propagation yields 0, no overflow as max value m+n <= 1000 fits int"
       ]
     }
   ]

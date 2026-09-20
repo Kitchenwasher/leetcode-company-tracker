@@ -3,7 +3,7 @@ import { Question, UserProgressItem, ProblemStatus, Difficulty } from '../types'
 import { QuestionSolution, SolutionApproach, QuestionDescription } from '../types/solution';
 import { questionsApi } from '../api/questionsApi';
 import { WhiteboardCanvas } from './WhiteboardCanvas';
-import { CppPlayground } from './CppPlayground';
+import { CodeEditorRunner } from './CodeEditorRunner';
 import { useAuth } from '../context/AuthContext';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Star, CheckCircle2,
@@ -45,7 +45,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
 
   // Left & Right Tabs
   const [leftTab, setLeftTab] = useState<'description' | 'theory' | 'notes' | 'srs' | 'companies'>('description');
-  const [rightTab, setRightTab] = useState<'runner' | 'whiteboard' | 'scratchpad'>('runner');
+  const [rightTab, setRightTab] = useState<'code' | 'whiteboard'>('code');
 
   // Authentic LeetCode Problem Description
   const [descriptionData, setDescriptionData] = useState<QuestionDescription | null>(null);
@@ -1087,52 +1087,44 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
         </div>
 
         {/* ========================================================= */}
-        {/* RIGHT PANE (50%): In-Browser IDE Runner & Whiteboard     */}
+        {/* RIGHT PANE (50%): Code Editor & Runner + Whiteboard Canvas */}
         {/* ========================================================= */}
         <div className="w-full md:w-1/2 flex flex-col bg-background overflow-hidden">
           {/* Right Pane Navigation Header */}
           <div className="h-10 border-b border-border bg-surface/90 px-3 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-1">
               <button
-                onClick={() => setRightTab('runner')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  rightTab === 'runner' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
+                onClick={() => setRightTab('code')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  rightTab === 'code' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
                 }`}
               >
-                <Zap className="w-3.5 h-3.5 text-primary" />
-                <span>C++ Code Scratchpad</span>
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Code Editor & Runner</span>
               </button>
 
               <button
                 onClick={() => setRightTab('whiteboard')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   rightTab === 'whiteboard' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
                 }`}
               >
                 <Palette className="w-3.5 h-3.5 text-primary" />
                 <span>Whiteboard Canvas</span>
               </button>
-
-              <button
-                onClick={() => setRightTab('scratchpad')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  rightTab === 'scratchpad' ? 'bg-primary text-black font-bold shadow-terminal-glow' : 'text-textMuted hover:text-white'
-                }`}
-              >
-                <Code2 className="w-3.5 h-3.5" />
-                <span>Code Scratchpad</span>
-              </button>
             </div>
           </div>
 
           {/* Right Pane Active Content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {rightTab === 'runner' && (
-              <CppPlayground
-                initialCode={currentApproach?.cppCode || codeText || undefined}
-                questionTitle={q.title}
-                onSendToNotes={(code) => {
-                  setNotes((prev) => prev + '\n\n```cpp\n' + code + '\n```');
+          <div className="flex-1 overflow-hidden p-2 sm:p-3">
+            {rightTab === 'code' && (
+              <CodeEditorRunner
+                question={q}
+                currentApproach={currentApproach}
+                descriptionData={descriptionData}
+                onSolved={() => handleSetStatus('solved')}
+                onSendToNotes={(codeSnippet) => {
+                  setNotes((prev) => prev + '\n\n```\n' + codeSnippet + '\n```');
                   setLeftTab('notes');
                   sounds.playSuccess();
                 }}
@@ -1142,44 +1134,6 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
             {rightTab === 'whiteboard' && (
               <div className="h-full">
                 <WhiteboardCanvas questionId={q.id} height={560} />
-              </div>
-            )}
-
-            {rightTab === 'scratchpad' && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    {['cpp', 'python', 'java', 'javascript'].map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() => setCodeLang(lang)}
-                        className={`px-2.5 py-1 text-xs font-mono font-medium rounded-lg uppercase ${
-                          codeLang === lang
-                            ? 'bg-primary text-black font-bold'
-                            : 'bg-surfaceElevated text-textMuted hover:text-textPrimary'
-                        }`}
-                      >
-                        {lang}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={handleCopyScratchpadCode}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surfaceElevated hover:bg-border text-xs font-mono text-textSecondary transition-colors"
-                  >
-                    {copiedScratchpadCode ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedScratchpadCode ? 'Copied' : 'Copy'}</span>
-                  </button>
-                </div>
-
-                <textarea
-                  value={codeText}
-                  onChange={(e) => setCodeText(e.target.value)}
-                  placeholder={`// Scratchpad in ${codeLang.toUpperCase()}\nclass Solution {\n    // Type code here...\n}`}
-                  rows={20}
-                  className="w-full p-4 rounded-xl bg-surface border border-border text-primary placeholder-textMuted text-xs font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500/50 resize-y leading-relaxed"
-                />
               </div>
             )}
           </div>

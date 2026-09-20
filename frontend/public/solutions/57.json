@@ -1,0 +1,85 @@
+{
+  "questionId": 57,
+  "title": "Insert Interval",
+  "difficulty": "Medium",
+  "corePattern": "Interval Merging with Three-Phase Partition",
+  "interviewTips": [
+    "Clarify input guarantees: intervals sorted by start and non-overlapping, but newInterval can be anywhere - ask about empty intervals and invalid intervals where start > end.",
+    "Trade-off to discuss: sorting plus merging is simpler to code but O(n log n); exploiting sorted order gives O(n) single pass with same output space.",
+    "Edge-case tip: use strict < for non-overlap before and <= for overlap during merge; touching intervals like [1,2] and [2,3] must merge."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Insert, Sort and Merge",
+      "tag": "Brute Force",
+      "intuition": "If we ignore that intervals are sorted, the problem reduces to classic Merge Intervals. Just append newInterval to the list, sort by start, then sweep merging overlaps. Correct but wastes the sorted property.",
+      "theory": "After appending, sort all n+1 intervals by start time. Maintain merged list. For each cur in sorted order: if merged empty or last end < cur start, there is no overlap so append; else overlap exists so extend last end to max(last end, cur end). Sorting guarantees all overlapping intervals become contiguous, so one linear merge suffices.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {\n        intervals.push_back(newInterval);\n        sort(intervals.begin(), intervals.end());\n        vector<vector<int>> merged;\n        for (auto& cur : intervals) {\n            if (merged.empty() || merged.back()[1] < cur[0]) merged.push_back(cur);\n            else merged.back()[1] = max(merged.back()[1], cur[1]);\n        }\n        return merged;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {\n        intervals.push_back(newInterval);\n        sort(intervals.begin(), intervals.end());\n        vector<vector<int>> merged;\n        for (auto& cur : intervals) {\n            if (merged.empty() || merged.back()[1] < cur[0]) merged.push_back(cur);\n            else merged.back()[1] = max(merged.back()[1], cur[1]);\n        }\n        return merged;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:\n        intervals.append(newInterval)\n        intervals.sort(key=lambda x: x[0])\n        merged = []\n        for cur in intervals:\n            if not merged or merged[-1][1] < cur[0]:\n                merged.append(cur)\n            else:\n                merged[-1][1] = max(merged[-1][1], cur[1])\n        return merged",
+        "java": "class Solution {\n    public int[][] insert(int[][] intervals, int[] newInterval) {\n        int n = intervals.length;\n        int[][] all = new int[n + 1][];\n        for (int i = 0; i < n; i++) all[i] = intervals[i];\n        all[n] = newInterval;\n        Arrays.sort(all, (a, b) -> Integer.compare(a[0], b[0]));\n        List<int[]> merged = new ArrayList<>();\n        for (int[] cur : all) {\n            if (merged.isEmpty() || merged.get(merged.size() - 1)[1] < cur[0]) merged.add(cur);\n            else merged.get(merged.size() - 1)[1] = Math.max(merged.get(merged.size() - 1)[1], cur[1]);\n        }\n        return merged.toArray(new int[merged.size()][]);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "Sorting n+1 intervals dominates; linear merge pass is O(n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Output merged list O(n); sorting uses O(log n) to O(n) auxiliary depending on implementation. Mutates input if push directly."
+      },
+      "dryRunExample": {
+        "input": "intervals = [[1,3],[6,9]], newInterval = [2,5]",
+        "steps": [
+          "append -> [[1,3],[6,9],[2,5]]",
+          "sort by start -> [[1,3],[2,5],[6,9]]",
+          "merge [1,3] + [2,5] -> [1,5], [6,9] no overlap -> [[1,5],[6,9]]"
+        ],
+        "output": "[[1,5],[6,9]]"
+      },
+      "edgeCases": [
+        "empty intervals: [] + [5,7] -> [[5,7]]",
+        "newInterval at end: [[1,2],[3,5]] + [6,8] appends",
+        "newInterval covers all: [[2,3],[4,5]] + [1,6] -> [[1,6]]",
+        "touching edges: [[1,2],[3,5]] + [2,3] -> [[1,5]]"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Single Pass Three-Phase Merge",
+      "tag": "Optimal",
+      "intuition": "Because intervals are already sorted and non-overlapping, newInterval splits them into left non-overlapping, overlapping middle, and right non-overlapping. We can emit left, merge middle into newInterval, then emit right in one pass without sorting.",
+      "theory": "Scan with index i. Phase 1: while intervals[i].end < newInterval.start, copy directly - strictly before, no merge. Phase 2: while intervals[i].start <= newInterval.end, overlap exists so expand newInterval to min start and max end. Condition uses <= to merge touching intervals. Phase 3: append expanded newInterval once, then copy remainder. Each interval visited once, order preserved.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {\n        vector<vector<int>> res;\n        int i = 0;\n        int n = intervals.size();\n        while (i < n && intervals[i][1] < newInterval[0]) {\n            res.push_back(intervals[i++]);\n        }\n        while (i < n && intervals[i][0] <= newInterval[1]) {\n            newInterval[0] = min(newInterval[0], intervals[i][0]);\n            newInterval[1] = max(newInterval[1], intervals[i][1]);\n            i++;\n        }\n        res.push_back(newInterval);\n        while (i < n) {\n            res.push_back(intervals[i++]);\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {\n        vector<vector<int>> res;\n        int i = 0;\n        int n = intervals.size();\n        while (i < n && intervals[i][1] < newInterval[0]) {\n            res.push_back(intervals[i++]);\n        }\n        while (i < n && intervals[i][0] <= newInterval[1]) {\n            newInterval[0] = min(newInterval[0], intervals[i][0]);\n            newInterval[1] = max(newInterval[1], intervals[i][1]);\n            i++;\n        }\n        res.push_back(newInterval);\n        while (i < n) {\n            res.push_back(intervals[i++]);\n        }\n        return res;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:\n        res = []\n        i = 0\n        n = len(intervals)\n        while i < n and intervals[i][1] < newInterval[0]:\n            res.append(intervals[i])\n            i += 1\n        while i < n and intervals[i][0] <= newInterval[1]:\n            newInterval[0] = min(newInterval[0], intervals[i][0])\n            newInterval[1] = max(newInterval[1], intervals[i][1])\n            i += 1\n        res.append(newInterval)\n        while i < n:\n            res.append(intervals[i])\n            i += 1\n        return res",
+        "java": "class Solution {\n    public int[][] insert(int[][] intervals, int[] newInterval) {\n        List<int[]> res = new ArrayList<>();\n        int i = 0;\n        int n = intervals.length;\n        while (i < n && intervals[i][1] < newInterval[0]) {\n            res.add(intervals[i++]);\n        }\n        while (i < n && intervals[i][0] <= newInterval[1]) {\n            newInterval[0] = Math.min(newInterval[0], intervals[i][0]);\n            newInterval[1] = Math.max(newInterval[1], intervals[i][1]);\n            i++;\n        }\n        res.add(newInterval);\n        while (i < n) {\n            res.add(intervals[i++]);\n        }\n        return res.toArray(new int[res.size()][]);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single linear scan, each interval examined once, no sorting."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "O(n) for output list; O(1) extra beyond output. Does not sort or use extra structures."
+      },
+      "dryRunExample": {
+        "input": "intervals = [[1,2],[3,10],[12,16]], newInterval = [4,8]",
+        "steps": [
+          "Phase1: [1,2] end 2 < 4 so copy, i=1",
+          "Phase2: [3,10] start 3 <= 8 so merge to [3,10], i=2, next [12,16] start 12 > 10 stop",
+          "Phase3: append [3,10] then copy [12,16] -> [[1,2],[3,10],[12,16]]"
+        ],
+        "output": "[[1,2],[3,10],[12,16]]"
+      },
+      "edgeCases": [
+        "insert at front: [[3,5]] + [1,2] -> [[1,2],[3,5]]",
+        "insert at back: [[1,2]] + [3,4] -> [[1,2],[3,4]]",
+        "merge multiple: [[1,2],[3,5],[6,7],[8,10]] + [4,9] -> [[1,2],[3,10]]",
+        "empty input: [] + [0,0] -> [[0,0]]"
+      ]
+    }
+  ]
+}

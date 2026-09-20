@@ -1,0 +1,119 @@
+{
+  "questionId": 73,
+  "title": "Set Matrix Zeroes",
+  "difficulty": "Medium",
+  "corePattern": "In-Place State Marking using First Row and Column",
+  "interviewTips": [
+    "Ask if matrix must be modified in-place and whether O(1) extra space is required - the follow-up explicitly asks for constant space.",
+    "Trade-off: O(m+n) row and column flag arrays is simplest and bug-free, while O(1) reuses first row and column as markers but needs careful handling.",
+    "Edge-case tip: matrix[0][0] is shared by row and column markers, so save whether first row and first column originally contain zero and apply them last."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Copy Matrix",
+      "tag": "Brute Force",
+      "intuition": "If we zero rows and columns while scanning, a newly written zero will falsely trigger more zeroing. Take a snapshot copy first, find zeros in the copy, and zero rows and columns in the original.",
+      "theory": "Let original be A and copy be C. For every C[i][j]==0, set entire row i and column j in A to 0. Since decisions are based only on C, there is no cascade effect. Correctness follows because a row or column is zeroed iff it contained a zero in the input.",
+      "cppCode": "class Solution {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        int m = matrix.size(), n = matrix[0].size();\n        vector<vector<int>> copy = matrix;\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (copy[i][j] == 0) {\n                    for (int k = 0; k < n; ++k) matrix[i][k] = 0;\n                    for (int k = 0; k < m; ++k) matrix[k][j] = 0;\n                }\n            }\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        int m = matrix.size(), n = matrix[0].size();\n        vector<vector<int>> copy = matrix;\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (copy[i][j] == 0) {\n                    for (int k = 0; k < n; ++k) matrix[i][k] = 0;\n                    for (int k = 0; k < m; ++k) matrix[k][j] = 0;\n                }\n            }\n        }\n    }\n};",
+        "python": "class Solution:\n    def setZeroes(self, matrix: List[List[int]]) -> None:\n        m, n = len(matrix), len(matrix[0])\n        copy = [row[:] for row in matrix]\n        for i in range(m):\n            for j in range(n):\n                if copy[i][j] == 0:\n                    for k in range(n):\n                        matrix[i][k] = 0\n                    for k in range(m):\n                        matrix[k][j] = 0",
+        "java": "class Solution {\n    public void setZeroes(int[][] matrix) {\n        int m = matrix.length, n = matrix[0].length;\n        int[][] copy = new int[m][n];\n        for (int i = 0; i < m; i++) copy[i] = matrix[i].clone();\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (copy[i][j] == 0) {\n                    for (int k = 0; k < n; k++) matrix[i][k] = 0;\n                    for (int k = 0; k < m; k++) matrix[k][j] = 0;\n                }\n            }\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n * (m + n))",
+        "explanation": "We scan all m*n cells, and for each zero we zero a full row of length n and column of length m. Worst case with many zeros is bounded by m*n*(m+n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "We store a full m by n copy of the matrix to freeze zero positions."
+      },
+      "dryRunExample": {
+        "input": "[[1,1,1],[1,0,1],[1,1,1]]",
+        "steps": [
+          "Copy matrix to snapshot C.",
+          "Find C[1][1]==0, so zero row 1 to [0,0,0] and column 1 in original.",
+          "No other zeros in C, final matrix has cross of zeros."
+        ],
+        "output": "[[1,0,1],[0,0,0],[1,0,1]]"
+      },
+      "edgeCases": [
+        "1x1 matrix with 0 stays 0, with 1 stays 1",
+        "Matrix with no zeros remains unchanged",
+        "Matrix with all zeros remains all zeros"
+      ]
+    },
+    {
+      "id": "extra-space",
+      "name": "Approach 2: Row and Column Flag Arrays",
+      "tag": "Better",
+      "intuition": "We only need to know which rows and which columns contain a zero, not the full copy. Record them in two boolean arrays in one pass, then zero in a second pass.",
+      "theory": "First pass computes rowZero[i] = whether row i has a zero and colZero[j] = whether column j has a zero. Second pass sets matrix[i][j]=0 iff rowZero[i] or colZero[j]. This is correct because zeroing condition is exactly row-or-column containment, and two passes separate detection from mutation to avoid cascade.",
+      "cppCode": "class Solution {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        int m = matrix.size(), n = matrix[0].size();\n        vector<char> zeroRow(m, 0), zeroCol(n, 0);\n        for (int i = 0; i < m; ++i)\n            for (int j = 0; j < n; ++j)\n                if (matrix[i][j] == 0) {\n                    zeroRow[i] = 1;\n                    zeroCol[j] = 1;\n                }\n        for (int i = 0; i < m; ++i)\n            for (int j = 0; j < n; ++j)\n                if (zeroRow[i] || zeroCol[j]) matrix[i][j] = 0;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        int m = matrix.size(), n = matrix[0].size();\n        vector<char> zeroRow(m, 0), zeroCol(n, 0);\n        for (int i = 0; i < m; ++i)\n            for (int j = 0; j < n; ++j)\n                if (matrix[i][j] == 0) {\n                    zeroRow[i] = 1;\n                    zeroCol[j] = 1;\n                }\n        for (int i = 0; i < m; ++i)\n            for (int j = 0; j < n; ++j)\n                if (zeroRow[i] || zeroCol[j]) matrix[i][j] = 0;\n    }\n};",
+        "python": "class Solution:\n    def setZeroes(self, matrix: List[List[int]]) -> None:\n        m, n = len(matrix), len(matrix[0])\n        zero_rows = [False] * m\n        zero_cols = [False] * n\n        for i in range(m):\n            for j in range(n):\n                if matrix[i][j] == 0:\n                    zero_rows[i] = True\n                    zero_cols[j] = True\n        for i in range(m):\n            for j in range(n):\n                if zero_rows[i] or zero_cols[j]:\n                    matrix[i][j] = 0",
+        "java": "class Solution {\n    public void setZeroes(int[][] matrix) {\n        int m = matrix.length, n = matrix[0].length;\n        boolean[] zeroRow = new boolean[m];\n        boolean[] zeroCol = new boolean[n];\n        for (int i = 0; i < m; i++)\n            for (int j = 0; j < n; j++)\n                if (matrix[i][j] == 0) {\n                    zeroRow[i] = true;\n                    zeroCol[j] = true;\n                }\n        for (int i = 0; i < m; i++)\n            for (int j = 0; j < n; j++)\n                if (zeroRow[i] || zeroCol[j]) matrix[i][j] = 0;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Two full scans of the matrix: one to mark rows and columns, one to zero. Each is m*n work."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m + n)",
+        "explanation": "Two boolean arrays of size m and n to remember which rows and columns need zeroing."
+      },
+      "dryRunExample": {
+        "input": "[[0,1,2,0],[3,4,5,2],[1,3,1,5]]",
+        "steps": [
+          "First pass: zero_rows=[True,False,False], zero_cols=[True,False,False,True].",
+          "Second pass: zero row 0 fully, zero col 0 and col 3 everywhere.",
+          "Result row1 col0 and col3 become 0, row2 col0 and col3 become 0."
+        ],
+        "output": "[[0,0,0,0],[0,4,5,0],[0,3,1,0]]"
+      },
+      "edgeCases": [
+        "Single row matrix: row flags still work, zero propagates horizontally and vertically same",
+        "Single column matrix: symmetric case",
+        "Zero in first row or first column correctly zeroes that entire row and column"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: In-Place First Row and Column Markers",
+      "tag": "Optimal",
+      "intuition": "The row and column flag arrays can be stored inside the matrix itself. Use first row to mark which columns need zeroing and first column to mark which rows need zeroing, plus two booleans for the first row and column themselves.",
+      "theory": "Save firstRowZero and firstColZero. For i>=1, j>=1, if matrix[i][j]==0 set matrix[i][0]=0 and matrix[0][j]=0 as markers. Then in reverse order zero inner cells where marker is 0. Finally zero first row if firstRowZero and first column if firstColZero. Using markers does not lose information because inner zeroing only reads markers, and first row and column are handled last.",
+      "cppCode": "class Solution {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        int m = matrix.size(), n = matrix[0].size();\n        bool firstRowZero = false, firstColZero = false;\n        for (int j = 0; j < n; ++j) if (matrix[0][j] == 0) firstRowZero = true;\n        for (int i = 0; i < m; ++i) if (matrix[i][0] == 0) firstColZero = true;\n        for (int i = 1; i < m; ++i)\n            for (int j = 1; j < n; ++j)\n                if (matrix[i][j] == 0) {\n                    matrix[i][0] = 0;\n                    matrix[0][j] = 0;\n                }\n        for (int i = 1; i < m; ++i)\n            for (int j = 1; j < n; ++j)\n                if (matrix[i][0] == 0 || matrix[0][j] == 0) matrix[i][j] = 0;\n        if (firstRowZero) for (int j = 0; j < n; ++j) matrix[0][j] = 0;\n        if (firstColZero) for (int i = 0; i < m; ++i) matrix[i][0] = 0;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        int m = matrix.size(), n = matrix[0].size();\n        bool firstRowZero = false, firstColZero = false;\n        for (int j = 0; j < n; ++j) if (matrix[0][j] == 0) firstRowZero = true;\n        for (int i = 0; i < m; ++i) if (matrix[i][0] == 0) firstColZero = true;\n        for (int i = 1; i < m; ++i)\n            for (int j = 1; j < n; ++j)\n                if (matrix[i][j] == 0) {\n                    matrix[i][0] = 0;\n                    matrix[0][j] = 0;\n                }\n        for (int i = 1; i < m; ++i)\n            for (int j = 1; j < n; ++j)\n                if (matrix[i][0] == 0 || matrix[0][j] == 0) matrix[i][j] = 0;\n        if (firstRowZero) for (int j = 0; j < n; ++j) matrix[0][j] = 0;\n        if (firstColZero) for (int i = 0; i < m; ++i) matrix[i][0] = 0;\n    }\n};",
+        "python": "class Solution:\n    def setZeroes(self, matrix: List[List[int]]) -> None:\n        m, n = len(matrix), len(matrix[0])\n        first_row_zero = any(matrix[0][j] == 0 for j in range(n))\n        first_col_zero = any(matrix[i][0] == 0 for i in range(m))\n        for i in range(1, m):\n            for j in range(1, n):\n                if matrix[i][j] == 0:\n                    matrix[i][0] = 0\n                    matrix[0][j] = 0\n        for i in range(1, m):\n            for j in range(1, n):\n                if matrix[i][0] == 0 or matrix[0][j] == 0:\n                    matrix[i][j] = 0\n        if first_row_zero:\n            for j in range(n):\n                matrix[0][j] = 0\n        if first_col_zero:\n            for i in range(m):\n                matrix[i][0] = 0",
+        "java": "class Solution {\n    public void setZeroes(int[][] matrix) {\n        int m = matrix.length, n = matrix[0].length;\n        boolean firstRowZero = false, firstColZero = false;\n        for (int j = 0; j < n; j++) if (matrix[0][j] == 0) firstRowZero = true;\n        for (int i = 0; i < m; i++) if (matrix[i][0] == 0) firstColZero = true;\n        for (int i = 1; i < m; i++)\n            for (int j = 1; j < n; j++)\n                if (matrix[i][j] == 0) {\n                    matrix[i][0] = 0;\n                    matrix[0][j] = 0;\n                }\n        for (int i = 1; i < m; i++)\n            for (int j = 1; j < n; j++)\n                if (matrix[i][0] == 0 || matrix[0][j] == 0) matrix[i][j] = 0;\n        if (firstRowZero) for (int j = 0; j < n; j++) matrix[0][j] = 0;\n        if (firstColZero) for (int i = 0; i < m; i++) matrix[i][0] = 0;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Three passes over matrix: mark, apply to inner submatrix, fix first row and column. Each is linear in matrix size."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two boolean variables are used; markers reuse the first row and column of the input matrix."
+      },
+      "dryRunExample": {
+        "input": "[[1,1,1],[1,0,1],[1,1,1]]",
+        "steps": [
+          "first_row_zero=False, first_col_zero=False.",
+          "Mark: matrix[1][1]==0 sets matrix[1][0]=0 and matrix[0][1]=0.",
+          "Apply: inner cell (1,1) sees marker 0 stays 0, cells (1,2) and (2,1) see marker 0 become 0, cell (2,2) unchanged.",
+          "First row and col flags false, so no final wipe. Result is cross of zeros."
+        ],
+        "output": "[[1,0,1],[0,0,0],[1,0,1]]"
+      },
+      "edgeCases": [
+        "matrix[0][0]==0 requires both first row and first column to be zeroed via flags",
+        "1xN or Nx1 matrix: inner loops are empty, answer depends only on the two flags",
+        "Multiple zeros sharing rows or columns reuse same markers without conflict"
+      ]
+    }
+  ]
+}

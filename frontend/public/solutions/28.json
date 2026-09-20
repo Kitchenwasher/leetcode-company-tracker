@@ -1,0 +1,121 @@
+{
+  "questionId": 28,
+  "title": "Find the Index of the First Occurrence in a String",
+  "difficulty": "Easy",
+  "corePattern": "String Matching - Sliding Window Comparison vs Prefix Automaton (KMP) vs Rolling Hash",
+  "interviewTips": [
+    "Clarify edge cases: what if needle is empty, needle longer than haystack, or both length 1? Confirm return 0 vs -1 conventions.",
+    "Trade-off to discuss: Brute Force O(n*m) with O(1) space is simplest and passes small constraints, KMP gives guaranteed O(n+m) with O(m) space, Rabin-Karp gives average O(n+m) but needs hash collision handling.",
+    "Edge-case tip: highly repetitive inputs like haystack=aaaaa...aab and needle=aaaab expose worst-case brute force; explain how LPS fallback avoids re-scanning."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Sliding Window",
+      "tag": "Brute Force",
+      "intuition": "Try every possible start position i in haystack and check if needle matches character by character. First match wins, otherwise continue. This is first-principles string matching.",
+      "theory": "For n=len(haystack), m=len(needle), there are n-m+1 alignments. For each alignment i, compare haystack[i+j] vs needle[j] for j in 0..m-1. Break on first mismatch. If all m match, return i. If no alignment matches, return -1. Correct because we exhaustively check all valid starting indices in order.",
+      "cppCode": "class Solution {\npublic:\n    int strStr(string haystack, string needle) {\n        int n = haystack.size(), m = needle.size();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        for (int i = 0; i <= n - m; ++i) {\n            int j = 0;\n            while (j < m && haystack[i + j] == needle[j]) ++j;\n            if (j == m) return i;\n        }\n        return -1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int strStr(string haystack, string needle) {\n        int n = haystack.size(), m = needle.size();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        for (int i = 0; i <= n - m; ++i) {\n            int j = 0;\n            while (j < m && haystack[i + j] == needle[j]) ++j;\n            if (j == m) return i;\n        }\n        return -1;\n    }\n};",
+        "python": "class Solution:\n    def strStr(self, haystack: str, needle: str) -> int:\n        n, m = len(haystack), len(needle)\n        if m == 0:\n            return 0\n        if m > n:\n            return -1\n        for i in range(n - m + 1):\n            j = 0\n            while j < m and haystack[i + j] == needle[j]:\n                j += 1\n            if j == m:\n                return i\n        return -1",
+        "java": "class Solution {\n    public int strStr(String haystack, String needle) {\n        int n = haystack.length(), m = needle.length();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        for (int i = 0; i <= n - m; i++) {\n            int j = 0;\n            while (j < m && haystack.charAt(i + j) == needle.charAt(j)) j++;\n            if (j == m) return i;\n        }\n        return -1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * m)",
+        "explanation": "Up to n-m+1 alignments, each compares up to m chars. Worst case e.g. haystack=aaaaa...a, needle=aaaab causes almost m compares per alignment."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only indices i and j are used, no extra arrays. Slicing version would be O(m) for substring copy."
+      },
+      "dryRunExample": {
+        "input": "haystack='sadbutsad', needle='sad'",
+        "steps": [
+          "i=0: compare s-a-d vs s-a-d -> all match, return 0",
+          "No further scanning needed"
+        ],
+        "output": "0"
+      },
+      "edgeCases": [
+        "needle longer than haystack -> -1",
+        "no occurrence e.g. haystack='leetcode', needle='leeto' -> -1",
+        "single char match and mismatch",
+        "repetitive prefix causing many partial matches"
+      ]
+    },
+    {
+      "id": "kmp",
+      "name": "Approach 2: Knuth-Morris-Pratt (KMP)",
+      "tag": "Optimal",
+      "intuition": "When a mismatch happens, we already know the matched prefix of needle. Use its longest proper prefix which is also suffix (LPS) to skip ahead without moving haystack pointer backwards.",
+      "theory": "Precompute LPS array where lps[i] = length of longest proper prefix of needle[0..i] that is also suffix. During scan, maintain j = length of current matched prefix of needle. On match haystack[i]==needle[j], advance both. On mismatch, fallback j=lps[j-1] instead of restarting from 0, preserving the overlapping prefix. This simulates a prefix automaton and each character is processed at most twice, giving linear time.",
+      "cppCode": "class Solution {\npublic:\n    int strStr(string haystack, string needle) {\n        int n = haystack.size(), m = needle.size();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        vector<int> lps(m, 0);\n        for (int i = 1; i < m; ++i) {\n            int j = lps[i - 1];\n            while (j > 0 && needle[i] != needle[j]) j = lps[j - 1];\n            if (needle[i] == needle[j]) ++j;\n            lps[i] = j;\n        }\n        int j = 0;\n        for (int i = 0; i < n; ++i) {\n            while (j > 0 && haystack[i] != needle[j]) j = lps[j - 1];\n            if (haystack[i] == needle[j]) ++j;\n            if (j == m) return i - m + 1;\n        }\n        return -1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int strStr(string haystack, string needle) {\n        int n = haystack.size(), m = needle.size();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        vector<int> lps(m, 0);\n        for (int i = 1; i < m; ++i) {\n            int j = lps[i - 1];\n            while (j > 0 && needle[i] != needle[j]) j = lps[j - 1];\n            if (needle[i] == needle[j]) ++j;\n            lps[i] = j;\n        }\n        int j = 0;\n        for (int i = 0; i < n; ++i) {\n            while (j > 0 && haystack[i] != needle[j]) j = lps[j - 1];\n            if (haystack[i] == needle[j]) ++j;\n            if (j == m) return i - m + 1;\n        }\n        return -1;\n    }\n};",
+        "python": "class Solution:\n    def strStr(self, haystack: str, needle: str) -> int:\n        n, m = len(haystack), len(needle)\n        if m == 0:\n            return 0\n        if m > n:\n            return -1\n        lps = [0] * m\n        for i in range(1, m):\n            j = lps[i - 1]\n            while j > 0 and needle[i] != needle[j]:\n                j = lps[j - 1]\n            if needle[i] == needle[j]:\n                j += 1\n            lps[i] = j\n        j = 0\n        for i in range(n):\n            while j > 0 and haystack[i] != needle[j]:\n                j = lps[j - 1]\n            if haystack[i] == needle[j]:\n                j += 1\n            if j == m:\n                return i - m + 1\n        return -1",
+        "java": "class Solution {\n    public int strStr(String haystack, String needle) {\n        int n = haystack.length(), m = needle.length();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        int[] lps = new int[m];\n        for (int i = 1; i < m; i++) {\n            int j = lps[i - 1];\n            while (j > 0 && needle.charAt(i) != needle.charAt(j)) j = lps[j - 1];\n            if (needle.charAt(i) == needle.charAt(j)) j++;\n            lps[i] = j;\n        }\n        int j = 0;\n        for (int i = 0; i < n; i++) {\n            while (j > 0 && haystack.charAt(i) != needle.charAt(j)) j = lps[j - 1];\n            if (haystack.charAt(i) == needle.charAt(j)) j++;\n            if (j == m) return i - m + 1;\n        }\n        return -1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n + m)",
+        "explanation": "O(m) to build LPS and O(n) to scan haystack. Each step either advances i or reduces j, so total fallback steps are amortized linear."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m)",
+        "explanation": "LPS array of size m stores prefix function for needle."
+      },
+      "dryRunExample": {
+        "input": "haystack='aabaabaaf', needle='aabaaf'",
+        "steps": [
+          "Build LPS for aabaaf -> [0,1,0,1,2,0]",
+          "Scan: match aabaa, mismatch at haystack[5]=a vs needle[5]=f, fallback j=lps[4]=2",
+          "Continue without rewinding i, eventually match at index 3",
+          "Return 3"
+        ],
+        "output": "3"
+      },
+      "edgeCases": [
+        "needle='aaaab' with haystack='aaaaa...aaaab' -> KMP stays linear while brute force is quadratic",
+        "needle with no self-overlap e.g. 'abcdef' -> lps all zero",
+        "needle length 1 -> lps=[0], reduces to linear scan"
+      ]
+    },
+    {
+      "id": "rabin-karp",
+      "name": "Approach 3: Rabin-Karp Rolling Hash",
+      "tag": "Rolling Hash",
+      "intuition": "Compare hash values of needle and each length-m window of haystack instead of comparing all characters. Slide window in O(1) by removing left char and adding right char.",
+      "theory": "Use polynomial hash H = c0*B^(m-1)+...+c(m-1) mod MOD. Precompute power=B^(m-1) mod MOD, needleHash and first windowHash in O(m). Roll: windowHash = ((windowHash - haystack[i]*power)*B + haystack[i+m]) mod MOD. If hashes equal, verify with direct O(m) compare to rule out collision. Average linear because hash mismatch filters most windows; worst case still O(n*m) if many collisions or adversarial input.",
+      "cppCode": "class Solution {\npublic:\n    int strStr(string haystack, string needle) {\n        int n = haystack.size(), m = needle.size();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        const long long BASE = 256, MOD = 1000000007;\n        long long power = 1;\n        for (int i = 0; i < m - 1; ++i) power = (power * BASE) % MOD;\n        long long needleHash = 0, windowHash = 0;\n        for (int i = 0; i < m; ++i) {\n            needleHash = (needleHash * BASE + (unsigned char)needle[i]) % MOD;\n            windowHash = (windowHash * BASE + (unsigned char)haystack[i]) % MOD;\n        }\n        for (int i = 0; i <= n - m; ++i) {\n            if (windowHash == needleHash && haystack.compare(i, m, needle) == 0) return i;\n            if (i + m < n) {\n                windowHash = (windowHash - (unsigned char)haystack[i] * power % MOD + MOD) % MOD;\n                windowHash = (windowHash * BASE + (unsigned char)haystack[i + m]) % MOD;\n            }\n        }\n        return -1;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int strStr(string haystack, string needle) {\n        int n = haystack.size(), m = needle.size();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        const long long BASE = 256, MOD = 1000000007;\n        long long power = 1;\n        for (int i = 0; i < m - 1; ++i) power = (power * BASE) % MOD;\n        long long needleHash = 0, windowHash = 0;\n        for (int i = 0; i < m; ++i) {\n            needleHash = (needleHash * BASE + (unsigned char)needle[i]) % MOD;\n            windowHash = (windowHash * BASE + (unsigned char)haystack[i]) % MOD;\n        }\n        for (int i = 0; i <= n - m; ++i) {\n            if (windowHash == needleHash && haystack.compare(i, m, needle) == 0) return i;\n            if (i + m < n) {\n                windowHash = (windowHash - (unsigned char)haystack[i] * power % MOD + MOD) % MOD;\n                windowHash = (windowHash * BASE + (unsigned char)haystack[i + m]) % MOD;\n            }\n        }\n        return -1;\n    }\n};",
+        "python": "class Solution:\n    def strStr(self, haystack: str, needle: str) -> int:\n        n, m = len(haystack), len(needle)\n        if m == 0:\n            return 0\n        if m > n:\n            return -1\n        BASE, MOD = 256, 1000000007\n        power = 1\n        for _ in range(m - 1):\n            power = (power * BASE) % MOD\n        needle_hash = 0\n        window_hash = 0\n        for i in range(m):\n            needle_hash = (needle_hash * BASE + ord(needle[i])) % MOD\n            window_hash = (window_hash * BASE + ord(haystack[i])) % MOD\n        for i in range(n - m + 1):\n            if window_hash == needle_hash:\n                if haystack[i:i + m] == needle:\n                    return i\n            if i + m < n:\n                window_hash = (window_hash - ord(haystack[i]) * power) % MOD\n                window_hash = (window_hash * BASE + ord(haystack[i + m])) % MOD\n        return -1",
+        "java": "class Solution {\n    public int strStr(String haystack, String needle) {\n        int n = haystack.length(), m = needle.length();\n        if (m == 0) return 0;\n        if (m > n) return -1;\n        long BASE = 256, MOD = 1000000007;\n        long power = 1;\n        for (int i = 0; i < m - 1; i++) power = (power * BASE) % MOD;\n        long needleHash = 0, windowHash = 0;\n        for (int i = 0; i < m; i++) {\n            needleHash = (needleHash * BASE + needle.charAt(i)) % MOD;\n            windowHash = (windowHash * BASE + haystack.charAt(i)) % MOD;\n        }\n        for (int i = 0; i <= n - m; i++) {\n            if (windowHash == needleHash) {\n                if (haystack.substring(i, i + m).equals(needle)) return i;\n            }\n            if (i + m < n) {\n                windowHash = (windowHash - haystack.charAt(i) * power % MOD + MOD) % MOD;\n                windowHash = (windowHash * BASE + haystack.charAt(i + m)) % MOD;\n            }\n        }\n        return -1;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n + m) average, O(n * m) worst",
+        "explanation": "O(m) to hash needle and first window, O(n) rolling steps O(1) each. Direct verification only on hash hit, so average linear; worst case with many hits degrades to brute force."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only a few hash variables and power value, no array proportional to input."
+      },
+      "dryRunExample": {
+        "input": "haystack='hello', needle='ll'",
+        "steps": [
+          "m=2, power=256, needleHash=hash(ll)",
+          "window 0 he: hash mismatch, roll to el",
+          "window 1 el: mismatch, roll to ll",
+          "window 2 ll: hash match + verify true, return 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "hash collision requires explicit substring verify",
+        "large m needs mod to avoid overflow, use long long",
+        "needle longer than haystack -> early -1",
+        "single char needle -> power=1 loop skipped"
+      ]
+    }
+  ]
+}

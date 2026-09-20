@@ -1,0 +1,88 @@
+{
+  "questionId": 410,
+  "title": "Split Array Largest Sum",
+  "difficulty": "Hard",
+  "corePattern": "Binary Search on Answer (Parametric Search) + Greedy Feasibility Check",
+  "interviewTips": [
+    "Clarify constraints: can subarrays be empty? No, k non-empty contiguous partitions; ask if nums can contain negatives/zeros (here nums[i] >= 0, critical for greedy).",
+    "Trade-off: DP O(n^2*k) is intuitive and works for n=1000 but binary search O(n log sum) is optimal; explain why greedy check is valid only for non-negative numbers.",
+    "Edge-case tip: answer fits in 32-bit but intermediate sum needs 64-bit (n*1e6 up to 1e9); test k==1, k==n, all zeros, and max(nums) vs sum(nums) bounds."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Dynamic Programming with Prefix Sum",
+      "tag": "Brute Force",
+      "intuition": "Try every possible last cut. If first p elements are split into j-1 parts optimally, and elements p..i-1 form the last part, the cost is max of those two. Take minimum over all p.",
+      "theory": "Let prefix[i] be sum of first i elements. Define dp[i][j] = minimal largest sum to split first i elements into j parts. Recurrence: dp[0][0]=0, dp[i][j]=min_{p in [j-1,i-1]} max(dp[p][j-1], prefix[i]-prefix[p]). This enumerates all partitions, so optimal substructure holds. Answer is dp[n][k].",
+      "cppCode": "class Solution {\npublic:\n    int splitArray(vector<int>& nums, int k) {\n        int n = nums.size();\n        vector<long long> prefix(n + 1, 0);\n        for (int i = 0; i < n; ++i) prefix[i + 1] = prefix[i] + nums[i];\n        const long long INF = (long long)4e18;\n        vector<vector<long long>> dp(n + 1, vector<long long>(k + 1, INF));\n        dp[0][0] = 0;\n        for (int i = 1; i <= n; ++i) {\n            for (int j = 1; j <= min(i, k); ++j) {\n                for (int p = j - 1; p < i; ++p) {\n                    if (dp[p][j - 1] == INF) continue;\n                    long long cur = max(dp[p][j - 1], prefix[i] - prefix[p]);\n                    dp[i][j] = min(dp[i][j], cur);\n                }\n            }\n        }\n        return (int)dp[n][k];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int splitArray(vector<int>& nums, int k) {\n        int n = nums.size();\n        vector<long long> prefix(n + 1, 0);\n        for (int i = 0; i < n; ++i) prefix[i + 1] = prefix[i] + nums[i];\n        const long long INF = (long long)4e18;\n        vector<vector<long long>> dp(n + 1, vector<long long>(k + 1, INF));\n        dp[0][0] = 0;\n        for (int i = 1; i <= n; ++i) {\n            for (int j = 1; j <= min(i, k); ++j) {\n                for (int p = j - 1; p < i; ++p) {\n                    if (dp[p][j - 1] == INF) continue;\n                    long long cur = max(dp[p][j - 1], prefix[i] - prefix[p]);\n                    dp[i][j] = min(dp[i][j], cur);\n                }\n            }\n        }\n        return (int)dp[n][k];\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def splitArray(self, nums: List[int], k: int) -> int:\n        n = len(nums)\n        prefix = [0] * (n + 1)\n        for i in range(n):\n            prefix[i + 1] = prefix[i] + nums[i]\n        INF = float('inf')\n        dp = [[INF] * (k + 1) for _ in range(n + 1)]\n        dp[0][0] = 0\n        for i in range(1, n + 1):\n            for j in range(1, min(i, k) + 1):\n                for p in range(j - 1, i):\n                    cur = max(dp[p][j - 1], prefix[i] - prefix[p])\n                    if cur < dp[i][j]:\n                        dp[i][j] = cur\n        return int(dp[n][k])",
+        "java": "class Solution {\n    public int splitArray(int[] nums, int k) {\n        int n = nums.length;\n        long[] prefix = new long[n + 1];\n        for (int i = 0; i < n; i++) prefix[i + 1] = prefix[i] + nums[i];\n        long INF = Long.MAX_VALUE / 2;\n        long[][] dp = new long[n + 1][k + 1];\n        for (int i = 0; i <= n; i++) for (int j = 0; j <= k; j++) dp[i][j] = INF;\n        dp[0][0] = 0;\n        for (int i = 1; i <= n; i++) {\n            for (int j = 1; j <= Math.min(i, k); j++) {\n                for (int p = j - 1; p < i; p++) {\n                    if (dp[p][j - 1] == INF) continue;\n                    long cur = Math.max(dp[p][j - 1], prefix[i] - prefix[p]);\n                    dp[i][j] = Math.min(dp[i][j], cur);\n                }\n            }\n        }\n        return (int) dp[n][k];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2 * k)",
+        "explanation": "n states for prefix length times k partitions times O(n) scan over previous cut p. For n=1000, k=50 this is up to 50M operations."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n * k)",
+        "explanation": "dp table (n+1)*(k+1) plus O(n) prefix sum. Can be optimized to O(n) with rolling j dimension but need full p loop."
+      },
+      "dryRunExample": {
+        "input": "nums=[7,2,5,10,8], k=2",
+        "steps": [
+          "prefix=[0,7,9,14,24,32]",
+          "dp[i][1]=prefix[i]: dp[5][1]=32",
+          "dp[5][2]=min_p max(dp[p][1], 32-prefix[p]): p=3 gives max(14,18)=18 minimal",
+          "answer dp[5][2]=18 corresponding to cut after index 2: [7,2,5]|[10,8]"
+        ],
+        "output": "18"
+      },
+      "edgeCases": [
+        "k==1: answer is sum(nums), dp reduces to single row",
+        "k==n: answer is max(nums), each element its own subarray",
+        "zeros in nums: prefix duplicates, max logic still correct",
+        "large sum up to 1e9: use long long, cast to int only at return"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Binary Search on Answer + Greedy Check",
+      "tag": "Optimal",
+      "intuition": "Guess the answer M = largest allowed subarray sum. Greedily pack as many elements as possible per subarray without exceeding M; this uses minimal number of subarrays. If we need <=k subarrays, M is feasible.",
+      "theory": "Feasibility predicate F(M) = can split into <=k parts with each sum <=M is monotone: if M feasible, any M'>M feasible. Since nums[i]>=0, greedy left-to-right packing is optimal to minimize count (cut only when forced). Search space is [max(nums), sum(nums)]. Binary search smallest feasible M gives minimal largest sum. This is parametric search.",
+      "cppCode": "class Solution {\npublic:\n    int splitArray(vector<int>& nums, int k) {\n        auto canSplit = [&](long long maxSum) -> bool {\n            int cnt = 1;\n            long long cur = 0;\n            for (int x : nums) {\n                if (cur + x > maxSum) {\n                    cnt++;\n                    cur = x;\n                    if (cnt > k) return false;\n                } else {\n                    cur += x;\n                }\n            }\n            return true;\n        };\n        long long lo = 0, hi = 0;\n        for (int x : nums) {\n            lo = max(lo, (long long)x);\n            hi += x;\n        }\n        while (lo < hi) {\n            long long mid = lo + (hi - lo) / 2;\n            if (canSplit(mid)) hi = mid;\n            else lo = mid + 1;\n        }\n        return (int)lo;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int splitArray(vector<int>& nums, int k) {\n        auto canSplit = [&](long long maxSum) -> bool {\n            int cnt = 1;\n            long long cur = 0;\n            for (int x : nums) {\n                if (cur + x > maxSum) {\n                    cnt++;\n                    cur = x;\n                    if (cnt > k) return false;\n                } else {\n                    cur += x;\n                }\n            }\n            return true;\n        };\n        long long lo = 0, hi = 0;\n        for (int x : nums) {\n            lo = max(lo, (long long)x);\n            hi += x;\n        }\n        while (lo < hi) {\n            long long mid = lo + (hi - lo) / 2;\n            if (canSplit(mid)) hi = mid;\n            else lo = mid + 1;\n        }\n        return (int)lo;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def splitArray(self, nums: List[int], k: int) -> int:\n        def can_split(max_sum: int) -> bool:\n            cnt = 1\n            cur = 0\n            for x in nums:\n                if cur + x > max_sum:\n                    cnt += 1\n                    cur = x\n                    if cnt > k:\n                        return False\n                else:\n                    cur += x\n            return True\n        lo = max(nums)\n        hi = sum(nums)\n        while lo < hi:\n            mid = (lo + hi) // 2\n            if can_split(mid):\n                hi = mid\n            else:\n                lo = mid + 1\n        return lo",
+        "java": "class Solution {\n    public int splitArray(int[] nums, int k) {\n        long lo = 0, hi = 0;\n        for (int x : nums) {\n            lo = Math.max(lo, x);\n            hi += x;\n        }\n        while (lo < hi) {\n            long mid = lo + (hi - lo) / 2;\n            if (canSplit(nums, k, mid)) hi = mid;\n            else lo = mid + 1;\n        }\n        return (int) lo;\n    }\n    private boolean canSplit(int[] nums, int k, long maxSum) {\n        int cnt = 1;\n        long cur = 0;\n        for (int x : nums) {\n            if (cur + x > maxSum) {\n                cnt++;\n                cur = x;\n                if (cnt > k) return false;\n            } else {\n                cur += x;\n            }\n        }\n        return true;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log S)",
+        "explanation": "S = sum(nums). Each feasibility check is O(n) greedy scan, binary search needs O(log S) iterations (S up to 1e9, ~30 steps)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only counters and bounds besides input array."
+      },
+      "dryRunExample": {
+        "input": "nums=[7,2,5,10,8], k=2",
+        "steps": [
+          "lo=max=10, hi=sum=32",
+          "mid=21: greedy packs [7,2,5]=14, [10,8]=18 => 2 parts <=k feasible => hi=21",
+          "mid=15: packs [7,2,5]=14, [10]=10, [8]=8 => 3 parts >k not feasible => lo=16",
+          "continue narrowing [16,21] -> ... -> converges to 18",
+          "check 18 feasible, 17 needs 3 parts, so answer 18"
+        ],
+        "output": "18"
+      },
+      "edgeCases": [
+        "k==1: lo=max, hi=sum, check forces single part, returns sum",
+        "k==n: answer max(nums), greedy with M=max uses exactly n parts",
+        "single large element: lo ensures no M smaller than max element considered",
+        "all zeros: lo=0 hi=0 loop skipped, returns 0"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "questionId": 122,
+  "title": "Best Time to Buy and Sell Stock II",
+  "difficulty": "Medium",
+  "corePattern": "Unlimited Transactions State Machine DP and Greedy Accumulation of Positive Slopes",
+  "interviewTips": [
+    "Ask if multiple transactions can overlap and if same-day buy-sell is allowed - for Stock II holding at most one share, unlimited completed transactions are allowed.",
+    "Contrast with Stock I (single transaction): explain why greedy works here but not there due to unlimited transactions decomposing into independent positive segments.",
+    "Mention valley-peak vs sum of positive differences are equivalent - be ready to prove splitting [a,b,c] with a<b<c into (b-a)+(c-b)=c-a.",
+    "Edge-case tip: handle n<2, strictly decreasing prices (answer 0, never negative), and large n up to 3*10^4 with O(1) space.",
+    "Trade-off: DP state machine generalizes to k transactions and cooldown/fee variants, while greedy O(n) is shortest but not extensible."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Recursion (Try All Buy/Sell Choices)",
+      "tag": "Brute Force",
+      "intuition": "At each day you have a state: holding a stock or not. If not holding you can buy or skip, if holding you can sell or skip. Explore both choices recursively and take the best profit.",
+      "theory": "Model as decision tree with state (i, holding). Recurrence: if holding, best = max(prices[i]+F(i+1,False), F(i+1,True)); else best = max(-prices[i]+F(i+1,True), F(i+1,False)). Base case i==n returns 0 if not holding else -inf (invalid to end holding). This enumerates all 2^n action sequences.",
+      "cppCode": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        return dfs(prices, 0, false);\n    }\nprivate:\n    int dfs(vector<int>& p, int i, bool holding) {\n        if (i == (int)p.size()) return holding ? -1000000000 : 0;\n        if (holding) {\n            int sell = p[i] + dfs(p, i + 1, false);\n            int skip = dfs(p, i + 1, true);\n            return max(sell, skip);\n        } else {\n            int buy = -p[i] + dfs(p, i + 1, true);\n            int skip = dfs(p, i + 1, false);\n            return max(buy, skip);\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        return dfs(prices, 0, false);\n    }\nprivate:\n    int dfs(vector<int>& p, int i, bool holding) {\n        if (i == (int)p.size()) return holding ? -1000000000 : 0;\n        if (holding) {\n            int sell = p[i] + dfs(p, i + 1, false);\n            int skip = dfs(p, i + 1, true);\n            return max(sell, skip);\n        } else {\n            int buy = -p[i] + dfs(p, i + 1, true);\n            int skip = dfs(p, i + 1, false);\n            return max(buy, skip);\n        }\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        n = len(prices)\n        def dfs(i: int, holding: bool) -> int:\n            if i == n:\n                return -10**9 if holding else 0\n            if holding:\n                sell = prices[i] + dfs(i + 1, False)\n                skip = dfs(i + 1, True)\n                return sell if sell > skip else skip\n            else:\n                buy = -prices[i] + dfs(i + 1, True)\n                skip = dfs(i + 1, False)\n                return buy if buy > skip else skip\n        return dfs(0, False)",
+        "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        return dfs(prices, 0, false);\n    }\n    private int dfs(int[] p, int i, boolean holding) {\n        if (i == p.length) return holding ? -1000000000 : 0;\n        if (holding) {\n            int sell = p[i] + dfs(p, i + 1, false);\n            int skip = dfs(p, i + 1, true);\n            return Math.max(sell, skip);\n        } else {\n            int buy = -p[i] + dfs(p, i + 1, true);\n            int skip = dfs(p, i + 1, false);\n            return Math.max(buy, skip);\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(2^n)",
+        "explanation": "Two branches per day (take vs skip action), total 2^n paths for n days. Without memoization each state recomputed."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Recursion depth n for call stack, no extra tables."
+      },
+      "dryRunExample": {
+        "input": "prices = [7,1,5,3,6,4]",
+        "steps": [
+          "dfs(0,False): buy at 7 vs skip -> skip better",
+          "dfs(1,False): buy at 1 (-1 + future) vs skip -> buy wins",
+          "holding path explores sell at 5 (+5), sell at 3, sell at 6, etc.",
+          "Best path found: buy 1 sell 5 (+4) + buy 3 sell 6 (+3) = 7",
+          "All other combinations give <=7"
+        ],
+        "output": "7"
+      },
+      "edgeCases": [
+        "n=0 or n=1 returns 0, no transaction possible",
+        "Strictly decreasing e.g. [7,6,4,3,1] returns 0, recursion never picks negative profit over skip",
+        "TLE for n>20, only for correctness baseline"
+      ]
+    },
+    {
+      "id": "dp",
+      "name": "Approach 2: Dynamic Programming - Hold and Cash States",
+      "tag": "Dynamic Programming",
+      "intuition": "Maintain two best profits each day: max profit if holding a stock and max profit if not holding (cash). Each day you can transition by buying, selling, or doing nothing.",
+      "theory": "Let hold[i] = max profit on day i ending with stock, cash[i] = max profit ending without stock. Transitions: hold[i]=max(hold[i-1], cash[i-1]-prices[i]), cash[i]=max(cash[i-1], hold[i-1]+prices[i]). Init hold[0]=-prices[0], cash[0]=0. Answer cash[n-1]. Only previous day needed, so compress to O(1) space. This is the unlimited-transaction state machine.",
+      "cppCode": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        if (prices.empty()) return 0;\n        int hold = -prices[0];\n        int cash = 0;\n        for (size_t i = 1; i < prices.size(); ++i) {\n            int prevHold = hold;\n            int prevCash = cash;\n            hold = max(prevHold, prevCash - prices[i]);\n            cash = max(prevCash, prevHold + prices[i]);\n        }\n        return cash;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        if (prices.empty()) return 0;\n        int hold = -prices[0];\n        int cash = 0;\n        for (size_t i = 1; i < prices.size(); ++i) {\n            int prevHold = hold;\n            int prevCash = cash;\n            hold = max(prevHold, prevCash - prices[i]);\n            cash = max(prevCash, prevHold + prices[i]);\n        }\n        return cash;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        if not prices:\n            return 0\n        hold = -prices[0]\n        cash = 0\n        for price in prices[1:]:\n            hold, cash = max(hold, cash - price), max(cash, hold + price)\n        return cash",
+        "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        if (prices == null || prices.length == 0) return 0;\n        int hold = -prices[0];\n        int cash = 0;\n        for (int i = 1; i < prices.length; i++) {\n            int prevHold = hold;\n            int prevCash = cash;\n            hold = Math.max(prevHold, prevCash - prices[i]);\n            cash = Math.max(prevCash, prevHold + prices[i]);\n        }\n        return cash;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass over n prices with O(1) transition per day."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two variables hold and cash; full O(n) table compressed."
+      },
+      "dryRunExample": {
+        "input": "prices = [7,1,5,3,6,4]",
+        "steps": [
+          "init hold=-7 cash=0",
+          "price 1: hold=max(-7,-1)=-1 cash=max(0,-6)=0",
+          "price 5: hold=max(-1,-5)=-1 cash=max(0,4)=4",
+          "price 3: hold=max(-1,1)=1 cash=max(4,2)=4",
+          "price 6: hold=max(1,-2)=1 cash=max(4,7)=7",
+          "price 4: hold=max(1,3)=3 cash=max(7,5)=7 => answer 7"
+        ],
+        "output": "7"
+      },
+      "edgeCases": [
+        "Empty array returns 0",
+        "Decreasing [5,4,3,2,1]: hold stays negative, cash stays 0",
+        "Increasing [1,2,3,4,5]: cash grows each day to 4",
+        "Single element [5] returns 0"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Optimal Greedy - Sum All Positive Differences",
+      "tag": "Optimal",
+      "intuition": "Because you can do unlimited transactions, every upward step is profit you should capture. If price rises from yesterday to today, buy yesterday and sell today. Sum all such rises.",
+      "theory": "Any optimal transaction buy at valley l sell at peak r with l<r can be decomposed: prices[r]-prices[l] = sum(prices[k]-prices[k-1]) for k in (l+1..r) where intermediate steps may go up and down. Negative steps would be skipped by splitting into multiple transactions, positive steps kept. Hence total optimum equals sum over i of max(0, prices[i]-prices[i-1]). Greedy is optimal because transactions are independent and have no cost.",
+      "cppCode": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int profit = 0;\n        for (size_t i = 1; i < prices.size(); ++i) {\n            if (prices[i] > prices[i - 1]) profit += prices[i] - prices[i - 1];\n        }\n        return profit;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int profit = 0;\n        for (size_t i = 1; i < prices.size(); ++i) {\n            if (prices[i] > prices[i - 1]) profit += prices[i] - prices[i - 1];\n        }\n        return profit;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        profit = 0\n        for i in range(1, len(prices)):\n            diff = prices[i] - prices[i - 1]\n            if diff > 0:\n                profit += diff\n        return profit",
+        "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        int profit = 0;\n        for (int i = 1; i < prices.length; i++) {\n            if (prices[i] > prices[i - 1]) profit += prices[i] - prices[i - 1];\n        }\n        return profit;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One linear scan computing adjacent differences."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only profit accumulator and loop index."
+      },
+      "dryRunExample": {
+        "input": "prices = [7,1,5,3,6,4]",
+        "steps": [
+          "1-7=-6 skip",
+          "5-1=4 add => profit 4",
+          "3-5=-2 skip",
+          "6-3=3 add => profit 7",
+          "4-6=-2 skip => final 7"
+        ],
+        "output": "7"
+      },
+      "edgeCases": [
+        "Decreasing [7,6,4,3,1]: no positive diff, returns 0",
+        "Flat [3,3,3]: diff 0, returns 0",
+        "Increasing [1,2,3,4,5]: sum = 4 equals 5-1",
+        "Two days [1,10] or [10,1] handled correctly"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "questionId": 67,
+  "title": "Add Binary",
+  "difficulty": "Easy",
+  "corePattern": "Reverse Two-Pointer Simulation with Carry Propagation",
+  "interviewTips": [
+    "Ask about input size: strings can be 10^4+ chars, so converting to int overflows in C++/Java - must simulate digit-by-digit.",
+    "Trade-off to discuss: prepending to immutable string is O(N^2) due to copying vs appending then reversing is O(N).",
+    "Clarify edge cases: different lengths, leading zeros, all-ones carry chain, and final carry that grows answer like '111' + '1' = '1000'."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Simulation with Front Prepend",
+      "tag": "Brute Force",
+      "intuition": "Add like in elementary school from the least significant bit. Walk both strings from the end, sum bits plus carry, prepend the result bit, and propagate carry forward.",
+      "theory": "Maintain indices i, j at ends of a, b and carry 0/1. At each step total = carry + (a[i]-'0' if valid) + (b[j]-'0' if valid). Current bit is total%2, next carry is total//2. Loop while i>=0 or j>=0 or carry. Prepending builds answer in correct order directly but each prepend copies the whole string.",
+      "cppCode": "class Solution {\npublic:\n    string addBinary(string a, string b) {\n        int i = (int)a.size() - 1;\n        int j = (int)b.size() - 1;\n        int carry = 0;\n        string res = \"\";\n        while (i >= 0 || j >= 0 || carry) {\n            int total = carry;\n            if (i >= 0) total += a[i--] - '0';\n            if (j >= 0) total += b[j--] - '0';\n            res = (char)('0' + total % 2) + res;\n            carry = total / 2;\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string addBinary(string a, string b) {\n        int i = (int)a.size() - 1;\n        int j = (int)b.size() - 1;\n        int carry = 0;\n        string res = \"\";\n        while (i >= 0 || j >= 0 || carry) {\n            int total = carry;\n            if (i >= 0) total += a[i--] - '0';\n            if (j >= 0) total += b[j--] - '0';\n            res = (char)('0' + total % 2) + res;\n            carry = total / 2;\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def addBinary(self, a: str, b: str) -> str:\n        i = len(a) - 1\n        j = len(b) - 1\n        carry = 0\n        res = ''\n        while i >= 0 or j >= 0 or carry:\n            total = carry\n            if i >= 0:\n                total += ord(a[i]) - ord('0')\n                i -= 1\n            if j >= 0:\n                total += ord(b[j]) - ord('0')\n                j -= 1\n            res = str(total % 2) + res\n            carry = total // 2\n        return res",
+        "java": "class Solution {\n    public String addBinary(String a, String b) {\n        int i = a.length() - 1;\n        int j = b.length() - 1;\n        int carry = 0;\n        String res = \"\";\n        while (i >= 0 || j >= 0 || carry != 0) {\n            int total = carry;\n            if (i >= 0) total += a.charAt(i--) - '0';\n            if (j >= 0) total += b.charAt(j--) - '0';\n            res = (char)('0' + total % 2) + res;\n            carry = total / 2;\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O((N+M)^2)",
+        "explanation": "N=len(a), M=len(b). We do O(N+M) iterations, but each prepend res = bit + res copies O(K) chars where K grows to N+M, leading to quadratic time in Python/Java immutable strings and C++ string."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N+M)",
+        "explanation": "Result string of length up to max(N,M)+1 for final carry, plus O(1) extra pointers and carry."
+      },
+      "dryRunExample": {
+        "input": "a = \"11\", b = \"1\"",
+        "steps": [
+          "i=1,j=0,carry=0,total=1+1=2 -> bit 0, carry 1, res='0'",
+          "i=0,j=-1,carry=1,total=1+1=2 -> bit 0, carry 1, res='00'",
+          "i=-1,j=-1,carry=1,total=1 -> bit 1, carry 0, res='100'",
+          "loop ends, return '100'"
+        ],
+        "output": "\"100\""
+      },
+      "edgeCases": [
+        "Different lengths: a='1010', b='101' -> correctly treats missing digits as 0",
+        "Final carry growth: a='111', b='1' -> '1000'",
+        "Zeros: a='0', b='0' -> '0', and leading zeros: '001' + '01' -> '010' or '10' depending on preservation"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Two-Pointer with Append and Reverse",
+      "tag": "Optimal",
+      "intuition": "Same LSB-to-MSB addition logic, but avoid quadratic prepend by appending bits to a mutable buffer and reversing once at the end.",
+      "theory": "Carry can only be 0 or 1 because max total = 1+1+1=3. Collect answer bits LSB-first in array / StringBuilder / push_back string. Each step is O(1) amortized append. After loop, reverse buffer to MSB-first order. This is optimal because every input char and output char is processed once.",
+      "cppCode": "class Solution {\npublic:\n    string addBinary(string a, string b) {\n        int i = (int)a.size() - 1;\n        int j = (int)b.size() - 1;\n        int carry = 0;\n        string res;\n        res.reserve(max(a.size(), b.size()) + 1);\n        while (i >= 0 || j >= 0 || carry) {\n            int total = carry;\n            if (i >= 0) total += a[i--] - '0';\n            if (j >= 0) total += b[j--] - '0';\n            res.push_back('0' + total % 2);\n            carry = total / 2;\n        }\n        reverse(res.begin(), res.end());\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string addBinary(string a, string b) {\n        int i = (int)a.size() - 1;\n        int j = (int)b.size() - 1;\n        int carry = 0;\n        string res;\n        res.reserve(max(a.size(), b.size()) + 1);\n        while (i >= 0 || j >= 0 || carry) {\n            int total = carry;\n            if (i >= 0) total += a[i--] - '0';\n            if (j >= 0) total += b[j--] - '0';\n            res.push_back('0' + total % 2);\n            carry = total / 2;\n        }\n        reverse(res.begin(), res.end());\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def addBinary(self, a: str, b: str) -> str:\n        i = len(a) - 1\n        j = len(b) - 1\n        carry = 0\n        res = []\n        while i >= 0 or j >= 0 or carry:\n            total = carry\n            if i >= 0:\n                total += ord(a[i]) - 48\n                i -= 1\n            if j >= 0:\n                total += ord(b[j]) - 48\n                j -= 1\n            res.append(chr(48 + total % 2))\n            carry = total // 2\n        res.reverse()\n        return ''.join(res)",
+        "java": "class Solution {\n    public String addBinary(String a, String b) {\n        int i = a.length() - 1;\n        int j = b.length() - 1;\n        int carry = 0;\n        StringBuilder sb = new StringBuilder();\n        while (i >= 0 || j >= 0 || carry != 0) {\n            int total = carry;\n            if (i >= 0) total += a.charAt(i--) - '0';\n            if (j >= 0) total += b.charAt(j--) - '0';\n            sb.append((char)('0' + total % 2));\n            carry = total / 2;\n        }\n        return sb.reverse().toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N+M)",
+        "explanation": "Each character of a and b visited once, each result bit appended once and reversed once. Linear in total input size."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N+M)",
+        "explanation": "Output buffer of size max(N,M)+1. No other significant extra space; reverse is in-place."
+      },
+      "dryRunExample": {
+        "input": "a = \"1010\", b = \"1011\"",
+        "steps": [
+          "Append LSB first: i=3,j=3: 0+1=1 -> append '1', carry 0",
+          "i=2,j=2: 1+1=2 -> append '0', carry 1",
+          "i=1,j=1: 0+0+1=1 -> append '1', carry 0",
+          "i=0,j=0: 1+1=2 -> append '0', carry 1",
+          "carry=1 -> append '1', buffer=['1','0','1','0','1']",
+          "reverse -> '10101'"
+        ],
+        "output": "\"10101\""
+      },
+      "edgeCases": [
+        "Single bit with carry: a='1', b='1' -> '10'",
+        "Large inputs length 10^4 all ones: tests linear performance and single final carry",
+        "One empty vs non-empty logic (per constraints len>=1, but code handles j<0 gracefully)"
+      ]
+    }
+  ]
+}

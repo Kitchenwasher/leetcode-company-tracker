@@ -1,0 +1,90 @@
+{
+  "questionId": 131,
+  "title": "Palindrome Partitioning",
+  "difficulty": "Medium",
+  "corePattern": "Backtracking Enumeration with Palindrome Precomputation",
+  "interviewTips": [
+    "Clarify output expectations: order of partitions does not matter but every substring in each partition must be a palindrome, ask about s length constraints (n <= 16 allows exponential).",
+    "Trade-off to discuss: on-the-fly O(n) palindrome check vs O(n^2) DP table for O(1) checks - same worst-case output size but large constant-factor speedup and interview signal.",
+    "Edge cases to mention: single char, all same chars like aaa (2^(n-1) partitions), no multi-char palindrome like abc, and recursion depth up to n."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Backtracking with On-the-Fly Palindrome Check",
+      "tag": "Brute Force",
+      "intuition": "Try every cut position from left to right. At index start, extend end forward and keep only palindromic prefix s[start:end+1], recurse on the remainder. When start reaches n we found a valid full partition.",
+      "theory": "This is DFS over the partition decision tree. There are n-1 gaps each cut or not cut, so at most 2^(n-1) leaves. For each candidate substring we test palindrome with two pointers. The recursion path holds current partition, backtrack by popping after recursive call. Correct because we explore all cut combinations and prune non-palindromic choices.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<string>> partition(string s) {\n        vector<vector<string>> res;\n        vector<string> path;\n        dfs(s, 0, path, res);\n        return res;\n    }\nprivate:\n    bool isPal(const string& s, int l, int r) {\n        while (l < r) {\n            if (s[l++] != s[r--]) return false;\n        }\n        return true;\n    }\n    void dfs(const string& s, int start, vector<string>& path, vector<vector<string>>& res) {\n        if (start == (int)s.size()) {\n            res.push_back(path);\n            return;\n        }\n        for (int end = start; end < (int)s.size(); ++end) {\n            if (isPal(s, start, end)) {\n                path.push_back(s.substr(start, end - start + 1));\n                dfs(s, end + 1, path, res);\n                path.pop_back();\n            }\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<string>> partition(string s) {\n        vector<vector<string>> res;\n        vector<string> path;\n        dfs(s, 0, path, res);\n        return res;\n    }\nprivate:\n    bool isPal(const string& s, int l, int r) {\n        while (l < r) {\n            if (s[l++] != s[r--]) return false;\n        }\n        return true;\n    }\n    void dfs(const string& s, int start, vector<string>& path, vector<vector<string>>& res) {\n        if (start == (int)s.size()) {\n            res.push_back(path);\n            return;\n        }\n        for (int end = start; end < (int)s.size(); ++end) {\n            if (isPal(s, start, end)) {\n                path.push_back(s.substr(start, end - start + 1));\n                dfs(s, end + 1, path, res);\n                path.pop_back();\n            }\n        }\n    }\n};",
+        "python": "class Solution:\n    def partition(self, s: str) -> list[list[str]]:\n        res = []\n        path = []\n        def is_pal(l: int, r: int) -> bool:\n            while l < r:\n                if s[l] != s[r]:\n                    return False\n                l += 1\n                r -= 1\n            return True\n        def dfs(start: int):\n            if start == len(s):\n                res.append(path[:])\n                return\n            for end in range(start, len(s)):\n                if is_pal(start, end):\n                    path.append(s[start:end+1])\n                    dfs(end + 1)\n                    path.pop()\n        dfs(0)\n        return res",
+        "java": "class Solution {\n    public List<List<String>> partition(String s) {\n        List<List<String>> res = new ArrayList<>();\n        backtrack(s, 0, new ArrayList<>(), res);\n        return res;\n    }\n    private void backtrack(String s, int start, List<String> path, List<List<String>> res) {\n        if (start == s.length()) {\n            res.add(new ArrayList<>(path));\n            return;\n        }\n        for (int end = start; end < s.length(); end++) {\n            if (isPal(s, start, end)) {\n                path.add(s.substring(start, end + 1));\n                backtrack(s, end + 1, path, res);\n                path.remove(path.size() - 1);\n            }\n        }\n    }\n    private boolean isPal(String s, int l, int r) {\n        while (l < r) {\n            if (s.charAt(l++) != s.charAt(r--)) return false;\n        }\n        return true;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * 2^n)",
+        "explanation": "At most 2^(n-1) partitions to enumerate. Each level may check up to O(n) substrings each costing O(n) two-pointer scan, and copying partitions costs O(n). Dominant term is O(n * 2^n) in worst case like s = all a."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Recursion depth up to n and path holds up to n substrings, O(n) auxiliary excluding output. Output itself can be O(n * 2^n) to store all partitions."
+      },
+      "dryRunExample": {
+        "input": "s = aab",
+        "steps": [
+          "dfs(0): try end=0 substring a is palindrome -> path=[a], dfs(1)",
+          "dfs(1): try end=1 substring a is palindrome -> path=[a,a], dfs(2)",
+          "dfs(2): end=2 substring b is palindrome -> path=[a,a,b], dfs(3) hits end -> save [a,a,b], backtrack",
+          "dfs(1): try end=2 substring ab not palindrome -> prune, backtrack to dfs(0)",
+          "dfs(0): try end=1 substring aa is palindrome -> path=[aa], dfs(2) -> adds b -> save [aa,b]",
+          "dfs(0): try end=2 substring aab not palindrome -> prune"
+        ],
+        "output": "[[a,a,b],[aa,b]]"
+      },
+      "edgeCases": [
+        "Single char a -> [[a]]",
+        "All same aaa -> 4 partitions: [[a,a,a],[a,aa],[aa,a],[aaa]] stresses exponential output",
+        "No multi-char palindrome abc -> only [[a,b,c]]",
+        "Full palindrome aba -> includes [[a,b,a],[aba]]"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Backtracking with DP Palindrome Table",
+      "tag": "Optimal",
+      "intuition": "Precompute which substrings are palindromes once, then backtrack with O(1) lookups instead of rescanning characters every time. Same search but much less repeated work.",
+      "theory": "Define isPal[i][j] true if s[i..j] is palindrome. Recurrence: s[i]==s[j] and (length<=2 or isPal[i+1][j-1]). Fill by increasing length or from bottom-up i=n-1..0. Then DFS identical to brute force but condition is table lookup. This removes O(n) factor for palindrome testing. Alternative is memo DFS + expand-around-center, same idea. Correctness follows from DP correctness plus exhaustive backtracking.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<string>> partition(string s) {\n        int n = s.size();\n        vector<vector<bool>> isPal(n, vector<bool>(n, false));\n        for (int i = 0; i < n; ++i) isPal[i][i] = true;\n        for (int len = 2; len <= n; ++len) {\n            for (int i = 0; i + len - 1 < n; ++i) {\n                int j = i + len - 1;\n                if (s[i] == s[j]) {\n                    if (len == 2 || isPal[i + 1][j - 1]) isPal[i][j] = true;\n                }\n            }\n        }\n        vector<vector<string>> res;\n        vector<string> path;\n        dfs(s, 0, isPal, path, res);\n        return res;\n    }\nprivate:\n    void dfs(const string& s, int start, vector<vector<bool>>& isPal, vector<string>& path, vector<vector<string>>& res) {\n        if (start == (int)s.size()) {\n            res.push_back(path);\n            return;\n        }\n        for (int end = start; end < (int)s.size(); ++end) {\n            if (isPal[start][end]) {\n                path.push_back(s.substr(start, end - start + 1));\n                dfs(s, end + 1, isPal, path, res);\n                path.pop_back();\n            }\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<string>> partition(string s) {\n        int n = s.size();\n        vector<vector<bool>> isPal(n, vector<bool>(n, false));\n        for (int i = 0; i < n; ++i) isPal[i][i] = true;\n        for (int len = 2; len <= n; ++len) {\n            for (int i = 0; i + len - 1 < n; ++i) {\n                int j = i + len - 1;\n                if (s[i] == s[j]) {\n                    if (len == 2 || isPal[i + 1][j - 1]) isPal[i][j] = true;\n                }\n            }\n        }\n        vector<vector<string>> res;\n        vector<string> path;\n        dfs(s, 0, isPal, path, res);\n        return res;\n    }\nprivate:\n    void dfs(const string& s, int start, vector<vector<bool>>& isPal, vector<string>& path, vector<vector<string>>& res) {\n        if (start == (int)s.size()) {\n            res.push_back(path);\n            return;\n        }\n        for (int end = start; end < (int)s.size(); ++end) {\n            if (isPal[start][end]) {\n                path.push_back(s.substr(start, end - start + 1));\n                dfs(s, end + 1, isPal, path, res);\n                path.pop_back();\n            }\n        }\n    }\n};",
+        "python": "class Solution:\n    def partition(self, s: str) -> list[list[str]]:\n        n = len(s)\n        is_pal = [[False] * n for _ in range(n)]\n        for i in range(n):\n            is_pal[i][i] = True\n        for length in range(2, n + 1):\n            for i in range(n - length + 1):\n                j = i + length - 1\n                if s[i] == s[j]:\n                    if length == 2 or is_pal[i + 1][j - 1]:\n                        is_pal[i][j] = True\n        res = []\n        path = []\n        def dfs(start: int):\n            if start == n:\n                res.append(path[:])\n                return\n            for end in range(start, n):\n                if is_pal[start][end]:\n                    path.append(s[start:end + 1])\n                    dfs(end + 1)\n                    path.pop()\n        dfs(0)\n        return res",
+        "java": "class Solution {\n    public List<List<String>> partition(String s) {\n        int n = s.length();\n        boolean[][] isPal = new boolean[n][n];\n        for (int i = 0; i < n; i++) isPal[i][i] = true;\n        for (int len = 2; len <= n; len++) {\n            for (int i = 0; i + len - 1 < n; i++) {\n                int j = i + len - 1;\n                if (s.charAt(i) == s.charAt(j)) {\n                    if (len == 2 || isPal[i + 1][j - 1]) isPal[i][j] = true;\n                }\n            }\n        }\n        List<List<String>> res = new ArrayList<>();\n        backtrack(s, 0, isPal, new ArrayList<>(), res);\n        return res;\n    }\n    private void backtrack(String s, int start, boolean[][] isPal, List<String> path, List<List<String>> res) {\n        if (start == s.length()) {\n            res.add(new ArrayList<>(path));\n            return;\n        }\n        for (int end = start; end < s.length(); end++) {\n            if (isPal[start][end]) {\n                path.add(s.substring(start, end + 1));\n                backtrack(s, end + 1, isPal, path, res);\n                path.remove(path.size() - 1);\n            }\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2 + n * 2^n)",
+        "explanation": "O(n^2) to build palindrome DP table by increasing length. Backtracking still visits up to 2^n nodes with O(1) palindrome check, plus O(n) copy per valid leaf, so O(n * 2^n) enumeration. Total dominated by enumeration but constant factor much better."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "O(n^2) for isPal table plus O(n) recursion stack and current path. Output storage extra O(n * 2^n) worst case."
+      },
+      "dryRunExample": {
+        "input": "s = aab",
+        "steps": [
+          "Build table n=3: diag true, len2: [0,1]=aa true, [1,2]=ab false, len3: [0,2]=aab false because isPal[1][1] true but s[0]!=s[2]",
+          "dfs(0): isPal[0][0] true -> path=[a], dfs(1)",
+          "dfs(1): isPal[1][1] true -> path=[a,a], dfs(2) -> isPal[2][2] true -> save [a,a,b]",
+          "dfs(1): isPal[1][2] false skip",
+          "back to dfs(0): isPal[0][1] true -> path=[aa], dfs(2) -> save [aa,b], isPal[0][2] false skip"
+        ],
+        "output": "[[a,a,b],[aa,b]]"
+      },
+      "edgeCases": [
+        "n=1: table 1x1, dfs saves single partition",
+        "aaaa: table all true, enumeration yields 2^(n-1)=8 partitions, tests recursion and copying",
+        "abcde with distinct chars: only diagonal true, single result path",
+        "Constraint n<=16 keeps O(n^2)=256 table small while output exponential is acceptable"
+      ]
+    }
+  ]
+}

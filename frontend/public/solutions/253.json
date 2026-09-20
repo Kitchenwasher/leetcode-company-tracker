@@ -1,0 +1,125 @@
+{
+  "questionId": 253,
+  "title": "Meeting Rooms II",
+  "difficulty": "Medium",
+  "corePattern": "Sweep Line / Greedy Interval Partitioning - Maximum Concurrency Equals Minimum Resources",
+  "interviewTips": [
+    "Clarify: is [1,2] and [2,3] overlapping? No - a meeting ending at time t frees the room for a meeting starting at t, so use < not <= when comparing start vs end.",
+    "Trade-off: Two-pointers on sorted starts/ends is O(n log n) time and O(n) space with best constants; Min-Heap is same complexity but more directly models room reuse and extends to assignment problems.",
+    "Edge-case tip: empty input returns 0, single interval returns 1, and brute-force counting pairwise overlaps overcounts - you must count concurrency at a point in time, not total overlapping pairs."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Counting at Start Times",
+      "tag": "Brute Force",
+      "intuition": "The number of rooms needed equals the maximum number of meetings happening at the same instant. That maximum must occur at some meeting start time, so check every start time and count how many intervals cover it.",
+      "theory": "For a fixed time t = intervals[i][0], a meeting j is active iff start_j <= t < end_j. Counting this for all i and taking the max yields the chromatic number of the interval graph. We evaluate n points against n intervals. Correctness follows because concurrency only increases at start events, so the peak is attained at a start.",
+      "cppCode": "class Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& intervals) {\n        int n = intervals.size();\n        if (n == 0) return 0;\n        int maxRooms = 0;\n        for (int i = 0; i < n; ++i) {\n            int t = intervals[i][0];\n            int rooms = 0;\n            for (int j = 0; j < n; ++j) {\n                if (intervals[j][0] <= t && t < intervals[j][1]) rooms++;\n            }\n            maxRooms = max(maxRooms, rooms);\n        }\n        return maxRooms;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& intervals) {\n        int n = intervals.size();\n        if (n == 0) return 0;\n        int maxRooms = 0;\n        for (int i = 0; i < n; ++i) {\n            int t = intervals[i][0];\n            int rooms = 0;\n            for (int j = 0; j < n; ++j) {\n                if (intervals[j][0] <= t && t < intervals[j][1]) rooms++;\n            }\n            maxRooms = max(maxRooms, rooms);\n        }\n        return maxRooms;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def minMeetingRooms(self, intervals: List[List[int]]) -> int:\n        if not intervals:\n            return 0\n        n = len(intervals)\n        max_rooms = 0\n        for i in range(n):\n            t = intervals[i][0]\n            rooms = 0\n            for j in range(n):\n                if intervals[j][0] <= t < intervals[j][1]:\n                    rooms += 1\n            max_rooms = max(max_rooms, rooms)\n        return max_rooms",
+        "java": "class Solution {\n    public int minMeetingRooms(int[][] intervals) {\n        if (intervals == null || intervals.length == 0) return 0;\n        int n = intervals.length;\n        int maxRooms = 0;\n        for (int i = 0; i < n; i++) {\n            int t = intervals[i][0];\n            int rooms = 0;\n            for (int j = 0; j < n; j++) {\n                if (intervals[j][0] <= t && t < intervals[j][1]) rooms++;\n            }\n            maxRooms = Math.max(maxRooms, rooms);\n        }\n        return maxRooms;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "For each of n start times we scan all n intervals to count coverage."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only counters used besides input."
+      },
+      "dryRunExample": {
+        "input": "intervals = [[0,30],[5,10],[15,20]]",
+        "steps": [
+          "t=0: covers [0,30] only => 1",
+          "t=5: covers [0,30],[5,10] => 2",
+          "t=15: covers [0,30],[15,20] => 2",
+          "max = 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "Empty list => 0",
+        "Single interval => 1",
+        "Touching intervals [[1,2],[2,3]] => 1, must use < not <= for end check",
+        "All identical [[1,5],[1,5],[1,5]] => 3"
+      ]
+    },
+    {
+      "id": "two-pointers",
+      "name": "Approach 2: Sorted Starts and Ends with Two Pointers",
+      "tag": "Sorting + Two Pointers",
+      "intuition": "Sort all start times and all end times separately. Sweep chronologically: if the next start is before the earliest end, we need a new room; otherwise a room frees up and we reuse it.",
+      "theory": "This is a sweep line / prefix-sum on events. Let starts and ends be sorted. Maintain used rooms. Invariant: ends[e] is the earliest ending among active meetings. If starts[s] < ends[e], no meeting has ended, so used++. Else, one meeting ended (used--) before starts[s], so we advance e to free it. Tracking max used gives answer. Sorting dominates cost.",
+      "cppCode": "class Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& intervals) {\n        int n = intervals.size();\n        if (n == 0) return 0;\n        vector<int> starts(n), ends(n);\n        for (int i = 0; i < n; ++i) {\n            starts[i] = intervals[i][0];\n            ends[i] = intervals[i][1];\n        }\n        sort(starts.begin(), starts.end());\n        sort(ends.begin(), ends.end());\n        int s = 0, e = 0, used = 0, best = 0;\n        while (s < n) {\n            if (starts[s] < ends[e]) {\n                ++used;\n                best = max(best, used);\n                ++s;\n            } else {\n                --used;\n                ++e;\n            }\n        }\n        return best;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& intervals) {\n        int n = intervals.size();\n        if (n == 0) return 0;\n        vector<int> starts(n), ends(n);\n        for (int i = 0; i < n; ++i) {\n            starts[i] = intervals[i][0];\n            ends[i] = intervals[i][1];\n        }\n        sort(starts.begin(), starts.end());\n        sort(ends.begin(), ends.end());\n        int s = 0, e = 0, used = 0, best = 0;\n        while (s < n) {\n            if (starts[s] < ends[e]) {\n                ++used;\n                best = max(best, used);\n                ++s;\n            } else {\n                --used;\n                ++e;\n            }\n        }\n        return best;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def minMeetingRooms(self, intervals: List[List[int]]) -> int:\n        if not intervals:\n            return 0\n        n = len(intervals)\n        starts = sorted(s for s, e in intervals)\n        ends = sorted(e for s, e in intervals)\n        s = e = 0\n        used = 0\n        best = 0\n        while s < n:\n            if starts[s] < ends[e]:\n                used += 1\n                best = max(best, used)\n                s += 1\n            else:\n                used -= 1\n                e += 1\n        return best",
+        "java": "import java.util.Arrays;\nclass Solution {\n    public int minMeetingRooms(int[][] intervals) {\n        if (intervals == null || intervals.length == 0) return 0;\n        int n = intervals.length;\n        int[] starts = new int[n];\n        int[] ends = new int[n];\n        for (int i = 0; i < n; i++) {\n            starts[i] = intervals[i][0];\n            ends[i] = intervals[i][1];\n        }\n        Arrays.sort(starts);\n        Arrays.sort(ends);\n        int s = 0, e = 0, used = 0, best = 0;\n        while (s < n) {\n            if (starts[s] < ends[e]) {\n                used++;\n                best = Math.max(best, used);\n                s++;\n            } else {\n                used--;\n                e++;\n            }\n        }\n        return best;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "Sorting starts and ends dominates; linear two-pointer sweep after."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Two extra arrays of size n for starts and ends; sorting uses O(log n) stack."
+      },
+      "dryRunExample": {
+        "input": "intervals = [[0,30],[5,10],[15,20]]",
+        "steps": [
+          "starts=[0,5,15], ends=[10,20,30]",
+          "s=0: 0<10 => used=1 best=1 s=1",
+          "s=1: 5<10 => used=2 best=2 s=2",
+          "s=2: 15<10? no => used=1 e=1",
+          "s=2: 15<20? yes => used=2 best=2 s=3",
+          "done => 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "[[7,10],[2,4]] => starts=[2,7] ends=[4,10], reuse gives 1",
+        "[[1,2],[2,3],[3,4]] => equality branch reuses, answer 1",
+        "Nested [[1,10],[2,3],[4,5]] => peak 2"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Sort by Start + Min-Heap of End Times",
+      "tag": "Optimal",
+      "intuition": "Process meetings in start order. Keep a min-heap of end times of rooms currently in use. If the earliest-ending room is free (end <= current start), reuse it; otherwise allocate a new room. Heap size at the end is the answer.",
+      "theory": "Greedy interval partitioning is optimal: sorting by start time and reusing any free room never harms optimality due to exchange argument - all busy rooms are symmetric except end time, so freeing the earliest-ending one is best. Min-heap gives O(log n) access to earliest end. Max heap size equals max concurrency, which is a lower bound and achieved by this construction.",
+      "cppCode": "class Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& intervals) {\n        if (intervals.empty()) return 0;\n        sort(intervals.begin(), intervals.end());\n        priority_queue<int, vector<int>, greater<int>> pq;\n        pq.push(intervals[0][1]);\n        for (size_t i = 1; i < intervals.size(); ++i) {\n            if (!pq.empty() && pq.top() <= intervals[i][0]) pq.pop();\n            pq.push(intervals[i][1]);\n        }\n        return (int)pq.size();\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& intervals) {\n        if (intervals.empty()) return 0;\n        sort(intervals.begin(), intervals.end());\n        priority_queue<int, vector<int>, greater<int>> pq;\n        pq.push(intervals[0][1]);\n        for (size_t i = 1; i < intervals.size(); ++i) {\n            if (!pq.empty() && pq.top() <= intervals[i][0]) pq.pop();\n            pq.push(intervals[i][1]);\n        }\n        return (int)pq.size();\n    }\n};",
+        "python": "from typing import List\nimport heapq\nclass Solution:\n    def minMeetingRooms(self, intervals: List[List[int]]) -> int:\n        if not intervals:\n            return 0\n        intervals.sort(key=lambda x: x[0])\n        heap = []\n        heapq.heappush(heap, intervals[0][1])\n        for s, e in intervals[1:]:\n            if heap[0] <= s:\n                heapq.heappop(heap)\n            heapq.heappush(heap, e)\n        return len(heap)",
+        "java": "import java.util.Arrays;\nimport java.util.PriorityQueue;\nclass Solution {\n    public int minMeetingRooms(int[][] intervals) {\n        if (intervals == null || intervals.length == 0) return 0;\n        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));\n        PriorityQueue<Integer> pq = new PriorityQueue<>();\n        pq.offer(intervals[0][1]);\n        for (int i = 1; i < intervals.length; i++) {\n            if (pq.peek() <= intervals[i][0]) pq.poll();\n            pq.offer(intervals[i][1]);\n        }\n        return pq.size();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "Sort by start O(n log n) plus n heap push/pop each O(log n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Heap holds at most n end times in worst case of all overlapping."
+      },
+      "dryRunExample": {
+        "input": "intervals = [[0,30],[5,10],[15,20]]",
+        "steps": [
+          "sort by start: [[0,30],[5,10],[15,20]], heap=[30]",
+          "s=5: top 30 <=5? no => push 10 => heap=[10,30]",
+          "s=15: top 10 <=15? yes => pop 10, push 20 => heap=[20,30]",
+          "size=2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "Empty => 0, single => 1",
+        "Same start [[1,4],[1,3],[1,2]] => heap grows to 3",
+        "Chain [[1,2],[2,3],[3,4]] => heap stays size 1 due to <= reuse",
+        "Unsorted input requires sort first"
+      ]
+    }
+  ]
+}

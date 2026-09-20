@@ -1,0 +1,86 @@
+{
+  "questionId": 1757,
+  "title": "Recyclable and Low Fat Products",
+  "difficulty": "Easy",
+  "corePattern": "Predicate Filtering (Relational Selection)",
+  "interviewTips": [
+    "Clarify if low_fats and recyclable can be NULL or lowercase y, and whether to return only product_id or full rows.",
+    "Trade-off: row-by-row loop is easy to understand but slow in pandas, declarative WHERE and vectorized mask lets the engine optimize filtering.",
+    "Edge-case tip: handle empty table, zero matches, and ensure case-sensitive comparison to 'Y' not truthy values."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Row Scan",
+      "tag": "Brute Force",
+      "intuition": "Check every product one by one and keep it only if low_fats is Y and recyclable is Y, like manually scanning the table.",
+      "theory": "This is relational selection sigma with predicate low_fats='Y' AND recyclable='Y'. Scanning all n rows and testing the predicate is O(n). It is correct because AND requires both conditions true, all other combinations are rejected.",
+      "cppCode": "struct Product {\n    int product_id;\n    char low_fats;\n    char recyclable;\n};\nclass Solution {\npublic:\n    vector<int> findProducts(vector<Product>& products) {\n        vector<int> ans;\n        for (auto &p : products) {\n            if (p.low_fats == 'Y' && p.recyclable == 'Y') {\n                ans.push_back(p.product_id);\n            }\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "struct Product {\n    int product_id;\n    char low_fats;\n    char recyclable;\n};\nclass Solution {\npublic:\n    vector<int> findProducts(vector<Product>& products) {\n        vector<int> ans;\n        for (auto &p : products) {\n            if (p.low_fats == 'Y' && p.recyclable == 'Y') {\n                ans.push_back(p.product_id);\n            }\n        }\n        return ans;\n    }\n};",
+        "python": "import pandas as pd\nclass Solution:\n    def find_products(self, products: pd.DataFrame) -> pd.DataFrame:\n        res = []\n        for _, row in products.iterrows():\n            if row['low_fats'] == 'Y' and row['recyclable'] == 'Y':\n                res.append(row['product_id'])\n        return pd.DataFrame(res, columns=['product_id'])",
+        "java": "import java.util.*;\nclass Product {\n    int productId;\n    char lowFats;\n    char recyclable;\n    Product(int id, char l, char r) { productId = id; lowFats = l; recyclable = r; }\n}\nclass Solution {\n    public List<Integer> findProducts(List<Product> products) {\n        List<Integer> ans = new ArrayList<>();\n        for (Product p : products) {\n            if (p.lowFats == 'Y' && p.recyclable == 'Y') {\n                ans.add(p.productId);\n            }\n        }\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Visit each of n products once and do O(1) comparison. In pandas iterrows adds high constant overhead."
+      },
+      "spaceComplexity": {
+        "complexity": "O(k)",
+        "explanation": "Store k matching product_ids where k <= n, plus O(1) extra for loop variables."
+      },
+      "dryRunExample": {
+        "input": "Products: (0,Y,N), (1,Y,Y), (2,N,Y), (3,N,N), (4,Y,Y)",
+        "steps": [
+          "check 0: Y,N -> reject",
+          "check 1: Y,Y -> keep 1",
+          "check 2: N,Y -> reject",
+          "check 3: N,N -> reject",
+          "check 4: Y,Y -> keep 4"
+        ],
+        "output": "[1, 4]"
+      },
+      "edgeCases": [
+        "empty table returns empty result",
+        "no Y,Y rows returns empty result",
+        "all rows match returns all ids"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Declarative Filter (WHERE / Vectorized)",
+      "tag": "Optimal",
+      "intuition": "Let the engine filter for you: SQL WHERE with AND or pandas boolean mask or STL and Stream filter, no manual per-row branching in user code.",
+      "theory": "Same selection sigma but executed declaratively. SQL optimizer can use indexes, pandas uses vectorized C-level loops, C++ copy_if and Java Stream express predicate as lambda. Logic: keep row iff low_fats='Y' AND recyclable='Y', project only product_id.",
+      "cppCode": "struct Product {\n    int product_id;\n    char low_fats;\n    char recyclable;\n};\nclass Solution {\npublic:\n    vector<int> findProducts(vector<Product>& products) {\n        vector<Product> filtered;\n        filtered.reserve(products.size());\n        copy_if(products.begin(), products.end(), back_inserter(filtered), [](const Product& p) {\n            return p.low_fats == 'Y' && p.recyclable == 'Y';\n        });\n        vector<int> ans;\n        ans.reserve(filtered.size());\n        for (auto &p : filtered) ans.push_back(p.product_id);\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "struct Product {\n    int product_id;\n    char low_fats;\n    char recyclable;\n};\nclass Solution {\npublic:\n    vector<int> findProducts(vector<Product>& products) {\n        vector<Product> filtered;\n        filtered.reserve(products.size());\n        copy_if(products.begin(), products.end(), back_inserter(filtered), [](const Product& p) {\n            return p.low_fats == 'Y' && p.recyclable == 'Y';\n        });\n        vector<int> ans;\n        ans.reserve(filtered.size());\n        for (auto &p : filtered) ans.push_back(p.product_id);\n        return ans;\n    }\n};",
+        "python": "import pandas as pd\nclass Solution:\n    def find_products(self, products: pd.DataFrame) -> pd.DataFrame:\n        mask = (products['low_fats'] == 'Y') & (products['recyclable'] == 'Y')\n        return products.loc[mask, ['product_id']]",
+        "java": "import java.util.*;\nimport java.util.stream.*;\nclass Product {\n    int productId;\n    char lowFats;\n    char recyclable;\n    Product(int id, char l, char r) { productId = id; lowFats = l; recyclable = r; }\n}\nclass Solution {\n    public List<Integer> findProducts(List<Product> products) {\n        return products.stream().filter(p -> p.lowFats == 'Y' && p.recyclable == 'Y').map(p -> p.productId).collect(Collectors.toList());\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass over n rows by engine. Same asymptotic as brute force but much smaller constant via vectorized C loop and SQL optimization."
+      },
+      "spaceComplexity": {
+        "complexity": "O(k)",
+        "explanation": "Only output of k matching ids plus temporary boolean mask of size n in pandas which is O(n) auxiliary but reclaimed."
+      },
+      "dryRunExample": {
+        "input": "Products: (0,Y,N), (1,Y,Y), (2,N,Y), (3,N,N), (4,Y,Y)",
+        "steps": [
+          "build mask low_fats=Y: [T,T,F,F,T]",
+          "build mask recyclable=Y: [F,T,T,F,T]",
+          "AND masks: [F,T,F,F,T]",
+          "project product_id where true"
+        ],
+        "output": "[1, 4]"
+      },
+      "edgeCases": [
+        "NULL values never equal Y so correctly excluded",
+        "lowercase y not matched due to case-sensitive compare",
+        "duplicate product_id preserved as-is"
+      ]
+    }
+  ]
+}

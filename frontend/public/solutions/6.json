@@ -1,0 +1,88 @@
+{
+  "questionId": 6,
+  "title": "Zigzag Conversion",
+  "difficulty": "Medium",
+  "corePattern": "Simulation with Direction Toggle",
+  "interviewTips": [
+    "Ask if numRows == 1 or numRows >= len(s) should return s directly without simulation",
+    "Trade-off: 2D grid is intuitive but wastes space scanning empty cells, row-buckets achieve O(n) time with O(n) space and no empty scan",
+    "Edge-case tip: direction must flip at row 0 and row numRows-1, and test with numRows=1, numRows=2, and single character"
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with 2D Grid Simulation",
+      "tag": "Brute Force",
+      "intuition": "Literally draw the zigzag on paper with rows and columns, place each character by moving down vertically then up diagonally, then read row by row.",
+      "theory": "Maintain row,col pointer and going_down flag. Place s[i] at grid[row][col]. If row==0 go down, if row==numRows-1 go up. Going down means row+1 same col, going up means row-1 col+1. After all placed, iterate rows 0..numRows-1 and columns 0..n-1 collecting non-empty cells to form answer.",
+      "cppCode": "class Solution {\npublic:\n    string convert(string s, int numRows) {\n        if (numRows == 1 || numRows >= (int)s.size()) return s;\n        int n = s.size();\n        vector<vector<char>> grid(numRows, vector<char>(n, 0));\n        int row = 0, col = 0;\n        bool going_down = true;\n        for (char ch : s) {\n            grid[row][col] = ch;\n            if (row == 0) going_down = true;\n            else if (row == numRows - 1) going_down = false;\n            if (going_down) row++;\n            else { row--; col++; }\n        }\n        string res;\n        res.reserve(n);\n        for (int r = 0; r < numRows; ++r)\n            for (int c = 0; c < n; ++c)\n                if (grid[r][c] != 0) res.push_back(grid[r][c]);\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string convert(string s, int numRows) {\n        if (numRows == 1 || numRows >= (int)s.size()) return s;\n        int n = s.size();\n        vector<vector<char>> grid(numRows, vector<char>(n, 0));\n        int row = 0, col = 0;\n        bool going_down = true;\n        for (char ch : s) {\n            grid[row][col] = ch;\n            if (row == 0) going_down = true;\n            else if (row == numRows - 1) going_down = false;\n            if (going_down) row++;\n            else { row--; col++; }\n        }\n        string res;\n        res.reserve(n);\n        for (int r = 0; r < numRows; ++r)\n            for (int c = 0; c < n; ++c)\n                if (grid[r][c] != 0) res.push_back(grid[r][c]);\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def convert(self, s: str, numRows: int) -> str:\n        if numRows == 1 or numRows >= len(s):\n            return s\n        n = len(s)\n        grid = [[''] * n for _ in range(numRows)]\n        row, col = 0, 0\n        going_down = True\n        for ch in s:\n            grid[row][col] = ch\n            if row == 0:\n                going_down = True\n            elif row == numRows - 1:\n                going_down = False\n            if going_down:\n                row += 1\n            else:\n                row -= 1\n                col += 1\n        res = []\n        for r in range(numRows):\n            for c in range(n):\n                if grid[r][c] != '':\n                    res.append(grid[r][c])\n        return ''.join(res)",
+        "java": "class Solution {\n    public String convert(String s, int numRows) {\n        if (numRows == 1 || numRows >= s.length()) return s;\n        int n = s.length();\n        char[][] grid = new char[numRows][n];\n        int row = 0, col = 0;\n        boolean goingDown = true;\n        for (int i = 0; i < n; i++) {\n            grid[row][col] = s.charAt(i);\n            if (row == 0) goingDown = true;\n            else if (row == numRows - 1) goingDown = false;\n            if (goingDown) row++;\n            else { row--; col++; }\n        }\n        StringBuilder sb = new StringBuilder();\n        for (int r = 0; r < numRows; r++)\n            for (int c = 0; c < n; c++)\n                if (grid[r][c] != 0) sb.append(grid[r][c]);\n        return sb.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(numRows * n)",
+        "explanation": "O(n) to place characters plus O(numRows * n) to scan entire grid row by row for non-empty cells."
+      },
+      "spaceComplexity": {
+        "complexity": "O(numRows * n)",
+        "explanation": "2D grid of numRows rows by n columns to hold sparse zigzag layout plus output string."
+      },
+      "dryRunExample": {
+        "input": "s = 'PAYPALISHIRING', numRows = 3",
+        "steps": [
+          "grid 3 x 14 empty, row=0 col=0 going_down=True",
+          "place P(0,0) A(1,0) Y(2,0) then flip to up, place P(1,1)",
+          "place A(0,2) L(1,2) I(2,2) then flip to up, place S(1,3)",
+          "place H(0,4) I(1,4) R(2,4) then flip to up, place I(1,5)",
+          "place N(0,6) G(1,6), read row0=PAHN row1=APLSIIG row2=YIR",
+          "concat rows to PAHNAPLSIIGYIR"
+        ],
+        "output": "PAHNAPLSIIGYIR"
+      },
+      "edgeCases": [
+        "numRows == 1 returns original string, avoids infinite direction flip",
+        "numRows >= len(s) returns original string, each char in own row",
+        "single character string with any numRows"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Row Buckets with Direction Flag",
+      "tag": "Optimal",
+      "intuition": "We only care about which row each character belongs to, not its column, so append characters directly to per-row buffers while bouncing between top and bottom.",
+      "theory": "Zigzag row index follows periodic bounce: 0,1,...,numRows-1,numRows-2,...,1,0,... Maintain cur row and going_down flag. For each ch append to rows[cur], then update flag at boundaries and do cur+=1 or cur-=1. Finally join rows in order. This is exact row projection of grid simulation without storing columns.",
+      "cppCode": "class Solution {\npublic:\n    string convert(string s, int numRows) {\n        if (numRows == 1 || numRows >= (int)s.size()) return s;\n        vector<string> rows(numRows);\n        int cur = 0;\n        bool going_down = false;\n        for (char ch : s) {\n            rows[cur] += ch;\n            if (cur == 0) going_down = true;\n            else if (cur == numRows - 1) going_down = false;\n            cur += going_down ? 1 : -1;\n        }\n        string res;\n        for (auto &r : rows) res += r;\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string convert(string s, int numRows) {\n        if (numRows == 1 || numRows >= (int)s.size()) return s;\n        vector<string> rows(numRows);\n        int cur = 0;\n        bool going_down = false;\n        for (char ch : s) {\n            rows[cur] += ch;\n            if (cur == 0) going_down = true;\n            else if (cur == numRows - 1) going_down = false;\n            cur += going_down ? 1 : -1;\n        }\n        string res;\n        for (auto &r : rows) res += r;\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def convert(self, s: str, numRows: int) -> str:\n        if numRows == 1 or numRows >= len(s):\n            return s\n        rows = [[] for _ in range(numRows)]\n        cur = 0\n        going_down = False\n        for ch in s:\n            rows[cur].append(ch)\n            if cur == 0:\n                going_down = True\n            elif cur == numRows - 1:\n                going_down = False\n            cur += 1 if going_down else -1\n        return ''.join(''.join(r) for r in rows)",
+        "java": "class Solution {\n    public String convert(String s, int numRows) {\n        if (numRows == 1 || numRows >= s.length()) return s;\n        StringBuilder[] rows = new StringBuilder[numRows];\n        for (int i = 0; i < numRows; i++) rows[i] = new StringBuilder();\n        int cur = 0;\n        boolean goingDown = false;\n        for (int i = 0; i < s.length(); i++) {\n            rows[cur].append(s.charAt(i));\n            if (cur == 0) goingDown = true;\n            else if (cur == numRows - 1) goingDown = false;\n            cur += goingDown ? 1 : -1;\n        }\n        StringBuilder res = new StringBuilder();\n        for (StringBuilder r : rows) res.append(r);\n        return res.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass over n characters, each append is O(1) amortized, final join is O(n)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Row buffers together store all n characters plus output string, no empty grid cells."
+      },
+      "dryRunExample": {
+        "input": "s = 'PAYPALISHIRING', numRows = 3",
+        "steps": [
+          "rows=[[],[],[]] cur=0",
+          "P->row0 A->row1 Y->row2 P->row1 A->row0 L->row1 I->row2",
+          "S->row1 H->row0 I->row1 R->row2 I->row1 N->row0 G->row1",
+          "row0=[P,A,H,N] row1=[A,P,L,S,I,I,G] row2=[Y,I,R]",
+          "join to PAHNAPLSIIGYIR"
+        ],
+        "output": "PAHNAPLSIIGYIR"
+      },
+      "edgeCases": [
+        "numRows == 1 must early return else cur would go out of bounds",
+        "numRows == 2 alternates 0,1,0,1 with no diagonal middle row",
+        "len(s) <= numRows means cur never hits bottom, just fills top rows"
+      ]
+    }
+  ]
+}

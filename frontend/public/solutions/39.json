@@ -1,0 +1,87 @@
+{
+  "questionId": 39,
+  "title": "Combination Sum",
+  "difficulty": "Medium",
+  "corePattern": "Backtracking with Unbounded Reuse (DFS + Pruning)",
+  "interviewTips": [
+    "Clarify: candidates are distinct, each can be reused unlimited times, but combinations must be unique - does order matter? No, [2,3] same as [3,2].",
+    "Trade-off: sorting enables early break pruning but costs O(N log N); pick-or-skip branching is simple but explores more dead paths than start-index for-loop.",
+    "Edge-case tip: enforce non-decreasing order via start index to avoid duplicates, and stop recursion when remain < 0 or candidate > remain."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Pick-or-Skip Backtracking",
+      "tag": "Brute Force",
+      "intuition": "At each index decide to take the same candidate again (unbounded reuse) or skip to next candidate. Explore all possibilities with DFS and record path when sum equals target.",
+      "theory": "Model as binary decision tree: dfs(i, total) branches to include candidates[i] staying at i, or exclude it moving to i+1. Base cases: total == target -> save copy, total > target or i == n -> prune. This enumerates all multisets without needing sort, but explores many overshoot paths because it does not break early on large values.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {\n        vector<vector<int>> res;\n        vector<int> cur;\n        dfs(0, candidates, target, 0, cur, res);\n        return res;\n    }\nprivate:\n    void dfs(int i, vector<int>& cand, int target, int total, vector<int>& cur, vector<vector<int>>& res) {\n        if (total == target) { res.push_back(cur); return; }\n        if (i >= (int)cand.size() || total > target) return;\n        cur.push_back(cand[i]);\n        dfs(i, cand, target, total + cand[i], cur, res);\n        cur.pop_back();\n        dfs(i + 1, cand, target, total, cur, res);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {\n        vector<vector<int>> res;\n        vector<int> cur;\n        dfs(0, candidates, target, 0, cur, res);\n        return res;\n    }\nprivate:\n    void dfs(int i, vector<int>& cand, int target, int total, vector<int>& cur, vector<vector<int>>& res) {\n        if (total == target) { res.push_back(cur); return; }\n        if (i >= (int)cand.size() || total > target) return;\n        cur.push_back(cand[i]);\n        dfs(i, cand, target, total + cand[i], cur, res);\n        cur.pop_back();\n        dfs(i + 1, cand, target, total, cur, res);\n    }\n};",
+        "python": "class Solution:\n    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:\n        res = []\n        def dfs(i, cur, total):\n            if total == target:\n                res.append(cur[:])\n                return\n            if i >= len(candidates) or total > target:\n                return\n            cur.append(candidates[i])\n            dfs(i, cur, total + candidates[i])\n            cur.pop()\n            dfs(i + 1, cur, total)\n        dfs(0, [], 0)\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> combinationSum(int[] candidates, int target) {\n        List<List<Integer>> res = new ArrayList<>();\n        dfs(0, candidates, target, 0, new ArrayList<>(), res);\n        return res;\n    }\n    private void dfs(int i, int[] cand, int target, int total, List<Integer> cur, List<List<Integer>> res) {\n        if (total == target) { res.add(new ArrayList<>(cur)); return; }\n        if (i >= cand.length || total > target) return;\n        cur.add(cand[i]);\n        dfs(i, cand, target, total + cand[i], cur, res);\n        cur.remove(cur.size() - 1);\n        dfs(i + 1, cand, target, total, cur, res);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N ^ (T / M))",
+        "explanation": "N is number of candidates, T is target, M is min candidate. Depth up to T/M and branching factor up to N in worst case. Bound is exponential; without sorting no early break so more calls than optimal."
+      },
+      "spaceComplexity": {
+        "complexity": "O(T / M)",
+        "explanation": "Recursion depth bounded by T/M reuses of smallest value, plus current path storage. Output space for all valid combinations not counted."
+      },
+      "dryRunExample": {
+        "input": "candidates = [2,3,6,7], target = 7",
+        "steps": [
+          "dfs(0, [], 0): take 2 -> dfs(0, [2], 2)",
+          "dfs(0, [2], 2): take 2 -> dfs(0, [2,2], 4) -> take 2 -> total 6 -> take 2 exceeds, skip chain explores [2,2,3] == 7 found",
+          "skip branches from earlier nodes explore [2,3] + 2? No, eventually explore take 3 at i=1 and take 7 at i=3 -> [7] found",
+          "all other branches exceed target or exhaust indices and backtrack"
+        ],
+        "output": "[[2,2,3],[7]]"
+      },
+      "edgeCases": [
+        "target smaller than all candidates -> returns []",
+        "single candidate that divides target, e.g., [2], 4 -> [[2,2]]",
+        "single candidate that does not divide target, e.g., [3], 5 -> []",
+        "large target with small min value causes deep recursion"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Sorted Backtracking with Pruning",
+      "tag": "Optimal",
+      "intuition": "Sort candidates so we can iterate forward from start index and break as soon as candidate exceeds remaining sum. Reuse allowed by recursing with same i, uniqueness enforced by only moving forward.",
+      "theory": "DFS on state (start, remain): for i from start to n-1, if cand[i] > remain break due to sorted order, else choose cand[i] and recurse backtrack(i, remain - cand[i]). This generates combinations in non-decreasing order, guaranteeing no permutations/duplicates. Sorting plus break prunes entire suffix of loop, sharply reducing calls vs unsorted pick-or-skip.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {\n        sort(candidates.begin(), candidates.end());\n        vector<vector<int>> res;\n        vector<int> cur;\n        backtrack(0, candidates, target, cur, res);\n        return res;\n    }\nprivate:\n    void backtrack(int start, vector<int>& cand, int remain, vector<int>& cur, vector<vector<int>>& res) {\n        if (remain == 0) { res.push_back(cur); return; }\n        for (int i = start; i < (int)cand.size(); ++i) {\n            if (cand[i] > remain) break;\n            cur.push_back(cand[i]);\n            backtrack(i, cand, remain - cand[i], cur, res);\n            cur.pop_back();\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {\n        sort(candidates.begin(), candidates.end());\n        vector<vector<int>> res;\n        vector<int> cur;\n        backtrack(0, candidates, target, cur, res);\n        return res;\n    }\nprivate:\n    void backtrack(int start, vector<int>& cand, int remain, vector<int>& cur, vector<vector<int>>& res) {\n        if (remain == 0) { res.push_back(cur); return; }\n        for (int i = start; i < (int)cand.size(); ++i) {\n            if (cand[i] > remain) break;\n            cur.push_back(cand[i]);\n            backtrack(i, cand, remain - cand[i], cur, res);\n            cur.pop_back();\n        }\n    }\n};",
+        "python": "class Solution:\n    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:\n        candidates.sort()\n        res = []\n        def backtrack(start, cur, remain):\n            if remain == 0:\n                res.append(cur[:])\n                return\n            for i in range(start, len(candidates)):\n                if candidates[i] > remain:\n                    break\n                cur.append(candidates[i])\n                backtrack(i, cur, remain - candidates[i])\n                cur.pop()\n        backtrack(0, [], target)\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> combinationSum(int[] candidates, int target) {\n        Arrays.sort(candidates);\n        List<List<Integer>> res = new ArrayList<>();\n        backtrack(0, candidates, target, new ArrayList<>(), res);\n        return res;\n    }\n    private void backtrack(int start, int[] cand, int remain, List<Integer> cur, List<List<Integer>> res) {\n        if (remain == 0) { res.add(new ArrayList<>(cur)); return; }\n        for (int i = start; i < cand.length; ++i) {\n            if (cand[i] > remain) break;\n            cur.add(cand[i]);\n            backtrack(i, cand, remain - cand[i], cur, res);\n            cur.remove(cur.size() - 1);\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N ^ (T / M))",
+        "explanation": "Same worst-case exponential bound as brute force where N=len, T=target, M=min value, plus O(N log N) sort. In practice much faster due to sorted break pruning and for-loop avoiding separate skip branch."
+      },
+      "spaceComplexity": {
+        "complexity": "O(T / M)",
+        "explanation": "Recursion depth at most T/M and path size at most T/M. Sorting is O(log N) to O(N) extra depending on implementation."
+      },
+      "dryRunExample": {
+        "input": "candidates = [2,3,6,7], target = 7",
+        "steps": [
+          "sort -> [2,3,6,7], backtrack(0, [], 7)",
+          "i=0 val 2: cur [2] -> backtrack(0, [2], 5): picks 2,2 then 3 -> [2,2,3] remain 0 found, further 6>1 break",
+          "backtrack unwind, i=1 val 3: cur [3] -> remain 4 cannot reach 7, backtrack",
+          "i=2 val 6, i=3 val 7: cur [7] remain 0 found, loop ends"
+        ],
+        "output": "[[2,2,3],[7]]"
+      },
+      "edgeCases": [
+        "unsorted input e.g., [7,3,2] still works after sort",
+        "target = 0 not in constraints (target >=1) but would return [[]] if handled",
+        "candidates contain value > target -> immediately skipped by break",
+        "duplicate-free guarantee relies on distinct input; if duplicates existed need i>start and cand[i]==cand[i-1] skip"
+      ]
+    }
+  ]
+}

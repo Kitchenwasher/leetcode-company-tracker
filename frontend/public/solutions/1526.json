@@ -1,0 +1,122 @@
+{
+  "questionId": 1526,
+  "title": "Minimum Number of Increments on Subarrays to Form a Target Array",
+  "difficulty": "Hard",
+  "corePattern": "Greedy Vertical Counting / Painting Fence with Positive Differences",
+  "interviewTips": [
+    "Clarify operation: increment any contiguous subarray by 1, starting from all zeros, ask for minimum operations to reach target.",
+    "Trade-off: simulation is intuitive but O(n * max) time, divide and conquer shows structure O(n log n) average, greedy single pass is O(n) optimal with O(1) space.",
+    "Edge cases: single element, strictly decreasing array needs only target[0] ops, strictly increasing needs target[-1] ops, large values up to 1e5 require 64-bit safe accumulation logic."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Simulation",
+      "tag": "Brute Force",
+      "intuition": "Build target forward step by step. While current array differs, take the leftmost unfinished position, extend as far as possible over unfinished positions, increment that whole segment by 1. Each increment is one allowed operation, so counting steps gives answer.",
+      "theory": "Any optimal solution can be transformed to use maximal extendable segments greedily without extra cost for simulation. Reverse view is decrementing target to zero by decrementing subarrays. Forward simulation is correct but slow because it performs exactly answer many iterations, each scanning O(n). Answer can be sum(target) up to 1e10, so this is exponential in input size and only for understanding.",
+      "cppCode": "class Solution {\npublic:\n    int minNumberOperations(vector<int>& target) {\n        int n = target.size();\n        vector<int> cur(n, 0);\n        int ops = 0;\n        while (cur != target) {\n            int i = 0;\n            while (i < n && cur[i] == target[i]) i++;\n            int j = i;\n            while (j + 1 < n && cur[j + 1] < target[j + 1]) j++;\n            for (int k = i; k <= j; ++k) cur[k]++;\n            ops++;\n        }\n        return ops;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minNumberOperations(vector<int>& target) {\n        int n = target.size();\n        vector<int> cur(n, 0);\n        int ops = 0;\n        while (cur != target) {\n            int i = 0;\n            while (i < n && cur[i] == target[i]) i++;\n            int j = i;\n            while (j + 1 < n && cur[j + 1] < target[j + 1]) j++;\n            for (int k = i; k <= j; ++k) cur[k]++;\n            ops++;\n        }\n        return ops;\n    }\n};",
+        "python": "class Solution:\n    def minNumberOperations(self, target: List[int]) -> int:\n        n = len(target)\n        cur = [0] * n\n        ops = 0\n        while cur != target:\n            i = 0\n            while i < n and cur[i] == target[i]:\n                i += 1\n            j = i\n            while j + 1 < n and cur[j + 1] < target[j + 1]:\n                j += 1\n            for k in range(i, j + 1):\n                cur[k] += 1\n            ops += 1\n        return ops",
+        "java": "class Solution {\n    public int minNumberOperations(int[] target) {\n        int n = target.length;\n        int[] cur = new int[n];\n        int ops = 0;\n        while (!java.util.Arrays.equals(cur, target)) {\n            int i = 0;\n            while (i < n && cur[i] == target[i]) i++;\n            int j = i;\n            while (j + 1 < n && cur[j + 1] < target[j + 1]) j++;\n            for (int k = i; k <= j; k++) cur[k]++;\n            ops++;\n        }\n        return ops;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * S)",
+        "explanation": "S is answer = up to sum(target). Each operation scans O(n) to find segment and update. Worst O(n * max(target)) e.g., n=1e5, max=1e5 is infeasible. Demonstrates why optimization needed."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Extra cur array of size n to simulate building, plus O(1) pointers."
+      },
+      "dryRunExample": {
+        "input": "target = [1,2,3]",
+        "steps": [
+          "cur=[0,0,0] ops=0",
+          "segment [0,2] -> cur=[1,1,1] ops=1",
+          "segment [1,2] -> cur=[1,2,2] ops=2",
+          "segment [2,2] -> cur=[1,2,3] ops=3 done"
+        ],
+        "output": "3"
+      },
+      "edgeCases": [
+        "n=1 needs target[0] ops, many loops",
+        "decreasing [3,2,1] still needs 3 ops but simulation does 3 iterations",
+        "all zeros not allowed by constraints but would need 0 ops"
+      ]
+    },
+    {
+      "id": "divide-conquer",
+      "name": "Approach 2: Divide and Conquer on Minimum",
+      "tag": "Divide and Conquer",
+      "intuition": "If we must raise interval [l,r] from height base to target heights, we can raise whole interval to its minimum, then solve left and right parts independently. Minimum splits problem because operations covering across minimum can be shared.",
+      "theory": "Let m be index of minimum in [l,r]. Need target[m]-base operations that cover m, they can also cover everything else in [l,r] for free. After applying them, left [l,m-1] and right [m+1,r] have new base target[m] and are independent since any further operation cannot cross m without overshooting m. Recurrence: F(l,r,base)=target[m]-base+F(l,m-1,target[m])+F(m+1,r,target[m]). Correct by induction.",
+      "cppCode": "class Solution {\npublic:\n    int minNumberOperations(vector<int>& target) {\n        return solve(target, 0, (int)target.size() - 1, 0);\n    }\nprivate:\n    int solve(vector<int>& t, int l, int r, int base) {\n        if (l > r) return 0;\n        int m = l;\n        for (int i = l + 1; i <= r; ++i) if (t[i] < t[m]) m = i;\n        int cost = t[m] - base;\n        cost += solve(t, l, m - 1, t[m]);\n        cost += solve(t, m + 1, r, t[m]);\n        return cost;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minNumberOperations(vector<int>& target) {\n        return solve(target, 0, (int)target.size() - 1, 0);\n    }\nprivate:\n    int solve(vector<int>& t, int l, int r, int base) {\n        if (l > r) return 0;\n        int m = l;\n        for (int i = l + 1; i <= r; ++i) if (t[i] < t[m]) m = i;\n        int cost = t[m] - base;\n        cost += solve(t, l, m - 1, t[m]);\n        cost += solve(t, m + 1, r, t[m]);\n        return cost;\n    }\n};",
+        "python": "class Solution:\n    def minNumberOperations(self, target: List[int]) -> int:\n        def solve(l: int, r: int, base: int) -> int:\n            if l > r:\n                return 0\n            m = l\n            for i in range(l + 1, r + 1):\n                if target[i] < target[m]:\n                    m = i\n            cost = target[m] - base\n            cost += solve(l, m - 1, target[m])\n            cost += solve(m + 1, r, target[m])\n            return cost\n        return solve(0, len(target) - 1, 0)",
+        "java": "class Solution {\n    public int minNumberOperations(int[] target) {\n        return solve(target, 0, target.length - 1, 0);\n    }\n    private int solve(int[] t, int l, int r, int base) {\n        if (l > r) return 0;\n        int m = l;\n        for (int i = l + 1; i <= r; i++) if (t[i] < t[m]) m = i;\n        int cost = t[m] - base;\n        cost += solve(t, l, m - 1, t[m]);\n        cost += solve(t, m + 1, r, t[m]);\n        return cost;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n) average, O(n^2) worst",
+        "explanation": "Each level scans to find minimum. Balanced splits give n log n, sorted array gives n + (n-1) + ... = O(n^2). Can be improved to O(n log n) worst with segment tree or sparse table."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n) worst",
+        "explanation": "Recursion depth up to n for sorted input, plus O(n) input. Average depth O(log n)."
+      },
+      "dryRunExample": {
+        "input": "target = [3,1,1,2]",
+        "steps": [
+          "solve(0,3,0): min=1 val=1 cost=1",
+          "left solve(0,0,1): min=3 cost=2 -> total 3",
+          "right solve(2,3,1): min at 2 val=1 cost=0 + solve(3,3,1)=1 -> total 1",
+          "overall 1+2+1=4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "strictly increasing causes O(n^2) degenerate recursion",
+        "all equal: one minimum split still O(n^2) naive scan, answer = value",
+        "deep recursion may stack overflow for n=1e5 in Python/Java"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Greedy Single Pass with Monotonic Stack Insight",
+      "tag": "Optimal",
+      "intuition": "Operations can be carried over from previous position. If target[i] <= target[i-1], the operations used for previous already cover current, no new ops needed. If target[i] > target[i-1], need exactly the difference as new operations starting at i.",
+      "theory": "Consider building left to right maintaining a monotonic stack of heights. Number of active increments needed at i is target[i]. At step i, we keep min(target[i], target[i-1]) shared operations continuing, and add max(0, target[i]-target[i-1]) new ones. Telescoping sum gives target[0] + sum positive diffs. This equals stack solution where we push increasing heights and pop decreasing heights, counting pushes. Optimal by exchange argument: any solution needs at least that many distinct starts.",
+      "cppCode": "class Solution {\npublic:\n    int minNumberOperations(vector<int>& target) {\n        int ops = target[0];\n        for (int i = 1; i < (int)target.size(); ++i) {\n            if (target[i] > target[i - 1]) ops += target[i] - target[i - 1];\n        }\n        return ops;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int minNumberOperations(vector<int>& target) {\n        int ops = target[0];\n        for (int i = 1; i < (int)target.size(); ++i) {\n            if (target[i] > target[i - 1]) ops += target[i] - target[i - 1];\n        }\n        return ops;\n    }\n};",
+        "python": "class Solution:\n    def minNumberOperations(self, target: List[int]) -> int:\n        ops = target[0]\n        for i in range(1, len(target)):\n            if target[i] > target[i - 1]:\n                ops += target[i] - target[i - 1]\n        return ops",
+        "java": "class Solution {\n    public int minNumberOperations(int[] target) {\n        int ops = target[0];\n        for (int i = 1; i < target.length; i++) {\n            if (target[i] > target[i - 1]) ops += target[i] - target[i - 1];\n        }\n        return ops;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single linear scan, each element visited once with O(1) work."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only accumulator and loop index. Explicit monotonic stack version would use O(n) worst but same time."
+      },
+      "dryRunExample": {
+        "input": "target = [3,1,1,2]",
+        "steps": [
+          "ops=3 from target[0]",
+          "i=1: 1<=3 add 0 -> ops=3",
+          "i=2: 1<=1 add 0 -> ops=3",
+          "i=3: 2>1 add 1 -> ops=4"
+        ],
+        "output": "4"
+      },
+      "edgeCases": [
+        "decreasing [5,4,3,2,1] -> ops=5, no positive diffs",
+        "increasing [1,2,3,4] -> ops=4 equals last value",
+        "single element [100000] -> ops=100000",
+        "alternating [1,100000,1,100000] -> large sum fits 32-bit int but use long for safety"
+      ]
+    }
+  ]
+}

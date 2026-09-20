@@ -1,0 +1,125 @@
+{
+  "questionId": 200,
+  "title": "Number of Islands",
+  "difficulty": "Medium",
+  "corePattern": "Flood Fill / Connected Components in Implicit Grid Graph",
+  "interviewTips": [
+    "Clarify input mutation: ask if you may modify grid in-place to mark visited or need separate visited array for read-only input.",
+    "Trade-off: DFS recursive is shortest to code but risks stack overflow; BFS iterative is safe for large grids; Union-Find is best for dynamic/streaming land additions.",
+    "Edge-case tip: explicitly handle empty grid, single cell, all water, all land, and large 300x300 grid for recursion depth discussion."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: DFS Flood Fill (Recursive)",
+      "tag": "Brute Force",
+      "intuition": "Each island is a connected component of '1's via 4-directions. When we find an unvisited '1', we have found a new island, then flood-fill and sink the whole island to '0' so it is never counted again.",
+      "theory": "Model grid as implicit graph where each land cell is a node with edges to up/down/left/right land neighbors. DFS from any land visits exactly its connected component. Outer double loop ensures every cell is start-checked once. Sinking to '0' acts as visited marking in O(1) extra per cell. Total visits O(m*n).",
+      "cppCode": "class Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        if (grid.empty() || grid[0].empty()) return 0;\n        int m = grid.size(), n = grid[0].size();\n        int count = 0;\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (grid[i][j] == '1') {\n                    ++count;\n                    dfs(grid, i, j);\n                }\n            }\n        }\n        return count;\n    }\nprivate:\n    void dfs(vector<vector<char>>& grid, int r, int c) {\n        int m = grid.size(), n = grid[0].size();\n        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1') return;\n        grid[r][c] = '0';\n        dfs(grid, r + 1, c);\n        dfs(grid, r - 1, c);\n        dfs(grid, r, c + 1);\n        dfs(grid, r, c - 1);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        if (grid.empty() || grid[0].empty()) return 0;\n        int m = grid.size(), n = grid[0].size();\n        int count = 0;\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (grid[i][j] == '1') {\n                    ++count;\n                    dfs(grid, i, j);\n                }\n            }\n        }\n        return count;\n    }\nprivate:\n    void dfs(vector<vector<char>>& grid, int r, int c) {\n        int m = grid.size(), n = grid[0].size();\n        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1') return;\n        grid[r][c] = '0';\n        dfs(grid, r + 1, c);\n        dfs(grid, r - 1, c);\n        dfs(grid, r, c + 1);\n        dfs(grid, r, c - 1);\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def numIslands(self, grid: List[List[str]]) -> int:\n        if not grid or not grid[0]:\n            return 0\n        m, n = len(grid), len(grid[0])\n        count = 0\n        def dfs(r: int, c: int) -> None:\n            if r < 0 or r >= m or c < 0 or c >= n or grid[r][c] != '1':\n                return\n            grid[r][c] = '0'\n            dfs(r + 1, c)\n            dfs(r - 1, c)\n            dfs(r, c + 1)\n            dfs(r, c - 1)\n        for i in range(m):\n            for j in range(n):\n                if grid[i][j] == '1':\n                    count += 1\n                    dfs(i, j)\n        return count",
+        "java": "class Solution {\n    public int numIslands(char[][] grid) {\n        if (grid == null || grid.length == 0) return 0;\n        int m = grid.length, n = grid[0].length;\n        int count = 0;\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] == '1') {\n                    count++;\n                    dfs(grid, i, j);\n                }\n            }\n        }\n        return count;\n    }\n    private void dfs(char[][] grid, int r, int c) {\n        int m = grid.length, n = grid[0].length;\n        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1') return;\n        grid[r][c] = '0';\n        dfs(grid, r + 1, c);\n        dfs(grid, r - 1, c);\n        dfs(grid, r, c + 1);\n        dfs(grid, r, c - 1);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Each cell is visited at most once; DFS work across all islands sums to number of cells. m rows, n cols."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Worst-case recursion stack when grid is all land is O(m*n). In-place sinking uses O(1) extra besides stack. Use iterative version if stack limit is concern."
+      },
+      "dryRunExample": {
+        "input": "grid = [['1','1','0'],['1','0','0'],['0','0','1']]",
+        "steps": [
+          "scan (0,0)=='1' -> count=1, DFS sinks (0,0),(0,1),(1,0) to '0'",
+          "scan rest of row 0-1 finds only '0'",
+          "scan (2,2)=='1' -> count=2, DFS sinks (2,2) to '0'",
+          "no more land, return 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "Empty grid [] or [[]] -> 0",
+        "All water [['0','0'],['0','0']] -> 0",
+        "All land [['1','1'],['1','1']] -> 1",
+        "Single cell [['1']] -> 1, [['0']] -> 0",
+        "Diagonal-only '1's are separate islands (no 8-direction)"
+      ]
+    },
+    {
+      "id": "bfs",
+      "name": "Approach 2: BFS Iterative with Queue",
+      "tag": "Breadth-First Search",
+      "intuition": "Same flood-fill idea but use an explicit queue to expand level by level instead of recursion. This avoids call-stack overflow on large grids and is interview-safe.",
+      "theory": "When outer loop finds '1', push it to queue and mark visited immediately upon enqueue to prevent duplicates. While queue non-empty, pop and push 4-neighbors that are '1'. This BFS traverses exactly one connected component. Counting how many times BFS is started equals number of islands.",
+      "cppCode": "class Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        if (grid.empty() || grid[0].empty()) return 0;\n        int m = grid.size(), n = grid[0].size();\n        int count = 0;\n        const int dirs[4][2] = {{1,0},{-1,0},{0,1},{0,-1}};\n        queue<pair<int,int>> q;\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (grid[i][j] != '1') continue;\n                ++count;\n                grid[i][j] = '0';\n                q.emplace(i, j);\n                while (!q.empty()) {\n                    auto [r, c] = q.front(); q.pop();\n                    for (auto &d : dirs) {\n                        int nr = r + d[0], nc = c + d[1];\n                        if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr][nc] == '1') {\n                            grid[nr][nc] = '0';\n                            q.emplace(nr, nc);\n                        }\n                    }\n                }\n            }\n        }\n        return count;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        if (grid.empty() || grid[0].empty()) return 0;\n        int m = grid.size(), n = grid[0].size();\n        int count = 0;\n        const int dirs[4][2] = {{1,0},{-1,0},{0,1},{0,-1}};\n        queue<pair<int,int>> q;\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (grid[i][j] != '1') continue;\n                ++count;\n                grid[i][j] = '0';\n                q.emplace(i, j);\n                while (!q.empty()) {\n                    auto [r, c] = q.front(); q.pop();\n                    for (auto &d : dirs) {\n                        int nr = r + d[0], nc = c + d[1];\n                        if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr][nc] == '1') {\n                            grid[nr][nc] = '0';\n                            q.emplace(nr, nc);\n                        }\n                    }\n                }\n            }\n        }\n        return count;\n    }\n};",
+        "python": "from typing import List\nfrom collections import deque\nclass Solution:\n    def numIslands(self, grid: List[List[str]]) -> int:\n        if not grid or not grid[0]:\n            return 0\n        m, n = len(grid), len(grid[0])\n        count = 0\n        dirs = [(1, 0), (-1, 0), (0, 1), (0, -1)]\n        for i in range(m):\n            for j in range(n):\n                if grid[i][j] != '1':\n                    continue\n                count += 1\n                grid[i][j] = '0'\n                q = deque([(i, j)])\n                while q:\n                    r, c = q.popleft()\n                    for dr, dc in dirs:\n                        nr, nc = r + dr, c + dc\n                        if 0 <= nr < m and 0 <= nc < n and grid[nr][nc] == '1':\n                            grid[nr][nc] = '0'\n                            q.append((nr, nc))\n        return count",
+        "java": "import java.util.*;\nclass Solution {\n    public int numIslands(char[][] grid) {\n        if (grid == null || grid.length == 0) return 0;\n        int m = grid.length, n = grid[0].length;\n        int count = 0;\n        int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1}};\n        Queue<int[]> q = new ArrayDeque<>();\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] != '1') continue;\n                count++;\n                grid[i][j] = '0';\n                q.offer(new int[]{i, j});\n                while (!q.isEmpty()) {\n                    int[] cur = q.poll();\n                    for (int[] d : dirs) {\n                        int nr = cur[0] + d[0], nc = cur[1] + d[1];\n                        if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr][nc] == '1') {\n                            grid[nr][nc] = '0';\n                            q.offer(new int[]{nr, nc});\n                        }\n                    }\n                }\n            }\n        }\n        return count;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Each cell enqueued/dequeued at most once, O(1) work per cell."
+      },
+      "spaceComplexity": {
+        "complexity": "O(min(m, n)) to O(m * n)",
+        "explanation": "Queue holds frontier of current BFS. Worst case all land -> O(m*n). Typical narrow frontier -> O(min(m,n)). No recursion stack."
+      },
+      "dryRunExample": {
+        "input": "grid = [['1','1','1'],['0','1','0'],['1','0','1']]",
+        "steps": [
+          "start (0,0) count=1, queue=[(0,0)], mark visited",
+          "pop (0,0) -> add (0,1); pop (0,1) -> add (0,2),(1,1); drain until component {(0,0),(0,1),(0,2),(1,1)} sunk",
+          "start (2,0) count=2, BFS sinks alone",
+          "start (2,2) count=3, BFS sinks alone -> return 3"
+        ],
+        "output": "3"
+      },
+      "edgeCases": [
+        "300x300 all '1' -> queue grows large but no stack overflow",
+        "Checkerboard [['1','0'],['0','1']] -> 2 islands, BFS starts twice",
+        "Single row [['1','1','0','1']] -> 2 islands"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Union-Find (Disjoint Set Union)",
+      "tag": "Optimal",
+      "intuition": "Treat each land cell as its own set, then union right and down land neighbors. Number of distinct sets among land cells equals number of islands. Ideal when grid is built incrementally.",
+      "theory": "Initialize parent for each cell id=r*n+c. Count initial lands. For each land, union with land to right and down (checking only 2 directions avoids duplicate work). Union by rank + path compression gives near-O(1) amortized per operation. Decrement island count on each successful merge. Final count is answer without mutating grid.",
+      "cppCode": "class DSU {\npublic:\n    vector<int> p, r;\n    DSU(int n): p(n), r(n, 0) { iota(p.begin(), p.end(), 0); }\n    int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }\n    bool unite(int a, int b) {\n        a = find(a); b = find(b);\n        if (a == b) return false;\n        if (r[a] < r[b]) swap(a, b);\n        p[b] = a;\n        if (r[a] == r[b]) ++r[a];\n        return true;\n    }\n};\nclass Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        if (grid.empty() || grid[0].empty()) return 0;\n        int m = grid.size(), n = grid[0].size();\n        DSU dsu(m * n);\n        int count = 0;\n        for (int i = 0; i < m; ++i)\n            for (int j = 0; j < n; ++j)\n                if (grid[i][j] == '1') ++count;\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (grid[i][j] != '1') continue;\n                int cur = i * n + j;\n                if (j + 1 < n && grid[i][j + 1] == '1')\n                    if (dsu.unite(cur, i * n + j + 1)) --count;\n                if (i + 1 < m && grid[i + 1][j] == '1')\n                    if (dsu.unite(cur, (i + 1) * n + j)) --count;\n            }\n        }\n        return count;\n    }\n};",
+      "code": {
+        "cpp": "class DSU {\npublic:\n    vector<int> p, r;\n    DSU(int n): p(n), r(n, 0) { iota(p.begin(), p.end(), 0); }\n    int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }\n    bool unite(int a, int b) {\n        a = find(a); b = find(b);\n        if (a == b) return false;\n        if (r[a] < r[b]) swap(a, b);\n        p[b] = a;\n        if (r[a] == r[b]) ++r[a];\n        return true;\n    }\n};\nclass Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        if (grid.empty() || grid[0].empty()) return 0;\n        int m = grid.size(), n = grid[0].size();\n        DSU dsu(m * n);\n        int count = 0;\n        for (int i = 0; i < m; ++i)\n            for (int j = 0; j < n; ++j)\n                if (grid[i][j] == '1') ++count;\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (grid[i][j] != '1') continue;\n                int cur = i * n + j;\n                if (j + 1 < n && grid[i][j + 1] == '1')\n                    if (dsu.unite(cur, i * n + j + 1)) --count;\n                if (i + 1 < m && grid[i + 1][j] == '1')\n                    if (dsu.unite(cur, (i + 1) * n + j)) --count;\n            }\n        }\n        return count;\n    }\n};",
+        "python": "from typing import List\nclass DSU:\n    def __init__(self, n: int):\n        self.p = list(range(n))\n        self.r = [0] * n\n    def find(self, x: int) -> int:\n        while self.p[x] != x:\n            self.p[x] = self.p[self.p[x]]\n            x = self.p[x]\n        return x\n    def union(self, a: int, b: int) -> bool:\n        ra, rb = self.find(a), self.find(b)\n        if ra == rb:\n            return False\n        if self.r[ra] < self.r[rb]:\n            ra, rb = rb, ra\n        self.p[rb] = ra\n        if self.r[ra] == self.r[rb]:\n            self.r[ra] += 1\n        return True\nclass Solution:\n    def numIslands(self, grid: List[List[str]]) -> int:\n        if not grid or not grid[0]:\n            return 0\n        m, n = len(grid), len(grid[0])\n        dsu = DSU(m * n)\n        count = 0\n        for i in range(m):\n            for j in range(n):\n                if grid[i][j] == '1':\n                    count += 1\n        for i in range(m):\n            for j in range(n):\n                if grid[i][j] != '1':\n                    continue\n                cur = i * n + j\n                if j + 1 < n and grid[i][j + 1] == '1':\n                    if dsu.union(cur, i * n + j + 1):\n                        count -= 1\n                if i + 1 < m and grid[i + 1][j] == '1':\n                    if dsu.union(cur, (i + 1) * n + j):\n                        count -= 1\n        return count",
+        "java": "class DSU {\n    int[] p, r;\n    DSU(int n) { p = new int[n]; r = new int[n]; for (int i = 0; i < n; i++) p[i] = i; }\n    int find(int x) { if (p[x] != x) p[x] = find(p[x]); return p[x]; }\n    boolean union(int a, int b) {\n        a = find(a); b = find(b);\n        if (a == b) return false;\n        if (r[a] < r[b]) { int t = a; a = b; b = t; }\n        p[b] = a;\n        if (r[a] == r[b]) r[a]++;\n        return true;\n    }\n}\nclass Solution {\n    public int numIslands(char[][] grid) {\n        if (grid == null || grid.length == 0) return 0;\n        int m = grid.length, n = grid[0].length;\n        DSU dsu = new DSU(m * n);\n        int count = 0;\n        for (int i = 0; i < m; i++)\n            for (int j = 0; j < n; j++)\n                if (grid[i][j] == '1') count++;\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] != '1') continue;\n                int cur = i * n + j;\n                if (j + 1 < n && grid[i][j + 1] == '1')\n                    if (dsu.union(cur, i * n + j + 1)) count--;\n                if (i + 1 < m && grid[i + 1][j] == '1')\n                    if (dsu.union(cur, (i + 1) * n + j)) count--;\n            }\n        }\n        return count;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(m * n * alpha(m*n))",
+        "explanation": "Almost linear; alpha is inverse Ackermann, <5 for any practical input. Each land unions at most twice."
+      },
+      "spaceComplexity": {
+        "complexity": "O(m * n)",
+        "explanation": "Parent and rank arrays of size m*n. Does not mutate grid, so needs extra DSU storage vs in-place DFS/BFS."
+      },
+      "dryRunExample": {
+        "input": "grid = [['1','1','0'],['0','1','0'],['0','0','1']]",
+        "steps": [
+          "initial land count=4, ids 0,1,4,8",
+          "(0,0) union (0,1) -> count=3",
+          "(0,1) union (1,1) -> count=2",
+          "(1,1) has no right/down land, (2,2) isolated",
+          "final count=2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "All water -> count 0, no unions",
+        "All land 3x3 -> 9 lands merged to 1 via 12 unions",
+        "Does not modify input, useful when grid is read-only",
+        "Follow-up Number of Islands II (dynamic adds) requires this approach"
+      ]
+    }
+  ]
+}

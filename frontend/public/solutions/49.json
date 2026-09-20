@@ -1,0 +1,130 @@
+{
+  "questionId": 49,
+  "title": "Group Anagrams",
+  "difficulty": "Medium",
+  "corePattern": "Hashing by Canonical Key - Equivalence Class Grouping",
+  "interviewTips": [
+    "Ask if strings contain only lowercase English letters or Unicode - this decides between 26-count array vs sorting vs generic Counter key.",
+    "Clarify that order does not matter: any order of groups and any order inside groups is accepted.",
+    "Trade-off: sorted key is simpler and general O(K log K); counting key is O(K) per string and optimal under lowercase constraint.",
+    "Cover edge cases: empty input, single string, empty strings, duplicates, all anagrams vs no anagrams, and very long strings."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force Pairwise Comparison",
+      "tag": "Brute Force",
+      "intuition": "If two strings are anagrams they have identical character frequencies. Pick the first ungrouped string as a representative, scan all later ungrouped strings and pull those that are anagrams of it into the same group, then repeat.",
+      "theory": "Define equivalence relation: a ~ b if isAnagram(a,b). We build equivalence classes greedily. isAnagram is checked in O(K) by counting 26 letters: increment for a, decrement for b, all zero means anagram. Each string is compared to at most N representatives, giving N^2 comparisons in worst case. This is correct but repeats counting work many times instead of hashing once.",
+      "cppCode": "class Solution {\npublic:\n    bool isAnagram(const string& a, const string& b) {\n        if (a.size() != b.size()) return false;\n        vector<int> freq(26, 0);\n        for (char c : a) freq[c - 'a']++;\n        for (char c : b) freq[c - 'a']--;\n        for (int x : freq) if (x != 0) return false;\n        return true;\n    }\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        int n = strs.size();\n        vector<bool> visited(n, false);\n        vector<vector<string>> res;\n        for (int i = 0; i < n; ++i) {\n            if (visited[i]) continue;\n            vector<string> group;\n            group.push_back(strs[i]);\n            visited[i] = true;\n            for (int j = i + 1; j < n; ++j) {\n                if (!visited[j] && isAnagram(strs[i], strs[j])) {\n                    group.push_back(strs[j]);\n                    visited[j] = true;\n                }\n            }\n            res.push_back(move(group));\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool isAnagram(const string& a, const string& b) {\n        if (a.size() != b.size()) return false;\n        vector<int> freq(26, 0);\n        for (char c : a) freq[c - 'a']++;\n        for (char c : b) freq[c - 'a']--;\n        for (int x : freq) if (x != 0) return false;\n        return true;\n    }\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        int n = strs.size();\n        vector<bool> visited(n, false);\n        vector<vector<string>> res;\n        for (int i = 0; i < n; ++i) {\n            if (visited[i]) continue;\n            vector<string> group;\n            group.push_back(strs[i]);\n            visited[i] = true;\n            for (int j = i + 1; j < n; ++j) {\n                if (!visited[j] && isAnagram(strs[i], strs[j])) {\n                    group.push_back(strs[j]);\n                    visited[j] = true;\n                }\n            }\n            res.push_back(move(group));\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:\n        n = len(strs)\n        visited = [False] * n\n        res = []\n        def is_anagram(a: str, b: str) -> bool:\n            if len(a) != len(b):\n                return False\n            freq = [0] * 26\n            for ch in a:\n                freq[ord(ch) - 97] += 1\n            for ch in b:\n                freq[ord(ch) - 97] -= 1\n            return all(x == 0 for x in freq)\n        for i in range(n):\n            if visited[i]:\n                continue\n            group = [strs[i]]\n            visited[i] = True\n            for j in range(i + 1, n):\n                if not visited[j] and is_anagram(strs[i], strs[j]):\n                    group.append(strs[j])\n                    visited[j] = True\n            res.append(group)\n        return res",
+        "java": "class Solution {\n    private boolean isAnagram(String a, String b) {\n        if (a.length() != b.length()) return false;\n        int[] freq = new int[26];\n        for (char c : a.toCharArray()) freq[c - 'a']++;\n        for (char c : b.toCharArray()) freq[c - 'a']--;\n        for (int x : freq) if (x != 0) return false;\n        return true;\n    }\n    public List<List<String>> groupAnagrams(String[] strs) {\n        int n = strs.length;\n        boolean[] visited = new boolean[n];\n        List<List<String>> res = new ArrayList<>();\n        for (int i = 0; i < n; i++) {\n            if (visited[i]) continue;\n            List<String> group = new ArrayList<>();\n            group.add(strs[i]);\n            visited[i] = true;\n            for (int j = i + 1; j < n; j++) {\n                if (!visited[j] && isAnagram(strs[i], strs[j])) {\n                    group.add(strs[j]);\n                    visited[j] = true;\n                }\n            }\n            res.add(group);\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N^2 * K)",
+        "explanation": "N strings, up to O(N^2) pairs checked, each isAnagram costs O(K) for length K to build 26-counts. Worst case when no anagrams."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N * K)",
+        "explanation": "Output stores all strings plus O(26)=O(1) temp freq per check and O(N) visited array."
+      },
+      "dryRunExample": {
+        "input": "strs = [eat, tea, tan, ate, nat, bat]",
+        "steps": [
+          "i=0 eat unvisited -> group=[eat], compare tea: anagram -> add, tan: no, ate: anagram -> add, nat: no, bat: no => [eat,tea,ate]",
+          "i=1 tea visited skip, i=2 tan unvisited -> group=[tan], ate visited skip, nat: anagram -> add, bat: no => [tan,nat]",
+          "i=5 bat unvisited -> group=[bat]",
+          "result [[eat,tea,ate],[tan,nat],[bat]]"
+        ],
+        "output": "[[eat,tea,ate],[tan,nat],[bat]] in any order"
+      },
+      "edgeCases": [
+        "Empty list [] => return []",
+        "Single string [a] => [[a]]",
+        "Empty strings ['', ''] => [['','']] grouped together",
+        "Duplicates [eat,eat] stay in same group"
+      ]
+    },
+    {
+      "id": "sorted-key",
+      "name": "Approach 2: Sorted String as Hash Key",
+      "tag": "Hashing + Sorting",
+      "intuition": "Anagrams become identical when sorted. Use the sorted version of each string as a canonical key in a hash map, all strings sharing the same key belong to the same group.",
+      "theory": "Sorting is a canonicalization function f where f(s1)==f(s2) iff s1 and s2 are anagrams. Hash map from key to list gives O(1) average grouping per string. This works for any comparable characters including Unicode, no alphabet size assumption needed. Cost is dominated by sorting each string of length K.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        unordered_map<string, vector<string>> mp;\n        for (auto &s : strs) {\n            string k = s;\n            sort(k.begin(), k.end());\n            mp[k].push_back(s);\n        }\n        vector<vector<string>> res;\n        res.reserve(mp.size());\n        for (auto &p : mp) res.push_back(move(p.second));\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        unordered_map<string, vector<string>> mp;\n        for (auto &s : strs) {\n            string k = s;\n            sort(k.begin(), k.end());\n            mp[k].push_back(s);\n        }\n        vector<vector<string>> res;\n        res.reserve(mp.size());\n        for (auto &p : mp) res.push_back(move(p.second));\n        return res;\n    }\n};",
+        "python": "from collections import defaultdict\nclass Solution:\n    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:\n        mp = defaultdict(list)\n        for s in strs:\n            key = ''.join(sorted(s))\n            mp[key].append(s)\n        return list(mp.values())",
+        "java": "class Solution {\n    public List<List<String>> groupAnagrams(String[] strs) {\n        Map<String, List<String>> mp = new HashMap<>();\n        for (String s : strs) {\n            char[] arr = s.toCharArray();\n            Arrays.sort(arr);\n            String k = new String(arr);\n            mp.computeIfAbsent(k, x -> new ArrayList<>()).add(s);\n        }\n        return new ArrayList<>(mp.values());\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N * K log K)",
+        "explanation": "N strings, sorting each length-K string costs O(K log K). Hash map operations O(K) to hash key average."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N * K)",
+        "explanation": "Hash map stores N strings plus sorted keys of total O(N*K) characters."
+      },
+      "dryRunExample": {
+        "input": "strs = [eat, tea, tan, ate, nat, bat]",
+        "steps": [
+          "eat -> key aet -> map{aet:[eat]}",
+          "tea -> key aet -> map{aet:[eat,tea]}",
+          "tan -> key ant -> map{aet:[eat,tea], ant:[tan]}",
+          "ate -> key aet -> map{aet:[eat,tea,ate], ant:[tan]}",
+          "nat -> key ant -> map{ant:[tan,nat]}",
+          "bat -> key abt -> map{... abt:[bat]}",
+          "return values"
+        ],
+        "output": "[[eat,tea,ate],[tan,nat],[bat]] in any order"
+      },
+      "edgeCases": [
+        "Empty string '' -> sorted key '' works",
+        "All distinct: [abc, def, ghi] => three singleton groups",
+        "All same anagram: [eat,tea,ate] => one group",
+        "Unicode strings still work with sorting"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Character Frequency Count as Hash Key",
+      "tag": "Optimal",
+      "intuition": "Instead of sorting, count letters a-z. Two anagrams have identical 26-length frequency vectors, so use that vector as hash key. Counting is linear in string length.",
+      "theory": "For lowercase English constraint, frequency vector of size 26 is a canonical form computable in O(K). Encode as tuple in Python, delimited string or array in C++/Java for hashing. Each string processed once: O(K) to count + O(26) to build key. Optimal when alphabet Sigma is small and fixed. Generalizes to larger alphabets with HashMap of counts but 26-array is fastest here.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        unordered_map<string, vector<string>> mp;\n        for (auto &s : strs) {\n            vector<int> cnt(26, 0);\n            for (char c : s) cnt[c - 'a']++;\n            string key;\n            key.reserve(52);\n            for (int i = 0; i < 26; ++i) {\n                key += to_string(cnt[i]);\n                key.push_back('#');\n            }\n            mp[key].push_back(s);\n        }\n        vector<vector<string>> res;\n        res.reserve(mp.size());\n        for (auto &p : mp) res.push_back(move(p.second));\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        unordered_map<string, vector<string>> mp;\n        for (auto &s : strs) {\n            vector<int> cnt(26, 0);\n            for (char c : s) cnt[c - 'a']++;\n            string key;\n            key.reserve(52);\n            for (int i = 0; i < 26; ++i) {\n                key += to_string(cnt[i]);\n                key.push_back('#');\n            }\n            mp[key].push_back(s);\n        }\n        vector<vector<string>> res;\n        res.reserve(mp.size());\n        for (auto &p : mp) res.push_back(move(p.second));\n        return res;\n    }\n};",
+        "python": "from collections import defaultdict\nclass Solution:\n    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:\n        mp = defaultdict(list)\n        for s in strs:\n            cnt = [0] * 26\n            for ch in s:\n                cnt[ord(ch) - 97] += 1\n            mp[tuple(cnt)].append(s)\n        return list(mp.values())",
+        "java": "class Solution {\n    public List<List<String>> groupAnagrams(String[] strs) {\n        Map<String, List<String>> mp = new HashMap<>();\n        for (String s : strs) {\n            int[] cnt = new int[26];\n            for (char c : s.toCharArray()) cnt[c - 'a']++;\n            StringBuilder sb = new StringBuilder();\n            for (int i = 0; i < 26; i++) {\n                sb.append(cnt[i]).append('#');\n            }\n            String key = sb.toString();\n            mp.computeIfAbsent(key, x -> new ArrayList<>()).add(s);\n        }\n        return new ArrayList<>(mp.values());\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(N * K)",
+        "explanation": "N strings, each needs O(K) to count characters plus O(26)=O(1) to build key. Hash insert O(1) average."
+      },
+      "spaceComplexity": {
+        "complexity": "O(N * K)",
+        "explanation": "Map stores all N strings. Keys add O(N*26)=O(N) overhead. Counting array O(26)=O(1) per iteration."
+      },
+      "dryRunExample": {
+        "input": "strs = [eat, tea, tan, ate, nat, bat]",
+        "steps": [
+          "eat -> counts {a:1,e:1,t:1} -> key 1#0#0#0#1#... -> group1",
+          "tea -> same counts -> same key -> group1=[eat,tea]",
+          "tan -> counts {a:1,n:1,t:1} -> new key -> group2=[tan]",
+          "ate -> same as eat -> group1=[eat,tea,ate]",
+          "nat -> same as tan -> group2=[tan,nat]",
+          "bat -> counts {a:1,b:1,t:1} -> new key -> group3=[bat]"
+        ],
+        "output": "[[eat,tea,ate],[tan,nat],[bat]] in any order"
+      },
+      "edgeCases": [
+        "Empty string '' -> all-zero count key, all empties group together",
+        "Long strings length 100: counting stays linear, sorting would be slower",
+        "Requires lowercase a-z; for uppercase or Unicode use sorting or generic Counter key",
+        "Input [] => return [] without building keys"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "questionId": 102,
+  "title": "Binary Tree Level Order Traversal",
+  "difficulty": "Medium",
+  "corePattern": "Breadth-First Search (BFS) Level Order Traversal",
+  "interviewTips": [
+    "Clarify input: can root be null? Should you return [] vs null? What is expected node value range?",
+    "Trade-off: BFS with queue is iterative O(n) and most intuitive; DFS with depth index also O(n) but uses call stack - discuss recursion depth risk on skewed tree (stack overflow in C++/Java).",
+    "Edge-case tip: capture level size before loop (int n = q.size()) - otherwise mixing next level nodes corrupts grouping; always check null children before enqueue.",
+    "Follow-up readiness: be ready to extend to Zigzag (103), Bottom-up (107), Right-side view (199) - all reuse same level-separation template."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Height + Collect Level by Level",
+      "tag": "Brute Force",
+      "intuition": "If we knew tree height h, level order is just collect all nodes at distance 0, then distance 1, ..., distance h-1 from root. Distance-k nodes can be found by simple recursion: go down k steps.",
+      "theory": "First compute height via max(leftHeight, rightHeight)+1. Then for each level i in [0,h), run a DFS that decrements level until 0 and appends node.val. This repeats full traversals h times. Correct because collect(root,i) visits exactly nodes whose depth==i in left-to-right order. Time is O(n*h) since each of h levels scans O(n) nodes. In worst skewed case h=n => O(n^2); in balanced case h=log n => O(n log n). Space is O(h) recursion stack for height/collect plus O(n) output.",
+      "cppCode": "class Solution {\npublic:\n    int getHeight(TreeNode* root) {\n        if (!root) return 0;\n        return 1 + max(getHeight(root->left), getHeight(root->right));\n    }\n    void collect(TreeNode* root, int level, vector<int>& cur) {\n        if (!root) return;\n        if (level == 0) cur.push_back(root->val);\n        else {\n            collect(root->left, level - 1, cur);\n            collect(root->right, level - 1, cur);\n        }\n    }\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        if (!root) return {};\n        int h = getHeight(root);\n        vector<vector<int>> res;\n        for (int i = 0; i < h; ++i) {\n            vector<int> cur;\n            collect(root, i, cur);\n            res.push_back(cur);\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int getHeight(TreeNode* root) {\n        if (!root) return 0;\n        return 1 + max(getHeight(root->left), getHeight(root->right));\n    }\n    void collect(TreeNode* root, int level, vector<int>& cur) {\n        if (!root) return;\n        if (level == 0) cur.push_back(root->val);\n        else {\n            collect(root->left, level - 1, cur);\n            collect(root->right, level - 1, cur);\n        }\n    }\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        if (!root) return {};\n        int h = getHeight(root);\n        vector<vector<int>> res;\n        for (int i = 0; i < h; ++i) {\n            vector<int> cur;\n            collect(root, i, cur);\n            res.push_back(cur);\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:\n        if not root:\n            return []\n        def height(node):\n            if not node:\n                return 0\n            return 1 + max(height(node.left), height(node.right))\n        def collect(node, level, cur):\n            if not node:\n                return\n            if level == 0:\n                cur.append(node.val)\n            else:\n                collect(node.left, level - 1, cur)\n                collect(node.right, level - 1, cur)\n        h = height(root)\n        res = []\n        for i in range(h):\n            cur = []\n            collect(root, i, cur)\n            res.append(cur)\n        return res",
+        "java": "class Solution {\n    private int getHeight(TreeNode root) {\n        if (root == null) return 0;\n        return 1 + Math.max(getHeight(root.left), getHeight(root.right));\n    }\n    private void collect(TreeNode root, int level, List<Integer> cur) {\n        if (root == null) return;\n        if (level == 0) cur.add(root.val);\n        else {\n            collect(root.left, level - 1, cur);\n            collect(root.right, level - 1, cur);\n        }\n    }\n    public List<List<Integer>> levelOrder(TreeNode root) {\n        List<List<Integer>> res = new ArrayList<>();\n        if (root == null) return res;\n        int h = getHeight(root);\n        for (int i = 0; i < h; i++) {\n            List<Integer> cur = new ArrayList<>();\n            collect(root, i, cur);\n            res.add(cur);\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * h)",
+        "explanation": "h = height. Each of h levels does a full O(n) traversal to find nodes at that depth. Worst O(n^2) for skewed chain (h=n), O(n log n) for balanced tree."
+      },
+      "spaceComplexity": {
+        "complexity": "O(h)",
+        "explanation": "Recursion stack depth h for height/collect, plus O(n) for output (not counted as auxiliary by some interviewers). No queue used."
+      },
+      "dryRunExample": {
+        "input": "root = [3,9,20,null,null,15,7]",
+        "steps": [
+          "height(root)=3",
+          "i=0: collect(root,0) => [3]",
+          "i=1: collect(root,1) => left 9, right 20 => [9,20]",
+          "i=2: collect(root,2) => [15,7]"
+        ],
+        "output": "[[3],[9,20],[15,7]]"
+      },
+      "edgeCases": [
+        "Empty tree (null) => return []",
+        "Single node => [[val]]",
+        "Skewed chain e.g. [1,null,2,null,3] => [[1],[2],[3]] with O(n^2) time - highlights inefficiency",
+        "Unbalanced with missing children - null checks prevent crash"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: BFS with Queue and Level Size",
+      "tag": "Optimal",
+      "intuition": "Process tree level by level using a FIFO queue. All nodes of current depth are in queue; snapshot queue size, pop exactly that many, push their children for next level.",
+      "theory": "BFS guarantees visitation in increasing depth order because queue is FIFO: nodes enqueued earlier (shallower) are dequeued earlier. By fixing n = q.size() at start of each while iteration, we isolate one level. Each node is enqueued and dequeued exactly once, preserving left-to-right order by pushing left before right. This yields correct level grouping in single pass.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        vector<vector<int>> res;\n        if (!root) return res;\n        queue<TreeNode*> q;\n        q.push(root);\n        while (!q.empty()) {\n            int n = q.size();\n            vector<int> level;\n            level.reserve(n);\n            for (int i = 0; i < n; ++i) {\n                TreeNode* node = q.front(); q.pop();\n                level.push_back(node->val);\n                if (node->left) q.push(node->left);\n                if (node->right) q.push(node->right);\n            }\n            res.push_back(move(level));\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        vector<vector<int>> res;\n        if (!root) return res;\n        queue<TreeNode*> q;\n        q.push(root);\n        while (!q.empty()) {\n            int n = q.size();\n            vector<int> level;\n            level.reserve(n);\n            for (int i = 0; i < n; ++i) {\n                TreeNode* node = q.front(); q.pop();\n                level.push_back(node->val);\n                if (node->left) q.push(node->left);\n                if (node->right) q.push(node->right);\n            }\n            res.push_back(move(level));\n        }\n        return res;\n    }\n};",
+        "python": "from collections import deque\nclass Solution:\n    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:\n        if not root:\n            return []\n        res = []\n        q = deque([root])\n        while q:\n            n = len(q)\n            level = []\n            for _ in range(n):\n                node = q.popleft()\n                level.append(node.val)\n                if node.left:\n                    q.append(node.left)\n                if node.right:\n                    q.append(node.right)\n            res.append(level)\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> levelOrder(TreeNode root) {\n        List<List<Integer>> res = new ArrayList<>();\n        if (root == null) return res;\n        Queue<TreeNode> q = new LinkedList<>();\n        q.offer(root);\n        while (!q.isEmpty()) {\n            int n = q.size();\n            List<Integer> level = new ArrayList<>(n);\n            for (int i = 0; i < n; i++) {\n                TreeNode node = q.poll();\n                level.add(node.val);\n                if (node.left != null) q.offer(node.left);\n                if (node.right != null) q.offer(node.right);\n            }\n            res.add(level);\n        }\n        return res;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each of n nodes enqueued and dequeued once, O(1) work per node."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Queue holds at most one full level (max width). Worst O(n/2)=O(n) for perfect tree last level; plus O(n) output."
+      },
+      "dryRunExample": {
+        "input": "root = [3,9,20,null,null,15,7]",
+        "steps": [
+          "q=[3] => n=1, pop 3, push 9,20 => level [3], q=[9,20]",
+          "n=2, pop 9 (no children), pop 20 (push 15,7) => level [9,20], q=[15,7]",
+          "n=2, pop 15, pop 7 => level [15,7], q=[]"
+        ],
+        "output": "[[3],[9,20],[15,7]]"
+      },
+      "edgeCases": [
+        "Empty tree => []",
+        "Single node => [[val]]",
+        "Skewed tree => queue size stays 1, still O(n)",
+        "Large width (perfect tree) => queue grows to ~n/2, fits in memory O(n)"
+      ]
+    }
+  ]
+}

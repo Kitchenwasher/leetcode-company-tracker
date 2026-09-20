@@ -1,0 +1,131 @@
+{
+  "questionId": 34,
+  "title": "Find First and Last Position of Element in Sorted Array",
+  "difficulty": "Medium",
+  "corePattern": "Modified Binary Search - Lower Bound and Upper Bound",
+  "interviewTips": [
+    "Clarify constraints: can nums be empty? Is target guaranteed to exist? Confirm required return [-1,-1] when not found and O(log n) time expectation.",
+    "Trade-off discussion: linear scan is O(n) and simple but fails requirement; binary-search-plus-expand is O(log n) average but O(n) worst-case when array is all target, only dual lower/upper bound search guarantees O(log n).",
+    "Edge-case tip: test empty array, single element, target smaller than all elements, larger than all, all elements equal to target, and target at index 0 or n-1 to validate boundary updates with lo <= hi and hi = mid - 1 / lo = mid + 1.",
+    "Implementation tip: never use mid = (lo+hi)//2 in Java/C++ without overflow guard; use mid = lo + (hi-lo)//2, and reuse one findBound helper with a findFirst flag to avoid duplicated code."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Linear Scan (Brute Force)",
+      "tag": "Brute Force",
+      "intuition": "Since we just need first and last occurrence, scan left to right and record the first index where nums[i]==target and keep updating last index. This works on any array, sorted or not, but ignores sortedness.",
+      "theory": "Single pass maintains first = -1 and last = -1. For each i, if nums[i]==target then if first==-1 set first=i, and always set last=i. Because scan is in order, first stays as leftmost and last ends as rightmost. Correct by order of traversal. Takes n comparisons.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> searchRange(vector<int>& nums, int target) {\n        int first = -1, last = -1;\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            if (nums[i] == target) {\n                if (first == -1) first = i;\n                last = i;\n            }\n        }\n        return {first, last};\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> searchRange(vector<int>& nums, int target) {\n        int first = -1, last = -1;\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            if (nums[i] == target) {\n                if (first == -1) first = i;\n                last = i;\n            }\n        }\n        return {first, last};\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def searchRange(self, nums: List[int], target: int) -> List[int]:\n        first, last = -1, -1\n        for i, x in enumerate(nums):\n            if x == target:\n                if first == -1:\n                    first = i\n                last = i\n        return [first, last]",
+        "java": "class Solution {\n    public int[] searchRange(int[] nums, int target) {\n        int first = -1, last = -1;\n        for (int i = 0; i < nums.length; i++) {\n            if (nums[i] == target) {\n                if (first == -1) first = i;\n                last = i;\n            }\n        }\n        return new int[]{first, last};\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "One linear pass over n elements, each does O(1) comparison. Does not exploit sortedness."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two integer variables first and last besides output array of size 2."
+      },
+      "dryRunExample": {
+        "input": "nums = [5,7,7,8,8,10], target = 8",
+        "steps": [
+          "i=0 val 5 !=8 skip",
+          "i=1 val 7 !=8 skip",
+          "i=2 val 7 !=8 skip",
+          "i=3 val 8 ==8 -> first=3 last=3",
+          "i=4 val 8 ==8 -> last=4",
+          "i=5 val 10 !=8 skip",
+          "return [3,4]"
+        ],
+        "output": "[3,4]"
+      },
+      "edgeCases": [
+        "Empty array [] -> [-1,-1]",
+        "Target absent e.g. [5,7,7,8,8,10] target 6 -> [-1,-1]",
+        "All same e.g. [2,2,2] target 2 -> [0,2]",
+        "Single element [1] target 1 -> [0,0]"
+      ]
+    },
+    {
+      "id": "binary-expand",
+      "name": "Approach 2: Binary Search + Two-Way Expansion",
+      "tag": "Binary Search",
+      "intuition": "Use standard binary search to find any occurrence of target in O(log n), then expand left and right linearly to find boundaries. Leverages sortedness to jump to the target block quickly.",
+      "theory": "Sorted array guarantees all copies of target are contiguous. If binary search finds index m with nums[m]==target, the true first is the leftmost contiguous equal element and last is rightmost. Expanding with while left>=0 and nums[left]==target and while right<n and nums[right]==target finds them. Correct but expansion can be O(n) if many duplicates.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> searchRange(vector<int>& nums, int target) {\n        int n = nums.size();\n        int lo = 0, hi = n - 1, found = -1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) { found = mid; break; }\n            else if (nums[mid] < target) lo = mid + 1;\n            else hi = mid - 1;\n        }\n        if (found == -1) return {-1, -1};\n        int l = found, r = found;\n        while (l - 1 >= 0 && nums[l - 1] == target) --l;\n        while (r + 1 < n && nums[r + 1] == target) ++r;\n        return {l, r};\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> searchRange(vector<int>& nums, int target) {\n        int n = nums.size();\n        int lo = 0, hi = n - 1, found = -1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) { found = mid; break; }\n            else if (nums[mid] < target) lo = mid + 1;\n            else hi = mid - 1;\n        }\n        if (found == -1) return {-1, -1};\n        int l = found, r = found;\n        while (l - 1 >= 0 && nums[l - 1] == target) --l;\n        while (r + 1 < n && nums[r + 1] == target) ++r;\n        return {l, r};\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def searchRange(self, nums: List[int], target: int) -> List[int]:\n        n = len(nums)\n        lo, hi = 0, n - 1\n        found = -1\n        while lo <= hi:\n            mid = lo + (hi - lo) // 2\n            if nums[mid] == target:\n                found = mid\n                break\n            elif nums[mid] < target:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n        if found == -1:\n            return [-1, -1]\n        l = r = found\n        while l - 1 >= 0 and nums[l - 1] == target:\n            l -= 1\n        while r + 1 < n and nums[r + 1] == target:\n            r += 1\n        return [l, r]",
+        "java": "class Solution {\n    public int[] searchRange(int[] nums, int target) {\n        int n = nums.length;\n        int lo = 0, hi = n - 1, found = -1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) { found = mid; break; }\n            else if (nums[mid] < target) lo = mid + 1;\n            else hi = mid - 1;\n        }\n        if (found == -1) return new int[]{-1, -1};\n        int l = found, r = found;\n        while (l - 1 >= 0 && nums[l - 1] == target) l--;\n        while (r + 1 < n && nums[r + 1] == target) r++;\n        return new int[]{l, r};\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log n + k)",
+        "explanation": "O(log n) to find any occurrence plus O(k) to expand where k is count of target. Worst-case O(n) when whole array equals target, e.g. [2,2,...,2]."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only pointers lo, hi, mid, found, l, r use constant extra space."
+      },
+      "dryRunExample": {
+        "input": "nums = [5,7,7,8,8,10], target = 8",
+        "steps": [
+          "lo=0 hi=5 mid=2 val 7 <8 -> lo=3",
+          "lo=3 hi=5 mid=4 val 8 ==8 -> found=4",
+          "expand left: nums[3]==8 -> l=3, nums[2]==7 stop",
+          "expand right: nums[5]==10 stop -> r=4",
+          "return [3,4]"
+        ],
+        "output": "[3,4]"
+      },
+      "edgeCases": [
+        "All duplicates [7,7,7,7,7] target 7 -> expansion scans all n -> O(n)",
+        "Target absent -> binary search returns [-1,-1] without expansion",
+        "Target at ends e.g. [1,2,3] target 1 -> expand only right"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Two Modified Binary Searches (Lower and Upper Bound)",
+      "tag": "Optimal",
+      "intuition": "Find leftmost and rightmost positions independently by biasing binary search. When nums[mid]==target, do not stop: for first occurrence keep searching left (hi=mid-1), for last occurrence keep searching right (lo=mid+1) while remembering answer.",
+      "theory": "Define findBound(findFirst). Invariant: answer holds best candidate so far. If nums[mid]==target, record ans=mid then narrow to left half if findFirst else right half. If nums[mid]<target go right, else go left. This is exactly lower_bound and upper_bound-1. Each search maintains logarithmic range halving, so both converge to extreme occurrences. Correct because we never discard the side containing the extreme.",
+      "cppCode": "class Solution {\npublic:\n    int findBound(vector<int>& nums, int target, bool findFirst) {\n        int lo = 0, hi = (int)nums.size() - 1, ans = -1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) {\n                ans = mid;\n                if (findFirst) hi = mid - 1;\n                else lo = mid + 1;\n            } else if (nums[mid] < target) {\n                lo = mid + 1;\n            } else {\n                hi = mid - 1;\n            }\n        }\n        return ans;\n    }\n    vector<int> searchRange(vector<int>& nums, int target) {\n        return {findBound(nums, target, true), findBound(nums, target, false)};\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int findBound(vector<int>& nums, int target, bool findFirst) {\n        int lo = 0, hi = (int)nums.size() - 1, ans = -1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) {\n                ans = mid;\n                if (findFirst) hi = mid - 1;\n                else lo = mid + 1;\n            } else if (nums[mid] < target) {\n                lo = mid + 1;\n            } else {\n                hi = mid - 1;\n            }\n        }\n        return ans;\n    }\n    vector<int> searchRange(vector<int>& nums, int target) {\n        return {findBound(nums, target, true), findBound(nums, target, false)};\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def searchRange(self, nums: List[int], target: int) -> List[int]:\n        def findBound(findFirst: bool) -> int:\n            lo, hi, ans = 0, len(nums) - 1, -1\n            while lo <= hi:\n                mid = lo + (hi - lo) // 2\n                if nums[mid] == target:\n                    ans = mid\n                    if findFirst:\n                        hi = mid - 1\n                    else:\n                        lo = mid + 1\n                elif nums[mid] < target:\n                    lo = mid + 1\n                else:\n                    hi = mid - 1\n            return ans\n        return [findBound(True), findBound(False)]",
+        "java": "class Solution {\n    private int findBound(int[] nums, int target, boolean findFirst) {\n        int lo = 0, hi = nums.length - 1, ans = -1;\n        while (lo <= hi) {\n            int mid = lo + (hi - lo) / 2;\n            if (nums[mid] == target) {\n                ans = mid;\n                if (findFirst) hi = mid - 1;\n                else lo = mid + 1;\n            } else if (nums[mid] < target) {\n                lo = mid + 1;\n            } else {\n                hi = mid - 1;\n            }\n        }\n        return ans;\n    }\n    public int[] searchRange(int[] nums, int target) {\n        return new int[]{findBound(nums, target, true), findBound(nums, target, false)};\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(log n)",
+        "explanation": "Two binary searches each halve range per iteration, so 2*O(log n)=O(log n). Meets problem follow-up requirement."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Iterative binary search uses only lo, hi, mid, ans variables. No recursion or extra arrays."
+      },
+      "dryRunExample": {
+        "input": "nums = [5,7,7,8,8,10], target = 8",
+        "steps": [
+          "findFirst: lo=0 hi=5 mid=2 val7<8 lo=3",
+          "lo=3 hi=5 mid=4 val8==8 ans=4 hi=3",
+          "lo=3 hi=3 mid=3 val8==8 ans=3 hi=2 -> stop ans=3",
+          "findLast: lo=0 hi=5 mid=2 val7<8 lo=3",
+          "lo=3 hi=5 mid=4 val8==8 ans=4 lo=5",
+          "lo=5 hi=5 mid=5 val10>8 hi=4 -> stop ans=4",
+          "return [3,4]"
+        ],
+        "output": "[3,4]"
+      },
+      "edgeCases": [
+        "Empty [] -> lo=0 hi=-1 loop skipped -> [-1,-1]",
+        "Not found [5,7,7,8,8,10] target 9 -> both bounds -1",
+        "Single element [1] target 1 -> [0,0]",
+        "All equal [2,2,2,2] target 2 -> first search drifts left to 0, second drifts right to 3 -> [0,3]"
+      ]
+    }
+  ]
+}

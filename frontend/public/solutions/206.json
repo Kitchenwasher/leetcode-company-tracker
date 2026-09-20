@@ -1,0 +1,123 @@
+{
+  "questionId": 206,
+  "title": "Reverse Linked List",
+  "difficulty": "Easy",
+  "corePattern": "In-Place Linked List Pointer Reversal",
+  "interviewTips": [
+    "Ask if you must mutate original nodes in-place versus creating new nodes, and whether input can be empty or cyclic.",
+    "Trade-off: iterative O(1) space is production-preferred; recursion is elegant but risks stack overflow on long lists, stack-based uses O(n) extra space.",
+    "Edge-case tip: always test empty list, single node, two nodes, and ensure original head next is set to null to avoid a cycle."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Stack-Based Reversal",
+      "tag": "Brute Force",
+      "intuition": "Push all nodes onto a stack to reverse their order, then pop them to rebuild links from tail to head. Last-in-first-out naturally gives reversed order.",
+      "theory": "Traverse once pushing each node pointer onto a stack. The top is the original tail which becomes new head. Pop one by one linking curr.next to popped node. Finally set last node next to null. This uses extra storage to avoid careful pointer juggling but still runs in linear time.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        if (!head) return nullptr;\n        std::stack<ListNode*> st;\n        ListNode* curr = head;\n        while (curr) {\n            st.push(curr);\n            curr = curr->next;\n        }\n        ListNode* newHead = st.top(); st.pop();\n        curr = newHead;\n        while (!st.empty()) {\n            curr->next = st.top(); st.pop();\n            curr = curr->next;\n        }\n        curr->next = nullptr;\n        return newHead;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        if (!head) return nullptr;\n        std::stack<ListNode*> st;\n        ListNode* curr = head;\n        while (curr) {\n            st.push(curr);\n            curr = curr->next;\n        }\n        ListNode* newHead = st.top(); st.pop();\n        curr = newHead;\n        while (!st.empty()) {\n            curr->next = st.top(); st.pop();\n            curr = curr->next;\n        }\n        curr->next = nullptr;\n        return newHead;\n    }\n};",
+        "python": "class Solution:\n    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        stack = []\n        curr = head\n        while curr:\n            stack.append(curr)\n            curr = curr.next\n        if not stack:\n            return None\n        new_head = stack.pop()\n        curr = new_head\n        while stack:\n            node = stack.pop()\n            curr.next = node\n            curr = node\n        curr.next = None\n        return new_head",
+        "java": "class Solution {\n    public ListNode reverseList(ListNode head) {\n        Deque<ListNode> stack = new ArrayDeque<>();\n        ListNode curr = head;\n        while (curr != null) {\n            stack.push(curr);\n            curr = curr.next;\n        }\n        if (stack.isEmpty()) return null;\n        ListNode newHead = stack.pop();\n        curr = newHead;\n        while (!stack.isEmpty()) {\n            curr.next = stack.pop();\n            curr = curr.next;\n        }\n        curr.next = null;\n        return newHead;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each of n nodes is pushed once and popped once, two linear passes."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Stack stores n node pointers in addition to input."
+      },
+      "dryRunExample": {
+        "input": "head = [1,2,3]",
+        "steps": [
+          "push 1, push 2, push 3, stack top is 3",
+          "pop 3 as new_head, curr=3",
+          "pop 2, link 3->2, curr=2",
+          "pop 1, link 2->1, curr=1, set 1->null",
+          "return 3"
+        ],
+        "output": "[3,2,1]"
+      },
+      "edgeCases": [
+        "Empty list returns null without stack access",
+        "Single node push then pop returns same node with next set to null",
+        "Must set final curr.next to null else original head still points forward and creates cycle"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Iterative In-Place Reversal",
+      "tag": "Optimal",
+      "intuition": "Walk the list once flipping each next pointer to point backward. Keep prev as new head built so far and nxt to not lose the rest of the list.",
+      "theory": "Maintain invariant: nodes before curr are already reversed with prev as their head, nodes from curr onward are untouched. For each curr, save nxt=curr.next, redirect curr.next=prev, then advance prev=curr and curr=nxt. When curr becomes null, prev is the new head. Only three pointers are needed.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        ListNode* prev = nullptr;\n        ListNode* curr = head;\n        while (curr != nullptr) {\n            ListNode* nxt = curr->next;\n            curr->next = prev;\n            prev = curr;\n            curr = nxt;\n        }\n        return prev;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        ListNode* prev = nullptr;\n        ListNode* curr = head;\n        while (curr != nullptr) {\n            ListNode* nxt = curr->next;\n            curr->next = prev;\n            prev = curr;\n            curr = nxt;\n        }\n        return prev;\n    }\n};",
+        "python": "class Solution:\n    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        prev = None\n        curr = head\n        while curr:\n            nxt = curr.next\n            curr.next = prev\n            prev = curr\n            curr = nxt\n        return prev",
+        "java": "class Solution {\n    public ListNode reverseList(ListNode head) {\n        ListNode prev = null;\n        ListNode curr = head;\n        while (curr != null) {\n            ListNode nxt = curr.next;\n            curr.next = prev;\n            prev = curr;\n            curr = nxt;\n        }\n        return prev;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass visits each node once with O(1) work per node."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only prev, curr, nxt pointers, no extra allocation proportional to n."
+      },
+      "dryRunExample": {
+        "input": "head = [1,2,3,4,5]",
+        "steps": [
+          "prev=null, curr=1: save 2, 1->null, prev=1, curr=2",
+          "save 3, 2->1, prev=2, curr=3",
+          "save 4, 3->2, prev=3, curr=4",
+          "save 5, 4->3, prev=4, curr=5",
+          "save null, 5->4, prev=5, curr=null, return 5"
+        ],
+        "output": "[5,4,3,2,1]"
+      },
+      "edgeCases": [
+        "Empty list: loop skipped, return null",
+        "Single node: one flip to null, returns same node",
+        "Two nodes: verifies nxt save prevents losing second half"
+      ]
+    },
+    {
+      "id": "recursive",
+      "name": "Approach 3: Recursive Reversal",
+      "tag": "Recursion",
+      "intuition": "Reverse the suffix starting at head.next, then make that suffix tail point back to head. Let recursion handle all but the first edge.",
+      "theory": "Base case: empty or single node is already reversed. Recursive step: newHead=reverse(head.next) is head of reversed suffix. The suffix tail is head.next, so set head.next.next=head to append head at end, then head.next=null to break old link. Unwinding builds full reversal. Call depth equals list length.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        if (head == nullptr || head->next == nullptr) return head;\n        ListNode* newHead = reverseList(head->next);\n        head->next->next = head;\n        head->next = nullptr;\n        return newHead;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        if (head == nullptr || head->next == nullptr) return head;\n        ListNode* newHead = reverseList(head->next);\n        head->next->next = head;\n        head->next = nullptr;\n        return newHead;\n    }\n};",
+        "python": "class Solution:\n    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        if head is None or head.next is None:\n            return head\n        newHead = self.reverseList(head.next)\n        head.next.next = head\n        head.next = None\n        return newHead",
+        "java": "class Solution {\n    public ListNode reverseList(ListNode head) {\n        if (head == null || head.next == null) return head;\n        ListNode newHead = reverseList(head.next);\n        head.next.next = head;\n        head.next = null;\n        return newHead;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "n recursive calls each doing O(1) pointer rewiring."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Recursion call stack depth n in worst case, plus O(1) extra per frame."
+      },
+      "dryRunExample": {
+        "input": "head = [1,2,3]",
+        "steps": [
+          "reverse(1) calls reverse(2) calls reverse(3) returns 3",
+          "at 2: 3->2, 2->null, return 3",
+          "at 1: 2->1, 1->null, return 3",
+          "final head 3->2->1"
+        ],
+        "output": "[3,2,1]"
+      },
+      "edgeCases": [
+        "Empty list hits base case and returns null",
+        "Single node hits head.next==null and returns itself",
+        "Long list may cause stack overflow in languages with limited recursion depth, prefer iterative"
+      ]
+    }
+  ]
+}

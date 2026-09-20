@@ -1,0 +1,122 @@
+{
+  "questionId": 45,
+  "title": "Jump Game II",
+  "difficulty": "Medium",
+  "corePattern": "Greedy Range Expansion / BFS Layering",
+  "interviewTips": [
+    "Clarify guarantee: can you assume last index is always reachable? Yes per statement, so no -1 case.",
+    "Trade-off: O(n^2) DP is easy to derive but TLE for n=10^4; O(n) greedy with farthest and currentEnd is expected.",
+    "Edge-case tip: n==1 needs 0 jumps; do not count an extra jump when you start at target, and loop only to n-2 in greedy."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force DP",
+      "tag": "Brute Force",
+      "intuition": "If we know minimum jumps to reach every earlier index j, then minimum jumps to reach i is 1 plus the best j that can jump directly to i. Compute left to right.",
+      "theory": "Define dp[i] as min jumps to reach i. dp[0]=0, dp[i]=INF initially. For i from 1 to n-1, for j < i, if j+nums[j] >= i then dp[i]=min(dp[i], dp[j]+1). This is DAG shortest path where edge j->k exists if k <= j+nums[j]. Correct by optimal substructure: any optimal path to i comes via some predecessor j, so taking min over all feasible j is optimal.",
+      "cppCode": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        int n = nums.size();\n        const int INF = 1e9;\n        vector<int> dp(n, INF);\n        dp[0] = 0;\n        for (int i = 1; i < n; ++i) {\n            for (int j = 0; j < i; ++j) {\n                if (j + nums[j] >= i) {\n                    dp[i] = min(dp[i], dp[j] + 1);\n                }\n            }\n        }\n        return dp[n-1];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        int n = nums.size();\n        const int INF = 1e9;\n        vector<int> dp(n, INF);\n        dp[0] = 0;\n        for (int i = 1; i < n; ++i) {\n            for (int j = 0; j < i; ++j) {\n                if (j + nums[j] >= i) {\n                    dp[i] = min(dp[i], dp[j] + 1);\n                }\n            }\n        }\n        return dp[n-1];\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def jump(self, nums: List[int]) -> int:\n        n = len(nums)\n        INF = 10**9\n        dp = [INF] * n\n        dp[0] = 0\n        for i in range(1, n):\n            for j in range(i):\n                if j + nums[j] >= i:\n                    if dp[j] + 1 < dp[i]:\n                        dp[i] = dp[j] + 1\n        return dp[n-1]",
+        "java": "class Solution {\n    public int jump(int[] nums) {\n        int n = nums.length;\n        int INF = (int)1e9;\n        int[] dp = new int[n];\n        java.util.Arrays.fill(dp, INF);\n        dp[0] = 0;\n        for (int i = 1; i < n; i++) {\n            for (int j = 0; j < i; j++) {\n                if (j + nums[j] >= i && dp[j] != INF) {\n                    dp[i] = Math.min(dp[i], dp[j] + 1);\n                }\n            }\n        }\n        return dp[n-1];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "For each i we scan all j < i, total n*(n-1)/2 checks."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "dp array of size n."
+      },
+      "dryRunExample": {
+        "input": "nums = [2,3,1,1,4]",
+        "steps": [
+          "dp=[0,INF,INF,INF,INF]",
+          "i=1: j=0 reaches -> dp[1]=1",
+          "i=2: j=0 reaches -> dp[2]=1",
+          "i=3: j=1 reaches (1+3>=3) -> dp[3]=2",
+          "i=4: j=1 reaches (1+3>=4) -> dp[4]=2, answer 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "n==1 returns 0 without loop",
+        "nums=[1,1,1,1] forces chain of 3 jumps",
+        "nums=[5,0,0,0,0,1] tests long jump from start"
+      ]
+    },
+    {
+      "id": "bfs-level",
+      "name": "Approach 2: BFS Level Order",
+      "tag": "BFS",
+      "intuition": "Each jump is an edge from i to (i+1 .. i+nums[i]). Minimum jumps equals shortest path in unweighted graph, which BFS finds level by level.",
+      "theory": "Start BFS queue with 0. Each BFS level corresponds to one more jump. Expand node cur to all unvisited nxt in (cur+1 .. cur+nums[cur]). First time we reach n-1 we used minimal jumps by BFS property. Visited prevents reprocessing. Correct but naive expansion can be O(n^2) in worst case like all 1s with large n, though each node enqueued once.",
+      "cppCode": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        int n = nums.size();\n        if (n == 1) return 0;\n        vector<char> vis(n, 0);\n        vis[0] = 1;\n        queue<int> q;\n        q.push(0);\n        int jumps = 0;\n        while (!q.empty()) {\n            ++jumps;\n            int sz = q.size();\n            while (sz--) {\n                int cur = q.front(); q.pop();\n                int reach = min(n - 1, cur + nums[cur]);\n                for (int nxt = cur + 1; nxt <= reach; ++nxt) {\n                    if (nxt == n - 1) return jumps;\n                    if (!vis[nxt]) { vis[nxt] = 1; q.push(nxt); }\n                }\n            }\n        }\n        return jumps;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        int n = nums.size();\n        if (n == 1) return 0;\n        vector<char> vis(n, 0);\n        vis[0] = 1;\n        queue<int> q;\n        q.push(0);\n        int jumps = 0;\n        while (!q.empty()) {\n            ++jumps;\n            int sz = q.size();\n            while (sz--) {\n                int cur = q.front(); q.pop();\n                int reach = min(n - 1, cur + nums[cur]);\n                for (int nxt = cur + 1; nxt <= reach; ++nxt) {\n                    if (nxt == n - 1) return jumps;\n                    if (!vis[nxt]) { vis[nxt] = 1; q.push(nxt); }\n                }\n            }\n        }\n        return jumps;\n    }\n};",
+        "python": "from typing import List\nfrom collections import deque\nclass Solution:\n    def jump(self, nums: List[int]) -> int:\n        n = len(nums)\n        if n == 1:\n            return 0\n        visited = [False] * n\n        visited[0] = True\n        q = deque([0])\n        jumps = 0\n        while q:\n            jumps += 1\n            for _ in range(len(q)):\n                cur = q.popleft()\n                reach = min(n - 1, cur + nums[cur])\n                for nxt in range(cur + 1, reach + 1):\n                    if nxt == n - 1:\n                        return jumps\n                    if not visited[nxt]:\n                        visited[nxt] = True\n                        q.append(nxt)\n        return jumps",
+        "java": "class Solution {\n    public int jump(int[] nums) {\n        int n = nums.length;\n        if (n == 1) return 0;\n        boolean[] vis = new boolean[n];\n        vis[0] = true;\n        java.util.Queue<Integer> q = new java.util.ArrayDeque<>();\n        q.offer(0);\n        int jumps = 0;\n        while (!q.isEmpty()) {\n            jumps++;\n            int sz = q.size();\n            for (int k = 0; k < sz; k++) {\n                int cur = q.poll();\n                int reach = Math.min(n - 1, cur + nums[cur]);\n                for (int nxt = cur + 1; nxt <= reach; nxt++) {\n                    if (nxt == n - 1) return jumps;\n                    if (!vis[nxt]) { vis[nxt] = true; q.offer(nxt); }\n                }\n            }\n        }\n        return jumps;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2) worst-case, O(n) with range optimization",
+        "explanation": "Each node dequeued once but naive inner loop scans all neighbors; sum of out-degrees can be O(n^2). Can be optimized to O(n) by tracking max visited."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Queue and visited array."
+      },
+      "dryRunExample": {
+        "input": "nums = [2,3,1,1,4]",
+        "steps": [
+          "level 0: [0], jumps=0",
+          "expand 0 -> {1,2}, jumps=1, queue=[1,2]",
+          "expand 1 -> reach 4 includes target, return jumps=2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "n==1 returns 0 immediately",
+        "nums=[0] single element",
+        "linear chain [1,1,1,1,1] gives n-1 levels"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Optimal Greedy Range Expansion",
+      "tag": "Optimal",
+      "intuition": "We do not need to know exact landing spot, only how far the current number of jumps can reach. Extend the frontier as far as possible, then take one more jump.",
+      "theory": "Maintain farthest reachable with jumps+1 jumps and currentEnd = farthest reachable with jumps jumps. Iterate i in [0, n-2]: farthest=max(farthest, i+nums[i]). When i==currentEnd, we must use another jump to progress, so jumps++, currentEnd=farthest. This is implicit BFS: all indices in (prevEnd, currentEnd] are one jump away. Greedy is optimal because farthest is the maximum over all i in current window, so no choice with same jumps can go further.",
+      "cppCode": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        int n = nums.size();\n        if (n == 1) return 0;\n        int jumps = 0, curEnd = 0, farthest = 0;\n        for (int i = 0; i < n - 1; ++i) {\n            farthest = max(farthest, i + nums[i]);\n            if (i == curEnd) {\n                ++jumps;\n                curEnd = farthest;\n                if (curEnd >= n - 1) break;\n            }\n        }\n        return jumps;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        int n = nums.size();\n        if (n == 1) return 0;\n        int jumps = 0, curEnd = 0, farthest = 0;\n        for (int i = 0; i < n - 1; ++i) {\n            farthest = max(farthest, i + nums[i]);\n            if (i == curEnd) {\n                ++jumps;\n                curEnd = farthest;\n                if (curEnd >= n - 1) break;\n            }\n        }\n        return jumps;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def jump(self, nums: List[int]) -> int:\n        n = len(nums)\n        if n == 1:\n            return 0\n        jumps = 0\n        curEnd = 0\n        farthest = 0\n        for i in range(n - 1):\n            farthest = max(farthest, i + nums[i])\n            if i == curEnd:\n                jumps += 1\n                curEnd = farthest\n                if curEnd >= n - 1:\n                    break\n        return jumps",
+        "java": "class Solution {\n    public int jump(int[] nums) {\n        int n = nums.length;\n        if (n == 1) return 0;\n        int jumps = 0, curEnd = 0, farthest = 0;\n        for (int i = 0; i < n - 1; i++) {\n            farthest = Math.max(farthest, i + nums[i]);\n            if (i == curEnd) {\n                jumps++;\n                curEnd = farthest;\n                if (curEnd >= n - 1) break;\n            }\n        }\n        return jumps;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass to n-1, O(1) work per index."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only three integer variables."
+      },
+      "dryRunExample": {
+        "input": "nums = [2,3,1,1,4]",
+        "steps": [
+          "init jumps=0 curEnd=0 farthest=0",
+          "i=0: farthest=2, i==curEnd -> jumps=1 curEnd=2",
+          "i=1: farthest=4, i!=curEnd",
+          "i=2: farthest=4, i==curEnd -> jumps=2 curEnd=4 break",
+          "answer 2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "n==1 -> 0",
+        "nums=[2,1] -> 1 jump directly",
+        "nums=[1,2,3] -> jumps=2, tests loop bound n-1 to avoid extra count"
+      ]
+    }
+  ]
+}

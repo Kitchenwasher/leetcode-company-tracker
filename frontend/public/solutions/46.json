@@ -1,0 +1,86 @@
+{
+  "questionId": 46,
+  "title": "Permutations",
+  "difficulty": "Medium",
+  "corePattern": "Backtracking with DFS and State Restoration",
+  "interviewTips": [
+    "Clarify: Are all numbers distinct? Yes per constraints - ask how duplicates would change it (would need sorting + skip logic like Permutations II).",
+    "Trade-off: Used-array version is clearer to explain, swap in-place version saves O(n) extra space and avoids path copying overhead - mention both.",
+    "Edge-case tip: Always copy path when adding to result (path[:] / new ArrayList<>(path)) otherwise all entries reference same mutable list."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Backtracking with Used Array",
+      "tag": "Backtracking",
+      "intuition": "Build permutation one position at a time. At each step try every number that has not been used yet, mark it used, recurse, then unmark it to try the next choice.",
+      "theory": "This is DFS over a decision tree of depth n. Level d corresponds to position d in permutation. Branching factor shrinks from n to 1. Each root-to-leaf path is one permutation. Used boolean array tracks which indices are already in current path. Backtracking (undo choice) restores state so sibling branches start clean. Total leaves = n! .",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        vector<vector<int>> res;\n        vector<int> path;\n        vector<bool> used(nums.size(), false);\n        backtrack(nums, path, used, res);\n        return res;\n    }\nprivate:\n    void backtrack(vector<int>& nums, vector<int>& path, vector<bool>& used, vector<vector<int>>& res) {\n        if (path.size() == nums.size()) {\n            res.push_back(path);\n            return;\n        }\n        for (int i = 0; i < (int)nums.size(); i++) {\n            if (used[i]) continue;\n            used[i] = true;\n            path.push_back(nums[i]);\n            backtrack(nums, path, used, res);\n            path.pop_back();\n            used[i] = false;\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        vector<vector<int>> res;\n        vector<int> path;\n        vector<bool> used(nums.size(), false);\n        backtrack(nums, path, used, res);\n        return res;\n    }\nprivate:\n    void backtrack(vector<int>& nums, vector<int>& path, vector<bool>& used, vector<vector<int>>& res) {\n        if (path.size() == nums.size()) {\n            res.push_back(path);\n            return;\n        }\n        for (int i = 0; i < (int)nums.size(); i++) {\n            if (used[i]) continue;\n            used[i] = true;\n            path.push_back(nums[i]);\n            backtrack(nums, path, used, res);\n            path.pop_back();\n            used[i] = false;\n        }\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def permute(self, nums: List[int]) -> List[List[int]]:\n        res = []\n        path = []\n        used = [False] * len(nums)\n        def backtrack():\n            if len(path) == len(nums):\n                res.append(path[:])\n                return\n            for i in range(len(nums)):\n                if used[i]:\n                    continue\n                used[i] = True\n                path.append(nums[i])\n                backtrack()\n                path.pop()\n                used[i] = False\n        backtrack()\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> permute(int[] nums) {\n        List<List<Integer>> res = new ArrayList<>();\n        List<Integer> path = new ArrayList<>();\n        boolean[] used = new boolean[nums.length];\n        backtrack(nums, path, used, res);\n        return res;\n    }\n    private void backtrack(int[] nums, List<Integer> path, boolean[] used, List<List<Integer>> res) {\n        if (path.size() == nums.length) {\n            res.add(new ArrayList<>(path));\n            return;\n        }\n        for (int i = 0; i < nums.length; i++) {\n            if (used[i]) continue;\n            used[i] = true;\n            path.add(nums[i]);\n            backtrack(nums, path, used, res);\n            path.remove(path.size() - 1);\n            used[i] = false;\n        }\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * n!)",
+        "explanation": "There are n! permutations. For each we do O(n) work to build path and O(n) to copy it into result. Number of recursive calls is sum_{k=0..n} P(n,k) which is bounded by O(n * n!)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n * n!)",
+        "explanation": "Output stores n! lists of length n. Auxiliary space is O(n) for path + O(n) for used array + O(n) recursion stack depth."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3]",
+        "steps": [
+          "path=[] try 1 -> path=[1]",
+          "from [1] try 2 -> path=[1,2] -> try 3 -> path=[1,2,3] => save [1,2,3], backtrack",
+          "from [1] try 3 -> path=[1,3] -> try 2 -> path=[1,3,2] => save [1,3,2], backtrack",
+          "pop to [] try 2 -> path=[2] expands to [2,1,3], [2,3,1]",
+          "pop to [] try 3 -> path=[3] expands to [3,1,2], [3,2,1]"
+        ],
+        "output": "[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]"
+      },
+      "edgeCases": [
+        "n=1: single element returns [[1]] - base case start==len works",
+        "Empty path copy bug: must append copy not reference",
+        "All distinct guaranteed so no dedup needed"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: In-Place Swap Backtracking",
+      "tag": "Optimal",
+      "intuition": "Fix prefix nums[0:start] as already permuted, then swap each candidate into position start to choose what goes next. Recurse to fix next position, then swap back.",
+      "theory": "Partition array into fixed prefix [0,start) and remaining suffix [start,n). Loop i from start to n-1 swaps nums[start] with nums[i] to place every remaining element at position start exactly once. Recurse with start+1. When start==n, current array order is one permutation. Swap-back restores original order for next sibling. No used array or extra path needed, operates directly on input array.",
+      "cppCode": "class Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        vector<vector<int>> res;\n        backtrack(nums, 0, res);\n        return res;\n    }\nprivate:\n    void backtrack(vector<int>& nums, int start, vector<vector<int>>& res) {\n        if (start == (int)nums.size()) {\n            res.push_back(nums);\n            return;\n        }\n        for (int i = start; i < (int)nums.size(); i++) {\n            swap(nums[start], nums[i]);\n            backtrack(nums, start + 1, res);\n            swap(nums[start], nums[i]);\n        }\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        vector<vector<int>> res;\n        backtrack(nums, 0, res);\n        return res;\n    }\nprivate:\n    void backtrack(vector<int>& nums, int start, vector<vector<int>>& res) {\n        if (start == (int)nums.size()) {\n            res.push_back(nums);\n            return;\n        }\n        for (int i = start; i < (int)nums.size(); i++) {\n            swap(nums[start], nums[i]);\n            backtrack(nums, start + 1, res);\n            swap(nums[start], nums[i]);\n        }\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def permute(self, nums: List[int]) -> List[List[int]]:\n        res = []\n        def backtrack(start: int):\n            if start == len(nums):\n                res.append(nums[:])\n                return\n            for i in range(start, len(nums)):\n                nums[start], nums[i] = nums[i], nums[start]\n                backtrack(start + 1)\n                nums[start], nums[i] = nums[i], nums[start]\n        backtrack(0)\n        return res",
+        "java": "class Solution {\n    public List<List<Integer>> permute(int[] nums) {\n        List<List<Integer>> res = new ArrayList<>();\n        backtrack(nums, 0, res);\n        return res;\n    }\n    private void backtrack(int[] nums, int start, List<List<Integer>> res) {\n        if (start == nums.length) {\n            List<Integer> perm = new ArrayList<>();\n            for (int x : nums) perm.add(x);\n            res.add(perm);\n            return;\n        }\n        for (int i = start; i < nums.length; i++) {\n            swap(nums, start, i);\n            backtrack(nums, start + 1, res);\n            swap(nums, start, i);\n        }\n    }\n    private void swap(int[] nums, int a, int b) {\n        int t = nums[a];\n        nums[a] = nums[b];\n        nums[b] = t;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * n!)",
+        "explanation": "Same n! leaves, each leaf costs O(n) to copy array into result. Swaps are O(1). Time is asymptotically optimal because output size itself is O(n * n!)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n * n!)",
+        "explanation": "Output dominates. Auxiliary space is O(n) recursion stack only, no used or path arrays - O(1) extra excluding output and stack."
+      },
+      "dryRunExample": {
+        "input": "nums = [1,2,3]",
+        "steps": [
+          "start=0: i=0 swap(0,0) => [1,2,3], recurse",
+          "start=1: i=1 swap(1,1) => [1,2,3], recurse start=2: i=2 => [1,2,3] save; i=2 swap(2,2) variant [1,3,2] save after swap(1,2)",
+          "back to start=0: i=1 swap(0,1) => [2,1,3], recurse yields [2,1,3], [2,3,1]",
+          "back to start=0: i=2 swap(0,2) => [3,2,1], recurse yields [3,2,1], [3,1,2]"
+        ],
+        "output": "[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,2,1],[3,1,2]]"
+      },
+      "edgeCases": [
+        "n=1: loop runs once, start==1 saves copy",
+        "Must swap back after recursion else array stays mutated for next i",
+        "Must copy nums when saving (nums[:] / new list) because later swaps mutate it"
+      ]
+    }
+  ]
+}
