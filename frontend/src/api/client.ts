@@ -105,13 +105,27 @@ export const api = axios.create({
   withCredentials: true, // Send HttpOnly refresh token cookie
 });
 
-// Attach access token to requests & ensure active base URL
+// Attach access token to requests & ensure active base URL and adequate route-specific timeouts
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   config.baseURL = getActiveBaseURL();
   const token = getStoredAccessToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Dynamic route-specific timeouts:
+  // - AI solution generation: 120s (complex LLM reasoning)
+  // - Auth & session operations: 25s (allows for serverless DB cold-start wake-up & bcrypt hashing)
+  // - General API queries: minimum 15s (prevents 2.5s false timeout kills)
+  const url = config.url || '';
+  if (url.includes('/ai-solution') || (url.includes('/solution') && url.includes('regenerate=true'))) {
+    config.timeout = 120000;
+  } else if (url.includes('/auth/')) {
+    config.timeout = 25000;
+  } else {
+    config.timeout = Math.max(config.timeout || 0, TIMEOUT_MS, 15000);
+  }
+
   return config;
 });
 

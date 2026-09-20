@@ -156,6 +156,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  const formatAuthErrorMessage = (err: any, fallback: string): string => {
+    if (err.response?.data?.error) return err.response.data.error;
+    if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+      return 'Database connection timed out during cold start. Please retry in a moment.';
+    }
+    if (err.code === 'ERR_NETWORK') {
+      return 'Cannot connect to backend server. Please verify your connection.';
+    }
+    return err.message || fallback;
+  };
+
   const login = async (email: string, password: string): Promise<boolean> => {
     setAuthError(null);
     try {
@@ -169,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return false;
     } catch (err: any) {
-      const msg = err.response?.data?.error || err.message || 'Invalid email or password.';
+      const msg = formatAuthErrorMessage(err, 'Invalid email or password.');
       setAuthError(msg);
       throw new Error(msg);
     }
