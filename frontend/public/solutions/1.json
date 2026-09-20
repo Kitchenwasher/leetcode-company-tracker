@@ -2,97 +2,80 @@
   "questionId": 1,
   "title": "Two Sum",
   "difficulty": "Easy",
-  "corePattern": "Hash Map Lookup & Complement Arithmetic",
+  "corePattern": "Hash Table Complement Lookup",
   "interviewTips": [
-    "Always clarify whether the input array can contain negative numbers, duplicate numbers, or if multiple valid pairs exist.",
-    "State why the brute-force nested loop is quadratic before leaping into the hash map to demonstrate problem-solving progression.",
-    "Mention that returning indices means sorting would require storing pairs (value, index), which takes O(N) space anyway."
+    "Ask if the array is sorted and whether to return indices or values - sorted enables two-pointer, unsorted requires hash map.",
+    "Clarify constraints: exactly one solution exists, same element cannot be used twice, and whether duplicates, negatives, or no-solution cases matter.",
+    "Discuss trade-off explicitly: brute force uses O(1) extra space but O(n^2) time, while hash map uses O(n) space to achieve O(n) time.",
+    "Explain why you check complement before inserting in one-pass hash map to avoid reusing the same element and to handle duplicates like [3,3] correctly."
   ],
   "approaches": [
     {
       "id": "brute-force",
-      "name": "Approach 1: Brute Force (Nested Loops)",
+      "name": "Approach 1: Brute Force",
       "tag": "Brute Force",
-      "intuition": "Check every possible pair of elements in the array to see if their sum matches the target. This simulates what a human would do by testing each number against every other subsequent number.",
-      "theory": "For an array of length N, there are N * (N - 1) / 2 unique pairs. By running two nested loops\u2014outer index i from 0 to N-1 and inner index j from i+1 to N-1\u2014we evaluate every combination without evaluating duplicate pairs or an element with itself.",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    std::vector<int> twoSum(const std::vector<int>& nums, int target) {\n        int n = nums.size();\n        // Check every unique pair (i, j) where j > i\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                if (nums[i] + nums[j] == target) {\n                    return {i, j};\n                }\n            }\n        }\n        return {}; // No solution found\n    }\n};",
+      "intuition": "The most direct first-principles idea is to try every pair. Fix index i, then scan every j greater than i and test if nums[i] + nums[j] equals target. Since exactly one solution exists, the first matching pair must be the answer.",
+      "theory": "There are n choose 2 = n*(n-1)/2 unordered pairs with i less than j. Nested loops enumerate all of them without repetition and never use the same element twice by starting j at i+1. Correctness follows by exhaustive search: if a solution pair exists it will eventually be examined. No extra data structure is needed.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        int n = nums.size();\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                if (nums[i] + nums[j] == target) return {i, j};\n            }\n        }\n        return {};\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        int n = nums.size();\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                if (nums[i] + nums[j] == target) return {i, j};\n            }\n        }\n        return {};\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n        n = len(nums)\n        for i in range(n):\n            for j in range(i + 1, n):\n                if nums[i] + nums[j] == target:\n                    return [i, j]\n        return []",
+        "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        int n = nums.length;\n        for (int i = 0; i < n; i++) {\n            for (int j = i + 1; j < n; j++) {\n                if (nums[i] + nums[j] == target) return new int[]{i, j};\n            }\n        }\n        return new int[]{};\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N^2)",
-        "explanation": "Two nested loops inspecting N * (N - 1) / 2 pairs in the worst case."
+        "complexity": "O(n^2)",
+        "explanation": "Double loop checks all n*(n-1)/2 pairs, each check is O(1), so total time is quadratic in n."
       },
       "spaceComplexity": {
         "complexity": "O(1)",
-        "explanation": "No auxiliary memory allocated; uses only two integer index variables."
+        "explanation": "Only loop indices and a few variables are used, no extra space proportional to input."
       },
       "dryRunExample": {
-        "input": "nums = [2, 7, 11, 15], target = 9",
+        "input": "nums = [2,7,11,15], target = 9",
         "steps": [
-          "i = 0 (val 2), j = 1 (val 7): 2 + 7 = 9 == target. Match found!",
-          "Return [0, 1]"
+          "i=0 (2): j=1 check 2+7=9 -> match found",
+          "return [0,1] immediately without scanning remaining pairs"
         ],
-        "output": "[0, 1]"
+        "output": "[0,1]"
       },
       "edgeCases": [
-        "Array with exactly two elements: must check both.",
-        "Negative values: e.g., nums = [-3, 4, 3, 90], target = 0."
+        "n=2 minimal input e.g. [1,2] target 3 returns [0,1]",
+        "Duplicate values e.g. [3,3] target 6 requires j starting at i+1 so same element is not reused but two equal values at different indices work",
+        "Negative numbers and zero e.g. [-1,-2,-3,-4] target -7 or [0,4,3,0] target 0"
       ]
     },
     {
-      "id": "two-pointers-sorting",
-      "name": "Approach 2: Sort + Two Pointers",
-      "tag": "Better",
-      "intuition": "If the array was sorted, we could use two pointers starting from opposite ends and narrow the window based on whether the sum is too small or too large. However, since the question asks for original indices, we must pair each value with its original index before sorting.",
-      "theory": "When sorted, if `nums[left] + nums[right] < target`, the only way to increase the sum is to increment `left`. Conversely, if the sum > target, decrement `right`. This reduces the search phase to O(N) after an O(N log N) sort.",
-      "cppCode": "#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    std::vector<int> twoSum(const std::vector<int>& nums, int target) {\n        int n = nums.size();\n        // Pair value with original index: pair<value, originalIndex>\n        std::vector<std::pair<int, int>> indexedNums;\n        indexedNums.reserve(n);\n        for (int i = 0; i < n; ++i) {\n            indexedNums.push_back({nums[i], i});\n        }\n\n        // Sort ascending by value\n        std::sort(indexedNums.begin(), indexedNums.end());\n\n        int left = 0;\n        int right = n - 1;\n        while (left < right) {\n            long long currentSum = static_cast<long long>(indexedNums[left].first) + indexedNums[right].first;\n            if (currentSum == target) {\n                return {indexedNums[left].second, indexedNums[right].second};\n            } else if (currentSum < target) {\n                ++left;\n            } else {\n                --right;\n            }\n        }\n        return {};\n    }\n};",
-      "timeComplexity": {
-        "complexity": "O(N log N)",
-        "explanation": "Sorting N pairs dominates the linear two-pointer scan."
-      },
-      "spaceComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Allocates a vector of pairs to preserve original indices."
-      },
-      "dryRunExample": {
-        "input": "nums = [3, 2, 4], target = 6",
-        "steps": [
-          "Pairs: [(3,0), (2,1), (4,2)] -> Sorted: [(2,1), (3,0), (4,2)]",
-          "left = 0 (2), right = 2 (4): 2 + 4 = 6 == target. Match!",
-          "Return original indices: [1, 2]"
-        ],
-        "output": "[1, 2]"
-      },
-      "edgeCases": [
-        "Integer overflow when adding two large numbers: cast to `long long`."
-      ]
-    },
-    {
-      "id": "one-pass-hashmap",
-      "name": "Approach 3: One-Pass Hash Map (Optimal)",
+      "id": "optimal",
+      "name": "Approach 2: One-Pass Hash Map",
       "tag": "Optimal",
-      "intuition": "For each number `x`, we require its complement `target - x`. Instead of scanning backwards repeatedly, we store seen numbers in an unordered hash map. In a single pass, if `complement` is already in the map, we have found our answer in O(1) average lookup time.",
-      "theory": "By trading space for time, a hash table provides expected O(1) amortized insertion and lookup via hashing. As we iterate left to right, every previous element has been indexed, ensuring no element pairs with itself and duplicate values are handled naturally.",
-      "cppCode": "#include <vector>\n#include <unordered_map>\n\nclass Solution {\npublic:\n    std::vector<int> twoSum(const std::vector<int>& nums, int target) {\n        // Maps value -> original index\n        std::unordered_map<int, int> numToIndex;\n        numToIndex.reserve(nums.size());\n\n        for (int i = 0; i < static_cast<int>(nums.size()); ++i) {\n            int complement = target - nums[i];\n\n            // Check if complement was already seen\n            auto it = numToIndex.find(complement);\n            if (it != numToIndex.end()) {\n                return {it->second, i};\n            }\n\n            // Record current number's index for subsequent elements\n            numToIndex[nums[i]] = i;\n        }\n\n        return {};\n    }\n};",
+      "intuition": "Rewrite the equation: for current value x we need y = target - x. As we scan left to right, all values to the left are already known. If we remember them in a hash table mapping value to index, we can check in O(1) whether the needed complement has been seen.",
+      "theory": "Maintain map value -> index for elements already visited. At index i, compute complement = target - nums[i]. If complement is in the map, we have found indices map[complement] and i that sum to target. Otherwise insert nums[i] with index i and continue. Checking before inserting guarantees we never reuse the same element. Each element is visited once and each hash operation is O(1) average, giving linear time. Correctness holds because when we reach the second element of the solution pair, the first element is already in the map.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        unordered_map<int, int> seen;\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            int complement = target - nums[i];\n            auto it = seen.find(complement);\n            if (it != seen.end()) return {it->second, i};\n            seen[nums[i]] = i;\n        }\n        return {};\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        unordered_map<int, int> seen;\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            int complement = target - nums[i];\n            auto it = seen.find(complement);\n            if (it != seen.end()) return {it->second, i};\n            seen[nums[i]] = i;\n        }\n        return {};\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n        seen = {}\n        for i, num in enumerate(nums):\n            complement = target - num\n            if complement in seen:\n                return [seen[complement], i]\n            seen[num] = i\n        return []",
+        "java": "import java.util.HashMap;\nimport java.util.Map;\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> seen = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            int complement = target - nums[i];\n            if (seen.containsKey(complement)) return new int[]{seen.get(complement), i};\n            seen.put(nums[i], i);\n        }\n        return new int[]{};\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Traverses the array of size N exactly once. Hash map find and insert operations take O(1) amortized time."
+        "complexity": "O(n)",
+        "explanation": "Single pass over n elements, each hash table lookup and insert is O(1) average time."
       },
       "spaceComplexity": {
-        "complexity": "O(N)",
-        "explanation": "In the worst case, stores up to N elements in the unordered_map."
+        "complexity": "O(n)",
+        "explanation": "Hash table stores up to n value-to-index entries in the worst case before solution is found."
       },
       "dryRunExample": {
-        "input": "nums = [2, 11, 7, 15], target = 9",
+        "input": "nums = [2,7,11,15], target = 9",
         "steps": [
-          "i=0: num=2, complement=7. Not in map. Map: {2: 0}",
-          "i=1: num=11, complement=-2. Not in map. Map: {2: 0, 11: 1}",
-          "i=2: num=7, complement=2. Found in map! Index: 0.",
-          "Return [0, 2]"
+          "i=0, num=2, complement=7 not in {} -> store {2:0}",
+          "i=1, num=7, complement=2 found in map at index 0 -> return [0,1]"
         ],
-        "output": "[0, 2]"
+        "output": "[0,1]"
       },
       "edgeCases": [
-        "Duplicate elements that add up to target (e.g. nums=[3, 3], target=6): when the second 3 is processed, complement 3 is already in the map, returning [0, 1] before collision overwrites.",
-        "Negative integers and zero target."
+        "Duplicates with same value e.g. [3,2,4,3] target 6 returns [1,2], and [3,3] target 6 returns [0,1] because check happens before insert",
+        "Negative numbers, zeros, and large values work since hash key is exact value, no sorting assumption",
+        "Solution at ends e.g. [1,5,3,8,2] target 3 returns [0,4] after map grows to size 4"
       ]
     }
   ]

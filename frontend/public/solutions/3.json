@@ -2,49 +2,122 @@
   "questionId": 3,
   "title": "Longest Substring Without Repeating Characters",
   "difficulty": "Medium",
-  "corePattern": "Strings",
+  "corePattern": "Sliding Window with Hash Table (Last-Seen Index)",
   "interviewTips": [
-    "State the brute-force approach first before presenting the optimal Strings technique.",
-    "Discuss Time and Space complexities upfront before writing code.",
-    "Test on empty inputs and single-element edge cases."
+    "Ask clarifying questions: What is the charset (ASCII vs Unicode)? Can s be empty? Should you return length or the substring itself? Is space case-sensitive?",
+    "Trade-off discussion: Brute force is easy to derive but O(n^2); HashSet sliding window is O(n) with two pointers and up to 2n steps; Last-index map achieves true single-pass O(n) with direct left jump - explain why jumping is safe.",
+    "Edge-case tip: Test empty string, single char, all same chars like 'bbbbb', all unique like 'abcdef', and wrap-around duplicate like 'abba' where left must not move backwards."
   ],
   "approaches": [
     {
-      "id": "nested-loops",
-      "name": "Approach 1: Nested Loops (Brute Force)",
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
       "tag": "Brute Force",
-      "intuition": "Examine every pair or window using two nested loops, checking conditions repeatedly.",
-      "theory": "Checking every subsegment takes quadratic time O(N^2).",
-      "cppCode": "#include <vector>\n\nclass Solution {\npublic:\n    int bruteForce(const std::vector<int>& nums) {\n        int n = nums.size();\n        int maxResult = 0;\n        for (int i = 0; i < n; ++i) {\n            for (int j = i; j < n; ++j) {\n                // Evaluate subarray nums[i..j]\n            }\n        }\n        return maxResult;\n    }\n};",
+      "intuition": "Try every start index i and expand end index j until a repeat is found. The longest valid expansion from any i is a candidate answer. This directly encodes the definition of substring without repeating characters.",
+      "theory": "For each i, maintain a set of characters in s[i..j]. Incrementally add s[j]. If s[j] already in set, then any longer j' > j from same i is also invalid, so break. Update max length as j-i+1. Correct because all O(n^2) substrings are examined and validity is checked incrementally in O(1) amortized per extension.",
+      "cppCode": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        int n = s.size();\n        int maxLen = 0;\n        for (int i = 0; i < n; ++i) {\n            unordered_set<char> seen;\n            for (int j = i; j < n; ++j) {\n                if (seen.count(s[j])) break;\n                seen.insert(s[j]);\n                maxLen = max(maxLen, j - i + 1);\n            }\n        }\n        return maxLen;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        int n = s.size();\n        int maxLen = 0;\n        for (int i = 0; i < n; ++i) {\n            unordered_set<char> seen;\n            for (int j = i; j < n; ++j) {\n                if (seen.count(s[j])) break;\n                seen.insert(s[j]);\n                maxLen = max(maxLen, j - i + 1);\n            }\n        }\n        return maxLen;\n    }\n};",
+        "python": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        n = len(s)\n        max_len = 0\n        for i in range(n):\n            seen = set()\n            for j in range(i, n):\n                if s[j] in seen:\n                    break\n                seen.add(s[j])\n                if j - i + 1 > max_len:\n                    max_len = j - i + 1\n        return max_len",
+        "java": "class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        int n = s.length();\n        int maxLen = 0;\n        for (int i = 0; i < n; i++) {\n            Set<Character> seen = new HashSet<>();\n            for (int j = i; j < n; j++) {\n                char c = s.charAt(j);\n                if (seen.contains(c)) break;\n                seen.add(c);\n                maxLen = Math.max(maxLen, j - i + 1);\n            }\n        }\n        return maxLen;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N^2)",
-        "explanation": "Evaluates all quadratic pairs/subarrays."
+        "complexity": "O(n^2)",
+        "explanation": "n start positions, each expands up to n in worst case (all unique). Set insert and lookup are O(1) average, so total O(n^2)."
       },
       "spaceComplexity": {
-        "complexity": "O(1)",
-        "explanation": "No auxiliary data structures."
+        "complexity": "O(min(n, m))",
+        "explanation": "Set for current window holds at most alphabet size m or n characters. m is 128 for ASCII, larger for Unicode."
+      },
+      "dryRunExample": {
+        "input": "s = 'abcabcbb'",
+        "steps": [
+          "i=0: expand j=0->a, j=1->b, j=2->c, j=3->a repeats, break, max_len=3",
+          "i=1: expand b,c,a,b repeats, max_len stays 3",
+          "i=2: expand c,a,b,c repeats, max_len stays 3",
+          "Later i give windows of length 2 or 1, answer remains 3"
+        ],
+        "output": "3"
       },
       "edgeCases": [
-        "Empty inputs or single-element inputs."
+        "Empty string returns 0",
+        "Single character returns 1",
+        "All same like 'bbbbb' returns 1",
+        "All unique like 'abcdef' returns n"
       ]
     },
     {
-      "id": "two-pointers-optimal",
-      "name": "Approach 2: Two Pointers / Sliding Window (Optimal)",
-      "tag": "Optimal",
-      "intuition": "Maintain two pointers (left and right). Expand `right` to include elements and advance `left` when constraints are violated, preserving a valid window state.",
-      "theory": "Each pointer moves strictly monotonically from 0 to N. Because each element is processed at most twice (once added, once removed), total operations are strictly 2N = O(N).",
-      "cppCode": "#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int twoPointersOptimal(const std::vector<int>& nums) {\n        int left = 0;\n        int maxResult = 0;\n\n        for (int right = 0; right < static_cast<int>(nums.size()); ++right) {\n            // Add nums[right] to window\n\n            // Shrink from left while invalid\n            while (/* window condition violated */ false) {\n                // remove nums[left]\n                ++left;\n            }\n\n            maxResult = std::max(maxResult, right - left + 1);\n        }\n\n        return maxResult;\n    }\n};",
+      "id": "sliding-window-set",
+      "name": "Approach 2: Sliding Window with Hash Set",
+      "tag": "Sliding Window",
+      "intuition": "Maintain a window [left, right] that always has distinct characters. Move right forward; if s[right] duplicates, shrink from left until duplicate is removed. This reuses work instead of restarting from scratch.",
+      "theory": "Invariant: set contains exactly characters of current window s[left..right-1] with no duplicates. When adding s[right], while it is in set, remove s[left] and increment left. This restores invariant with minimal shrink because any valid window ending at right must start after previous occurrence. Each index enters and leaves set at most once, giving linear time. Max window size seen is optimal by exhaustive consideration of all right endpoints.",
+      "cppCode": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        unordered_set<char> seen;\n        int left = 0;\n        int maxLen = 0;\n        for (int right = 0; right < (int)s.size(); ++right) {\n            while (seen.count(s[right])) {\n                seen.erase(s[left]);\n                ++left;\n            }\n            seen.insert(s[right]);\n            maxLen = max(maxLen, right - left + 1);\n        }\n        return maxLen;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        unordered_set<char> seen;\n        int left = 0;\n        int maxLen = 0;\n        for (int right = 0; right < (int)s.size(); ++right) {\n            while (seen.count(s[right])) {\n                seen.erase(s[left]);\n                ++left;\n            }\n            seen.insert(s[right]);\n            maxLen = max(maxLen, right - left + 1);\n        }\n        return maxLen;\n    }\n};",
+        "python": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        seen = set()\n        left = 0\n        max_len = 0\n        for right in range(len(s)):\n            while s[right] in seen:\n                seen.remove(s[left])\n                left += 1\n            seen.add(s[right])\n            if right - left + 1 > max_len:\n                max_len = right - left + 1\n        return max_len",
+        "java": "class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        Set<Character> seen = new HashSet<>();\n        int left = 0;\n        int maxLen = 0;\n        for (int right = 0; right < s.length(); right++) {\n            char c = s.charAt(right);\n            while (seen.contains(c)) {\n                seen.remove(s.charAt(left));\n                left++;\n            }\n            seen.add(c);\n            maxLen = Math.max(maxLen, right - left + 1);\n        }\n        return maxLen;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Each pointer advances at most N times."
+        "complexity": "O(n)",
+        "explanation": "Each character is added and removed from set at most once. Right moves n times, left moves at most n times, so O(2n) = O(n)."
       },
       "spaceComplexity": {
-        "complexity": "O(1)",
-        "explanation": "Modifies window bounds in place without extra arrays."
+        "complexity": "O(min(n, m))",
+        "explanation": "Set stores current window distinct characters, bounded by n and alphabet size m."
+      },
+      "dryRunExample": {
+        "input": "s = 'abcabcbb'",
+        "steps": [
+          "right=0,1,2: window [0,2]=abc, max=3",
+          "right=3 a duplicate: remove a,b? Actually remove s[0]=a, left=1, window bca, max=3",
+          "right=4 b duplicate: remove s[1]=b, left=2, window cab, max=3",
+          "right=5 c duplicate: remove s[2]=c, left=3, window abc, max=3",
+          "right=6,7 b duplicates: shrink to cb then b, max stays 3"
+        ],
+        "output": "3"
       },
       "edgeCases": [
-        "Window of size 1, duplicate values."
+        "Empty string: loop never runs, returns 0",
+        "'abba': must shrink one by one, left moves from 0 to 2 correctly",
+        "'tmmzuxt': shrinking must drop multiple left chars until duplicate gone"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Optimized Sliding Window with Last Index Map",
+      "tag": "Optimal",
+      "intuition": "Instead of shrinking one by one, remember last index of each character. When s[right] was seen inside current window, jump left directly to last occurrence + 1. This skips useless intermediate shrinks.",
+      "theory": "Keep map last[c] = most recent index of c. Maintain left as start of distinct window. For each right, if last[s[right]] >= left, then duplicate is inside window and any start <= last[s[right]] is invalid, so set left = last[s[right]] + 1. Otherwise left unchanged. Update last[s[right]] = right. This preserves maximal valid window ending at right in O(1). Single pass proves optimality because best window ending at each right is considered. The condition >= left prevents moving left backwards on old occurrences like in 'abba'.",
+      "cppCode": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        unordered_map<char, int> last;\n        int left = 0;\n        int maxLen = 0;\n        for (int right = 0; right < (int)s.size(); ++right) {\n            auto it = last.find(s[right]);\n            if (it != last.end() && it->second >= left) {\n                left = it->second + 1;\n            }\n            last[s[right]] = right;\n            maxLen = max(maxLen, right - left + 1);\n        }\n        return maxLen;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        unordered_map<char, int> last;\n        int left = 0;\n        int maxLen = 0;\n        for (int right = 0; right < (int)s.size(); ++right) {\n            auto it = last.find(s[right]);\n            if (it != last.end() && it->second >= left) {\n                left = it->second + 1;\n            }\n            last[s[right]] = right;\n            maxLen = max(maxLen, right - left + 1);\n        }\n        return maxLen;\n    }\n};",
+        "python": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        last = {}\n        left = 0\n        max_len = 0\n        for right, c in enumerate(s):\n            if c in last and last[c] >= left:\n                left = last[c] + 1\n            last[c] = right\n            if right - left + 1 > max_len:\n                max_len = right - left + 1\n        return max_len",
+        "java": "class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        Map<Character, Integer> last = new HashMap<>();\n        int left = 0;\n        int maxLen = 0;\n        for (int right = 0; right < s.length(); right++) {\n            char c = s.charAt(right);\n            if (last.containsKey(c) && last.get(c) >= left) {\n                left = last.get(c) + 1;\n            }\n            last.put(c, right);\n            maxLen = Math.max(maxLen, right - left + 1);\n        }\n        return maxLen;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass over n characters, each hashmap get and put is O(1) average."
+      },
+      "spaceComplexity": {
+        "complexity": "O(min(n, m))",
+        "explanation": "Map stores last index per distinct character, at most n entries bounded by alphabet size m. Can be O(1) with fixed 128-size array for ASCII."
+      },
+      "dryRunExample": {
+        "input": "s = 'abba'",
+        "steps": [
+          "right=0 a: last={a:0}, window [0,0]=a, max=1",
+          "right=1 b: last={a:0,b:1}, window [0,1]=ab, max=2",
+          "right=2 b duplicate last[b]=1 >= left=0 so left=2, window [2,2]=b, max=2",
+          "right=3 a last[a]=0 < left=2 so left stays 2, window [2,3]=ba, max=2"
+        ],
+        "output": "2"
+      },
+      "edgeCases": [
+        "Empty string returns 0",
+        "'abba' tests left never moves backwards - need >= left check",
+        "'dvdf' tests jump: at second d, left jumps from 0 to 1, answer 3 for vdf",
+        "Long unique string of length n returns n"
       ]
     }
   ]

@@ -2,49 +2,124 @@
   "questionId": 2,
   "title": "Add Two Numbers",
   "difficulty": "Medium",
-  "corePattern": "Algorithms",
+  "corePattern": "Linked List Traversal with Carry Simulation using Dummy Head",
   "interviewTips": [
-    "State the brute-force approach first before presenting the optimal Algorithms technique.",
-    "Discuss Time and Space complexities upfront before writing code.",
-    "Test on empty inputs and single-element edge cases."
+    "Clarify digit order: confirm numbers are stored in reverse order (least significant digit first) and each node holds a single digit 0-9.",
+    "Clarify output expectations: ask whether to create new nodes or reuse input nodes, and how to handle final carry that creates a new most-significant digit.",
+    "Trade-off to discuss: iterative single-pass with O(1) extra space vs recursive solution with O(N) call stack vs extra-array solution with O(N) auxiliary space.",
+    "Edge-case tip: always loop while l1 or l2 or carry, not just while l1 and l2, to handle different lengths and trailing carry like [9,9] + [1].",
+    "Follow-up to propose: what if digits were in forward order? That requires reverse, stack, or recursion to handle carry from least significant side."
   ],
   "approaches": [
     {
       "id": "brute-force",
-      "name": "Approach 1: Naive Simulation / Brute Force",
+      "name": "Approach 1: Brute Force via Auxiliary Arrays",
       "tag": "Brute Force",
-      "intuition": "Directly simulate the problem description step-by-step without advanced data structures.",
-      "theory": "Provides the baseline verification algorithm before introducing optimizations.",
-      "cppCode": "#include <vector>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int solveNaive(const std::vector<int>& nums) {\n        // Direct simulation logic\n        int result = 0;\n        for (int x : nums) {\n            result += x;\n        }\n        return result;\n    }\n};",
+      "intuition": "If we decouple reading from adding, the problem becomes simple array addition. First copy both linked lists into arrays to get random access to digits, then simulate elementary-school addition from index 0 with a carry, then build a new linked list from the result digits.",
+      "theory": "Traverse l1 to array A of length m and l2 to array B of length n. Let N = max(m,n). For i in 0..N-1 take x = A[i] if exists else 0, y = B[i] if exists else 0, sum = x + y + carry, digit = sum % 10, carry = sum / 10. Append digit to answer list. If carry remains after loop, append one more node. This is correct because reverse order means index i corresponds to 10^i place value, so processing i increasing correctly propagates carry.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        vector<int> a, b;\n        while (l1) { a.push_back(l1->val); l1 = l1->next; }\n        while (l2) { b.push_back(l2->val); l2 = l2->next; }\n        size_t n = max(a.size(), b.size());\n        int carry = 0;\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        for (size_t i = 0; i < n; ++i) {\n            int x = i < a.size() ? a[i] : 0;\n            int y = i < b.size() ? b[i] : 0;\n            int s = x + y + carry;\n            carry = s / 10;\n            cur->next = new ListNode(s % 10);\n            cur = cur->next;\n        }\n        if (carry) cur->next = new ListNode(carry);\n        return dummy.next;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        vector<int> a, b;\n        while (l1) { a.push_back(l1->val); l1 = l1->next; }\n        while (l2) { b.push_back(l2->val); l2 = l2->next; }\n        size_t n = max(a.size(), b.size());\n        int carry = 0;\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        for (size_t i = 0; i < n; ++i) {\n            int x = i < a.size() ? a[i] : 0;\n            int y = i < b.size() ? b[i] : 0;\n            int s = x + y + carry;\n            carry = s / 10;\n            cur->next = new ListNode(s % 10);\n            cur = cur->next;\n        }\n        if (carry) cur->next = new ListNode(carry);\n        return dummy.next;\n    }\n};",
+        "python": "class Solution:\n    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\n        a = []\n        b = []\n        while l1:\n            a.append(l1.val)\n            l1 = l1.next\n        while l2:\n            b.append(l2.val)\n            l2 = l2.next\n        n = max(len(a), len(b))\n        carry = 0\n        dummy = ListNode(0)\n        cur = dummy\n        for i in range(n):\n            x = a[i] if i < len(a) else 0\n            y = b[i] if i < len(b) else 0\n            s = x + y + carry\n            carry = s // 10\n            cur.next = ListNode(s % 10)\n            cur = cur.next\n        if carry:\n            cur.next = ListNode(carry)\n        return dummy.next",
+        "java": "class Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        List<Integer> a = new ArrayList<>();\n        List<Integer> b = new ArrayList<>();\n        while (l1 != null) { a.add(l1.val); l1 = l1.next; }\n        while (l2 != null) { b.add(l2.val); l2 = l2.next; }\n        int n = Math.max(a.size(), b.size());\n        int carry = 0;\n        ListNode dummy = new ListNode(0);\n        ListNode cur = dummy;\n        for (int i = 0; i < n; i++) {\n            int x = i < a.size() ? a.get(i) : 0;\n            int y = i < b.size() ? b.get(i) : 0;\n            int s = x + y + carry;\n            carry = s / 10;\n            cur.next = new ListNode(s % 10);\n            cur = cur.next;\n        }\n        if (carry > 0) cur.next = new ListNode(carry);\n        return dummy.next;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N^2) or O(N)",
-        "explanation": "Depends on simulation steps."
+        "complexity": "O(max(m, n))",
+        "explanation": "We traverse each list once to fill arrays O(m+n) and once more over N=max(m,n) to add and build output. Overall linear in the longer list length."
       },
       "spaceComplexity": {
-        "complexity": "O(1)",
-        "explanation": "Constant auxiliary memory."
+        "complexity": "O(max(m, n))",
+        "explanation": "Extra arrays store all m+n digits plus output list of length up to max(m,n)+1. Excluding output, auxiliary space is O(m+n). This is why it is not optimal."
+      },
+      "dryRunExample": {
+        "input": "l1 = [2,4,3], l2 = [5,6,4]",
+        "steps": [
+          "Copy to arrays: a=[2,4,3], b=[5,6,4], n=3, carry=0",
+          "i=0: 2+5+0=7 -> digit 7 carry 0 -> list [7]",
+          "i=1: 4+6+0=10 -> digit 0 carry 1 -> list [7,0]",
+          "i=2: 3+4+1=8 -> digit 8 carry 0 -> list [7,0,8]",
+          "No final carry, return [7,0,8]"
+        ],
+        "output": "[7,0,8] which is 342 + 465 = 807"
       },
       "edgeCases": [
-        "Empty inputs, negative numbers, extreme bounds."
+        "Different lengths: [9,9,9] + [1] requires treating missing digits as 0",
+        "Final carry creating new node: [9,9] + [1] -> [0,0,1]",
+        "Zeros: [0] + [0] -> [0] without extra leading node"
       ]
     },
     {
-      "id": "optimal-cpp",
-      "name": "Approach 2: Optimal C++ Algorithm",
-      "tag": "Optimal",
-      "intuition": "Leverage optimal C++ STL structures (e.g. unordered_map, priority_queue, or two-pointer passes) to minimize runtime complexity.",
-      "theory": "Addresses the bottleneck of the naive approach by caching lookups in O(1) or pruning search branches.",
-      "cppCode": "#include <vector>\n#include <unordered_map>\n#include <algorithm>\n\nclass Solution {\npublic:\n    int solveOptimal(const std::vector<int>& nums) {\n        // Optimal C++ solution for: Add Two Numbers\n        std::unordered_map<int, int> countMap;\n        for (int num : nums) {\n            countMap[num]++;\n        }\n        return countMap.size();\n    }\n};",
+      "id": "recursive",
+      "name": "Approach 2: Recursion with Carry",
+      "tag": "Recursion",
+      "intuition": "Addition at each position depends only on the two digits and incoming carry, and produces an outgoing carry for the next more-significant position. This is naturally recursive: solve head position, then recursively solve the rest with the new carry.",
+      "theory": "Define helper(n1,n2,carry) that returns sum list for suffixes starting at n1,n2. Base case: if n1==null and n2==null and carry==0 return null. Otherwise x = n1.val or 0, y = n2.val or 0, s = x+y+carry, create node(s%10) whose next = helper(next1,next2,s/10). Correct by induction on remaining length: each call handles exactly one place value 10^k and forwards correct carry.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        return helper(l1, l2, 0);\n    }\nprivate:\n    ListNode* helper(ListNode* n1, ListNode* n2, int carry) {\n        if (!n1 && !n2 && carry == 0) return nullptr;\n        int x = n1 ? n1->val : 0;\n        int y = n2 ? n2->val : 0;\n        int s = x + y + carry;\n        ListNode* node = new ListNode(s % 10);\n        node->next = helper(n1 ? n1->next : nullptr, n2 ? n2->next : nullptr, s / 10);\n        return node;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        return helper(l1, l2, 0);\n    }\nprivate:\n    ListNode* helper(ListNode* n1, ListNode* n2, int carry) {\n        if (!n1 && !n2 && carry == 0) return nullptr;\n        int x = n1 ? n1->val : 0;\n        int y = n2 ? n2->val : 0;\n        int s = x + y + carry;\n        ListNode* node = new ListNode(s % 10);\n        node->next = helper(n1 ? n1->next : nullptr, n2 ? n2->next : nullptr, s / 10);\n        return node;\n    }\n};",
+        "python": "class Solution:\n    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\n        def helper(n1, n2, carry):\n            if not n1 and not n2 and carry == 0:\n                return None\n            x = n1.val if n1 else 0\n            y = n2.val if n2 else 0\n            s = x + y + carry\n            node = ListNode(s % 10)\n            nxt1 = n1.next if n1 else None\n            nxt2 = n2.next if n2 else None\n            node.next = helper(nxt1, nxt2, s // 10)\n            return node\n        return helper(l1, l2, 0)",
+        "java": "class Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        return helper(l1, l2, 0);\n    }\n    private ListNode helper(ListNode n1, ListNode n2, int carry) {\n        if (n1 == null && n2 == null && carry == 0) return null;\n        int x = (n1 != null) ? n1.val : 0;\n        int y = (n2 != null) ? n2.val : 0;\n        int s = x + y + carry;\n        ListNode node = new ListNode(s % 10);\n        ListNode nxt1 = (n1 != null) ? n1.next : null;\n        ListNode nxt2 = (n2 != null) ? n2.next : null;\n        node.next = helper(nxt1, nxt2, s / 10);\n        return node;\n    }\n}"
+      },
       "timeComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Single linear pass with amortized O(1) hash map operations."
+        "complexity": "O(max(m, n))",
+        "explanation": "One recursive call per digit position up to max(m,n)+1 calls for possible final carry, each doing O(1) work."
       },
       "spaceComplexity": {
-        "complexity": "O(N)",
-        "explanation": "Stores unique elements in auxiliary hash map."
+        "complexity": "O(max(m, n))",
+        "explanation": "Recursion stack depth equals number of positions up to max(m,n)+1, plus output list. Iterative version avoids this stack overhead."
+      },
+      "dryRunExample": {
+        "input": "l1 = [2,4,3], l2 = [5,6,4]",
+        "steps": [
+          "helper(2,5,0): s=7 -> node 7 + helper(4,6,0)",
+          "helper(4,6,0): s=10 -> node 0 + helper(3,4,1)",
+          "helper(3,4,1): s=8 -> node 8 + helper(null,null,0)",
+          "helper(null,null,0): base -> null, unwind to [7,0,8]"
+        ],
+        "output": "[7,0,8]"
       },
       "edgeCases": [
-        "Handling duplicate elements, overflow with large integer accumulators."
+        "Long carry chain: [9,9,9] + [1] recurses 4 deep to produce [0,0,0,1]",
+        "One list empty in recursion tail: [1,2] + [3] -> helper handles null as 0",
+        "Stack overflow risk for very long lists (10k+ nodes) in languages with limited stack"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Optimal Iterative Dummy Head Single Pass",
+      "tag": "Optimal",
+      "intuition": "We do not need to store digits first. Since input is already least-significant-first, we can walk both lists together, maintain a carry, emit one result node per step, and use a dummy head to avoid special-casing the first node.",
+      "theory": "Maintain pointers p=l1, q=l2 and carry. Invariant after processing k digits: result prefix holds correct k least-significant digits of sum and carry is floor(prefix_sum / 10^k). At each step with x,y (0 if pointer null), s=x+y+carry, emit s%10, new carry=s/10, advance pointers. Loop condition p||q||carry handles unequal lengths and final overflow. Dummy head gives stable start pointer; return dummy.next.",
+      "cppCode": "class Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        int carry = 0;\n        while (l1 || l2 || carry) {\n            int x = l1 ? l1->val : 0;\n            int y = l2 ? l2->val : 0;\n            int s = x + y + carry;\n            carry = s / 10;\n            cur->next = new ListNode(s % 10);\n            cur = cur->next;\n            if (l1) l1 = l1->next;\n            if (l2) l2 = l2->next;\n        }\n        return dummy.next;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        ListNode dummy(0);\n        ListNode* cur = &dummy;\n        int carry = 0;\n        while (l1 || l2 || carry) {\n            int x = l1 ? l1->val : 0;\n            int y = l2 ? l2->val : 0;\n            int s = x + y + carry;\n            carry = s / 10;\n            cur->next = new ListNode(s % 10);\n            cur = cur->next;\n            if (l1) l1 = l1->next;\n            if (l2) l2 = l2->next;\n        }\n        return dummy.next;\n    }\n};",
+        "python": "class Solution:\n    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\n        dummy = ListNode(0)\n        cur = dummy\n        carry = 0\n        while l1 or l2 or carry:\n            x = l1.val if l1 else 0\n            y = l2.val if l2 else 0\n            s = x + y + carry\n            carry = s // 10\n            cur.next = ListNode(s % 10)\n            cur = cur.next\n            if l1:\n                l1 = l1.next\n            if l2:\n                l2 = l2.next\n        return dummy.next",
+        "java": "class Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        ListNode dummy = new ListNode(0);\n        ListNode cur = dummy;\n        int carry = 0;\n        while (l1 != null || l2 != null || carry != 0) {\n            int x = (l1 != null) ? l1.val : 0;\n            int y = (l2 != null) ? l2.val : 0;\n            int s = x + y + carry;\n            carry = s / 10;\n            cur.next = new ListNode(s % 10);\n            cur = cur.next;\n            if (l1 != null) l1 = l1.next;\n            if (l2 != null) l2 = l2.next;\n        }\n        return dummy.next;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(max(m, n))",
+        "explanation": "Single pass visits each node at most once plus at most one extra iteration for final carry. Each iteration is O(1)."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only dummy pointer, current pointer and integer carry are used. Output list of length O(max(m,n)) is required and not counted as extra space."
+      },
+      "dryRunExample": {
+        "input": "l1 = [9,9,9], l2 = [1]",
+        "steps": [
+          "dummy->null, carry=0, p=9 q=1",
+          "9+1+0=10 -> emit 0 carry 1 -> [0]",
+          "9+0+1=10 -> emit 0 carry 1 -> [0,0]",
+          "9+0+1=10 -> emit 0 carry 1 -> [0,0,0]",
+          "null+null+1=1 -> emit 1 carry 0 -> [0,0,0,1]"
+        ],
+        "output": "[0,0,0,1] which is 999 + 1 = 1000"
+      },
+      "edgeCases": [
+        "Unequal lengths: [1,8] + [0] -> [1,8] with loop continuing on longer list",
+        "Final carry: [5] + [5] -> [0,1]",
+        "All zeros: [0] + [0] -> [0], loop runs once because l1/l2 non-null",
+        "Large inputs: 100 nodes of 9s, carry propagates correctly without overflow since we never convert whole list to int"
       ]
     }
   ]

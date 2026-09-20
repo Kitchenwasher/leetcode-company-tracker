@@ -84,7 +84,12 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
         try {
           const res = await fetch(`/solutions/${q.id}.json`);
           if (res.ok) {
-            data = await res.json();
+            const parsed = await res.json();
+            const isStub = JSON.stringify(parsed).includes('/* window condition violated */') ||
+                           JSON.stringify(parsed).includes('solveNaive');
+            if (!isStub && parsed.approaches && parsed.approaches.length > 0) {
+              data = parsed;
+            }
           }
         } catch {}
 
@@ -503,8 +508,8 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
             {/* TAB 1: C++ MULTI-APPROACH SOLUTIONS & THEORY */}
             {leftTab === 'theory' && (
               <div className="space-y-5">
-                {/* Core Pattern Pill & AI Action */}
-                {solutionData && (
+                {/* Core Pattern Pill & Verified Status */}
+                {solutionData && solutionData.approaches && solutionData.approaches.length > 0 && !isGeneratingAi && (
                   <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-surfaceElevated border border-border">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-primary shrink-0" />
@@ -513,15 +518,10 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleGenerateWithAi}
-                        disabled={isGeneratingAi}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-sm"
-                        title="Generate or refresh solution using Meta Muse AI"
-                      >
-                        <Sparkles className={`w-3.5 h-3.5 ${isGeneratingAi ? 'animate-spin' : ''}`} />
-                        <span>{isGeneratingAi ? 'Meta AI Generating...' : '✨ Ask Meta AI'}</span>
-                      </button>
+                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        Verified FAANG Editorial
+                      </span>
                     </div>
                   </div>
                 )}

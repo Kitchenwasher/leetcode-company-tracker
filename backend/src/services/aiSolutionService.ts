@@ -107,7 +107,7 @@ Format strictly as:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        max_tokens: 4500,
+        max_tokens: 8192,
         temperature: 0.2,
       }),
     });
@@ -118,10 +118,13 @@ Format strictly as:
     }
 
     const data = (await response.json()) as any;
-    const rawContent = data?.choices?.[0]?.message?.content;
+    const choice = data?.choices?.[0];
+    const rawContent = choice?.message?.content;
 
     if (!rawContent) {
-      throw new Error('Meta Muse API returned an empty completion response.');
+      const reason = choice?.finish_reason || 'unknown';
+      const usage = JSON.stringify(data?.usage || {});
+      throw new Error(`Meta Muse API returned an empty completion response (finish_reason: ${reason}, usage: ${usage}).`);
     }
 
     // Extract JSON object boundary
