@@ -371,6 +371,9 @@ export class QuestionController {
 
       const question = await prisma.question.findUnique({
         where: { id },
+        include: {
+          solution: true,
+        },
       });
 
       if (!question) {
@@ -389,51 +392,145 @@ export class QuestionController {
         slug = question.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       }
 
-      // Fetch from LeetCode GraphQL
-      const gqlRes = await fetch('https://leetcode.com/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Referer': 'https://leetcode.com',
-        },
-        body: JSON.stringify({
-          query: `query questionData($titleSlug: String!) {
-            question(titleSlug: $titleSlug) {
-              questionId
-              title
-              content
-              difficulty
-              exampleTestcaseList
-              topicTags { name }
-              codeSnippets {
-                lang
-                langSlug
-                code
-              }
-            }
-          }`,
-          variables: { titleSlug: slug },
-        }),
-      });
+      let parsedTopics: string[] = [];
+      try {
+        parsedTopics = JSON.parse(question.topics);
+      } catch {
+        parsedTopics = [];
+      }
 
-      if (!gqlRes.ok) {
-        res.status(502).json({ error: 'Failed to fetch description from LeetCode' });
+      // 1. Check if already cached permanently in PostgreSQL Neon Database
+      if (question.descriptionContent && question.codeSnippets) {
+        let cachedTestcases: string[] = [];
+        let cachedSnippets: any[] = [];
+        try {
+          cachedTestcases = question.exampleTestcases ? JSON.parse(question.exampleTestcases) : [];
+        } catch {
+          cachedTestcases = [];
+        }
+        try {
+          cachedSnippets = question.codeSnippets ? JSON.parse(question.codeSnippets) : [];
+        } catch {
+          cachedSnippets = [];
+        }
+
+        // Return cached data immediately without any network calls to LeetCode
+        res.json({
+          id: question.id,
+          title: question.title,
+          titleSlug: slug,
+          difficulty: question.difficulty,
+          content: question.descriptionContent,
+          exampleTestcases: cachedTestcases,
+          topicTags: parsedTopics,
+          codeSnippets: cachedSnippets,
+          cached: true,
+        });
         return;
       }
 
-      const gqlData = (await gqlRes.json()) as any;
-      const detail = gqlData?.data?.question;
+      // 2. Not cached in DB yet: Fetch once from LeetCode GraphQL
+      let detail: any = null;
+      try {
+        const gqlRes = await fetch('https://leetcode.com/graphql', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Referer': 'https://leetcode.com',
+            'Origin': 'https://leetcode.com',
+          },
+          body: JSON.stringify({
+            query: `query questionData($titleSlug: String!) {
+              question(titleSlug: $titleSlug) {
+                questionId
+                title
+                content
+                difficulty
+                exampleTestcaseList
+                topicTags { name }
+                codeSnippets {
+                  lang
+                  langSlug
+                  code
+                }
+              }
+            }`,
+            variables: { titleSlug: slug },
+          }),
+        });
+
+        if (gqlRes.ok) {
+          const gqlData = (await gqlRes.json()) as any;
+          detail = gqlData?.data?.question;
+        }
+      } catch (fetchErr) {
+        console.warn(`[LeetCode GraphQL] Fetch failed for slug '${slug}':`, fetchErr);
+      }
+
+      // 3. If fetched successfully, persist permanently into database
+      if (detail && detail.content) {
+        const snippets = detail.codeSnippets || [];
+        const testcases = detail.exampleTestcaseList || [];
+        const tags = detail.topicTags?.map((t: any) => t.name) || parsedTopics;
+
+        try {
+          await prisma.question.update({
+            where: { id: question.id },
+            data: {
+              descriptionContent: detail.content,
+              exampleTestcases: JSON.stringify(testcases),
+              codeSnippets: JSON.stringify(snippets),
+            },
+          });
+        } catch (dbErr) {
+          console.error(`[DB Cache] Failed to cache question #${question.id} in DB:`, dbErr);
+        }
+
+        res.json({
+          id: question.id,
+          title: question.title,
+          titleSlug: slug,
+          difficulty: question.difficulty,
+          content: detail.content,
+          exampleTestcases: testcases,
+          topicTags: tags,
+          codeSnippets: snippets,
+          cached: false,
+        });
+        return;
+      }
+
+      // 4. Fallback if LeetCode GraphQL is blocked/down: extract snippets from solution if available
+      let fallbackSnippets: any[] = [];
+      if (question.solution?.approaches) {
+        try {
+          const approaches = JSON.parse(question.solution.approaches);
+          const firstApp = approaches[0];
+          if (firstApp?.code) {
+            if (firstApp.code.cpp) {
+              fallbackSnippets.push({ lang: 'C++', langSlug: 'cpp', code: firstApp.code.cpp });
+            }
+            if (firstApp.code.python) {
+              fallbackSnippets.push({ lang: 'Python3', langSlug: 'python3', code: firstApp.code.python });
+            }
+            if (firstApp.code.java) {
+              fallbackSnippets.push({ lang: 'Java', langSlug: 'java', code: firstApp.code.java });
+            }
+          }
+        } catch {}
+      }
 
       res.json({
         id: question.id,
         title: question.title,
         titleSlug: slug,
         difficulty: question.difficulty,
-        content: detail?.content || '<p>Problem description is currently unavailable.</p>',
-        exampleTestcases: detail?.exampleTestcaseList || [],
-        topicTags: detail?.topicTags?.map((t: any) => t.name) || [],
-        codeSnippets: detail?.codeSnippets || [],
+        content: question.descriptionContent || '<p>Problem description is loading or temporarily unavailable from LeetCode.</p>',
+        exampleTestcases: [],
+        topicTags: parsedTopics,
+        codeSnippets: fallbackSnippets,
+        cached: false,
       });
     } catch (err) {
       next(err);

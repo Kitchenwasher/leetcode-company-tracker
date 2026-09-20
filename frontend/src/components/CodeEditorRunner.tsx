@@ -52,9 +52,11 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
     return (localStorage.getItem('cheatcode_editor_lang') as SupportedLanguage) || 'python';
   });
 
+  const hasUserEditedCodeRef = useRef<boolean>(false);
+
   const [code, setCode] = useState<string>(() => {
     if (initialCode && initialCode.trim()) return initialCode;
-    return generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
+    return generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets, descriptionData?.content);
   });
   const [copied, setCopied] = useState<boolean>(false);
   const [isSolutionLoaded, setIsSolutionLoaded] = useState<boolean>(false);
@@ -93,31 +95,35 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
     lastLanguageRef.current = language;
 
     if (isNewQuestion) {
+      hasUserEditedCodeRef.current = false;
       const newCode = (initialCode && initialCode.trim())
         ? initialCode
-        : generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
+        : generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets, descriptionData?.content);
       setCode(newCode);
       onCodeChange?.(newCode);
       setIsSolutionLoaded(false);
       setExecResult(null);
     } else if (isNewLanguage) {
-      const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
+      hasUserEditedCodeRef.current = false;
+      const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets, descriptionData?.content);
       setCode(starter);
       onCodeChange?.(starter);
       setIsSolutionLoaded(false);
       setExecResult(null);
-    } else if (!isSolutionLoaded) {
-      // If code was currently an empty placeholder or generic stub, update when authentic snippet arrives
-      const isStub = !code || code.includes('// Write your solution here') || code.includes('def solve(self') || code.includes('public int[] solve');
-      if (isStub && (descriptionData?.codeSnippets?.length || currentApproach)) {
-        const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
+    } else if (!isSolutionLoaded && !hasUserEditedCodeRef.current) {
+      // If code was not manually typed by user, update to authentic LeetCode snippet as soon as it arrives
+      if (descriptionData?.codeSnippets?.length || currentApproach) {
+        const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets, descriptionData?.content);
         setCode(starter);
         onCodeChange?.(starter);
       }
     }
   }, [language, q.id, descriptionData, currentApproach]);
 
-  const updateCode = (newCode: string) => {
+  const updateCode = (newCode: string, isUserEdit = false) => {
+    if (isUserEdit) {
+      hasUserEditedCodeRef.current = true;
+    }
     setCode(newCode);
     onCodeChange?.(newCode);
   };
@@ -133,13 +139,15 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
 
   const handleLanguageChange = (newLang: SupportedLanguage) => {
     sounds.playClick();
+    hasUserEditedCodeRef.current = false;
     setLanguage(newLang);
     localStorage.setItem('cheatcode_editor_lang', newLang);
   };
 
   const handleResetStarter = () => {
     sounds.playClick();
-    const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
+    hasUserEditedCodeRef.current = false;
+    const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets, descriptionData?.content);
     updateCode(starter);
     setIsSolutionLoaded(false);
   };
@@ -367,7 +375,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
           language={language}
           value={code}
           theme="vs-dark"
-          onChange={(val) => updateCode(val || '')}
+          onChange={(val) => updateCode(val || '', true)}
           onMount={handleEditorDidMount}
           options={{
             fontSize: 13,

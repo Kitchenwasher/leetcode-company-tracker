@@ -48,6 +48,9 @@ model Question {
   isNeetCode150 Boolean           @default(false)
   isStriver180  Boolean           @default(false)
   isGrind169    Boolean           @default(false)
+  descriptionContent String?      // Cached LeetCode problem HTML description
+  exampleTestcases   String?      // Cached JSON string array of testcases
+  codeSnippets       String?      // Cached JSON string array of { lang, langSlug, code }
   createdAt     DateTime          @default(now())
 
   solution      Solution?
