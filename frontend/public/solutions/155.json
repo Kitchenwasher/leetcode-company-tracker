@@ -1,0 +1,92 @@
+{
+  "questionId": 155,
+  "title": "Min Stack",
+  "difficulty": "Medium",
+  "corePattern": "Augmented Stack / Auxiliary State Design",
+  "interviewTips": [
+    "Clarify constraints: will pop/top/getMin ever be called on empty stack? Per LeetCode no, but ask about behavior and duplicate values.",
+    "Trade-off to discuss: scanning for min is O(n) time vs caching min per state is O(1) time with O(n) extra space; duplicates require <= not < when pushing to min stack.",
+    "Edge-case tip: test duplicate minimums e.g., push 0, push 0, pop once — getMin must still be 0, and test strictly decreasing pushes where every element is a new min."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with Scan for Min",
+      "tag": "Brute Force",
+      "intuition": "Use a normal array/vector as stack for push/pop/top, and compute minimum on demand by scanning all elements when getMin is called. Simplest correct design with no extra bookkeeping.",
+      "theory": "A stack natively supports LIFO push/pop/top in O(1). The minimum over the stack is a global aggregate that changes on push/pop. Without caching, the only way to know it is to iterate over all n elements and take the minimum. This is correct because min(stack) is definitionally the answer, but getMin becomes linear.",
+      "cppCode": "class MinStack {\npublic:\n    vector<int> st;\n    MinStack() {}\n    void push(int val) { st.push_back(val); }\n    void pop() { st.pop_back(); }\n    int top() { return st.back(); }\n    int getMin() { return *min_element(st.begin(), st.end()); }\n};",
+      "code": {
+        "cpp": "class MinStack {\npublic:\n    vector<int> st;\n    MinStack() {}\n    void push(int val) { st.push_back(val); }\n    void pop() { st.pop_back(); }\n    int top() { return st.back(); }\n    int getMin() { return *min_element(st.begin(), st.end()); }\n};",
+        "python": "class MinStack:\n    def __init__(self):\n        self.stack = []\n    def push(self, val: int) -> None:\n        self.stack.append(val)\n    def pop(self) -> None:\n        self.stack.pop()\n    def top(self) -> int:\n        return self.stack[-1]\n    def getMin(self) -> int:\n        return min(self.stack)",
+        "java": "class MinStack {\n    private List<Integer> stack;\n    public MinStack() { stack = new ArrayList<>(); }\n    public void push(int val) { stack.add(val); }\n    public void pop() { stack.remove(stack.size() - 1); }\n    public int top() { return stack.get(stack.size() - 1); }\n    public int getMin() { int m = stack.get(0); for (int x : stack) m = Math.min(m, x); return m; }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n) for getMin, O(1) for push/pop/top",
+        "explanation": "push, pop, top touch only the top element. getMin scans all n elements to find the minimum."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Only one array storing n pushed values, no auxiliary structure."
+      },
+      "dryRunExample": {
+        "input": "push(-2), push(0), push(-3), getMin(), pop(), top(), getMin()",
+        "steps": [
+          "stack=[-2] after push(-2)",
+          "stack=[-2,0] after push(0)",
+          "stack=[-2,0,-3] after push(-3)",
+          "getMin scans [-2,0,-3] -> -3",
+          "pop removes -3 -> [-2,0]",
+          "top returns 0",
+          "getMin scans [-2,0] -> -2"
+        ],
+        "output": "getMin=-3, top=0, getMin=-2"
+      },
+      "edgeCases": [
+        "Single element: getMin must return that element",
+        "Duplicate minimums: e.g., [0,0] getMin is 0, still correct via scan",
+        "Negative and large values (-2^31 to 2^31-1): min comparison must handle full int range"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Auxiliary Min Stack",
+      "tag": "Optimal",
+      "intuition": "Cache the minimum at every stack state in a second stack. When you push a new value that is <= current minimum, also push it onto minStack. When you pop that value, pop minStack too. Then getMin is just the top of minStack.",
+      "theory": "Let S be main stack and M be min stack where M.top() = min(S). Invariant: M is non-decreasing from bottom to top and contains exactly the decreasing minima of S. Push maintains it: if val <= M.top(), val becomes new minimum so push to M. Pop maintains it: if popped val == M.top(), that minimum no longer exists so pop M. By induction M.top() always equals min(S), giving O(1) getMin. Using <= (not <) correctly handles duplicate minima.",
+      "cppCode": "class MinStack {\npublic:\n    stack<int> st;\n    stack<int> minSt;\n    MinStack() {}\n    void push(int val) {\n        st.push(val);\n        if (minSt.empty() || val <= minSt.top()) minSt.push(val);\n    }\n    void pop() {\n        if (st.top() == minSt.top()) minSt.pop();\n        st.pop();\n    }\n    int top() { return st.top(); }\n    int getMin() { return minSt.top(); }\n};",
+      "code": {
+        "cpp": "class MinStack {\npublic:\n    stack<int> st;\n    stack<int> minSt;\n    MinStack() {}\n    void push(int val) {\n        st.push(val);\n        if (minSt.empty() || val <= minSt.top()) minSt.push(val);\n    }\n    void pop() {\n        if (st.top() == minSt.top()) minSt.pop();\n        st.pop();\n    }\n    int top() { return st.top(); }\n    int getMin() { return minSt.top(); }\n};",
+        "python": "class MinStack:\n    def __init__(self):\n        self.stack = []\n        self.min_stack = []\n    def push(self, val: int) -> None:\n        self.stack.append(val)\n        if not self.min_stack or val <= self.min_stack[-1]:\n            self.min_stack.append(val)\n    def pop(self) -> None:\n        val = self.stack.pop()\n        if val == self.min_stack[-1]:\n            self.min_stack.pop()\n    def top(self) -> int:\n        return self.stack[-1]\n    def getMin(self) -> int:\n        return self.min_stack[-1]",
+        "java": "class MinStack {\n    private Deque<Integer> stack;\n    private Deque<Integer> minStack;\n    public MinStack() { stack = new ArrayDeque<>(); minStack = new ArrayDeque<>(); }\n    public void push(int val) { stack.push(val); if (minStack.isEmpty() || val <= minStack.peek()) minStack.push(val); }\n    public void pop() { int val = stack.pop(); if (val == minStack.peek()) minStack.pop(); }\n    public int top() { return stack.peek(); }\n    public int getMin() { return minStack.peek(); }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(1) for all operations",
+        "explanation": "push does at most two pushes, pop does at most two pops, top and getMin are single peek operations."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Main stack holds n elements, min stack holds at most n elements (exactly the number of times a new minimum or equal minimum was pushed; O(n) worst case for decreasing inputs, O(1) for increasing inputs)."
+      },
+      "dryRunExample": {
+        "input": "push(-2), push(0), push(-3), getMin(), pop(), top(), getMin()",
+        "steps": [
+          "push(-2): stack=[-2], minStack=[-2]",
+          "push(0): 0 > -2 so stack=[-2,0], minStack=[-2]",
+          "push(-3): -3 <= -2 so stack=[-2,0,-3], minStack=[-2,-3]",
+          "getMin -> minStack top = -3",
+          "pop: top -3 == min top -3 so pop both -> stack=[-2,0], minStack=[-2]",
+          "top -> 0",
+          "getMin -> minStack top = -2"
+        ],
+        "output": "getMin=-3, top=0, getMin=-2"
+      },
+      "edgeCases": [
+        "Duplicate mins: push(0), push(0) must push to minStack twice due to <=, else first pop loses min",
+        "Strictly decreasing: e.g., 5,4,3,2,1 — minStack grows to size n, still O(1) per op",
+        "Strictly increasing: e.g., 1,2,3 — minStack stays size 1, pop must not touch minStack until 1 is popped",
+        "Interleaved push/pop/top: invariant holds after every operation"
+      ]
+    }
+  ]
+}

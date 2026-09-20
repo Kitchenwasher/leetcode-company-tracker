@@ -1,0 +1,86 @@
+{
+  "questionId": 152,
+  "title": "Maximum Product Subarray",
+  "difficulty": "Medium",
+  "corePattern": "Dynamic Programming with Dual State Tracking (Modified Kadane for Product)",
+  "interviewTips": [
+    "Clarify constraints: can array contain zeros and negatives? Is n up to 2*10^4 and product fits in 32-bit int? Ask if empty subarray allowed (here no, at least one element).",
+    "Trade-off to discuss: Brute force O(n^2) is simple but fails on large n; DP O(n) time O(1) space is optimal because sign flips require tracking both max and min ending at i.",
+    "Edge-case tip: mention single element, all negatives with odd count, zeros splitting array, and single negative like [-2] where answer is -2, not 0."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "Enumerate every subarray starting at i and extend to j, maintain running product, and keep the global maximum. This directly implements the definition of maximum product subarray.",
+      "theory": "For each start index i, iterate end index j >= i and maintain prod = product(nums[i..j]). Update ans = max(ans, prod). There are n*(n+1)/2 subarrays, each extension is O(1) multiplication. Correct because all possibilities are examined. Space is O(1) besides input.",
+      "cppCode": "class Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        int n = nums.size();\n        int ans = nums[0];\n        for (int i = 0; i < n; ++i) {\n            int prod = 1;\n            for (int j = i; j < n; ++j) {\n                prod *= nums[j];\n                ans = max(ans, prod);\n            }\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        int n = nums.size();\n        int ans = nums[0];\n        for (int i = 0; i < n; ++i) {\n            int prod = 1;\n            for (int j = i; j < n; ++j) {\n                prod *= nums[j];\n                ans = max(ans, prod);\n            }\n        }\n        return ans;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxProduct(self, nums: List[int]) -> int:\n        n = len(nums)\n        ans = nums[0]\n        for i in range(n):\n            prod = 1\n            for j in range(i, n):\n                prod *= nums[j]\n                if prod > ans:\n                    ans = prod\n        return ans",
+        "java": "class Solution {\n    public int maxProduct(int[] nums) {\n        int n = nums.length;\n        int ans = nums[0];\n        for (int i = 0; i < n; i++) {\n            int prod = 1;\n            for (int j = i; j < n; j++) {\n                prod *= nums[j];\n                ans = Math.max(ans, prod);\n            }\n        }\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "n start positions each expands up to n ends, total O(n^2) multiplications and comparisons."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only prod and ans variables, no extra array."
+      },
+      "dryRunExample": {
+        "input": "nums = [2,3,-2,4]",
+        "steps": [
+          "i=0: prod sequence 2 -> 6 -> -12 -> -48, ans=6",
+          "i=1: prod sequence 3 -> -6 -> -24, ans stays 6",
+          "i=2: prod sequence -2 -> -8, ans stays 6",
+          "i=3: prod sequence 4, ans stays 6"
+        ],
+        "output": "6"
+      },
+      "edgeCases": [
+        "Single element [-2] returns -2",
+        "All zeros [0,0,0] returns 0",
+        "Overflow not an issue per constraints but product grows fast in brute force"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: DP Tracking Max and Min (Optimal)",
+      "tag": "Optimal",
+      "intuition": "Product differs from sum because a negative times a very small (negative) value becomes very large. So at each position we must remember both the largest and smallest product of a subarray ending here. A negative flips them.",
+      "theory": "Let maxEnd[i] = max product of subarray ending at i, minEnd[i] = min product ending at i. Recurrence: if nums[i] >= 0 then maxEnd[i]=max(nums[i], maxEnd[i-1]*nums[i]), minEnd[i]=min(nums[i], minEnd[i-1]*nums[i]); if nums[i] < 0 they swap roles. This is because any optimal subarray ending at i either starts at i or extends optimal previous subarray. Only previous max/min needed, so compress to O(1) space with curMax, curMin. Global ans = max over maxEnd[i].",
+      "cppCode": "class Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        int curMax = nums[0], curMin = nums[0], ans = nums[0];\n        for (size_t i = 1; i < nums.size(); ++i) {\n            int x = nums[i];\n            if (x < 0) swap(curMax, curMin);\n            curMax = max(x, curMax * x);\n            curMin = min(x, curMin * x);\n            ans = max(ans, curMax);\n        }\n        return ans;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        int curMax = nums[0], curMin = nums[0], ans = nums[0];\n        for (size_t i = 1; i < nums.size(); ++i) {\n            int x = nums[i];\n            if (x < 0) swap(curMax, curMin);\n            curMax = max(x, curMax * x);\n            curMin = min(x, curMin * x);\n            ans = max(ans, curMax);\n        }\n        return ans;\n    }\n};",
+        "python": "from typing import List\nclass Solution:\n    def maxProduct(self, nums: List[int]) -> int:\n        curMax = curMin = ans = nums[0]\n        for x in nums[1:]:\n            if x < 0:\n                curMax, curMin = curMin, curMax\n            curMax = max(x, curMax * x)\n            curMin = min(x, curMin * x)\n            if curMax > ans:\n                ans = curMax\n        return ans",
+        "java": "class Solution {\n    public int maxProduct(int[] nums) {\n        int curMax = nums[0], curMin = nums[0], ans = nums[0];\n        for (int i = 1; i < nums.length; i++) {\n            int x = nums[i];\n            if (x < 0) {\n                int t = curMax;\n                curMax = curMin;\n                curMin = t;\n            }\n            curMax = Math.max(x, curMax * x);\n            curMin = Math.min(x, curMin * x);\n            ans = Math.max(ans, curMax);\n        }\n        return ans;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single left-to-right pass, O(1) work per element."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only curMax, curMin, ans variables; no DP array needed."
+      },
+      "dryRunExample": {
+        "input": "nums = [2,3,-2,4]",
+        "steps": [
+          "init curMax=2 curMin=2 ans=2",
+          "x=3: curMax=max(3,6)=6 curMin=min(3,6)=3 ans=6",
+          "x=-2: swap -> curMax=3 curMin=6, curMax=max(-2,-6)=-2 curMin=min(-2,-12)=-12 ans=6",
+          "x=4: curMax=max(4,-8)=4 curMin=min(4,-48)=-48 ans=6"
+        ],
+        "output": "6"
+      },
+      "edgeCases": [
+        "[-2,0,-1] -> 0: zero resets, curMax/curMin restart via max(x, ...)",
+        "[-2] -> -2: loop not entered, ans is nums[0]",
+        "[-2,3,-4] -> 24: two negatives make positive, requires min tracking",
+        "[0,2] -> 2 and [2,0] -> 2: zero does not force answer to 0"
+      ]
+    }
+  ]
+}

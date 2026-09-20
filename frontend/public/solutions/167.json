@@ -1,0 +1,116 @@
+{
+  "questionId": 167,
+  "title": "Two Sum II - Input Array Is Sorted",
+  "difficulty": "Medium",
+  "corePattern": "Opposite Directional Two Pointers on Sorted Array",
+  "interviewTips": [
+    "Clarify 1-indexed return and that index1 < index2, and that exactly one solution exists so early exit is safe.",
+    "Trade-off: Brute force O(n^2) vs Binary Search O(n log n) vs Two Pointers O(n) - sortedness enables eliminating half or one side per step without extra space.",
+    "Edge-case tip: Do not reuse same element (l < r), handle negatives, duplicates like [1,2,2,3], and n=2 minimal case; remember to return 1-indexed positions."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "Check every pair i < j and return the first pair that sums to target. This ignores sortedness and is the baseline to beat.",
+      "theory": "For each i, scan all j > i. There are n*(n-1)/2 pairs. Exactly one pair matches per problem guarantee, so exhaustive search is correct but wasteful. No extra space is used and no sorting property is exploited.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        int n = numbers.size();\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                if (numbers[i] + numbers[j] == target) return {i + 1, j + 1};\n            }\n        }\n        return {};\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        int n = numbers.size();\n        for (int i = 0; i < n; ++i) {\n            for (int j = i + 1; j < n; ++j) {\n                if (numbers[i] + numbers[j] == target) return {i + 1, j + 1};\n            }\n        }\n        return {};\n    }\n};",
+        "python": "class Solution:\n    def twoSum(self, numbers: List[int], target: int) -> List[int]:\n        n = len(numbers)\n        for i in range(n):\n            for j in range(i + 1, n):\n                if numbers[i] + numbers[j] == target:\n                    return [i + 1, j + 1]\n        return []",
+        "java": "class Solution {\n    public int[] twoSum(int[] numbers, int target) {\n        int n = numbers.length;\n        for (int i = 0; i < n; i++) {\n            for (int j = i + 1; j < n; j++) {\n                if (numbers[i] + numbers[j] == target) return new int[]{i + 1, j + 1};\n            }\n        }\n        return new int[]{-1, -1};\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n^2)",
+        "explanation": "Double loop over all pairs, n*(n-1)/2 checks in worst case."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only constant extra variables for indices."
+      },
+      "dryRunExample": {
+        "input": "numbers = [2,7,11,15], target = 9",
+        "steps": [
+          "i=0 (2): check j=1 (7): 2+7=9 -> match",
+          "return [1,2] (1-indexed)"
+        ],
+        "output": "[1,2]"
+      },
+      "edgeCases": [
+        "n=2 minimal array e.g. [1,2], target=3",
+        "No early break needed but TLE for n=30000",
+        "Negative numbers still work since no ordering assumption"
+      ]
+    },
+    {
+      "id": "binary-search",
+      "name": "Approach 2: Binary Search per Element",
+      "tag": "Binary Search",
+      "intuition": "Fix left index i, then the needed complement target-numbers[i] must exist in the sorted suffix i+1..n-1, so find it with binary search instead of linear scan.",
+      "theory": "Because the array is sorted non-decreasing, the subarray to the right of i is sorted. For each i we binary search for need = target - numbers[i] in range [i+1, n-1]. Correctness follows from sorted order and existence of unique solution. This reduces inner scan from O(n) to O(log n).",
+      "cppCode": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        int n = numbers.size();\n        for (int i = 0; i < n; ++i) {\n            int need = target - numbers[i];\n            int lo = i + 1, hi = n - 1;\n            while (lo <= hi) {\n                int mid = lo + (hi - lo) / 2;\n                if (numbers[mid] == need) return {i + 1, mid + 1};\n                else if (numbers[mid] < need) lo = mid + 1;\n                else hi = mid - 1;\n            }\n        }\n        return {};\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        int n = numbers.size();\n        for (int i = 0; i < n; ++i) {\n            int need = target - numbers[i];\n            int lo = i + 1, hi = n - 1;\n            while (lo <= hi) {\n                int mid = lo + (hi - lo) / 2;\n                if (numbers[mid] == need) return {i + 1, mid + 1};\n                else if (numbers[mid] < need) lo = mid + 1;\n                else hi = mid - 1;\n            }\n        }\n        return {};\n    }\n};",
+        "python": "import bisect\nclass Solution:\n    def twoSum(self, numbers: List[int], target: int) -> List[int]:\n        n = len(numbers)\n        for i in range(n):\n            need = target - numbers[i]\n            j = bisect.bisect_left(numbers, need, i + 1, n)\n            if j < n and numbers[j] == need:\n                return [i + 1, j + 1]\n        return []",
+        "java": "class Solution {\n    public int[] twoSum(int[] numbers, int target) {\n        int n = numbers.length;\n        for (int i = 0; i < n; i++) {\n            int need = target - numbers[i];\n            int lo = i + 1, hi = n - 1;\n            while (lo <= hi) {\n                int mid = lo + (hi - lo) / 2;\n                if (numbers[mid] == need) return new int[]{i + 1, mid + 1};\n                else if (numbers[mid] < need) lo = mid + 1;\n                else hi = mid - 1;\n            }\n        }\n        return new int[]{-1, -1};\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n log n)",
+        "explanation": "n iterations each with O(log n) binary search over suffix."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only indices and complement variable, iterative binary search."
+      },
+      "dryRunExample": {
+        "input": "numbers = [2,7,11,15], target = 9",
+        "steps": [
+          "i=0 val=2 need=7 binary search in [1..3] -> mid finds 7 at index 1",
+          "return [1,2]"
+        ],
+        "output": "[1,2]"
+      },
+      "edgeCases": [
+        "Duplicates e.g. [1,2,2,3] target=4 needs bisect_left to find first occurrence after i",
+        "Need smaller than all suffix values or larger - binary search correctly misses",
+        "Negative targets and negatives in array still sorted so binary search valid"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Two Pointers (Optimal)",
+      "tag": "Optimal",
+      "intuition": "Put one pointer at start and one at end. If sum is too small move left up, if too large move right down. Sortedness lets us discard one side safely each step.",
+      "theory": "Let l=0, r=n-1. If numbers[l]+numbers[r]==target done. If sum < target, then for current r no index <=l can pair with r to reach target with smaller left value? Formal invariant: solution lies in [l,r]. If sum < target, numbers[l] is too small to pair with any index <=r (since numbers[r] is max in window), so l++ preserves solution. Symmetrically if sum > target, r-- preserves solution. Window shrinks each step, guaranteeing O(n) convergence to unique solution.",
+      "cppCode": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        int l = 0, r = (int)numbers.size() - 1;\n        while (l < r) {\n            int s = numbers[l] + numbers[r];\n            if (s == target) return {l + 1, r + 1};\n            else if (s < target) ++l;\n            else --r;\n        }\n        return {};\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        int l = 0, r = (int)numbers.size() - 1;\n        while (l < r) {\n            int s = numbers[l] + numbers[r];\n            if (s == target) return {l + 1, r + 1};\n            else if (s < target) ++l;\n            else --r;\n        }\n        return {};\n    }\n};",
+        "python": "class Solution:\n    def twoSum(self, numbers: List[int], target: int) -> List[int]:\n        l, r = 0, len(numbers) - 1\n        while l < r:\n            s = numbers[l] + numbers[r]\n            if s == target:\n                return [l + 1, r + 1]\n            elif s < target:\n                l += 1\n            else:\n                r -= 1\n        return []",
+        "java": "class Solution {\n    public int[] twoSum(int[] numbers, int target) {\n        int l = 0, r = numbers.length - 1;\n        while (l < r) {\n            int s = numbers[l] + numbers[r];\n            if (s == target) return new int[]{l + 1, r + 1};\n            else if (s < target) l++;\n            else r--;\n        }\n        return new int[]{-1, -1};\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each iteration moves l forward or r backward, at most n-1 moves."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two pointers and sum variable."
+      },
+      "dryRunExample": {
+        "input": "numbers = [2,7,11,15], target = 9",
+        "steps": [
+          "l=0(2), r=3(15): sum=17 > 9 -> r=2",
+          "l=0(2), r=2(11): sum=13 > 9 -> r=1",
+          "l=0(2), r=1(7): sum=9 == 9 -> return [1,2]"
+        ],
+        "output": "[1,2]"
+      },
+      "edgeCases": [
+        "Solution at extremes e.g. [1,2,3,4,5] target=6 -> [1,5] found immediately",
+        "All negatives e.g. [-5,-3,-1,0,2] target=-4 -> pointers still converge",
+        "Duplicates e.g. [1,2,2,7] target=4 -> l moves past first 2 correctly to return [2,3]"
+      ]
+    }
+  ]
+}

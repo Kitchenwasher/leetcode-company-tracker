@@ -1,0 +1,88 @@
+{
+  "questionId": 141,
+  "title": "Linked List Cycle",
+  "difficulty": "Easy",
+  "corePattern": "Floyd's Cycle Finding Algorithm (Fast and Slow Pointers)",
+  "interviewTips": [
+    "Clarify cycle definition: ask if cycle means revisiting same node object by reference, not equal values, and how input pos is given.",
+    "Trade-off to articulate: Hash Set is intuitive and O(n) space vs Floyd is O(1) space with same O(n) time - interviewers expect Floyd as follow-up.",
+    "Edge-case tip: explicitly handle empty list, single node without cycle, and single node self-loop to avoid null pointer errors."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force with Hash Set",
+      "tag": "Brute Force",
+      "intuition": "If we walk the list and ever visit the same node object twice, there must be a cycle. Remember every visited node in a set and check for repeats.",
+      "theory": "Traverse from head following next pointers. Maintain a set of visited node identities (references/pointers). For each curr, if curr is already in set return True, else add it and move to curr.next. If we reach null, no cycle exists. Correct because a cycle causes infinite revisit of same objects, while an acyclic list has n distinct nodes and terminates.",
+      "cppCode": "class Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        unordered_set<ListNode*> seen;\n        while (head) {\n            if (seen.count(head)) return true;\n            seen.insert(head);\n            head = head->next;\n        }\n        return false;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        unordered_set<ListNode*> seen;\n        while (head) {\n            if (seen.count(head)) return true;\n            seen.insert(head);\n            head = head->next;\n        }\n        return false;\n    }\n};",
+        "python": "class Solution:\n    def hasCycle(self, head: Optional[ListNode]) -> bool:\n        seen = set()\n        curr = head\n        while curr:\n            if curr in seen:\n                return True\n            seen.add(curr)\n            curr = curr.next\n        return False",
+        "java": "public class Solution {\n    public boolean hasCycle(ListNode head) {\n        Set<ListNode> seen = new HashSet<>();\n        while (head != null) {\n            if (!seen.add(head)) return true;\n            head = head.next;\n        }\n        return false;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Each of n nodes visited at most once with O(1) average hash set insert and lookup."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Stores up to n node references in hash set in worst case of acyclic list."
+      },
+      "dryRunExample": {
+        "input": "head = [3,2,0,-4], pos = 1 (tail connects to node index 1 with value 2)",
+        "steps": [
+          "curr=3 not in {} -> add 3, move to 2",
+          "curr=2 not in {3} -> add 2, move to 0",
+          "curr=0 not in {3,2} -> add 0, move to -4",
+          "curr=-4 not in {3,2,0} -> add -4, move to 2 (cycle edge)",
+          "curr=2 already in set -> return True"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "Empty list head=null -> returns False",
+        "Single node without cycle head=[1], pos=-1 -> returns False",
+        "Single node self-loop head=[1], pos=0 -> detects repeat and returns True",
+        "Two nodes with cycle [1,2], pos=0 -> returns True"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Floyd Tortoise and Hare",
+      "tag": "Optimal",
+      "intuition": "Imagine two runners on a track: slow moves 1 step, fast moves 2 steps. On a straight track fast runs away to the end, on a circular track fast laps and meets slow.",
+      "theory": "Initialize slow=head and fast=head. While fast and fast.next are not null, advance slow by 1 and fast by 2. If slow==fast, cycle exists. Proof: if no cycle, fast reaches null. If cycle of length C exists, after entering cycle the distance between fast and slow shrinks by 1 each iteration modulo C, so they must meet within C steps. Uses only pointer comparison, no extra storage.",
+      "cppCode": "class Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        ListNode* slow = head;\n        ListNode* fast = head;\n        while (fast && fast->next) {\n            slow = slow->next;\n            fast = fast->next->next;\n            if (slow == fast) return true;\n        }\n        return false;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        ListNode* slow = head;\n        ListNode* fast = head;\n        while (fast && fast->next) {\n            slow = slow->next;\n            fast = fast->next->next;\n            if (slow == fast) return true;\n        }\n        return false;\n    }\n};",
+        "python": "class Solution:\n    def hasCycle(self, head: Optional[ListNode]) -> bool:\n        slow = head\n        fast = head\n        while fast and fast.next:\n            slow = slow.next\n            fast = fast.next.next\n            if slow == fast:\n                return True\n        return False",
+        "java": "public class Solution {\n    public boolean hasCycle(ListNode head) {\n        ListNode slow = head;\n        ListNode fast = head;\n        while (fast != null && fast.next != null) {\n            slow = slow.next;\n            fast = fast.next.next;\n            if (slow == fast) return true;\n        }\n        return false;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Fast pointer traverses at most 2n steps. Acyclic case O(n), cyclic case slow enters cycle after k steps then meets within cycle length, still linear."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "Only two pointers slow and fast, no extra data structure proportional to input."
+      },
+      "dryRunExample": {
+        "input": "head = [3,2,0,-4], pos = 1",
+        "steps": [
+          "slow=3, fast=3, fast and fast.next exist",
+          "iter1: slow=2, fast=0, not equal",
+          "iter2: slow=0, fast=2 (fast went -4 -> 2 via cycle), not equal",
+          "iter3: slow=-4, fast=-4 (fast went 0 -> -4 -> -4? actually 0->-4->2->0->-4), equal -> return True"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "Empty list head=null -> loop condition fails, returns False",
+        "Single node no cycle: fast.next is null -> returns False",
+        "Single node self-loop: slow and fast meet after 1 iteration -> returns True",
+        "Long tail + small cycle: still meets without null dereference due to fast and fast.next checks"
+      ]
+    }
+  ]
+}

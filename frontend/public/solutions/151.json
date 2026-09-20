@@ -1,0 +1,121 @@
+{
+  "questionId": 151,
+  "title": "Reverse Words in a String",
+  "difficulty": "Medium",
+  "corePattern": "Two Pointers + String Parsing and Reversal",
+  "interviewTips": [
+    "Ask how to define a word: sequence of non-space chars, and whether to trim leading/trailing spaces and collapse multiple spaces to single space.",
+    "Trade-off: split/reversed is shortest to code but uses O(n) extra for tokens; scanning from end avoids split overhead; in-place triple-reverse achieves O(1) extra on mutable strings.",
+    "Edge-case tip: test empty string, all spaces, single word, and multiple internal spaces to verify no leading/trailing space in output."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Split and Reverse",
+      "tag": "Brute Force",
+      "intuition": "Words are separated by spaces, so splitting on whitespace automatically removes extra spaces. Once we have clean words, reversing their order and joining with single space gives the answer.",
+      "theory": "Use language split that discards empty tokens (Python split(), C++ stringstream >>, Java trim + split on regex). Collect tokens into array, iterate reversed, join with single space. This delegates space handling to library.",
+      "cppCode": "class Solution {\npublic:\n    string reverseWords(string s) {\n        stringstream ss(s);\n        string word;\n        string res;\n        while (ss >> word) {\n            if (!res.empty()) res = word + \" \" + res;\n            else res = word;\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string reverseWords(string s) {\n        stringstream ss(s);\n        string word;\n        string res;\n        while (ss >> word) {\n            if (!res.empty()) res = word + \" \" + res;\n            else res = word;\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def reverseWords(self, s: str) -> str:\n        return ' '.join(reversed(s.split()))",
+        "java": "class Solution {\n    public String reverseWords(String s) {\n        String[] words = s.trim().split(\"\\\\s+\");\n        if (words.length == 1 && words[0].isEmpty()) return \"\";\n        StringBuilder sb = new StringBuilder();\n        for (int i = words.length - 1; i >= 0; i--) {\n            sb.append(words[i]);\n            if (i > 0) sb.append(\" \");\n        }\n        return sb.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Single pass to split into words plus pass to join, each char processed constant times where n is string length."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Split stores all words and result string, both proportional to n in worst case."
+      },
+      "dryRunExample": {
+        "input": "\"  hello world  \"",
+        "steps": [
+          "split() -> ['hello','world'] ignoring spaces",
+          "reversed -> ['world','hello']",
+          "join with single space -> 'world hello'"
+        ],
+        "output": "\"world hello\""
+      },
+      "edgeCases": [
+        "Empty string returns empty string",
+        "All spaces like '   ' returns empty string",
+        "Single word like 'hello' returns same word",
+        "Multiple spaces like 'a good   example' collapsed correctly"
+      ]
+    },
+    {
+      "id": "two-pointer-scan",
+      "name": "Approach 2: Two Pointers Scan From End",
+      "tag": "Two Pointers",
+      "intuition": "To get reversed word order without storing all words first, scan from the end. Each time skip spaces, then find the start of the current word, copy it directly to answer.",
+      "theory": "Maintain i as end of current word and j to find its start: skip spaces with i, then move j left while non-space. Substring s[j+1..i] is one word. Append to result with single space separator. Move i=j and repeat. Each char visited at most twice.",
+      "cppCode": "class Solution {\npublic:\n    string reverseWords(string s) {\n        int n = s.size();\n        string res;\n        int i = n - 1;\n        while (i >= 0) {\n            while (i >= 0 && s[i] == ' ') i--;\n            if (i < 0) break;\n            int j = i;\n            while (j >= 0 && s[j] != ' ') j--;\n            if (!res.empty()) res += \" \";\n            res.append(s.substr(j + 1, i - j));\n            i = j;\n        }\n        return res;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string reverseWords(string s) {\n        int n = s.size();\n        string res;\n        int i = n - 1;\n        while (i >= 0) {\n            while (i >= 0 && s[i] == ' ') i--;\n            if (i < 0) break;\n            int j = i;\n            while (j >= 0 && s[j] != ' ') j--;\n            if (!res.empty()) res += \" \";\n            res.append(s.substr(j + 1, i - j));\n            i = j;\n        }\n        return res;\n    }\n};",
+        "python": "class Solution:\n    def reverseWords(self, s: str) -> str:\n        n = len(s)\n        words = []\n        i = n - 1\n        while i >= 0:\n            while i >= 0 and s[i] == ' ':\n                i -= 1\n            if i < 0:\n                break\n            j = i\n            while j >= 0 and s[j] != ' ':\n                j -= 1\n            words.append(s[j + 1:i + 1])\n            i = j\n        return ' '.join(words)",
+        "java": "class Solution {\n    public String reverseWords(String s) {\n        int n = s.length();\n        StringBuilder sb = new StringBuilder();\n        int i = n - 1;\n        while (i >= 0) {\n            while (i >= 0 && s.charAt(i) == ' ') i--;\n            if (i < 0) break;\n            int j = i;\n            while (j >= 0 && s.charAt(j) != ' ') j--;\n            if (sb.length() > 0) sb.append(\" \");\n            sb.append(s.substring(j + 1, i + 1));\n            i = j;\n        }\n        return sb.toString();\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Two pointers i and j only move left, each index visited O(1) times, plus O(n) to build output."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Only output string plus few pointers; no token array, but output itself is O(n). O(1) auxiliary."
+      },
+      "dryRunExample": {
+        "input": "\"a good   example\"",
+        "steps": [
+          "i=14 end: word s[12..18]=example, res='example'",
+          "skip spaces, j finds s[5..8]=good, res='example good'",
+          "skip spaces, word s[0..0]=a, res='example good a'"
+        ],
+        "output": "\"example good a\""
+      },
+      "edgeCases": [
+        "Leading/trailing spaces skipped by first while loop",
+        "Consecutive spaces skipped between words",
+        "Single char string works with j+1 indexing",
+        "Empty or all-space input returns empty without adding separator"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 3: Optimal In-Place Triple Reversal",
+      "tag": "Optimal",
+      "intuition": "Reversing the whole string puts words in correct reversed order but each word backwards. Reversing each word individually fixes letters, then compact spaces in one pass.",
+      "theory": "Step 1 reverse entire char array. Step 2 reverse each maximal non-space block. Step 3 two-pointer compaction: read pointer j scans, write pointer i copies non-space words and inserts single space between them, then resize/truncate. All steps linear and in-place on mutable array.",
+      "cppCode": "class Solution {\npublic:\n    string reverseWords(string s) {\n        reverse(s.begin(), s.end());\n        int n = s.size();\n        int i = 0;\n        while (i < n) {\n            while (i < n && s[i] == ' ') i++;\n            if (i >= n) break;\n            int j = i;\n            while (j < n && s[j] != ' ') j++;\n            reverse(s.begin() + i, s.begin() + j);\n            i = j;\n        }\n        return cleanSpaces(s);\n    }\nprivate:\n    string cleanSpaces(string &s) {\n        int n = s.size();\n        int i = 0, j = 0;\n        while (j < n) {\n            while (j < n && s[j] == ' ') j++;\n            while (j < n && s[j] != ' ') s[i++] = s[j++];\n            while (j < n && s[j] == ' ') j++;\n            if (j < n) s[i++] = ' ';\n        }\n        s.resize(i);\n        return s;\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    string reverseWords(string s) {\n        reverse(s.begin(), s.end());\n        int n = s.size();\n        int i = 0;\n        while (i < n) {\n            while (i < n && s[i] == ' ') i++;\n            if (i >= n) break;\n            int j = i;\n            while (j < n && s[j] != ' ') j++;\n            reverse(s.begin() + i, s.begin() + j);\n            i = j;\n        }\n        return cleanSpaces(s);\n    }\nprivate:\n    string cleanSpaces(string &s) {\n        int n = s.size();\n        int i = 0, j = 0;\n        while (j < n) {\n            while (j < n && s[j] == ' ') j++;\n            while (j < n && s[j] != ' ') s[i++] = s[j++];\n            while (j < n && s[j] == ' ') j++;\n            if (j < n) s[i++] = ' ';\n        }\n        s.resize(i);\n        return s;\n    }\n};",
+        "python": "class Solution:\n    def reverseWords(self, s: str) -> str:\n        a = list(s)\n        self.reverse(a, 0, len(a) - 1)\n        self.reverse_each_word(a)\n        return self.clean_spaces(a)\n    def reverse(self, a, l, r):\n        while l < r:\n            a[l], a[r] = a[r], a[l]\n            l += 1\n            r -= 1\n    def reverse_each_word(self, a):\n        n = len(a)\n        i = 0\n        while i < n:\n            while i < n and a[i] == ' ':\n                i += 1\n            if i >= n:\n                break\n            j = i\n            while j < n and a[j] != ' ':\n                j += 1\n            self.reverse(a, i, j - 1)\n            i = j\n    def clean_spaces(self, a):\n        n = len(a)\n        i = 0\n        j = 0\n        while j < n:\n            while j < n and a[j] == ' ':\n                j += 1\n            while j < n and a[j] != ' ':\n                a[i] = a[j]\n                i += 1\n                j += 1\n            while j < n and a[j] == ' ':\n                j += 1\n            if j < n:\n                a[i] = ' '\n                i += 1\n        return ''.join(a[:i])",
+        "java": "class Solution {\n    public String reverseWords(String s) {\n        char[] a = s.toCharArray();\n        reverse(a, 0, a.length - 1);\n        reverseEachWord(a);\n        return cleanSpaces(a);\n    }\n    private void reverse(char[] a, int l, int r) {\n        while (l < r) {\n            char t = a[l];\n            a[l++] = a[r];\n            a[r--] = t;\n        }\n    }\n    private void reverseEachWord(char[] a) {\n        int n = a.length;\n        int i = 0;\n        while (i < n) {\n            while (i < n && a[i] == ' ') i++;\n            if (i >= n) break;\n            int j = i;\n            while (j < n && a[j] != ' ') j++;\n            reverse(a, i, j - 1);\n            i = j;\n        }\n    }\n    private String cleanSpaces(char[] a) {\n        int n = a.length;\n        int i = 0, j = 0;\n        while (j < n) {\n            while (j < n && a[j] == ' ') j++;\n            while (j < n && a[j] != ' ') a[i++] = a[j++];\n            while (j < n && a[j] == ' ') j++;\n            if (j < n) a[i++] = ' ';\n        }\n        return new String(a, 0, i);\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Three linear passes: full reverse, per-word reverse, and compaction. Each char moved O(1) times."
+      },
+      "spaceComplexity": {
+        "complexity": "O(1)",
+        "explanation": "In C++ and Java char array version uses O(1) extra beyond input; Python needs O(n) list because strings immutable, but algorithm itself is O(1) auxiliary."
+      },
+      "dryRunExample": {
+        "input": "\"the sky is blue\"",
+        "steps": [
+          "reverse whole -> 'eulb si yks eht'",
+          "reverse each word -> 'blue is sky the'",
+          "clean spaces -> no change, return 'blue is sky the'"
+        ],
+        "output": "\"blue is sky the\""
+      },
+      "edgeCases": [
+        "String with only spaces becomes empty after cleanSpaces resize to 0",
+        "No extra space at end: only add space if j < n",
+        "Single word: double reverse returns original",
+        "Already clean input passes through unchanged"
+      ]
+    }
+  ]
+}

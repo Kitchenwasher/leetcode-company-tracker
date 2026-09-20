@@ -8,10 +8,34 @@
     "hasSolution": true
   },
   {
+    "questionId": 10,
+    "title": "Regular Expression Matching",
+    "difficulty": "Hard",
+    "corePattern": "Dynamic Programming over String Indices with Star Branching",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 100,
+    "title": "Same Tree",
+    "difficulty": "Easy",
+    "corePattern": "Synchronous Tree Traversal - Simultaneous DFS/BFS Comparison",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 1008,
     "title": "Construct Binary Search Tree from Preorder Traversal",
     "difficulty": "Medium",
     "corePattern": "Trees",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 102,
+    "title": "Binary Tree Level Order Traversal",
+    "difficulty": "Medium",
+    "corePattern": "Breadth-First Search (BFS) Level Order Traversal",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -48,11 +72,43 @@
     "hasSolution": true
   },
   {
+    "questionId": 118,
+    "title": "Pascal's Triangle",
+    "difficulty": "Easy",
+    "corePattern": "Dynamic Programming - Iterative Row Construction via Additive Recurrence",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 121,
     "title": "Best Time to Buy and Sell Stock",
     "difficulty": "Easy",
     "corePattern": "Greedy Single Pass with Running Minimum - Prefix Minimum State Tracking",
     "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 122,
+    "title": "Best Time to Buy and Sell Stock II",
+    "difficulty": "Medium",
+    "corePattern": "Unlimited Transactions State Machine DP and Greedy Accumulation of Positive Slopes",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 124,
+    "title": "Binary Tree Maximum Path Sum",
+    "difficulty": "Hard",
+    "corePattern": "DP on Trees - Post-order DFS with Max Single-Path Gain",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 125,
+    "title": "Valid Palindrome",
+    "difficulty": "Easy",
+    "corePattern": "Two Pointers with On-the-Fly Filtering",
+    "approachCount": 2,
     "hasSolution": true
   },
   {
@@ -72,10 +128,26 @@
     "hasSolution": true
   },
   {
+    "questionId": 13,
+    "title": "Roman to Integer",
+    "difficulty": "Easy",
+    "corePattern": "Hash Table Lookup with Subtractive Pair Handling via Linear Scan",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 1305,
     "title": "All Elements in Two Binary Search Trees",
     "difficulty": "Medium",
     "corePattern": "Trees",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 131,
+    "title": "Palindrome Partitioning",
+    "difficulty": "Medium",
+    "corePattern": "Backtracking Enumeration with Palindrome Precomputation",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -88,10 +160,34 @@
     "hasSolution": true
   },
   {
+    "questionId": 135,
+    "title": "Candy",
+    "difficulty": "Hard",
+    "corePattern": "Two-Sided Greedy Constraint Satisfaction and Slope Counting",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 136,
+    "title": "Single Number",
+    "difficulty": "Easy",
+    "corePattern": "Bit Manipulation (XOR Cancellation)",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
     "questionId": 1382,
     "title": "Balance a Binary Search Tree",
     "difficulty": "Medium",
     "corePattern": "Trees",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 139,
+    "title": "Word Break",
+    "difficulty": "Medium",
+    "corePattern": "Dynamic Programming - String Partition / Reachability",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -104,10 +200,50 @@
     "hasSolution": true
   },
   {
+    "questionId": 141,
+    "title": "Linked List Cycle",
+    "difficulty": "Easy",
+    "corePattern": "Floyd's Cycle Finding Algorithm (Fast and Slow Pointers)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 146,
+    "title": "LRU Cache",
+    "difficulty": "Medium",
+    "corePattern": "Hash Map plus Doubly-Linked List for O(1) access with recency ordering",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 15,
     "title": "3Sum",
     "difficulty": "Medium",
     "corePattern": "Sorting + Fix-One-Element Reduction to 2Sum with Two Pointers",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 151,
+    "title": "Reverse Words in a String",
+    "difficulty": "Medium",
+    "corePattern": "Two Pointers + String Parsing and Reversal",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 152,
+    "title": "Maximum Product Subarray",
+    "difficulty": "Medium",
+    "corePattern": "Dynamic Programming with Dual State Tracking (Modified Kadane for Product)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 1526,
+    "title": "Minimum Number of Increments on Subarrays to Form a Target Array",
+    "difficulty": "Hard",
+    "corePattern": "Greedy Vertical Counting / Painting Fence with Positive Differences",
     "approachCount": 3,
     "hasSolution": true
   },
@@ -120,11 +256,27 @@
     "hasSolution": true
   },
   {
+    "questionId": 155,
+    "title": "Min Stack",
+    "difficulty": "Medium",
+    "corePattern": "Augmented Stack / Auxiliary State Design",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 1586,
     "title": "Binary Search Tree Iterator II",
     "difficulty": "Medium",
     "corePattern": "Trees",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 16,
+    "title": "3Sum Closest",
+    "difficulty": "Medium",
+    "corePattern": "Sorting + Two Pointers for 3Sum Reduction",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -139,8 +291,24 @@
     "questionId": 162,
     "title": "Find Peak Element",
     "difficulty": "Medium",
-    "corePattern": "Binary Search",
+    "corePattern": "Binary Search on Slope (Peak Finding in Unsorted Array)",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 167,
+    "title": "Two Sum II - Input Array Is Sorted",
+    "difficulty": "Medium",
+    "corePattern": "Opposite Directional Two Pointers on Sorted Array",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 169,
+    "title": "Majority Element",
+    "difficulty": "Easy",
+    "corePattern": "Boyer-Moore Majority Vote Algorithm",
+    "approachCount": 4,
     "hasSolution": true
   },
   {
@@ -160,6 +328,22 @@
     "hasSolution": true
   },
   {
+    "questionId": 175,
+    "title": "Combine Two Tables",
+    "difficulty": "Easy",
+    "corePattern": "Left Outer Join",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 1757,
+    "title": "Recyclable and Low Fat Products",
+    "difficulty": "Easy",
+    "corePattern": "Predicate Filtering (Relational Selection)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 1765,
     "title": "Map of Highest Peak",
     "difficulty": "Medium",
@@ -172,6 +356,30 @@
     "title": "Merge Strings Alternately",
     "difficulty": "Easy",
     "corePattern": "Two Pointers (Alternating Merge / Interleaving)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 18,
+    "title": "4Sum",
+    "difficulty": "Medium",
+    "corePattern": "Sorting + K-Sum Reduction with Two Pointers",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 189,
+    "title": "Rotate Array",
+    "difficulty": "Medium",
+    "corePattern": "In-place Array Rotation via Reversal and Cyclic Permutation",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 19,
+    "title": "Remove Nth Node From End of List",
+    "difficulty": "Medium",
+    "corePattern": "Two Pointers with Fixed Gap + Dummy Sentinel Node",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -219,16 +427,32 @@
     "questionId": 20,
     "title": "Valid Parentheses",
     "difficulty": "Easy",
-    "corePattern": "Stack (Last-In-First-Out Matching)",
+    "corePattern": "Stack (LIFO) for Bracket Matching",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 200,
+    "title": "Number of Islands",
+    "difficulty": "Medium",
+    "corePattern": "Flood Fill / Connected Components in Implicit Grid Graph",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 206,
+    "title": "Reverse Linked List",
+    "difficulty": "Easy",
+    "corePattern": "In-Place Linked List Pointer Reversal",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
     "questionId": 21,
     "title": "Merge Two Sorted Lists",
     "difficulty": "Easy",
-    "corePattern": "Two Pointers with Dummy Head Node",
-    "approachCount": 2,
+    "corePattern": "Two-Pointer Merge with Dummy Head",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -237,6 +461,30 @@
     "difficulty": "Medium",
     "corePattern": "Dynamic Programming",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 22,
+    "title": "Generate Parentheses",
+    "difficulty": "Medium",
+    "corePattern": "Constrained Backtracking over Catalan Structures",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 2235,
+    "title": "Add Two Integers",
+    "difficulty": "Easy",
+    "corePattern": "Math - Direct Arithmetic and Bit Manipulation",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 23,
+    "title": "Merge k Sorted Lists",
+    "difficulty": "Hard",
+    "corePattern": "K-Way Merge via Min-Heap and Divide and Conquer",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -280,6 +528,22 @@
     "hasSolution": true
   },
   {
+    "questionId": 25,
+    "title": "Reverse Nodes in k-Group",
+    "difficulty": "Hard",
+    "corePattern": "Dummy Node plus In-Place Linked List Group Reversal",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 253,
+    "title": "Meeting Rooms II",
+    "difficulty": "Medium",
+    "corePattern": "Sweep Line / Greedy Interval Partitioning - Maximum Concurrency Equals Minimum Resources",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
     "questionId": 255,
     "title": "Verify Preorder Sequence in Binary Search Tree",
     "difficulty": "Medium",
@@ -296,10 +560,26 @@
     "hasSolution": true
   },
   {
+    "questionId": 26,
+    "title": "Remove Duplicates from Sorted Array",
+    "difficulty": "Easy",
+    "corePattern": "Two Pointers - Slow-Fast In-Place Overwrite",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 2667,
     "title": "Create Hello World Function",
     "difficulty": "Easy",
     "corePattern": "Factory Function and Closure (First-Class Functions)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 27,
+    "title": "Remove Element",
+    "difficulty": "Easy",
+    "corePattern": "Two Pointers - In-Place Overwrite (Slow-Fast Partition)",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -325,6 +605,22 @@
     "difficulty": "Easy",
     "corePattern": "Binary Search",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 28,
+    "title": "Find the Index of the First Occurrence in a String",
+    "difficulty": "Easy",
+    "corePattern": "String Matching - Sliding Window Comparison vs Prefix Automaton (KMP) vs Rolling Hash",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 283,
+    "title": "Move Zeroes",
+    "difficulty": "Easy",
+    "corePattern": "Two Pointers - Stable In-Place Partition",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -364,6 +660,14 @@
     "title": "Longest Increasing Subsequence",
     "difficulty": "Medium",
     "corePattern": "Dynamic Programming",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 31,
+    "title": "Next Permutation",
+    "difficulty": "Medium",
+    "corePattern": "Lexicographic Pivot Search with Successor Swap and Suffix Reversal",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -411,8 +715,8 @@
     "questionId": 33,
     "title": "Search in Rotated Sorted Array",
     "difficulty": "Medium",
-    "corePattern": "Modified Binary Search (Sorted Half Invariant)",
-    "approachCount": 1,
+    "corePattern": "Modified Binary Search on Rotated Sorted Array",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -424,10 +728,26 @@
     "hasSolution": true
   },
   {
+    "questionId": 34,
+    "title": "Find First and Last Position of Element in Sorted Array",
+    "difficulty": "Medium",
+    "corePattern": "Modified Binary Search - Lower Bound and Upper Bound",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 347,
+    "title": "Top K Frequent Elements",
+    "difficulty": "Medium",
+    "corePattern": "Frequency Counting + Top-K Selection (Hash Map with Sorting / Heap / Bucket Sort)",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
     "questionId": 35,
     "title": "Search Insert Position",
     "difficulty": "Easy",
-    "corePattern": "Binary Search",
+    "corePattern": "Binary Search - Lower Bound",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -448,10 +768,26 @@
     "hasSolution": true
   },
   {
+    "questionId": 36,
+    "title": "Valid Sudoku",
+    "difficulty": "Medium",
+    "corePattern": "Hash Set Validation with Partitioned Constraints (Row / Column / Box Direct Addressing)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 3627,
     "title": "Maximum Median Sum of Subsequences of Size 3",
     "difficulty": "Medium",
     "corePattern": "Arrays & Hashing",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 37,
+    "title": "Sudoku Solver",
+    "difficulty": "Hard",
+    "corePattern": "Backtracking with Constraint Propagation (Exact Cover)",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -480,11 +816,43 @@
     "hasSolution": true
   },
   {
+    "questionId": 39,
+    "title": "Combination Sum",
+    "difficulty": "Medium",
+    "corePattern": "Backtracking with Unbounded Reuse (DFS + Pruning)",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 394,
+    "title": "Decode String",
+    "difficulty": "Medium",
+    "corePattern": "Stack for Nested Structures and Recursion for Bracket Matching",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 4,
     "title": "Median of Two Sorted Arrays",
     "difficulty": "Hard",
     "corePattern": "Binary Search on Partition Index over Smaller Array",
     "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 41,
+    "title": "First Missing Positive",
+    "difficulty": "Hard",
+    "corePattern": "In-Place Hashing / Cyclic Sort (Index as Hash Key)",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 410,
+    "title": "Split Array Largest Sum",
+    "difficulty": "Hard",
+    "corePattern": "Binary Search on Answer (Parametric Search) + Greedy Feasibility Check",
+    "approachCount": 2,
     "hasSolution": true
   },
   {
@@ -504,6 +872,30 @@
     "hasSolution": true
   },
   {
+    "questionId": 45,
+    "title": "Jump Game II",
+    "difficulty": "Medium",
+    "corePattern": "Greedy Range Expansion / BFS Layering",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 46,
+    "title": "Permutations",
+    "difficulty": "Medium",
+    "corePattern": "Backtracking with DFS and State Restoration",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 48,
+    "title": "Rotate Image",
+    "difficulty": "Medium",
+    "corePattern": "In-Place Matrix Transformation via Transpose + Reversal / Cyclic Permutation",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
     "questionId": 480,
     "title": "Sliding Window Median",
     "difficulty": "Hard",
@@ -512,10 +904,42 @@
     "hasSolution": true
   },
   {
+    "questionId": 49,
+    "title": "Group Anagrams",
+    "difficulty": "Medium",
+    "corePattern": "Hashing by Canonical Key - Equivalence Class Grouping",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 5,
+    "title": "Longest Palindromic Substring",
+    "difficulty": "Medium",
+    "corePattern": "Palindromic Symmetry - Expand Around Center",
+    "approachCount": 4,
+    "hasSolution": true
+  },
+  {
+    "questionId": 50,
+    "title": "Pow(x, n)",
+    "difficulty": "Medium",
+    "corePattern": "Binary Exponentiation (Exponentiation by Squaring)",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
     "questionId": 501,
     "title": "Find Mode in Binary Search Tree",
     "difficulty": "Easy",
     "corePattern": "Trees",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 51,
+    "title": "N-Queens",
+    "difficulty": "Hard",
+    "corePattern": "Backtracking with Constraint Pruning - Row-by-Row Placement with Column and Diagonal Conflict Elimination",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -528,10 +952,58 @@
     "hasSolution": true
   },
   {
+    "questionId": 53,
+    "title": "Maximum Subarray",
+    "difficulty": "Medium",
+    "corePattern": "Kadane's Algorithm - Dynamic Programming with Running Best and Reset on Negative Prefix",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 54,
+    "title": "Spiral Matrix",
+    "difficulty": "Medium",
+    "corePattern": "Matrix Simulation with Shrinking Boundaries",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 55,
+    "title": "Jump Game",
+    "difficulty": "Medium",
+    "corePattern": "Greedy Reachability Tracking - Farthest Reachable Index",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 56,
+    "title": "Merge Intervals",
+    "difficulty": "Medium",
+    "corePattern": "Sorting with Linear Sweep for Interval Merging",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 560,
+    "title": "Subarray Sum Equals K",
+    "difficulty": "Medium",
+    "corePattern": "Prefix Sum with Hash Map Frequency Counting",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 569,
     "title": "Median Employee Salary",
     "difficulty": "Hard",
     "corePattern": "Binary Search",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 57,
+    "title": "Insert Interval",
+    "difficulty": "Medium",
+    "corePattern": "Interval Merging with Three-Phase Partition",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -544,10 +1016,50 @@
     "hasSolution": true
   },
   {
+    "questionId": 58,
+    "title": "Length of Last Word",
+    "difficulty": "Easy",
+    "corePattern": "Reverse Traversal / String Parsing from End",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 6,
+    "title": "Zigzag Conversion",
+    "difficulty": "Medium",
+    "corePattern": "Simulation with Direction Toggle",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 61,
+    "title": "Rotate List",
+    "difficulty": "Medium",
+    "corePattern": "Circular Linking with Modulo Reduction",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 62,
+    "title": "Unique Paths",
+    "difficulty": "Medium",
+    "corePattern": "Grid Counting DP and Combinatorics (nCr)",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
     "questionId": 639,
     "title": "Decode Ways II",
     "difficulty": "Hard",
     "corePattern": "Dynamic Programming",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 66,
+    "title": "Plus One",
+    "difficulty": "Easy",
+    "corePattern": "Right-to-Left Array Simulation with Carry Propagation",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -560,11 +1072,35 @@
     "hasSolution": true
   },
   {
+    "questionId": 67,
+    "title": "Add Binary",
+    "difficulty": "Easy",
+    "corePattern": "Reverse Two-Pointer Simulation with Carry Propagation",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
     "questionId": 673,
     "title": "Number of Longest Increasing Subsequence",
     "difficulty": "Medium",
     "corePattern": "Dynamic Programming",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 68,
+    "title": "Text Justification",
+    "difficulty": "Hard",
+    "corePattern": "Greedy Line Packing and Simulation",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 69,
+    "title": "Sqrt(x)",
+    "difficulty": "Easy",
+    "corePattern": "Binary Search on Answer Space",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -579,8 +1115,8 @@
     "questionId": 70,
     "title": "Climbing Stairs",
     "difficulty": "Easy",
-    "corePattern": "Dynamic Programming",
-    "approachCount": 2,
+    "corePattern": "Linear Dynamic Programming - Fibonacci Recurrence",
+    "approachCount": 4,
     "hasSolution": true
   },
   {
@@ -619,8 +1155,16 @@
     "questionId": 72,
     "title": "Edit Distance",
     "difficulty": "Medium",
-    "corePattern": "Dynamic Programming",
-    "approachCount": 2,
+    "corePattern": "2D Dynamic Programming on Strings - Alignment DP",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 73,
+    "title": "Set Matrix Zeroes",
+    "difficulty": "Medium",
+    "corePattern": "In-Place State Marking using First Row and Column",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -628,6 +1172,30 @@
     "title": "Min Cost Climbing Stairs",
     "difficulty": "Easy",
     "corePattern": "Dynamic Programming",
+    "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 75,
+    "title": "Sort Colors",
+    "difficulty": "Medium",
+    "corePattern": "Dutch National Flag - Three-Way Partitioning with Two Pointers",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 78,
+    "title": "Subsets",
+    "difficulty": "Medium",
+    "corePattern": "Power Set Enumeration via Backtracking and Bitmasking",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 8,
+    "title": "String to Integer (atoi)",
+    "difficulty": "Medium",
+    "corePattern": "Sequential String Parsing with Overflow Clamping",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -640,11 +1208,27 @@
     "hasSolution": true
   },
   {
+    "questionId": 84,
+    "title": "Largest Rectangle in Histogram",
+    "difficulty": "Hard",
+    "corePattern": "Monotonic Increasing Stack for Previous and Next Smaller Element",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
     "questionId": 843,
     "title": "Guess the Word",
     "difficulty": "Hard",
     "corePattern": "Strings",
     "approachCount": 2,
+    "hasSolution": true
+  },
+  {
+    "questionId": 85,
+    "title": "Maximal Rectangle",
+    "difficulty": "Hard",
+    "corePattern": "2D to 1D Histogram Reduction + Monotonic Stack",
+    "approachCount": 3,
     "hasSolution": true
   },
   {
@@ -659,7 +1243,7 @@
     "questionId": 875,
     "title": "Koko Eating Bananas",
     "difficulty": "Medium",
-    "corePattern": "Binary Search",
+    "corePattern": "Binary Search on Answer (Monotonic Search Space)",
     "approachCount": 2,
     "hasSolution": true
   },
@@ -676,6 +1260,14 @@
     "title": "Palindrome Number",
     "difficulty": "Easy",
     "corePattern": "Math - Number Reversal and Symmetry Check",
+    "approachCount": 3,
+    "hasSolution": true
+  },
+  {
+    "questionId": 90,
+    "title": "Subsets II",
+    "difficulty": "Medium",
+    "corePattern": "Backtracking with Sorting and Duplicate Skipping",
     "approachCount": 3,
     "hasSolution": true
   },

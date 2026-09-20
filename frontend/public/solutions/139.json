@@ -1,0 +1,85 @@
+{
+  "questionId": 139,
+  "title": "Word Break",
+  "difficulty": "Medium",
+  "corePattern": "Dynamic Programming - String Partition / Reachability",
+  "interviewTips": [
+    "Clarify reuse: ask if dictionary words can be reused unlimited times (yes) and if empty string / empty wordDict are possible.",
+    "Trade-off to discuss: brute-force DFS enumerates all partitions O(2^n) vs DP memoizes reachable prefixes O(n*L); mention Trie optimization when wordDict is large.",
+    "Edge-case tip: mention worst case s='aaaa...b' with wordDict=['a','aa','aaa'] causing exponential blowup without memo/DP, and check max word length pruning."
+  ],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "Try every possible split position. Starting at index i, try every end j>i where s[i:j] is a dictionary word, then recursively solve suffix starting at j. If any path reaches end of string, answer is true.",
+      "theory": "This is exhaustive DFS over the partition tree. Root is index 0, children of i are all j>i with s[i:j] in wordSet. Search succeeds if node n is reachable. Correct because any valid segmentation corresponds to a root-to-leaf path. Without memoization subproblems (same suffix index) are recomputed many times, leading to exponential time.",
+      "cppCode": "class Solution {\npublic:\n    bool wordBreak(string s, vector<string>& wordDict) {\n        unordered_set<string> wordSet(wordDict.begin(), wordDict.end());\n        function<bool(int)> dfs = [&](int i) -> bool {\n            if (i == (int)s.size()) return true;\n            for (int j = i + 1; j <= (int)s.size(); ++j) {\n                if (wordSet.count(s.substr(i, j - i)) && dfs(j)) return true;\n            }\n            return false;\n        };\n        return dfs(0);\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool wordBreak(string s, vector<string>& wordDict) {\n        unordered_set<string> wordSet(wordDict.begin(), wordDict.end());\n        function<bool(int)> dfs = [&](int i) -> bool {\n            if (i == (int)s.size()) return true;\n            for (int j = i + 1; j <= (int)s.size(); ++j) {\n                if (wordSet.count(s.substr(i, j - i)) && dfs(j)) return true;\n            }\n            return false;\n        };\n        return dfs(0);\n    }\n};",
+        "python": "class Solution:\n    def wordBreak(self, s: str, wordDict: list[str]) -> bool:\n        word_set = set(wordDict)\n        def dfs(i: int) -> bool:\n            if i == len(s):\n                return True\n            for j in range(i + 1, len(s) + 1):\n                if s[i:j] in word_set and dfs(j):\n                    return True\n            return False\n        return dfs(0)",
+        "java": "class Solution {\n    public boolean wordBreak(String s, List<String> wordDict) {\n        Set<String> wordSet = new HashSet<>(wordDict);\n        return dfs(s, 0, wordSet);\n    }\n    private boolean dfs(String s, int i, Set<String> wordSet) {\n        if (i == s.length()) return true;\n        for (int j = i + 1; j <= s.length(); j++) {\n            if (wordSet.contains(s.substring(i, j)) && dfs(s, j, wordSet)) return true;\n        }\n        return false;\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(2^n)",
+        "explanation": "In worst case each index branches into n-i choices. Number of partitions of length-n string is 2^(n-1). Each substring hash lookup is O(1) average, substring creation O(n). TLEs on cases like aaaa... with overlapping dict."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n)",
+        "explanation": "Recursion depth up to n plus O(M) for hash set where M is total characters in wordDict. Substring copies add temporary O(n) cost."
+      },
+      "dryRunExample": {
+        "input": "s = \"leetcode\", wordDict = [\"leet\",\"code\"]",
+        "steps": [
+          "dfs(0): try j=1..8, s[0:4]='leet' in set -> call dfs(4)",
+          "dfs(4): try j=5..8, s[4:8]='code' in set -> call dfs(8)",
+          "dfs(8)==n -> return True, unwinds to True"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "s='a', wordDict=['a'] -> true; s='a', wordDict=['b'] -> false",
+        "Overlapping: s='aaaaaaa', wordDict=['aaa','aaaa'] -> true via 3+4, brute force explores many dead ends",
+        "Impossible suffix: s='aaaaab', wordDict=['a','aa','aaa'] -> false, explores full tree"
+      ]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal Bottom-Up DP with Max-Length Pruning",
+      "tag": "Optimal",
+      "intuition": "Instead of re-solving suffixes, record which prefixes are breakable. dp[i]=true if s[0:i] can be segmented. To compute dp[i], look back at most maxLen characters: if dp[i-l] is true and s[i-l:i] is a word, then dp[i] is true.",
+      "theory": "Optimal substructure: prefix i is breakable iff it extends a breakable prefix j with a dictionary word s[j:i]. This is forward reachability DAG where edges j->i exist if s[j:i] in dict. Processing i in increasing order guarantees dp[j] is final when used. Limiting lookback to maxLen = max word length preserves correctness and cuts O(n^2) to O(n*maxLen). dp[n] is answer.",
+      "cppCode": "class Solution {\npublic:\n    bool wordBreak(string s, vector<string>& wordDict) {\n        unordered_set<string> wordSet(wordDict.begin(), wordDict.end());\n        int maxLen = 0;\n        for (auto &w : wordDict) maxLen = max(maxLen, (int)w.size());\n        int n = s.size();\n        vector<char> dp(n + 1, false);\n        dp[0] = true;\n        for (int i = 1; i <= n; ++i) {\n            for (int l = 1; l <= maxLen && l <= i; ++l) {\n                if (!dp[i - l]) continue;\n                if (wordSet.count(s.substr(i - l, l))) { dp[i] = true; break; }\n            }\n        }\n        return dp[n];\n    }\n};",
+      "code": {
+        "cpp": "class Solution {\npublic:\n    bool wordBreak(string s, vector<string>& wordDict) {\n        unordered_set<string> wordSet(wordDict.begin(), wordDict.end());\n        int maxLen = 0;\n        for (auto &w : wordDict) maxLen = max(maxLen, (int)w.size());\n        int n = s.size();\n        vector<char> dp(n + 1, false);\n        dp[0] = true;\n        for (int i = 1; i <= n; ++i) {\n            for (int l = 1; l <= maxLen && l <= i; ++l) {\n                if (!dp[i - l]) continue;\n                if (wordSet.count(s.substr(i - l, l))) { dp[i] = true; break; }\n            }\n        }\n        return dp[n];\n    }\n};",
+        "python": "class Solution:\n    def wordBreak(self, s: str, wordDict: list[str]) -> bool:\n        word_set = set(wordDict)\n        if not wordDict:\n            return len(s) == 0\n        max_len = max(len(w) for w in wordDict)\n        n = len(s)\n        dp = [False] * (n + 1)\n        dp[0] = True\n        for i in range(1, n + 1):\n            for l in range(1, min(i, max_len) + 1):\n                if not dp[i - l]:\n                    continue\n                if s[i - l:i] in word_set:\n                    dp[i] = True\n                    break\n        return dp[n]",
+        "java": "class Solution {\n    public boolean wordBreak(String s, List<String> wordDict) {\n        Set<String> wordSet = new HashSet<>(wordDict);\n        int maxLen = 0;\n        for (String w : wordDict) maxLen = Math.max(maxLen, w.length());\n        int n = s.length();\n        boolean[] dp = new boolean[n + 1];\n        dp[0] = true;\n        for (int i = 1; i <= n; i++) {\n            for (int l = 1; l <= maxLen && l <= i; l++) {\n                if (!dp[i - l]) continue;\n                if (wordSet.contains(s.substring(i - l, i))) { dp[i] = true; break; }\n            }\n        }\n        return dp[n];\n    }\n}"
+      },
+      "timeComplexity": {
+        "complexity": "O(n * L)",
+        "explanation": "n = len(s), L = max word length. For each of n positions we check at most L substrings with O(1) hash lookup. Worst case O(n^2) when L ~ n, but typically much faster. Substring hashing cost bounded by L."
+      },
+      "spaceComplexity": {
+        "complexity": "O(n + M)",
+        "explanation": "dp array O(n) plus hash set O(M) where M is total characters in wordDict."
+      },
+      "dryRunExample": {
+        "input": "s = \"leetcode\", wordDict = [\"leet\",\"code\"], maxLen=4",
+        "steps": [
+          "dp[0]=true",
+          "i=4: l=4, dp[0]=true and s[0:4]='leet' in set -> dp[4]=true",
+          "i=1,2,3,5,6,7 remain false (no word matches from a true prefix)",
+          "i=8: l=4, dp[4]=true and s[4:8]='code' in set -> dp[8]=true",
+          "return dp[8]=true"
+        ],
+        "output": "true"
+      },
+      "edgeCases": [
+        "s='applepenapple', wordDict=['apple','pen'] -> true with reuse of 'apple'",
+        "s='catsandog', wordDict=['cats','dog','sand','and','cat'] -> false",
+        "s='', wordDict=[] -> true (empty prefix); s='a', wordDict=[] -> false"
+      ]
+    }
+  ]
+}
