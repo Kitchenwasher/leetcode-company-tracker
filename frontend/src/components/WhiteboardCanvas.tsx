@@ -10,6 +10,7 @@ import { sounds } from '../utils/sound';
 interface WhiteboardCanvasProps {
   questionId: string | number;
   height?: number;
+  isActive?: boolean;
 }
 
 type ToolMode = 'pen' | 'circle' | 'rect' | 'arrow' | 'eraser';
@@ -17,6 +18,7 @@ type ToolMode = 'pen' | 'circle' | 'rect' | 'arrow' | 'eraser';
 export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
   questionId,
   height = 420,
+  isActive = true,
 }) => {
   const { user } = useAuth();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -49,7 +51,13 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
 
     // Set canvas dimensions based on client bounding rect
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
+    const parentW = canvas.parentElement?.clientWidth || 0;
+    const computedWidth = rect.width > 0 ? rect.width : parentW > 0 ? parentW : 0;
+
+    // If canvas is hidden or has 0 width, defer initialization until visible
+    if (computedWidth <= 0) return;
+
+    canvas.width = Math.round(computedWidth);
     canvas.height = height;
 
     // Fill background
@@ -67,40 +75,48 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
     }
 
     // Load saved drawing
-    const saved = loadWhiteboardDrawing(questionId, user.id);
+    const saved = loadWhiteboardDrawing(questionId, user?.id);
     if (saved) {
       const img = new Image();
       img.onload = () => {
-        ctx.drawImage(img, 0, 0);
-        saveHistoryState();
+        try {
+          ctx.drawImage(img, 0, 0);
+          saveHistoryState();
+        } catch {}
       };
       img.src = saved;
     } else {
       saveHistoryState();
     }
-  }, [questionId, user.id, height]);
+  }, [questionId, user?.id, height, isActive]);
 
   const saveHistoryState = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const state = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    setHistory((prev) => [...prev.slice(-15), state]);
+    try {
+      const state = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      setHistory((prev) => [...prev.slice(-15), state]);
+    } catch (err) {
+      console.warn('Unable to capture whiteboard snapshot:', err);
+    }
   };
 
   const persistToStorage = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dataUrl = canvas.toDataURL('image/png');
-    saveWhiteboardDrawing(questionId, dataUrl, user.id);
-    setSavedToast(true);
-    setTimeout(() => setSavedToast(false), 1500);
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) return;
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      saveWhiteboardDrawing(questionId, dataUrl, user?.id);
+      setSavedToast(true);
+      setTimeout(() => setSavedToast(false), 1500);
+    } catch {}
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -111,7 +127,9 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
     setIsDrawing(true);
     setStartX(x);
     setStartY(y);
-    setSnapshot(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    try {
+      setSnapshot(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    } catch {}
 
     if (tool === 'pen' || tool === 'eraser') {
       ctx.beginPath();
@@ -183,7 +201,7 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
   const handleUndo = () => {
     if (history.length <= 1) return;
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -191,16 +209,18 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
     newHist.pop(); // Remove current
     const previous = newHist[newHist.length - 1];
     if (previous) {
-      ctx.putImageData(previous, 0, 0);
-      setHistory(newHist);
-      persistToStorage();
-      sounds.playClick();
+      try {
+        ctx.putImageData(previous, 0, 0);
+        setHistory(newHist);
+        persistToStorage();
+        sounds.playClick();
+      } catch {}
     }
   };
 
   const handleClear = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -224,12 +244,14 @@ export const WhiteboardCanvas: React.FC<WhiteboardCanvasProps> = ({
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const link = document.createElement('a');
-    link.download = `diagram_problem_${questionId}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    sounds.playClick();
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) return;
+    try {
+      const link = document.createElement('a');
+      link.download = `diagram_problem_${questionId}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      sounds.playClick();
+    } catch {}
   };
 
   return (

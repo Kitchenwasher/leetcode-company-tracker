@@ -1164,7 +1164,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
             </div>
 
             <div className={`h-full ${rightTab === 'whiteboard' ? 'block' : 'hidden'}`}>
-              <WhiteboardCanvas questionId={q.id} height={560} />
+              <WhiteboardCanvas questionId={q.id} height={560} isActive={rightTab === 'whiteboard'} />
             </div>
           </div>
         </div>
