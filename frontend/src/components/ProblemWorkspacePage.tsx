@@ -362,9 +362,9 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
     });
   };
 
-  const currentApproach: SolutionApproach | undefined = solutionData?.approaches[selectedApproachIndex];
-  const askingCompanies = Object.keys(q.companies);
-  const companyFreq = q.companies[companyId]?.all || q.companies[companyId]?.['thirty-days'] || 'Asked';
+  const currentApproach: SolutionApproach | undefined = solutionData?.approaches?.[selectedApproachIndex];
+  const askingCompanies = Object.keys(q?.companies || {});
+  const companyFreq = q?.companies?.[companyId]?.all || q?.companies?.[companyId]?.['thirty-days'] || 'Asked';
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background text-textPrimary overflow-hidden select-none">
@@ -480,7 +480,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
 
           {/* External LeetCode Button */}
           <a
-            href={q.url || `https://leetcode.com/problems/${q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`}
+            href={q.url || (q?.title ? `https://leetcode.com/problems/${q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}` : 'https://leetcode.com')}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/40 text-xs font-semibold transition-colors"
@@ -520,7 +520,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
               >
                 <Lightbulb className="w-3.5 h-3.5" />
                 <span>Editorial & Solutions</span>
-                {solutionData && (
+                {solutionData && solutionData.approaches && (
                   <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${leftTab === 'theory' ? 'bg-black/20 text-black' : 'bg-primary/20 text-primary'}`}>
                     {solutionData.approaches.length}
                   </span>
@@ -645,7 +645,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                     </div>
                     <div className="flex items-center justify-center gap-3">
                       <a
-                        href={q.url || `https://leetcode.com/problems/${q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`}
+                        href={q.url || (q?.title ? `https://leetcode.com/problems/${q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}` : 'https://leetcode.com')}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-black font-bold text-xs shadow-terminal-glow"
@@ -800,10 +800,10 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                           Time Complexity
                         </span>
                         <span className="font-mono text-sm font-bold text-primary">
-                          {currentApproach.timeComplexity.complexity}
+                          {currentApproach.timeComplexity?.complexity || 'O(N)'}
                         </span>
                         <p className="text-[11px] text-textMuted mt-0.5">
-                          {currentApproach.timeComplexity.explanation}
+                          {currentApproach.timeComplexity?.explanation || ''}
                         </p>
                       </div>
 
@@ -812,10 +812,10 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                           Space Complexity
                         </span>
                         <span className="font-mono text-sm font-bold text-primary">
-                          {currentApproach.spaceComplexity.complexity}
+                          {currentApproach.spaceComplexity?.complexity || 'O(1)'}
                         </span>
                         <p className="text-[11px] text-textMuted mt-0.5">
-                          {currentApproach.spaceComplexity.explanation}
+                          {currentApproach.spaceComplexity?.explanation || ''}
                         </p>
                       </div>
                     </div>
@@ -892,20 +892,26 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                         <h4 className="text-xs font-bold text-textSecondary uppercase tracking-wider">
                           🔍 Step-by-Step Dry Run Example
                         </h4>
-                        <div className="text-xs font-mono text-primary bg-surface p-2 rounded-lg border border-border">
-                          Input: {currentApproach.dryRunExample.input}
-                        </div>
-                        <ul className="space-y-1 text-xs text-textSecondary">
-                          {currentApproach.dryRunExample.steps.map((s, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-primary shrink-0 font-mono">•</span>
-                              <span>{s}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <div className="text-xs font-mono text-primary bg-surface p-2 rounded-lg border border-border">
-                          Expected Output: {currentApproach.dryRunExample.output}
-                        </div>
+                        {currentApproach.dryRunExample.input && (
+                          <div className="text-xs font-mono text-primary bg-surface p-2 rounded-lg border border-border">
+                            Input: {currentApproach.dryRunExample.input}
+                          </div>
+                        )}
+                        {Array.isArray(currentApproach.dryRunExample.steps) && currentApproach.dryRunExample.steps.length > 0 && (
+                          <ul className="space-y-1 text-xs text-textSecondary">
+                            {currentApproach.dryRunExample.steps.map((s, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span className="text-primary shrink-0 font-mono">•</span>
+                                <span>{s}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {currentApproach.dryRunExample.output && (
+                          <div className="text-xs font-mono text-primary bg-surface p-2 rounded-lg border border-border">
+                            Expected Output: {currentApproach.dryRunExample.output}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -1088,7 +1094,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto p-1">
                   {askingCompanies.map((c) => {
-                    const freq = q.companies[c]?.all || q.companies[c]?.['thirty-days'] || 'Asked';
+                    const freq = q?.companies?.[c]?.all || q?.companies?.[c]?.['thirty-days'] || 'Asked';
                     const isCurrent = c === companyId;
                     return (
                       <div

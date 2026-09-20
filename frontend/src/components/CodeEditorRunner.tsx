@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Editor, { OnMount } from '@monaco-editor/react';
 import { Question } from '../types';
 import { SolutionApproach, QuestionDescription } from '../types/solution';
 import { judgeApi, JudgeExecutionResponse } from '../api/judgeApi';
@@ -59,8 +60,8 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [execResult, setExecResult] = useState<JudgeExecutionResponse | null>(null);
 
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const lineNumbersRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<any>(null);
+  const handleRunCodeRef = useRef<() => void>(() => {});
   const lastQuestionIdRef = useRef(q.id);
   const lastLanguageRef = useRef(language);
 
@@ -100,11 +101,13 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
     onCodeChange?.(newCode);
   };
 
-  // Synchronize scrolling between code textarea and line numbers
-  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
-    if (lineNumbersRef.current) {
-      lineNumbersRef.current.scrollTop = e.currentTarget.scrollTop;
-    }
+  // VS Code Monaco Editor mount handler
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
+    editorRef.current = editor;
+    // Bind Ctrl+Enter or Cmd+Enter to trigger Run Code
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      handleRunCodeRef.current();
+    });
   };
 
   const handleLanguageChange = (newLang: SupportedLanguage) => {
@@ -136,55 +139,6 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
       sounds.playClick();
       setTimeout(() => setCopied(false), 2000);
     } catch {}
-  };
-
-  // Keyboard enhancements: Tab indentation, auto-close brackets, Ctrl+Enter run
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      handleRunCode();
-      return;
-    }
-
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const ta = textareaRef.current;
-      if (!ta) return;
-      const start = ta.selectionStart;
-      const end = ta.selectionEnd;
-      const spaces = '    ';
-      const newCode = code.substring(0, start) + spaces + code.substring(end);
-      updateCode(newCode);
-      requestAnimationFrame(() => {
-        ta.selectionStart = ta.selectionEnd = start + 4;
-      });
-      return;
-    }
-
-    const openCloseMap: Record<string, string> = {
-      '(': ')',
-      '[': ']',
-      '{': '}',
-      '"': '"',
-      "'": "'",
-      '`': '`',
-    };
-
-    if (openCloseMap[e.key]) {
-      const ta = textareaRef.current;
-      if (!ta) return;
-      const start = ta.selectionStart;
-      const end = ta.selectionEnd;
-      if (start === end) {
-        e.preventDefault();
-        const closeChar = openCloseMap[e.key];
-        const newCode = code.substring(0, start) + e.key + closeChar + code.substring(end);
-        updateCode(newCode);
-        requestAnimationFrame(() => {
-          ta.selectionStart = ta.selectionEnd = start + 1;
-        });
-      }
-    }
   };
 
   // Run Code against sample testcases
@@ -290,7 +244,10 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
     });
   };
 
-  const lineCount = code.split('\n').length;
+  useEffect(() => {
+    handleRunCodeRef.current = handleRunCode;
+  });
+
   const currentTestcase = testcases[selectedCaseIdx];
   const currentResultItem = execResult?.results?.[selectedCaseIdx];
 
@@ -362,32 +319,46 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
       </div>
 
       {/* ========================================================= */}
-      {/* 2. MAIN CODE EDITOR (Line Numbers + Synchronized Textarea)*/}
+      {/* 2. MAIN CODE EDITOR (VS Code Monaco Engine)             */}
       {/* ========================================================= */}
-      <div className="flex-1 flex overflow-hidden relative bg-[#0D1117]">
-        {/* Line Numbers Gutter */}
-        <div
-          ref={lineNumbersRef}
-          className="w-11 py-3 bg-[#0D1117] border-r border-border/50 text-right pr-2 text-textMuted/40 select-none overflow-hidden shrink-0 font-mono text-xs leading-6"
-        >
-          {Array.from({ length: Math.max(lineCount, 25) }).map((_, i) => (
-            <div key={i}>{i + 1}</div>
-          ))}
-        </div>
-
-        {/* Code Textarea */}
-        <textarea
-          ref={textareaRef}
+      <div className="flex-1 overflow-hidden relative bg-[#0D1117] min-h-[220px]">
+        <Editor
+          height="100%"
+          language={language}
           value={code}
-          onChange={(e) => updateCode(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onScroll={handleScroll}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoComplete="off"
-          autoCorrect="off"
-          className="flex-1 p-3 bg-transparent text-slate-100 font-mono text-xs leading-6 resize-none focus:outline-none overflow-auto whitespace-pre selection:bg-primary/30 selection:text-white"
-          placeholder="// Type your solution here..."
+          theme="vs-dark"
+          onChange={(val) => updateCode(val || '')}
+          onMount={handleEditorDidMount}
+          options={{
+            fontSize: 13,
+            fontFamily: "JetBrains Mono, Fira Code, Menlo, Monaco, Consolas, 'Courier New', monospace",
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            lineNumbers: 'on',
+            renderLineHighlight: 'all',
+            automaticLayout: true,
+            tabSize: 4,
+            wordWrap: 'on',
+            scrollbar: {
+              vertical: 'visible',
+              horizontal: 'visible',
+              verticalScrollbarSize: 8,
+              horizontalScrollbarSize: 8,
+            },
+            padding: { top: 12, bottom: 12 },
+            cursorBlinking: 'smooth',
+            smoothScrolling: true,
+            suggestOnTriggerCharacters: true,
+            bracketPairColorization: { enabled: true },
+            formatOnPaste: true,
+            formatOnType: true,
+          }}
+          loading={
+            <div className="flex items-center justify-center h-full text-textMuted text-xs font-mono gap-2">
+              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <span>Loading VS Code Editor...</span>
+            </div>
+          }
         />
       </div>
 

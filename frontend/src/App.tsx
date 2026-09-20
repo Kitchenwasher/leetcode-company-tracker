@@ -30,6 +30,7 @@ import { CompanyLogo } from './components/CompanyLogo';
 import { LandingPage } from './components/LandingPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppSidebarLayout } from './components/AppSidebarLayout';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { OverviewPage } from './components/OverviewPage';
 import { QuestionsPage } from './components/QuestionsPage';
 import { PracticePage } from './components/PracticePage';
@@ -76,11 +77,7 @@ const ProblemRouteView: React.FC<ProblemRouteViewProps> = ({
   }, [problemId, allQuestions]);
 
   const handleBack = useCallback(() => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      navigate(`/questions${store.selectedCompany ? `?company=${encodeURIComponent(store.selectedCompany.toLowerCase())}` : ''}`);
-    }
+    navigate(`/questions${store.selectedCompany ? `?company=${encodeURIComponent(store.selectedCompany.toLowerCase())}` : ''}`);
   }, [navigate, store.selectedCompany]);
 
   if (isLoading) {
@@ -114,6 +111,7 @@ const ProblemRouteView: React.FC<ProblemRouteViewProps> = ({
 
   return (
     <ProblemWorkspacePage
+      key={activeProblemQuestion.id}
       question={activeProblemQuestion}
       allQuestions={allQuestions}
       progress={store.progress[String(activeProblemQuestion.id)] || { questionId: activeProblemQuestion.id, status: 'todo', isFavorite: false }}
@@ -834,12 +832,14 @@ export const App: React.FC = () => {
           path="/problem/:problemId"
           element={
             <ProtectedRoute>
-              <ProblemRouteView
-                allQuestions={allQuestions}
-                isLoading={isLoading}
-                store={store}
-                onSaveProgressPatch={handleSaveProgressPatch}
-              />
+              <ErrorBoundary>
+                <ProblemRouteView
+                  allQuestions={allQuestions}
+                  isLoading={isLoading}
+                  store={store}
+                  onSaveProgressPatch={handleSaveProgressPatch}
+                />
+              </ErrorBoundary>
             </ProtectedRoute>
           }
         />
