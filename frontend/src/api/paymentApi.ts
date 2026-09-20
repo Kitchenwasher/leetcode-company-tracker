@@ -28,7 +28,7 @@ export const paymentApi = {
     bmcCreatorPage?: string;
     currency?: string;
     offerings?: {
-      annual: BMCOffering;
+      lifetime: BMCOffering;
       monthly: BMCOffering;
     };
   }> => {

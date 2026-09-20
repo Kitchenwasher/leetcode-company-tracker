@@ -17,29 +17,26 @@ export interface PlanConfig {
 }
 
 export const PLANS: Record<string, PlanConfig> = {
-  annual_special: {
-    id: 'annual_special',
-    name: 'Annual Pass (First Year Special)',
+  lifetime: {
+    id: 'lifetime',
+    name: 'Lifetime Access Pass',
     amountCents: 200000, // ₹2,000 in paise
     currency: 'inr',
-    interval: 'year',
-    firstYearAmountCents: 200000,
-    renewalAmountCents: 29900,
-    description: '₹2,000 for your first full year, then renews at ₹299/month starting the next year.',
-    badge: 'Save 44% • Best Value',
+    description: 'Pay once, own forever. Full lifetime access with zero recurring fees.',
+    badge: 'Best Value • Pay Once, Own Forever',
     features: [
-      'Full 365-day access to all 3,399 verified questions',
-      'Exclusive ₹2,000 first-year special (₹166/month equivalent)',
-      'Renews at ₹299/month in Year 2 (cancel or pause anytime)',
+      'Lifetime access to all 3,399 verified questions',
+      'One-time payment of ₹2,000 with zero recurring fees',
       'High-frequency company question sorting for 659 companies',
-      'Unlimited timed mock interview simulations & rubrics',
+      'Unlimited timed mock interview simulations & rubrics forever',
       'Spaced repetition memory queue & mastery retention',
       'Multi-language verified editorial solutions (C++, Python, Java)',
+      'All future features and roadmap updates included',
     ],
   },
   monthly: {
     id: 'monthly',
-    name: 'Monthly Pro Access',
+    name: '1-Month Pro Membership',
     amountCents: 29900, // ₹299 in paise
     currency: 'inr',
     interval: 'month',
@@ -58,7 +55,9 @@ export const PLANS: Record<string, PlanConfig> = {
 };
 
 // Aliases for backwards compatibility
-PLANS.pro_yearly = PLANS.annual_special;
+PLANS.annual_special = PLANS.lifetime;
+PLANS.pro_yearly = PLANS.lifetime;
+PLANS.pro_lifetime = PLANS.lifetime;
 PLANS.pro_monthly = PLANS.monthly;
 
 export class StripeService {

@@ -7,24 +7,24 @@ import { prisma } from '../config/db.js';
 export class PaymentController {
   static async getPlans(_req: Request, res: Response): Promise<void> {
     res.json({
-      plans: [PLANS.annual_special, PLANS.monthly],
+      plans: [PLANS.lifetime, PLANS.monthly],
       bmcCreatorPage: ENV.BMC_CREATOR_PAGE,
       currency: 'INR',
       offerings: {
-        annual: {
-          id: 'annual_special',
-          name: '1-Year Full Access Pass',
+        lifetime: {
+          id: 'lifetime',
+          name: 'Lifetime Access Pass',
           price: '₹2,000',
           amount: 2000,
-          description: '₹2,000 for the first full year, then ₹299/mo',
-          paymentUrl: `${ENV.BMC_CREATOR_PAGE}/e/1-year-cheatcode-pro`,
+          description: 'One-time payment • Pay once, own forever • No recurring fees',
+          paymentUrl: `${ENV.BMC_CREATOR_PAGE}`,
         },
         monthly: {
           id: 'monthly',
-          name: 'Monthly Pro Membership',
+          name: '1-Month Pro Membership',
           price: '₹299/mo',
           amount: 299,
-          description: 'Cancel anytime',
+          description: 'Billed monthly • Cancel anytime',
           paymentUrl: `${ENV.BMC_CREATOR_PAGE}`,
         },
       },

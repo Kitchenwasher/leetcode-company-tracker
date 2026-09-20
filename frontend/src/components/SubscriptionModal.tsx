@@ -12,7 +12,7 @@ const BMC_PAGE_URL = 'https://buymeacoffee.com/cheatcode69';
 
 export const SubscriptionModal: React.FC = () => {
   const { showSubscriptionModal, setShowSubscriptionModal, isPro, user, updateProfile } = useAuth();
-  const [selectedPlan, setSelectedPlan] = useState<'annual_special' | 'monthly'>('annual_special');
+  const [selectedPlan, setSelectedPlan] = useState<'lifetime' | 'monthly'>('lifetime');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export const SubscriptionModal: React.FC = () => {
     // Open Buy Me a Coffee in a new window with user email hint
     const url = BMC_PAGE_URL;
     window.open(url, '_blank', 'noopener,noreferrer');
-    setSuccessMsg(`Buy Me a Coffee opened in a new tab. Complete your payment using "${user?.email || 'your account email'}", then click "Verify & Activate Pro" below.`);
+    setSuccessMsg(`Buy Me a Coffee opened in a new tab. Complete your ${selectedPlan === 'lifetime' ? 'Lifetime Pass' : '1-Month'} payment using "${user?.email || 'your account email'}", then click "Verify & Activate Pro" below.`);
   };
 
   const handleVerifyPayment = async () => {
@@ -151,14 +151,14 @@ export const SubscriptionModal: React.FC = () => {
 
           {/* 2 Offerings Selection Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-            {/* Offer 1: Annual Special */}
+            {/* Offer 1: Lifetime Pass */}
             <div
               onClick={() => {
                 sounds.playClick();
-                setSelectedPlan('annual_special');
+                setSelectedPlan('lifetime');
               }}
               className={`relative rounded-2xl p-5 border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                selectedPlan === 'annual_special'
+                selectedPlan === 'lifetime'
                   ? 'bg-[#12161E] border-amber-400 shadow-xl shadow-amber-400/10 ring-1 ring-amber-400/40'
                   : 'bg-[#12161E]/40 border-white/[0.08] hover:border-white/20'
               }`}
@@ -166,38 +166,38 @@ export const SubscriptionModal: React.FC = () => {
               {/* Top Banner Tag */}
               <div className="absolute -top-3 left-4 px-3 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-extrabold uppercase tracking-wider shadow-md flex items-center gap-1">
                 <Tag className="w-3 h-3" />
-                <span>Save 44% • Best Offer</span>
+                <span>Best Value • Pay Once, Own Forever</span>
               </div>
 
               <div>
                 <div className="flex items-center justify-between pt-1 mb-2">
                   <span className="text-xs font-bold text-white uppercase tracking-wider">
-                    First Full Year Pass
+                    Lifetime Access Pass
                   </span>
                   <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                    selectedPlan === 'annual_special' ? 'border-amber-400 bg-amber-400' : 'border-zinc-600'
+                    selectedPlan === 'lifetime' ? 'border-amber-400 bg-amber-400' : 'border-zinc-600'
                   }`}>
-                    {selectedPlan === 'annual_special' && <Check className="w-3 h-3 text-black stroke-[3]" />}
+                    {selectedPlan === 'lifetime' && <Check className="w-3 h-3 text-black stroke-[3]" />}
                   </div>
                 </div>
 
                 <div className="flex items-baseline gap-1.5 my-3">
                   <span className="text-3xl font-extrabold text-white font-mono">₹2,000</span>
-                  <span className="text-xs text-textSecondary font-sans font-medium">/ 1st year</span>
+                  <span className="text-xs text-textSecondary font-sans font-medium">/ one-time</span>
                 </div>
 
                 <p className="text-[11px] text-amber-400 font-medium bg-amber-400/10 border border-amber-400/20 rounded-lg p-2 leading-relaxed">
-                  Only ₹166/month for your first 12 months. Then renews at ₹299/month in Year 2.
+                  Pay once and get lifetime access to everything. Zero recurring subscriptions or fees.
                 </p>
 
                 <ul className="mt-4 space-y-2 text-xs text-textSecondary">
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>Full 365-day platform unlock</span>
+                    <span>Lifetime unlock for all 3,399 questions</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>Unlimited timed mock simulations</span>
+                    <span>Unlimited timed mock interviews forever</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -205,17 +205,17 @@ export const SubscriptionModal: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>Spaced repetition algorithm</span>
+                    <span>All future platform updates included</span>
                   </li>
                 </ul>
               </div>
 
               <div className="mt-5 pt-3 border-t border-white/[0.06] text-[11px] text-zinc-400">
-                Cancel or modify renewal anytime.
+                One-time payment • Never charged again.
               </div>
             </div>
 
-            {/* Offer 2: Monthly Flexible Plan */}
+            {/* Offer 2: 1-Month Membership */}
             <div
               onClick={() => {
                 sounds.playClick();
@@ -230,7 +230,7 @@ export const SubscriptionModal: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-white uppercase tracking-wider">
-                    Monthly Plan
+                    1-Month Membership
                   </span>
                   <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                     selectedPlan === 'monthly' ? 'border-amber-400 bg-amber-400' : 'border-zinc-600'
@@ -245,13 +245,13 @@ export const SubscriptionModal: React.FC = () => {
                 </div>
 
                 <p className="text-[11px] text-zinc-300 bg-white/[0.03] border border-white/[0.06] rounded-lg p-2 leading-relaxed">
-                  Billed monthly. Complete flexibility with zero commitments.
+                  Billed monthly. Full platform unlock with complete flexibility to cancel anytime.
                 </p>
 
                 <ul className="mt-4 space-y-2 text-xs text-textSecondary">
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>Full platform unlock</span>
+                    <span>Full platform unlock for 1 month</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -269,7 +269,7 @@ export const SubscriptionModal: React.FC = () => {
               </div>
 
               <div className="mt-5 pt-3 border-t border-white/[0.06] text-[11px] text-zinc-400">
-                Billed monthly at ₹299.
+                Billed monthly at ₹299 • Cancel anytime.
               </div>
             </div>
           </div>
@@ -283,7 +283,7 @@ export const SubscriptionModal: React.FC = () => {
             >
               <Coffee className="w-4 h-4 fill-black" />
               <span>
-                Pay {selectedPlan === 'annual_special' ? '₹2,000 via Buy Me a Coffee (1 Year)' : '₹299/mo via Buy Me a Coffee'}
+                Pay {selectedPlan === 'lifetime' ? '₹2,000 via Buy Me a Coffee (Lifetime Access)' : '₹299/mo via Buy Me a Coffee (1 Month)'}
               </span>
               <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>

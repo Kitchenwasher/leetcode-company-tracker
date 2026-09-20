@@ -95,9 +95,11 @@ export class BMCService {
     const amountNum = parseFloat(
       String(inner.total_amount || inner.amount || (inner.support_coffees ? inner.support_coffees * 5 : 2000))
     ) || 2000;
-    const currency = String(inner.currency || 'INR').toLowerCase();
-    const isYearly = amountNum >= 1000 || String(inner.membership_tier_name || inner.extra_title || '').toLowerCase().includes('year');
-    const plan = isYearly ? 'pro_yearly' : 'pro_monthly';
+    const isLifetime =
+      amountNum >= 1000 ||
+      String(inner.membership_tier_name || inner.extra_title || payload.type || '').toLowerCase().includes('life') ||
+      String(inner.membership_tier_name || inner.extra_title || payload.type || '').toLowerCase().includes('year');
+    const plan = isLifetime ? 'pro_lifetime' : 'pro_monthly';
     const txnId = String(inner.support_id || inner.order_id || inner.transaction_id || `bmc_${Date.now()}`);
 
     // Look up user by email in Neon DB
