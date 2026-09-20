@@ -406,6 +406,11 @@ export class QuestionController {
               difficulty
               exampleTestcaseList
               topicTags { name }
+              codeSnippets {
+                lang
+                langSlug
+                code
+              }
             }
           }`,
           variables: { titleSlug: slug },
@@ -428,6 +433,7 @@ export class QuestionController {
         content: detail?.content || '<p>Problem description is currently unavailable.</p>',
         exampleTestcases: detail?.exampleTestcaseList || [],
         topicTags: detail?.topicTags?.map((t: any) => t.name) || [],
+        codeSnippets: detail?.codeSnippets || [],
       });
     } catch (err) {
       next(err);

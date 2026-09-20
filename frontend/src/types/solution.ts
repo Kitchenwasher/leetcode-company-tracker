@@ -36,6 +36,12 @@ export interface QuestionSolution {
   interviewTips: string[]; // Advice on how to present in an interview
 }
 
+export interface CodeSnippet {
+  lang: string;
+  langSlug: string;
+  code: string;
+}
+
 export interface QuestionDescription {
   id: number | string;
   title: string;
@@ -44,5 +50,6 @@ export interface QuestionDescription {
   content: string;
   exampleTestcases?: string[];
   topicTags?: string[];
+  codeSnippets?: CodeSnippet[];
 }
 

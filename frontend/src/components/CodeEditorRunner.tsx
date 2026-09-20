@@ -45,7 +45,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
 
   const [code, setCode] = useState<string>(() => {
     if (initialCode && initialCode.trim()) return initialCode;
-    return generateStarterCode(language, currentApproach, q.title);
+    return generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
   });
   const [copied, setCopied] = useState<boolean>(false);
   const [isSolutionLoaded, setIsSolutionLoaded] = useState<boolean>(false);
@@ -72,7 +72,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
     setSelectedCaseIdx(0);
   }, [descriptionData, q.id]);
 
-  // Generate clean starter template ONLY when question changes or user switches language
+  // Generate clean starter template when question changes, language switches, or authentic snippets arrive
   useEffect(() => {
     const isNewQuestion = lastQuestionIdRef.current !== q.id;
     const isNewLanguage = lastLanguageRef.current !== language;
@@ -82,19 +82,27 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
     if (isNewQuestion) {
       const newCode = (initialCode && initialCode.trim())
         ? initialCode
-        : generateStarterCode(language, currentApproach, q.title);
+        : generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
       setCode(newCode);
       onCodeChange?.(newCode);
       setIsSolutionLoaded(false);
       setExecResult(null);
     } else if (isNewLanguage) {
-      const starter = generateStarterCode(language, currentApproach, q.title);
+      const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
       setCode(starter);
       onCodeChange?.(starter);
       setIsSolutionLoaded(false);
       setExecResult(null);
+    } else if (!isSolutionLoaded) {
+      // If code was currently an empty placeholder or generic stub, update when authentic snippet arrives
+      const isStub = !code || code.includes('// Write your solution here') || code.includes('def solve(self') || code.includes('public int[] solve');
+      if (isStub && (descriptionData?.codeSnippets?.length || currentApproach)) {
+        const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
+        setCode(starter);
+        onCodeChange?.(starter);
+      }
     }
-  }, [language, q.id]);
+  }, [language, q.id, descriptionData, currentApproach]);
 
   const updateCode = (newCode: string) => {
     setCode(newCode);
@@ -118,7 +126,7 @@ export const CodeEditorRunner: React.FC<CodeEditorRunnerProps> = ({
 
   const handleResetStarter = () => {
     sounds.playClick();
-    const starter = generateStarterCode(language, currentApproach, q.title);
+    const starter = generateStarterCode(language, currentApproach, q.title, descriptionData?.codeSnippets);
     updateCode(starter);
     setIsSolutionLoaded(false);
   };
