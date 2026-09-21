@@ -239,7 +239,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               <div>
                 <label className="block text-xs text-textSecondary mb-1.5 font-medium flex items-center gap-1.5">
                   <Code className="w-3.5 h-3.5 text-primary" />
-                  <span>LeetCode Profile Username (Synced to Neon DB)</span>
+                  <span>LeetCode Profile Username (Cloud Synced)</span>
                 </label>
                 <input
                   type="text"

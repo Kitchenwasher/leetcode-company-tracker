@@ -170,12 +170,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
     }
   };
 
+  const handleClose = () => {
+    setLocalError(null);
+    setAuthError(null);
+    setInfoMessage(null);
+    setShowAuthModal(false);
+  };
+
+  // Close on Escape key press
+  useEffect(() => {
+    if (!showAuthModal) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAuthModal]);
+
   const handleGoogleManualClick = () => {
     if (googleClientId && window.google?.accounts?.id) {
       window.google.accounts.id.prompt();
     } else {
       setInfoMessage(
-        'Google OAuth: Add your GOOGLE_CLIENT_ID to backend/.env to enable 1-click Google Sign-In with Neon DB.'
+        'Google OAuth: Add your GOOGLE_CLIENT_ID to backend/.env to enable 1-click Google Sign-In.'
       );
     }
   };
@@ -194,41 +216,73 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
   const displayError = localError || authError;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in font-mono">
-      <div className="relative w-full max-w-md terminal-panel shadow-2xl overflow-hidden border border-border">
-        {/* Terminal Header */}
-        <div className="p-3 border-b border-border bg-surface flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <h3 className="font-bold text-primary text-xs uppercase tracking-wider">
-              &gt; AUTH_TERMINAL.sys (Neon DB)
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in font-mono"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+    >
+      <div className="relative w-full max-w-md rounded-2xl bg-black border border-white/[0.12] shadow-2xl overflow-hidden">
+        {/* MacBook Window Header Bar */}
+        <div className="px-4 py-3 border-b border-white/[0.08] bg-white/[0.03] backdrop-blur-md flex items-center justify-between select-none">
+          <div className="flex items-center gap-3">
+            {/* macOS Traffic Lights */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/70 shadow-[0_0_8px_rgba(255,95,86,0.35)] flex items-center justify-center text-[8px] text-black/70 font-bold transition-transform hover:scale-110 cursor-pointer group"
+                title="Close (Escape)"
+              >
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity leading-none">✕</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/70 shadow-[0_0_8px_rgba(255,189,46,0.35)] flex items-center justify-center text-[8px] text-black/70 font-bold transition-transform hover:scale-110 cursor-pointer group"
+                title="Minimize (Escape)"
+              >
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity leading-none">−</span>
+              </button>
+              <button
+                type="button"
+                className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/70 shadow-[0_0_8px_rgba(39,201,63,0.35)] flex items-center justify-center text-[7px] text-black/70 font-bold transition-transform hover:scale-110 cursor-pointer group"
+                title="Active"
+              >
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity leading-none">＋</span>
+              </button>
+            </div>
+
+            <span className="w-px h-3.5 bg-white/15" />
+
+            <h3 className="font-bold text-primary text-xs uppercase tracking-wider font-mono">
+              &gt; AUTH_TERMINAL.sys
             </h3>
           </div>
+
           <button
-            onClick={() => {
-              setLocalError(null);
-              setAuthError(null);
-              setShowAuthModal(false);
-            }}
-            className="px-2 py-0.5 rounded-[2px] bg-surfaceElevated hover:bg-border text-textMuted hover:text-primary text-xs font-mono cursor-pointer"
+            type="button"
+            onClick={handleClose}
+            className="px-2 py-0.5 rounded bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] text-zinc-400 hover:text-white text-xs font-mono cursor-pointer transition-colors"
+            title="Close (Escape key)"
           >
             [ESC]
           </button>
         </div>
 
-        <div className="p-5 sm:p-6">
+        <div className="p-5 sm:p-6 bg-black">
           {/* Header */}
           <div className="text-center mb-4">
             <h2 className="text-base font-bold text-primary uppercase tracking-wide">
               &gt; {tab === 'signin' ? 'AUTHENTICATE_SESSION' : 'REGISTER_NEW_OPERATOR'}
             </h2>
-            <p className="text-[11px] text-textMuted mt-1">
-              Live Neon PostgreSQL account persistence & progress synchronization
+            <p className="text-[11px] text-zinc-400 mt-1">
+              Secure account persistence &amp; progress synchronization
             </p>
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex rounded-[2px] bg-surface p-1 border border-border mb-4">
+          <div className="flex rounded-lg bg-zinc-950 p-1 border border-white/10 mb-4">
             <button
               type="button"
               onClick={() => {
@@ -237,10 +291,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                 setAuthError(null);
                 setInfoMessage(null);
               }}
-              className={`flex-1 py-1 text-xs font-bold rounded-[2px] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 tab === 'signin'
-                  ? 'bg-primary text-black shadow-terminal-glow'
-                  : 'text-textMuted hover:text-textPrimary'
+                  ? 'bg-primary text-black shadow-[0_0_12px_rgba(168,85,247,0.35)]'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
@@ -254,10 +308,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                 setAuthError(null);
                 setInfoMessage(null);
               }}
-              className={`flex-1 py-1 text-xs font-bold rounded-[2px] transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 tab === 'signup'
-                  ? 'bg-primary text-black shadow-terminal-glow'
-                  : 'text-textMuted hover:text-textPrimary'
+                  ? 'bg-primary text-black shadow-[0_0_12px_rgba(168,85,247,0.35)]'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               <UserPlus className="w-3.5 h-3.5" />
@@ -267,7 +321,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
 
           {/* Error Message Display */}
           {displayError && (
-            <div className="mb-3 p-2.5 rounded-[2px] bg-error/15 border border-error/40 text-error text-xs font-mono font-bold flex items-start gap-2">
+            <div className="mb-3 p-2.5 rounded-lg bg-red-500/15 border border-red-500/40 text-red-400 text-xs font-mono font-bold flex items-start gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>&gt; ERROR: {displayError}</span>
             </div>
@@ -275,7 +329,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
 
           {/* Info Message Display */}
           {infoMessage && (
-            <div className="mb-3 p-2.5 rounded-[2px] bg-primary/10 border border-primary/30 text-primary text-xs font-mono flex items-start gap-2">
+            <div className="mb-3 p-2.5 rounded-lg bg-primary/10 border border-primary/30 text-primary text-xs font-mono flex items-start gap-2">
               <Info className="w-4 h-4 shrink-0 mt-0.5" />
               <span>&gt; {infoMessage}</span>
             </div>
@@ -285,48 +339,48 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
           <form onSubmit={handleSubmit} className="space-y-3">
             {tab === 'signup' && (
               <div>
-                <label className="block text-[11px] font-bold text-textMuted uppercase mb-1">
+                <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
                   &gt; OPERATOR_NAME
                 </label>
                 <div className="relative">
-                  <UserIcon className="w-3.5 h-3.5 text-textMuted absolute left-2.5 top-2.5" />
+                  <UserIcon className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="w-full pl-8 pr-3 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary placeholder-textMuted focus:outline-none focus:border-borderActive focus:ring-1 focus:ring-borderActive"
+                    className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-white/10 rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-[11px] font-bold text-textMuted uppercase mb-1">
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
                 &gt; EMAIL_ADDRESS
               </label>
               <div className="relative">
-                <Mail className="w-3.5 h-3.5 text-textMuted absolute left-2.5 top-2.5" />
+                <Mail className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="operator@domain.com"
-                  className="w-full pl-8 pr-3 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary placeholder-textMuted focus:outline-none focus:border-borderActive focus:ring-1 focus:ring-borderActive"
+                  className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-white/10 rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-bold text-textMuted uppercase">
+                <label className="text-[11px] font-bold text-zinc-400 uppercase">
                   &gt; PASSWORD {tab === 'signup' && '(MIN 8 CHARS)'}
                 </label>
               </div>
               <div className="relative">
-                <Lock className="w-3.5 h-3.5 text-textMuted absolute left-2.5 top-2.5" />
+                <Lock className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -334,12 +388,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-8 pr-12 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary placeholder-textMuted focus:outline-none focus:border-borderActive focus:ring-1 focus:ring-borderActive font-mono"
+                  className="w-full pl-8 pr-12 py-1.5 bg-zinc-950 border border-white/10 rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 top-2 text-[10px] font-mono text-textMuted hover:text-primary cursor-pointer"
+                  className="absolute right-2.5 top-2 text-[10px] font-mono text-zinc-400 hover:text-primary cursor-pointer"
                 >
                   {showPassword ? '[HIDE]' : '[SHOW]'}
                 </button>
@@ -350,13 +404,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
               <>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[11px] font-bold text-textMuted uppercase mb-1">
+                    <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
                       &gt; TARGET_COMPANY
                     </label>
                     <select
                       value={targetCompany}
                       onChange={(e) => setTargetCompany(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary focus:outline-none focus:border-borderActive cursor-pointer"
+                      className="w-full px-2 py-1.5 bg-zinc-950 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-primary cursor-pointer"
                     >
                       <option value="google">GOOGLE</option>
                       <option value="meta">META</option>
@@ -369,7 +423,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-textMuted uppercase mb-1">
+                    <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-1">
                       &gt; LEETCODE_ID (OPTIONAL)
                     </label>
                     <input
@@ -377,7 +431,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                       value={leetcodeUsername}
                       onChange={(e) => setLeetcodeUsername(e.target.value)}
                       placeholder="username"
-                      className="w-full px-2.5 py-1.5 bg-background border border-border rounded-[2px] text-xs text-textPrimary placeholder-textMuted focus:outline-none focus:border-borderActive"
+                      className="w-full px-2.5 py-1.5 bg-zinc-950 border border-white/10 rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -387,7 +441,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-2 px-4 rounded-[2px] bg-primary hover:bg-primaryHover text-black text-xs font-bold font-mono shadow-terminal-glow flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full mt-2 py-2.5 px-4 rounded-lg bg-primary hover:bg-primaryHover text-black text-xs font-bold font-mono shadow-[0_0_16px_rgba(168,85,247,0.35)] flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
             >
               <span>{isSubmitting ? '[ PROCESSING... ]' : tab === 'signin' ? '[ EXECUTE_LOGIN ]' : '[ EXECUTE_REGISTRATION ]'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -397,10 +451,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
           {/* Social Authentication Bridges */}
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
+              <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-[10px] uppercase">
-              <span className="bg-surface px-2 text-textMuted font-mono">
+              <span className="bg-black px-2 text-zinc-500 font-mono">
                 // OAUTH_BRIDGES
               </span>
             </div>
@@ -415,9 +469,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                 <button
                   type="button"
                   onClick={handleGoogleManualClick}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-[2px] bg-surfaceElevated hover:bg-border border border-border hover:border-primaryDim text-xs font-bold font-mono text-textPrimary hover:text-primary transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-zinc-950 hover:bg-zinc-900 border border-white/10 hover:border-primary/50 text-xs font-bold font-mono text-white hover:text-primary transition-colors cursor-pointer"
                 >
-                  <Globe className="w-4 h-4 text-medium" />
+                  <Globe className="w-4 h-4 text-primary" />
                   <span>[ SIGN_IN_WITH_GOOGLE ]</span>
                 </button>
               )}
@@ -427,12 +481,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
             <button
               type="button"
               onClick={handleGithubClick}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-[2px] bg-surfaceElevated hover:bg-border border border-border hover:border-primaryDim text-xs font-bold font-mono text-textSecondary hover:text-white transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-zinc-950 hover:bg-zinc-900 border border-white/10 hover:border-primary/50 text-xs font-bold font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer"
             >
-              <Code2 className="w-4 h-4 text-textPrimary" />
+              <Code2 className="w-4 h-4 text-zinc-400" />
               <span>[ GITHUB_OAUTH ]</span>
               {!isGithubConfigured && (
-                <span className="text-[9px] px-1 py-0.2 rounded bg-surface border border-border text-textMuted">
+                <span className="text-[9px] px-1 py-0.2 rounded bg-black border border-white/10 text-zinc-500">
                   SOON
                 </span>
               )}

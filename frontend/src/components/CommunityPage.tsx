@@ -195,7 +195,7 @@ export const CommunityPage: React.FC = () => {
               <Trophy className="w-4 h-4 text-primary" />
               <h2 className="text-base font-semibold text-white">Top Contributors</h2>
             </div>
-            <span className="text-xs text-textMuted font-mono">Neon DB Live</span>
+            <span className="text-xs text-textMuted font-mono">Cloud Sync Live</span>
           </div>
 
           {loading ? (
