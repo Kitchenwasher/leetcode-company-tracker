@@ -324,20 +324,10 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
 
         {/* Left Sidebar */}
         <aside
-          className={`fixed top-16 bottom-0 left-0 z-40 w-60 border-r border-white/[0.08] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 overflow-hidden bg-[#09090b] ${
+          className={`fixed top-16 bottom-0 left-0 z-40 w-60 border-r border-white/[0.08] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 overflow-hidden bg-[#090C12] ${
             mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
           }`}
         >
-          {/* Full-Height Background Astronaut on Moon Image (Mirrored & Positioned to match original) */}
-          <img
-            src="/images/dashboard/astronaut-sidebar.jpg"
-            alt="Astronaut on lunar surface"
-            className="absolute inset-0 w-full h-full object-cover object-[62%_bottom] -scale-x-100 select-none pointer-events-none opacity-90"
-          />
-
-          {/* Gradients: Strong contrast at top for navigation icons, soft in mid/bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/95 via-[#09090b]/65 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-black/30 pointer-events-none" />
 
           {/* Nav Items Container */}
           <div
@@ -443,16 +433,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
         </aside>
 
         {/* Dynamic Page Content */}
-        <main
-          className="flex-1 lg:pl-60 min-w-0 relative bg-[#080B0F] min-h-[calc(100vh-4rem)]"
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(8, 11, 15, 0.70) 0%, rgba(8, 11, 15, 0.50) 45%, rgba(8, 11, 15, 0.85) 100%), url('/images/dashboard/space-bg.png')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center top',
-            backgroundAttachment: 'fixed',
-            backgroundRepeat: 'no-repeat',
-          }}
-        >
+        <main className="flex-1 lg:pl-60 min-w-0 relative bg-[#07090E] min-h-[calc(100vh-4rem)]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}
