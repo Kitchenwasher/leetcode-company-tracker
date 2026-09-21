@@ -62,146 +62,6 @@ const MacWindowBar: React.FC<{
   </div>
 );
 
-const SHOWCASE_COMPANIES = [
-  {
-    name: 'Google',
-    badge: 'MAANG',
-    questions: '1,250+ Qs',
-    role: 'SWE & Systems',
-    logo: (
-      <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-      </svg>
-    ),
-  },
-  {
-    name: 'Amazon',
-    badge: 'MAANG',
-    questions: '1,420+ Qs',
-    role: 'SDE I, II & III',
-    logo: (
-      <div className="w-5 h-5 rounded bg-[#FF9900] text-black font-black text-xs flex items-center justify-center shrink-0 font-sans">
-        a
-      </div>
-    ),
-  },
-  {
-    name: 'Microsoft',
-    badge: 'Big Tech',
-    questions: '1,100+ Qs',
-    role: 'SWE & Cloud',
-    logo: (
-      <div className="w-5 h-5 grid grid-cols-2 gap-0.5 shrink-0">
-        <div className="bg-[#F25022] rounded-[1px]" />
-        <div className="bg-[#7FBA00] rounded-[1px]" />
-        <div className="bg-[#00A4EF] rounded-[1px]" />
-        <div className="bg-[#FFB900] rounded-[1px]" />
-      </div>
-    ),
-  },
-  {
-    name: 'Meta',
-    badge: 'MAANG',
-    questions: '890+ Qs',
-    role: 'E4, E5 & Infra',
-    logo: (
-      <svg className="w-5 h-5 shrink-0 text-[#0081FB]" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-      </svg>
-    ),
-  },
-  {
-    name: 'Apple',
-    badge: 'MAANG',
-    questions: '650+ Qs',
-    role: 'iOS & Systems',
-    logo: (
-      <svg className="w-5 h-5 shrink-0 text-white" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.93-2.85-.9.04-1.99.6-2.61 1.34-.55.63-1.03 1.68-.9 2.71 1 .08 2.04-.45 2.58-1.2z"/>
-      </svg>
-    ),
-  },
-  {
-    name: 'Netflix',
-    badge: 'MAANG',
-    questions: '380+ Qs',
-    role: 'Senior Platform',
-    logo: (
-      <svg className="w-5 h-5 shrink-0 text-[#E50914]" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M4 2h4.5l4.5 12.5V2H17v20h-4.5L8 9.5V22H4V2z"/>
-      </svg>
-    ),
-  },
-  {
-    name: 'Uber',
-    badge: 'Unicorn',
-    questions: '540+ Qs',
-    role: 'Core Backend',
-    logo: (
-      <div className="w-5 h-5 rounded-full bg-white text-black font-black text-[9px] flex items-center justify-center font-mono">
-        UB
-      </div>
-    ),
-  },
-  {
-    name: 'Adobe',
-    badge: 'Tier-1',
-    questions: '490+ Qs',
-    role: 'Creative & Web',
-    logo: (
-      <svg className="w-5 h-5 shrink-0 text-[#ED2224]" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M13.966 22h3.044L24 2H16.633l-2.667 7.027zm-3.932 0H6.99L0 2h7.367l2.667 7.027zM12 11.516l2.167 5.75H9.833z"/>
-      </svg>
-    ),
-  },
-  {
-    name: 'Flipkart',
-    badge: 'E-Commerce',
-    questions: '420+ Qs',
-    role: 'Full Stack & SDE',
-    logo: (
-      <div className="w-5 h-5 rounded bg-[#2874F0] text-[#FFE500] font-black text-xs flex items-center justify-center font-sans font-bold">
-        fk
-      </div>
-    ),
-  },
-  {
-    name: 'Atlassian',
-    badge: 'Tier-1',
-    questions: '360+ Qs',
-    role: 'Cloud Services',
-    logo: (
-      <svg className="w-5 h-5 shrink-0 text-[#0052CC]" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M11.53 2c0 2.4-1 4.5-2.7 5.9L5.3 10.6c-.4.3-.6.8-.6 1.3s.2 1 .6 1.3l3.5 2.7c1.7 1.4 2.7 3.5 2.7 5.9v.2h5v-.2c0-3.6-1.5-6.8-4-9.1 2.5-2.3 4-5.5 4-9.1V2h-5z"/>
-      </svg>
-    ),
-  },
-  {
-    name: 'Bloomberg',
-    badge: 'FinTech',
-    questions: '680+ Qs',
-    role: 'Trading & C++',
-    logo: (
-      <div className="w-5 h-5 rounded bg-white text-black font-black text-[9px] flex items-center justify-center font-mono">
-        BB
-      </div>
-    ),
-  },
-  {
-    name: 'Stripe',
-    badge: 'FinTech',
-    questions: '310+ Qs',
-    role: 'API & Payments',
-    logo: (
-      <div className="w-5 h-5 rounded bg-[#635BFF] text-white font-black text-xs flex items-center justify-center font-sans">
-        S
-      </div>
-    ),
-  },
-];
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -476,7 +336,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
               <div className="flex flex-wrap items-start justify-between gap-2 border-b border-white/[0.06] pb-4">
                 <div>
                   <span className="text-xs font-semibold text-primary tracking-wider uppercase">
-                    Targeted Preparation
+                    VERIFIED COMPANY INTELLIGENCE
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold font-sans text-white mt-1">
                     Questions Mapped Directly to <span className="text-primary">Top Tech Teams</span>
@@ -487,64 +347,160 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </span>
               </div>
 
-              {/* Native Vector Company Showcase Grid (Replaces blurry raster image) */}
-              <div className="p-5 sm:p-7 rounded-2xl bg-[#0B0E14]/80 border border-white/[0.08] backdrop-blur-md shadow-xl space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-primary font-mono text-xs font-bold">&gt;</span>
-                    <span className="text-xs font-mono font-bold text-zinc-300 uppercase tracking-wider">
-                      INDEXED INTERVIEW PATTERNS
+              {/* Native Cyber Graphic Banner: Top Tech Company Logos and Names */}
+              <div
+                onClick={handleLaunch}
+                className="group relative rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#0B0E14] via-[#090C12] to-[#06080C] p-6 sm:p-8 lg:p-10 shadow-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-primary/10"
+              >
+                {/* Cyber Grid Lines Background */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+
+                {/* Subtle Ambient Radial Glow */}
+                <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-primary/10 blur-3xl pointer-events-none rounded-full" />
+
+                <div className="relative z-10 space-y-8 sm:space-y-10">
+                  {/* Terminal Header */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 text-[#EAB308] font-mono text-xs sm:text-sm font-semibold tracking-wider">
+                      <span>&gt;</span>
+                      <span>TRUSTED BY QUESTIONS FROM TOP COMPANIES</span>
+                    </div>
+                    <h3 className="text-white font-mono font-extrabold text-2xl sm:text-3xl lg:text-4xl tracking-wider">
+                      659+ COMPANIES INDEXED
+                    </h3>
+                  </div>
+
+                  {/* Row 1: Google, amazon, Microsoft, Meta, Uber */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 sm:gap-8 items-center justify-items-center">
+                    {/* Google */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center py-2">
+                      <span className="font-sans font-bold text-2xl sm:text-3xl tracking-tight">
+                        <span className="text-[#4285F4]">G</span>
+                        <span className="text-[#EA4335]">o</span>
+                        <span className="text-[#FBBC05]">o</span>
+                        <span className="text-[#4285F4]">g</span>
+                        <span className="text-[#34A853]">l</span>
+                        <span className="text-[#EA4335]">e</span>
+                      </span>
+                    </div>
+
+                    {/* Amazon */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex flex-col items-center justify-center py-2">
+                      <span className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-none font-sans">
+                        amazon
+                      </span>
+                      <svg className="w-16 sm:w-20 h-3 text-[#FF9900] -mt-0.5" viewBox="0 0 100 22" fill="none">
+                        <path
+                          d="M8 8C35 22 75 22 92 8"
+                          stroke="#FF9900"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M84 4L94 9L88 16Z"
+                          fill="#FF9900"
+                        />
+                      </svg>
+                    </div>
+
+                    {/* Microsoft */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center justify-center gap-2.5 py-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 grid grid-cols-2 gap-0.5 shrink-0">
+                        <div className="bg-[#F25022] rounded-[1px]" />
+                        <div className="bg-[#7FBA00] rounded-[1px]" />
+                        <div className="bg-[#00A4EF] rounded-[1px]" />
+                        <div className="bg-[#FFB900] rounded-[1px]" />
+                      </div>
+                      <span className="text-xl sm:text-2xl font-semibold text-white tracking-tight font-sans">
+                        Microsoft
+                      </span>
+                    </div>
+
+                    {/* Meta */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center justify-center gap-2.5 py-2">
+                      <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                          fill="#0081FB"
+                          d="M16.995 6C14.622 6 13.107 7.227 12 8.358C10.893 7.227 9.378 6 7.005 6C3.768 6 1 8.788 1 12.278C1 15.767 3.768 18.555 7.005 18.555C9.645 18.555 11.082 16.993 12 15.688C12.918 16.993 14.355 18.555 16.995 18.555C20.232 18.555 23 15.767 23 12.278C23 8.788 20.232 6 16.995 6ZM7.005 16.273C4.94 16.273 3.327 14.432 3.327 12.278C3.327 10.123 4.94 8.282 7.005 8.282C9.07 8.282 10.457 10.23 11.272 11.666C10.442 13.344 9.172 16.273 7.005 16.273ZM16.995 16.273C14.93 16.273 13.66 13.344 12.83 11.666C13.645 10.23 15.032 8.282 17.097 8.282C19.162 8.282 20.775 10.123 20.775 12.278C20.775 14.432 19.06 16.273 16.995 16.273Z"
+                        />
+                      </svg>
+                      <span className="text-xl sm:text-2xl font-bold text-white tracking-tight font-sans">
+                        Meta
+                      </span>
+                    </div>
+
+                    {/* Uber */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center justify-center py-2">
+                      <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight font-sans">
+                        Uber
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Adobe, Apple, NETFLIX, Flipkart, Codeforces */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 sm:gap-8 items-center justify-items-center">
+                    {/* Adobe */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center justify-center gap-2.5 py-2">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 text-[#ED2224]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M13.966 22h3.044L24 2H16.633l-2.667 7.027zm-3.932 0H6.99L0 2h7.367l2.667 7.027zM12 11.516l2.167 5.75H9.833z"/>
+                      </svg>
+                      <span className="text-xl sm:text-2xl font-bold text-white tracking-tight font-sans">
+                        Adobe
+                      </span>
+                    </div>
+
+                    {/* Apple */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center justify-center gap-2.5 py-2">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 text-white fill-current" viewBox="0 0 170 170">
+                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.6-7.85-11.75-14.43-6.52-10.4-11.5-22.37-14.94-35.91-3.44-13.55-5.16-26.06-5.16-37.53 0-14.54 3.73-26.69 11.2-36.46 7.47-9.76 16.89-14.73 28.26-14.92 5.06 0 10.46 1.34 16.2 4.02 5.74 2.68 9.61 4.07 11.61 4.17 1.83 0 5.86-1.46 12.09-4.39 6.23-2.92 11.67-4.24 16.32-3.95 12.39.78 22.3 5.48 29.74 14.1-10.88 6.64-16.17 15.76-15.86 27.35.31 9.4 3.99 17.29 11.04 23.68 7.05 6.39 15.34 10.02 24.87 10.89-2.22 6.94-4.87 14.1-7.94 21.46zM119.22 31.84c0-7.39 2.65-14.28 7.95-20.67 5.3-6.39 11.78-10.37 19.45-11.95.2 1.4.3 2.7.3 3.9 0 7.39-2.82 14.37-8.47 20.94-5.65 6.57-12.28 10.48-19.89 11.73-.2-1.3-.34-2.61-.34-3.95z"/>
+                      </svg>
+                      <span className="text-xl sm:text-2xl font-semibold text-white tracking-tight font-sans">
+                        Apple
+                      </span>
+                    </div>
+
+                    {/* NETFLIX */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center justify-center py-2">
+                      <span className="text-2xl sm:text-3xl font-black text-[#E50914] tracking-widest uppercase font-sans">
+                        NETFLIX
+                      </span>
+                    </div>
+
+                    {/* Flipkart */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center justify-center gap-2.5 py-2">
+                      <div className="w-6 h-7 sm:w-7 sm:h-8 rounded bg-white p-0.5 flex flex-col items-center justify-center relative shadow-sm shrink-0">
+                        <div className="w-2.5 h-1 border-t-2 border-l-2 border-r-2 border-zinc-500 rounded-t-sm -mt-1 mb-0.5" />
+                        <span className="text-[#2874F0] font-black text-sm sm:text-base italic leading-none font-sans">
+                          f
+                        </span>
+                        <div className="absolute -bottom-0.5 right-0.5 flex gap-0.5">
+                          <div className="w-1.5 h-0.5 bg-[#FFE500] rounded-full" />
+                        </div>
+                      </div>
+                      <span className="text-xl sm:text-2xl font-bold text-white tracking-tight font-sans italic">
+                        Flipkart
+                      </span>
+                    </div>
+
+                    {/* Codeforces */}
+                    <div className="transition-transform duration-200 hover:scale-105 select-none inline-flex items-center justify-center gap-2.5 py-2">
+                      <div className="flex items-end gap-1 h-6 shrink-0">
+                        <div className="w-1.5 h-3.5 bg-[#318CE7] rounded-sm" />
+                        <div className="w-1.5 h-6 bg-[#FFD700] rounded-sm" />
+                        <div className="w-1.5 h-4.5 bg-[#E53935] rounded-sm" />
+                      </div>
+                      <span className="text-xl sm:text-2xl font-semibold text-white tracking-tight font-sans">
+                        Codeforces
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Right "... and many more" */}
+                  <div className="flex justify-end pt-2 pr-2">
+                    <span className="text-xs sm:text-sm text-zinc-400 italic font-sans group-hover:text-primary transition-colors">
+                      ... and many more
                     </span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/25 self-start sm:self-auto">
-                    659+ COMPANIES ACTIVE
-                  </span>
-                </div>
-
-                {/* Grid of Company Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {SHOWCASE_COMPANIES.map((comp) => (
-                    <div
-                      key={comp.name}
-                      onClick={handleLaunch}
-                      className="p-3.5 sm:p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-primary/50 transition-all duration-300 group cursor-pointer flex flex-col justify-between space-y-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          {comp.logo}
-                          <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">
-                            {comp.name}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-white/[0.05] text-zinc-400 group-hover:text-white border border-white/[0.06] transition-colors">
-                          {comp.badge}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs pt-1 border-t border-white/[0.04]">
-                        <span className="font-mono text-primary font-semibold">
-                          {comp.questions}
-                        </span>
-                        <span className="text-textMuted text-[11px] font-sans">
-                          {comp.role}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Footer bar */}
-                <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-textSecondary border-t border-white/[0.04]">
-                  <span className="font-mono text-zinc-400 text-center sm:text-left">
-                    + 647 more global companies indexed across MAANG, Unicorns &amp; Startups
-                  </span>
-                  <button
-                    onClick={handleLaunch}
-                    className="inline-flex items-center gap-1.5 text-primary hover:text-white font-semibold transition-colors cursor-pointer"
-                  >
-                    <span>Browse Full Company Directory</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </div>
 
