@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sounds.playClick();
                 onNavigateOverview();
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-black font-semibold text-xs shadow-md shadow-primary/20 hover:bg-[#D4ED00] transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white font-semibold text-xs shadow-md shadow-primary/20 hover:bg-purple-600 transition-all cursor-pointer"
               title="Personalized Overview Dashboard"
             >
               <LayoutDashboard className="w-3.5 h-3.5" />

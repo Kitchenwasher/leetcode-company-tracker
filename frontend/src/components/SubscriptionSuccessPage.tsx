@@ -28,7 +28,7 @@ export const SubscriptionSuccessPage: React.FC = () => {
       particleCount: 150,
       spread: 90,
       origin: { y: 0.5 },
-      colors: ['#E5FF00', '#FFFFFF', '#D4ED00', '#F3F4F6', '#4285F4']
+      colors: ['#A855F7', '#FFFFFF', '#C084FC', '#7C3AED', '#4285F4']
     });
 
     // Ensure user tier is marked as 'pro' in frontend context
@@ -110,7 +110,7 @@ export const SubscriptionSuccessPage: React.FC = () => {
               sounds.playClick();
               navigate('/dashboard');
             }}
-            className="w-full sm:flex-1 py-3 px-5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-primary/20"
+            className="w-full sm:flex-1 py-3 px-5 rounded-xl bg-primary hover:bg-purple-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-primary/20"
           >
             <span>Launch Dashboard</span>
             <ArrowRight className="w-3.5 h-3.5" />

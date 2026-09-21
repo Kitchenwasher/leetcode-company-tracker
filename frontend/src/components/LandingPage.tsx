@@ -24,9 +24,9 @@ import {
   Award,
   ExternalLink
 } from 'lucide-react';
-import { DeviceMockup } from './DeviceMockup';
 import { useAuth } from '../context/AuthContext';
 import { sounds } from '../utils/sound';
+import EvilEye from './ui/EvilEye';
 
 const GithubIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -52,37 +52,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
   };
   return (
     <div className="min-h-screen bg-background text-textPrimary flex flex-col font-sans selection:bg-primary/20 selection:text-primary relative overflow-x-hidden">
-      {/* Top Status Bar */}
-      <div className="w-full bg-[#0B0E14] border-b border-white/[0.08] text-xs text-textSecondary py-2 px-4 sm:px-6 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4 sm:gap-6">
-            <span className="flex items-center gap-1.5 text-primary font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Live Platform
-            </span>
-            <span>
-              <strong className="text-white font-mono">659</strong> Companies Indexed
-            </span>
-            <span className="hidden sm:inline">
-              <strong className="text-white font-mono">3,399</strong> Verified Questions
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-4 text-textMuted text-xs">
-            <span>5 Recency Windows</span>
-            <span>•</span>
-            <span className="text-primary font-medium">100% Free &amp; Open</span>
-          </div>
-        </div>
-      </div>
 
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/[0.08] bg-[#080B0F]/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-white/[0.08] bg-[#080B0F]/60 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Brand Wordmark */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-white font-bold text-base tracking-tight font-sans">Cheat Code</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-black">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-white">
                 BETA
               </span>
             </div>
@@ -113,7 +91,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             {isAuthenticated ? (
               <button
                 onClick={handleLaunch}
-                className="px-4 py-2 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer font-sans"
+                className="px-4 py-2 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer font-sans"
               >
                 <span>Enter Dashboard</span>
                 <ChevronRight className="w-4 h-4" />
@@ -131,7 +109,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </button>
                 <button
                   onClick={handleLaunch}
-                  className="px-4 py-2 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer font-sans"
+                  className="px-4 py-2 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-1.5 cursor-pointer font-sans"
                 >
                   <span>Launch Platform</span>
                   <ChevronRight className="w-4 h-4" />
@@ -142,41 +120,63 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
         </div>
       </header>
 
+      {/* Fixed GPU-Accelerated Background Canvas with EvilEye */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <EvilEye
+          eyeColor="#7C3AED"
+          intensity={1.5}
+          pupilSize={0.6}
+          irisWidth={0.25}
+          glowIntensity={0.35}
+          scale={0.8}
+          noiseScale={1.0}
+          pupilFollow={1.0}
+          flameSpeed={1.0}
+          backgroundColor="#000000"
+        />
+      </div>
+
       {/* Main Narrative Canvas */}
-      <main
-        className="flex-1 relative z-10 py-6 sm:py-10 px-4 sm:px-6"
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(8, 11, 15, 0.75) 0%, rgba(8, 11, 15, 0.50) 45%, rgba(8, 11, 15, 0.85) 100%), url('/images/dashboard/space-bg.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center top',
-          backgroundAttachment: 'fixed',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
+      <main className="flex-1 relative z-10 py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col gap-8 sm:gap-12">
           
-          {/* SECTION 1: HERO & PRODUCT OVERVIEW */}
+          {/* SECTION 1: HERO & PRODUCT OVERVIEW (MacBook Window Frame) */}
           <section
             id="hero"
-            className="rounded-2xl border border-white/[0.08] bg-[#0E1217] p-6 sm:p-10 lg:p-12 relative overflow-hidden backdrop-blur-sm shadow-2xl flex flex-col justify-between"
-            style={{
-              backgroundImage: `linear-gradient(to right, rgba(8,11,15,0.92) 0%, rgba(8,11,15,0.85) 52%, rgba(8,11,15,0.60) 78%, rgba(8,11,15,0.90) 100%), url('/images/dashboard/space-bg.png')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
+            className="rounded-2xl sm:rounded-3xl border border-white/[0.08] bg-[#080B0F]/40 relative overflow-hidden backdrop-blur-md shadow-2xl flex flex-col justify-between"
           >
-            {/* Header Note & Eyebrow */}
-            <div className="flex items-center justify-between gap-2 mb-6 relative z-10">
-              <span className="text-xs font-semibold text-primary tracking-wider uppercase">
-                Intelligent Interview Preparation
-              </span>
+            {/* macOS Window Title Bar */}
+            <div className="w-full px-5 sm:px-8 py-3.5 sm:py-4 border-b border-white/[0.08] bg-white/[0.02] backdrop-blur-md flex items-center justify-between gap-3 relative z-10 select-none">
+              <div className="flex items-center gap-3 sm:gap-4">
+                {/* macOS Traffic Lights */}
+                <div className="flex items-center gap-2 group cursor-pointer" title="macOS Window Controls">
+                  <span className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/70 shadow-[0_0_8px_rgba(255,95,86,0.35)] flex items-center justify-center text-[8px] text-black/70 font-bold transition-transform group-hover:scale-105">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity leading-none">✕</span>
+                  </span>
+                  <span className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/70 shadow-[0_0_8px_rgba(255,189,46,0.35)] flex items-center justify-center text-[8px] text-black/70 font-bold transition-transform group-hover:scale-105">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity leading-none">−</span>
+                  </span>
+                  <span className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/70 shadow-[0_0_8px_rgba(39,201,63,0.35)] flex items-center justify-center text-[7px] text-black/70 font-bold transition-transform group-hover:scale-105">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity leading-none">＋</span>
+                  </span>
+                </div>
+
+                <span className="w-px h-3.5 bg-white/15 hidden sm:inline-block" />
+
+                <span className="text-xs font-semibold text-primary tracking-wider uppercase font-mono">
+                  Intelligent Interview Preparation
+                </span>
+              </div>
+
               <span className="text-xs text-textSecondary italic hidden sm:inline-block">
                 From Preparation to Opportunity ↗
               </span>
             </div>
 
-            {/* Internal 2-Column Hero */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+            {/* Inner Content Area */}
+            <div className="p-6 sm:p-10 lg:p-12 pt-6 sm:pt-8 flex flex-col justify-between flex-1 relative z-10">
+              {/* Internal 2-Column Hero */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
               {/* Left Column: Headline, Description & CTAs */}
               <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-center space-y-6">
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.08] font-sans">
@@ -193,7 +193,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 <div className="flex flex-wrap items-center gap-3 pt-1">
                   <button
                     onClick={handleLaunch}
-                    className="px-6 py-3.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-sm font-semibold tracking-wide shadow-lg shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer font-sans"
+                    className="px-6 py-3.5 rounded-xl bg-primary hover:bg-purple-600 text-white text-sm font-semibold tracking-wide shadow-lg shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer font-sans"
                   >
                     <span>{isAuthenticated ? 'Enter Dashboard' : 'Get Started'}</span>
                     <ChevronRight className="w-4 h-4" />
@@ -216,9 +216,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </div>
               </div>
 
-              {/* Right Column: LAPTOP / BROWSER DEVICE MOCKUP */}
-              <div className="lg:col-span-6 xl:col-span-5 w-full">
-                <DeviceMockup />
+              {/* Right Column: 3D TECH INTELLIGENCE ILLUSTRATION */}
+              <div className="lg:col-span-6 xl:col-span-5 w-full flex items-center justify-center">
+                <div className="relative w-full max-w-xl mx-auto flex items-center justify-center group">
+                  {/* Ambient Purple Glow */}
+                  <div className="absolute inset-0 bg-purple-600/30 rounded-full blur-3xl pointer-events-none -z-10" />
+                  <img
+                    src="/images/landing/hero-illustration.webp"
+                    alt="Cheat Code Technical Interview Platform"
+                    className="w-full h-auto object-contain drop-shadow-[0_25px_60px_rgba(168,85,247,0.40)] select-none transition-transform duration-500 hover:scale-[1.03]"
+                  />
+                </div>
               </div>
             </div>
 
@@ -252,17 +260,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </p>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
           {/* SECTION 2: WHY CHEAT CODE? */}
           <section
             id="features"
-            className="rounded-2xl border border-white/[0.08] relative overflow-hidden p-6 sm:p-10 lg:p-12 shadow-2xl flex flex-col justify-between"
-            style={{
-              backgroundImage: `linear-gradient(to bottom, rgba(8,11,15,0.85) 0%, rgba(8,11,15,0.94) 100%), url('/images/dashboard/space-bg.png')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
+            className="rounded-2xl border border-white/[0.08] bg-[#080B0F]/40 backdrop-blur-md relative overflow-hidden p-6 sm:p-10 lg:p-12 shadow-2xl flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
@@ -284,7 +288,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
 
             {/* 4 Feature Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-8 mt-4">
-              <div className="p-5 rounded-xl bg-[#0E1217]/80 border border-white/[0.08] backdrop-blur-md space-y-2 hover:border-primary/40 transition-colors">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm space-y-2 hover:border-purple-500/40 transition-all">
                 <div className="flex items-center gap-2 text-sm font-semibold text-white">
                   <Building2 className="w-4 h-4 text-primary" />
                   <span>Company-wise Questions</span>
@@ -294,7 +298,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </p>
               </div>
 
-              <div className="p-5 rounded-xl bg-[#0E1217]/80 border border-white/[0.08] backdrop-blur-md space-y-2 hover:border-primary/40 transition-colors">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm space-y-2 hover:border-purple-500/40 transition-all">
                 <div className="flex items-center gap-2 text-sm font-semibold text-white">
                   <Clock className="w-4 h-4 text-primary" />
                   <span>Recency Tracking</span>
@@ -304,7 +308,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </p>
               </div>
 
-              <div className="p-5 rounded-xl bg-[#0E1217]/80 border border-white/[0.08] backdrop-blur-md space-y-2 hover:border-primary/40 transition-colors">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm space-y-2 hover:border-purple-500/40 transition-all">
                 <div className="flex items-center gap-2 text-sm font-semibold text-white">
                   <BrainCircuit className="w-4 h-4 text-primary" />
                   <span>Spaced Repetition</span>
@@ -314,7 +318,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </p>
               </div>
 
-              <div className="p-5 rounded-xl bg-[#0E1217]/80 border border-white/[0.08] backdrop-blur-md space-y-2 hover:border-primary/40 transition-colors">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm space-y-2 hover:border-purple-500/40 transition-all">
                 <div className="flex items-center gap-2 text-sm font-semibold text-white">
                   <Timer className="w-4 h-4 text-primary" />
                   <span>Mock Interviews</span>
@@ -329,7 +333,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
           {/* SECTION 3: TRUSTED BY QUESTIONS FROM TOP COMPANIES */}
           <section
             id="companies"
-            className="rounded-2xl border border-white/[0.08] bg-[#0E1217] p-6 sm:p-10 lg:p-12 relative overflow-hidden backdrop-blur-sm shadow-xl space-y-6"
+            className="rounded-2xl border border-white/[0.08] bg-[#080B0F]/40 backdrop-blur-md shadow-2xl p-6 sm:p-10 lg:p-12 relative overflow-hidden space-y-6"
           >
             <div className="flex flex-wrap items-start justify-between gap-2 border-b border-white/[0.06] pb-4">
               <div>
@@ -366,7 +370,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
           {/* SECTION 4: HOW IT WORKS PIPELINE */}
           <section
             id="how-it-works"
-            className="rounded-2xl border border-white/[0.08] bg-[#0E1217] p-6 sm:p-10 lg:p-12 relative overflow-hidden backdrop-blur-sm shadow-xl space-y-6"
+            className="rounded-2xl border border-white/[0.08] bg-[#080B0F]/40 backdrop-blur-md shadow-2xl p-6 sm:p-10 lg:p-12 relative overflow-hidden space-y-6"
           >
             <div className="flex flex-wrap items-start justify-between gap-2 border-b border-white/[0.06] pb-4">
               <div>
@@ -384,7 +388,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 pt-2">
-              <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06] flex flex-col justify-between space-y-3">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between space-y-3 transition-all">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-bold text-xs font-mono">
                   1
                 </div>
@@ -399,7 +403,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </div>
               </div>
 
-              <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06] flex flex-col justify-between space-y-3">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between space-y-3 transition-all">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-bold text-xs font-mono">
                   2
                 </div>
@@ -414,7 +418,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </div>
               </div>
 
-              <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06] flex flex-col justify-between space-y-3">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between space-y-3 transition-all">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-bold text-xs font-mono">
                   3
                 </div>
@@ -429,7 +433,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </div>
               </div>
 
-              <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06] flex flex-col justify-between space-y-3">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between space-y-3 transition-all">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-bold text-xs font-mono">
                   4
                 </div>
@@ -444,7 +448,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                 </div>
               </div>
 
-              <div className="p-5 rounded-xl bg-[#12161E]/60 border border-white/[0.06] flex flex-col justify-between space-y-3">
+              <div className="p-5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between space-y-3 transition-all">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-bold text-xs font-mono">
                   5
                 </div>
@@ -463,14 +467,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             {/* Pipeline Footer */}
             <div className="pt-4 border-t border-white/[0.06]">
               <div className="flex items-center justify-between text-xs font-semibold text-textMuted tracking-wider uppercase mb-2">
-                <span className="text-primary">Collect</span>
+                <span className="text-purple-400">Collect</span>
                 <span>Process</span>
                 <span>Analyze</span>
                 <span>Practice</span>
-                <span className="text-primary">Succeed</span>
+                <span className="text-purple-400">Succeed</span>
               </div>
               <div className="w-full h-1 bg-white/[0.06] rounded-full overflow-hidden flex items-center">
-                <div className="w-full h-full bg-gradient-to-r from-primary via-[#D4ED00] to-amber-400" />
+                <div className="w-full h-full bg-gradient-to-r from-[#7C3AED] via-purple-500 to-indigo-400 shadow-[0_0_12px_rgba(124,58,237,0.6)]" />
               </div>
             </div>
           </section>
@@ -478,12 +482,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
           {/* SECTION 5: FINAL CTA */}
           <section
             id="cta"
-            className="rounded-2xl border border-white/[0.08] relative overflow-hidden p-6 sm:p-10 lg:p-12 shadow-2xl min-h-[380px] flex flex-col justify-between"
-            style={{
-              backgroundImage: `linear-gradient(to bottom, rgba(8,11,15,0.70) 0%, rgba(8,11,15,0.92) 100%), url('/images/dashboard/space-bg.png')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
+            className="rounded-2xl border border-white/[0.08] bg-[#080B0F]/40 backdrop-blur-md shadow-2xl p-6 sm:p-10 lg:p-12 relative overflow-hidden min-h-[380px] flex flex-col justify-between"
           >
             <div className="max-w-2xl">
               <span className="text-xs font-semibold text-primary tracking-wider uppercase">
@@ -501,7 +500,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
               <div>
                 <button
                   onClick={handleLaunch}
-                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-sm sm:text-base font-semibold tracking-wide shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary hover:bg-purple-600 text-white text-sm sm:text-base font-semibold tracking-wide shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                 >
                   <span>{isAuthenticated ? 'Enter Dashboard' : 'Launch Cheat Code'}</span>
                   <ChevronRight className="w-4 h-4" />
@@ -534,7 +533,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.08] bg-[#080B0F] py-8 px-4 sm:px-6 relative z-10 text-xs text-textMuted">
+      <footer className="border-t border-white/[0.08] bg-[#080B0F]/60 backdrop-blur-md py-8 px-4 sm:px-6 relative z-10 text-xs text-textMuted">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 flex-wrap text-center md:text-left">
             <span className="text-white font-bold">Cheat Code</span>

@@ -254,7 +254,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-5 py-2.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 font-sans"
+                  className="px-5 py-2.5 rounded-xl bg-primary hover:bg-purple-600 text-white text-xs font-semibold shadow-md shadow-primary/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 font-sans"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{isSaving ? 'Saving Changes...' : 'Save Changes'}</span>
@@ -319,7 +319,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     sounds.playClick();
                     setShowSubscriptionModal(true);
                   }}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans shadow-md shadow-primary/20"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-purple-600 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans shadow-md shadow-primary/20"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Upgrade to Pro via Stripe</span>

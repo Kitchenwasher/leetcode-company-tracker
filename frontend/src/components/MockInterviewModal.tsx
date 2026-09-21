@@ -104,7 +104,7 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
       particleCount: 50,
       spread: 60,
       origin: { y: 0.7 },
-      colors: ['#E5FF00', '#FFFFFF', '#D4ED00', '#F3F4F6'],
+      colors: ['#A855F7', '#FFFFFF', '#C084FC', '#7C3AED'],
     });
     setSolvedInSession((prev) => new Set([...prev, activeQ.id]));
     onUpdateStatus(activeQ.id, 'solved');
@@ -187,7 +187,7 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 isRunning
                   ? 'bg-rose-500 text-white hover:bg-rose-600'
-                  : 'bg-primary text-black hover:bg-[#D4ED00] shadow-md shadow-primary/20'
+                  : 'bg-primary text-white hover:bg-purple-600 shadow-md shadow-primary/20'
               }`}
             >
               {isRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
@@ -265,7 +265,7 @@ export const MockInterviewModal: React.FC<MockInterviewModalProps> = ({
                 <div className="flex items-center gap-2.5">
                   <button
                     onClick={handleSolveActive}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-semibold shadow-sm transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary hover:bg-purple-600 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Mark Solved</span>

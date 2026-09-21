@@ -445,7 +445,7 @@ export const CompaniesPage: React.FC<CompaniesPageProps> = ({
                             {comp.name}
                           </span>
                           {comp.badge && (
-                            <span className="bg-accent/10 text-accent border border-[#E5FF00]/30 text-[10px] px-2 py-0.2 rounded-full font-medium">
+                            <span className="bg-accent/10 text-accent border border-accent/30 text-[10px] px-2 py-0.2 rounded-full font-medium">
                               {comp.badge}
                             </span>
                           )}
@@ -482,7 +482,7 @@ export const CompaniesPage: React.FC<CompaniesPageProps> = ({
                         e.stopPropagation();
                         handleSelect(comp.id);
                       }}
-                      className="w-8 h-8 rounded-lg bg-[#141820] border border-white/[0.08] hover:border-[#E5FF00]/40 hover:bg-accent/10 text-zinc-400 hover:text-white flex items-center justify-center transition-all ml-auto cursor-pointer"
+                      className="w-8 h-8 rounded-lg bg-[#141820] border border-white/[0.08] hover:border-accent/40 hover:bg-accent/10 text-zinc-400 hover:text-white flex items-center justify-center transition-all ml-auto cursor-pointer"
                       title={`Explore ${comp.name} questions`}
                     >
                       <ArrowRight className="w-4 h-4" />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   Building2,
@@ -12,22 +13,18 @@ import {
   Settings,
   Search,
   Menu,
-  Sun,
-  Moon,
   Bell,
   ChevronDown,
   Sparkles,
-  Palette,
   LogOut,
 } from 'lucide-react';
 import { UserStoreState } from '../types';
 import { sounds } from '../utils/sound';
-import { QuickThemePopover } from './ThemeToolkit';
 import { useAuth } from '../context/AuthContext';
 import { ErrorBoundary } from './ErrorBoundary';
 
 interface AppSidebarLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   store: UserStoreState;
   onOpenMockModal: () => void;
   onOpenAnalyticsModal: () => void;
@@ -54,13 +51,13 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
   const { user, isAuthenticated, isPro, logout, setShowAuthModal } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showThemeToolkit, setShowThemeToolkit] = useState(false);
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
 
   // Close mobile sidebar and popovers on route change
   useEffect(() => {
     setMobileMenuOpen(false);
-    setShowThemeToolkit(false);
     setShowUserDropdown(false);
+    setHoveredNav(null);
   }, [location.pathname]);
 
   const isOverview = location.pathname === '/dashboard' || location.pathname === '/overview';
@@ -158,7 +155,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-[#080B0F] text-[#F3F4F6] flex flex-col font-sans selection:bg-[#E5FF00]/20 selection:text-[#E5FF00]">
+    <div className="min-h-screen bg-[#080B0F] text-[#F3F4F6] flex flex-col font-sans selection:bg-primary/25 selection:text-white">
       {/* Top Bar Header */}
       {!hideTopBar && (
         <header className="sticky top-0 z-40 w-full h-16 bg-[#0B0E14]/90 backdrop-blur-md border-b border-white/[0.08] px-4 sm:px-6 flex items-center justify-between select-none">
@@ -212,46 +209,8 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
             </button>
           </div>
 
-          {/* Right: Theme Toggles, Notifications, User Profile */}
+          {/* Right: Notifications & User Profile */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => sounds.playClick()}
-              className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors"
-              title="Theme light"
-            >
-              <Sun className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => sounds.playClick()}
-              className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors"
-              title="Theme dark"
-            >
-              <Moon className="w-4 h-4" />
-            </button>
-
-            {/* Quick Accent Color Toolkit Popover */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  sounds.playClick();
-                  setShowThemeToolkit(!showThemeToolkit);
-                }}
-                className={`p-2 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-                  showThemeToolkit ? 'bg-white/[0.1] text-white' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
-                }`}
-                title="Accent Color Toolkit"
-              >
-                <Palette className="w-4 h-4 text-accent" />
-                <span className="w-2 h-2 rounded-full bg-accent inline-block" />
-              </button>
-
-              <QuickThemePopover
-                isOpen={showThemeToolkit}
-                onClose={() => setShowThemeToolkit(false)}
-                onNavigateToSettings={() => navigate('/settings')}
-              />
-            </div>
-
             <button
               onClick={() => sounds.playClick()}
               className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors relative"
@@ -268,7 +227,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
                   sounds.playClick();
                   setShowAuthModal(true);
                 }}
-                className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-[#D4ED00] text-black font-semibold text-xs font-sans transition-colors cursor-pointer shadow-md shadow-primary/20"
+                className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-purple-600 text-white font-semibold text-xs font-sans transition-colors cursor-pointer shadow-md shadow-primary/20"
               >
                 Sign In
               </button>
@@ -285,7 +244,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
                       className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-white/10"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary text-black font-bold text-xs flex items-center justify-center shrink-0 shadow-sm font-sans">
+                    <div className="w-8 h-8 rounded-full bg-primary text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm font-sans">
                       {user.name ? user.name.slice(0, 2).toUpperCase() : 'U'}
                     </div>
                   )}
@@ -331,16 +290,6 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
                     <button
                       onClick={() => navigate('/settings')}
                       className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between border-t border-white/[0.08] mt-1 pt-2 cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Palette className="w-3.5 h-3.5 text-accent" />
-                        <span>Theme Color Toolkit</span>
-                      </span>
-                      <span className="w-2 h-2 rounded-full bg-accent" />
-                    </button>
-                    <button
-                      onClick={() => navigate('/settings')}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/[0.06] text-zinc-300 hover:text-white flex items-center justify-between cursor-pointer"
                     >
                       <span>Settings</span>
                     </button>
@@ -391,29 +340,81 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-black/30 pointer-events-none" />
 
           {/* Nav Items Container */}
-          <div className="relative z-10 p-3 space-y-1 overflow-y-auto">
+          <div
+            className="relative z-10 p-3 space-y-1 overflow-y-auto"
+            onMouseLeave={() => setHoveredNav(null)}
+          >
             <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider font-sans">
               Navigation
             </p>
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
-                <button
+                <motion.button
                   key={item.label}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                   onClick={item.action}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left cursor-pointer relative group font-sans backdrop-blur-xs ${
+                  onMouseEnter={() => setHoveredNav(item.label)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left cursor-pointer relative group font-sans backdrop-blur-xs select-none ${
                     item.isActive
-                      ? 'bg-accent-subtle text-accent font-semibold border-l-2 border-accent'
-                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.05]'
+                      ? 'text-accent font-semibold'
+                      : 'text-zinc-400 hover:text-zinc-100'
                   }`}
                 >
-                  <Icon
-                    className={`w-4 h-4 shrink-0 transition-colors ${
-                      item.isActive ? 'text-accent' : 'text-zinc-400 group-hover:text-zinc-200'
-                    }`}
-                  />
-                  <span className="truncate">{item.label}</span>
-                </button>
+                  {/* Subtle Hover Pill (Aceternity style) */}
+                  {hoveredNav === item.label && !item.isActive && (
+                    <motion.div
+                      layoutId="sidebar-hover-pill"
+                      className="absolute inset-0 rounded-lg bg-white/[0.05] border border-white/[0.07] pointer-events-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    />
+                  )}
+
+                  {/* Active Sliding Pill & Glow (Aceternity / ReactBits style) */}
+                  {item.isActive && (
+                    <>
+                      <motion.div
+                        layoutId="sidebar-active-pill"
+                        className="absolute inset-0 rounded-lg bg-accent-subtle border border-accent/30 pointer-events-none"
+                        style={{
+                          boxShadow: '0 0 16px -2px color-mix(in srgb, var(--theme-accent, #A855F7) 22%, transparent)',
+                        }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 420,
+                          damping: 32,
+                        }}
+                      />
+                      <motion.div
+                        layoutId="sidebar-active-bar"
+                        className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-accent pointer-events-none"
+                        style={{
+                          boxShadow: '0 0 10px var(--theme-accent, #A855F7)',
+                        }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 420,
+                          damping: 32,
+                        }}
+                      />
+                    </>
+                  )}
+
+                  <span className="relative z-10 flex items-center gap-3 w-full">
+                    <Icon
+                      className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
+                        item.isActive
+                          ? 'text-accent scale-110'
+                          : 'text-zinc-400 group-hover:text-zinc-200 group-hover:scale-105'
+                      }`}
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </span>
+                </motion.button>
               );
             })}
           </div>
@@ -452,9 +453,20 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
             backgroundRepeat: 'no-repeat',
           }}
         >
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full"
+            >
+              <ErrorBoundary>
+                {children ?? <Outlet />}
+              </ErrorBoundary>
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

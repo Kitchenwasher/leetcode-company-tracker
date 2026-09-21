@@ -633,7 +633,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                           </p>
                           <button
                             onClick={() => onNavigateToQuestions()}
-                            className="mt-1.5 px-3.5 py-1.5 rounded-lg bg-accent text-black font-semibold text-xs hover:bg-[#d4ed00] transition-colors cursor-pointer"
+                            className="mt-1.5 px-3.5 py-1.5 rounded-lg bg-accent text-white font-semibold text-xs hover:opacity-90 transition-colors cursor-pointer"
                           >
                             Solve Your First Question
                           </button>

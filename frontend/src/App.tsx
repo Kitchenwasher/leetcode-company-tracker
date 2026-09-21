@@ -41,6 +41,8 @@ import { BookmarksPage } from './components/BookmarksPage';
 import { CompaniesPage } from './components/CompaniesPage';
 import { SettingsPage } from './components/SettingsPage';
 import { SubscriptionSuccessPage } from './components/SubscriptionSuccessPage';
+import { SmoothScrollProvider } from './components/ui/SmoothScrollProvider';
+import { ClickSpark } from './components/ui/ClickSpark';
 import {
   Flame, ChevronLeft, ChevronRight, AlertCircle, Target
 } from 'lucide-react';
@@ -564,43 +566,55 @@ export const App: React.FC = () => {
   const activeCompanyMeta = companiesDict[store.selectedCompany || 'google'];
 
   return (
-    <div className="min-h-screen bg-background text-textPrimary flex flex-col font-mono selection:bg-primary/30 selection:text-primary bg-ambient-grid transition-colors">
-      <Routes>
-        {/* Landing Page */}
-        <Route
-          path="/"
-          element={
-            <LandingPage
-              onGetStarted={() => {
-                sounds.playClick();
-                if (isAuthenticated) {
-                  navigate('/dashboard');
-                } else {
+    <SmoothScrollProvider>
+      <ClickSpark />
+      <div className="min-h-screen bg-background text-textPrimary flex flex-col font-mono selection:bg-primary/30 selection:text-primary bg-ambient-grid transition-colors">
+        <Routes>
+          {/* Landing Page */}
+          <Route
+            path="/"
+            element={
+              <LandingPage
+                onGetStarted={() => {
+                  sounds.playClick();
+                  if (isAuthenticated) {
+                    navigate('/dashboard');
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
+                onSignIn={() => {
+                  sounds.playClick();
                   setShowAuthModal(true);
-                }
-              }}
-              onSignIn={() => {
-                sounds.playClick();
-                setShowAuthModal(true);
-              }}
-            />
-          }
-        />
+                }}
+              />
+            }
+          />
 
-        {/* Dashboard / Overview Home Page */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => navigate('/questions')}
-              >
+          {/* Persistent Protected App Layout with smoothly gliding sidebar navigation */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppSidebarLayout
+                  store={store}
+                  onOpenMockModal={() => setShowMockModal(true)}
+                  onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
+                  onOpenPlanner={() => setShowPlannerModal(true)}
+                  onOpenFlashcards={() => setShowFlashcardModal(true)}
+                  onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
+                  onSearchFocus={() => {
+                    const searchInput = document.querySelector('input[placeholder*="Search by ID"]') as HTMLInputElement;
+                    if (searchInput) searchInput.focus();
+                    else navigate('/questions');
+                  }}
+                />
+              </ProtectedRoute>
+            }
+          >
+            {/* Dashboard / Overview */}
+            <Route
+              path="/dashboard"
+              element={
                 <OverviewPage
                   questions={allQuestions}
                   companies={companiesDict}
@@ -612,31 +626,16 @@ export const App: React.FC = () => {
                   onNavigateToQuestions={() => navigate('/questions')}
                   onOpenMockModal={() => setShowMockModal(true)}
                 />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+              }
+            />
 
-        {/* Overview Alias */}
-        <Route path="/overview" element={<Navigate to="/dashboard" replace />} />
+            {/* Overview Alias */}
+            <Route path="/overview" element={<Navigate to="/dashboard" replace />} />
 
-        {/* Unified Questions Explorer */}
-        <Route
-          path="/questions"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => {
-                  const searchInput = document.querySelector('input[placeholder*="Search by ID"]') as HTMLInputElement;
-                  if (searchInput) searchInput.focus();
-                }}
-              >
+            {/* Unified Questions Explorer */}
+            <Route
+              path="/questions"
+              element={
                 <QuestionsPage
                   questions={allQuestions}
                   companies={companiesDict}
@@ -646,25 +645,13 @@ export const App: React.FC = () => {
                   onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
                   onSelectCompany={handleSelectCompany}
                 />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+              }
+            />
 
-        {/* Companies Directory Page */}
-        <Route
-          path="/companies"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => navigate('/questions')}
-              >
+            {/* Companies Directory Page */}
+            <Route
+              path="/companies"
+              element={
                 <CompaniesPage
                   companies={companiesDict}
                   questions={allQuestions}
@@ -673,117 +660,52 @@ export const App: React.FC = () => {
                     navigate(`/questions?company=${encodeURIComponent(slug.toLowerCase())}`);
                   }}
                 />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+              }
+            />
 
-        {/* Practice Page */}
-        <Route
-          path="/practice"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => navigate('/questions')}
-              >
+            {/* Practice Page */}
+            <Route
+              path="/practice"
+              element={
                 <PracticePage
                   questions={allQuestions}
                   store={store}
                   onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
                 />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+              }
+            />
 
-        {/* Mock Interview Page */}
-        <Route
-          path="/mock-interview"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => navigate('/questions')}
-              >
+            {/* Mock Interview Page */}
+            <Route
+              path="/mock-interview"
+              element={
                 <MockInterviewPage
                   questions={allQuestions}
                   companies={companiesDict}
                   store={store}
                   onOpenMockModal={() => setShowMockModal(true)}
                 />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+              }
+            />
 
-        {/* Progress Page */}
-        <Route
-          path="/progress"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => navigate('/questions')}
-              >
+            {/* Progress Page */}
+            <Route
+              path="/progress"
+              element={
                 <ProgressPage
                   questions={allQuestions}
                   store={store}
                 />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+              }
+            />
 
-        {/* Community Page */}
-        <Route
-          path="/community"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => navigate('/questions')}
-              >
-                <CommunityPage />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+            {/* Community Page */}
+            <Route path="/community" element={<CommunityPage />} />
 
-        {/* Bookmarks Page */}
-        <Route
-          path="/bookmarks"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => navigate('/questions')}
-              >
+            {/* Bookmarks Page */}
+            <Route
+              path="/bookmarks"
+              element={
                 <BookmarksPage
                   questions={allQuestions}
                   store={store}
@@ -791,35 +713,22 @@ export const App: React.FC = () => {
                   onToggleFavorite={handleToggleFavorite}
                   onUpdateStatus={handleUpdateStatus}
                 />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+              }
+            />
 
-        {/* Settings Page */}
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <AppSidebarLayout
-                store={store}
-                onOpenMockModal={() => setShowMockModal(true)}
-                onOpenAnalyticsModal={() => setShowAnalyticsModal(true)}
-                onOpenPlanner={() => setShowPlannerModal(true)}
-                onOpenFlashcards={() => setShowFlashcardModal(true)}
-                onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                onSearchFocus={() => navigate('/questions')}
-              >
+            {/* Settings Page */}
+            <Route
+              path="/settings"
+              element={
                 <SettingsPage
                   store={store}
                   questions={allQuestions}
                   onImportBackup={handleImportBackup}
                   onResetProgress={handleResetProgress}
                 />
-              </AppSidebarLayout>
-            </ProtectedRoute>
-          }
-        />
+              }
+            />
+          </Route>
 
         {/* Company Redirects (auto-redirect to /questions?company=...) */}
         <Route path="/dashboard/company/:companySlug" element={<CompanyRedirect />} />
@@ -936,12 +845,13 @@ export const App: React.FC = () => {
         onUpdateStatus={handleUpdateStatus}
       />
 
-      <LeetCodeSyncModal
-        isOpen={showLeetCodeSyncModal}
-        onClose={() => setShowLeetCodeSyncModal(false)}
-        allQuestions={allQuestions}
-        onBatchUpdateStatus={handleBatchUpdateStatus}
-      />
-    </div>
+        <LeetCodeSyncModal
+          isOpen={showLeetCodeSyncModal}
+          onClose={() => setShowLeetCodeSyncModal(false)}
+          allQuestions={allQuestions}
+          onBatchUpdateStatus={handleBatchUpdateStatus}
+        />
+      </div>
+    </SmoothScrollProvider>
   );
 };

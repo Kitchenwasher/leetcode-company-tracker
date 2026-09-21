@@ -656,6 +656,99 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     { value: 'difficulty-desc', label: 'Diff: Hard → Easy', tag: 'Desc', searchText: 'Difficulty Hard' },
   ], []);
 
+  const rowStatusOptions: GlideSelectOption[] = useMemo(() => [
+    {
+      value: 'todo',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
+          <span>Todo</span>
+        </span>
+      ),
+      searchText: 'Todo'
+    },
+    {
+      value: 'in-progress',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+          <span>In Progress</span>
+        </span>
+      ),
+      searchText: 'In Progress'
+    },
+    {
+      value: 'solved',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+          <span>Solved</span>
+        </span>
+      ),
+      searchText: 'Solved'
+    },
+    {
+      value: 'review',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+          <span>Review</span>
+        </span>
+      ),
+      searchText: 'Review'
+    },
+    {
+      value: 'mastered',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+          <span>Mastered</span>
+        </span>
+      ),
+      searchText: 'Mastered'
+    },
+  ], []);
+
+  const getRowStatusTheme = (st: ProblemStatus) => {
+    switch (st) {
+      case 'solved':
+        return {
+          accentColor: '#10b981',
+          textColor: '#34d399',
+          surfaceColor: 'rgba(16, 185, 129, 0.12)',
+          highlightColor: '#133526',
+        };
+      case 'mastered':
+        return {
+          accentColor: '#06b6d4',
+          textColor: '#22d3ee',
+          surfaceColor: 'rgba(6, 182, 212, 0.12)',
+          highlightColor: '#10333d',
+        };
+      case 'in-progress':
+        return {
+          accentColor: '#f59e0b',
+          textColor: '#fbbf24',
+          surfaceColor: 'rgba(245, 158, 11, 0.12)',
+          highlightColor: '#2b2210',
+        };
+      case 'review':
+        return {
+          accentColor: '#a855f7',
+          textColor: '#c084fc',
+          surfaceColor: 'rgba(168, 85, 247, 0.12)',
+          highlightColor: '#261538',
+        };
+      default:
+        return {
+          accentColor: '#71717a',
+          textColor: '#d1d5db',
+          surfaceColor: '#11141A',
+          highlightColor: '#1C222D',
+        };
+    }
+  };
+
   const hasActiveFilters =
     selectedCompany !== 'all' ||
     selectedDifficulty !== 'all' ||
@@ -753,7 +846,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
             size="sm"
             menuWidth={180}
             radius={8}
-            accentColor="var(--theme-accent, #FFFFFF)"
+            accentColor="var(--theme-accent, #A855F7)"
             surfaceColor="#11141A"
             highlightColor="#1C222D"
             textColor="#F3F4F6"
@@ -773,7 +866,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
             size="sm"
             menuWidth={220}
             radius={8}
-            accentColor="var(--theme-accent, #FFFFFF)"
+            accentColor="var(--theme-accent, #A855F7)"
             surfaceColor="#11141A"
             highlightColor="#1C222D"
             textColor="#F3F4F6"
@@ -793,7 +886,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
             size="sm"
             menuWidth={210}
             radius={8}
-            accentColor="var(--theme-accent, #FFFFFF)"
+            accentColor="var(--theme-accent, #A855F7)"
             surfaceColor="#11141A"
             highlightColor="#1C222D"
             textColor="#F3F4F6"
@@ -816,7 +909,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
             accentColor={
               selectedDifficulty === 'Easy' ? '#34D399' :
               selectedDifficulty === 'Medium' ? '#FBBF24' :
-              selectedDifficulty === 'Hard' ? '#FB7185' : 'var(--theme-accent, #FFFFFF)'
+              selectedDifficulty === 'Hard' ? '#FB7185' : 'var(--theme-accent, #A855F7)'
             }
             surfaceColor="#11141A"
             highlightColor="#1C222D"
@@ -837,7 +930,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
             size="sm"
             menuWidth={155}
             radius={8}
-            accentColor="var(--theme-accent, #FFFFFF)"
+            accentColor="var(--theme-accent, #A855F7)"
             surfaceColor="#11141A"
             highlightColor="#1C222D"
             textColor="#F3F4F6"
@@ -858,7 +951,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
             size="sm"
             menuWidth={195}
             radius={8}
-            accentColor="var(--theme-accent, #FFFFFF)"
+            accentColor="var(--theme-accent, #A855F7)"
             surfaceColor="#11141A"
             highlightColor="#1C222D"
             textColor="#F3F4F6"
@@ -911,7 +1004,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       {/* Questions List / Table */}
       {viewMode === 'table' ? (
         <div className="bg-[#0E1217] border border-white/[0.08] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto min-h-[420px]">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="text-xs text-zinc-400 border-b border-white/[0.06] bg-white/[0.01]">
@@ -931,6 +1024,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                 {paginatedQuestions.map((q) => {
                   const p = store.progress[String(q.id)];
                   const status = p?.status || 'todo';
+                  const statusTheme = getRowStatusTheme(status as ProblemStatus);
                   const isFav = !!p?.isFavorite;
                   const companyKeys = Object.keys(q.companies || {});
 
@@ -1068,30 +1162,30 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                       </td>
 
                       {/* Status */}
-                      <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className="py-3.5 px-4 relative z-0 has-[[aria-expanded=true]]:z-30"
+                        onClick={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
                         <div className="flex items-center gap-2">
-                          <select
+                          <GlideSelect
+                            options={rowStatusOptions}
                             value={status}
-                            onChange={(e) => {
+                            onChange={(val) => {
                               sounds.playClick();
-                              onUpdateStatus(q.id, e.target.value as ProblemStatus);
+                              onUpdateStatus(q.id, val as ProblemStatus);
                             }}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-medium border bg-[#11141A] focus:outline-hidden cursor-pointer ${
-                              status === 'solved' || status === 'mastered'
-                                ? 'text-emerald-400 border-emerald-500/30'
-                                : status === 'in-progress'
-                                ? 'text-amber-400 border-amber-500/30'
-                                : status === 'review'
-                                ? 'text-purple-400 border-purple-500/30'
-                                : 'text-zinc-400 border-white/[0.08]'
-                            }`}
-                          >
-                            <option value="todo">Todo</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="solved">Solved</option>
-                            <option value="review">Review</option>
-                            <option value="mastered">Mastered</option>
-                          </select>
+                            showTags={false}
+                            size="sm"
+                            menuWidth={136}
+                            radius={8}
+                            accentColor={statusTheme.accentColor}
+                            surfaceColor={statusTheme.surfaceColor}
+                            highlightColor={statusTheme.highlightColor}
+                            textColor={statusTheme.textColor}
+                            className="shrink-0"
+                            ariaLabel={`Status for ${q.title}`}
+                          />
 
                           <button
                             onClick={() => {

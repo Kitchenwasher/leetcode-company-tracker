@@ -253,7 +253,7 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                   sounds.playClick();
                   onOpenMockModal();
                 }}
-                className="mt-2 px-4 py-2 rounded-xl bg-primary text-black font-semibold text-xs hover:bg-[#D4ED00] transition-colors cursor-pointer"
+                className="mt-2 px-4 py-2 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-purple-600 transition-colors cursor-pointer"
               >
                 Start First Mock Interview
               </button>
@@ -654,13 +654,13 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
                     onClick={handleStartMock}
                     className={`w-full font-bold text-sm py-3.5 px-6 rounded-xl flex items-center justify-center gap-2.5 shadow-lg transition-all cursor-pointer font-sans ${
                       isPro || remainingMocks > 0
-                        ? 'bg-primary hover:bg-[#D4ED00] text-black shadow-primary/20 hover:shadow-primary/30'
+                        ? 'bg-primary hover:bg-purple-600 text-white shadow-primary/20 hover:shadow-primary/30'
                         : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black shadow-amber-400/20'
                     }`}
                   >
                     {isPro ? (
                       <>
-                        <Play className="w-4 h-4 fill-black" />
+                        <Play className="w-4 h-4 fill-white" />
                         <span>Start Mock Interview</span>
                       </>
                     ) : remainingMocks > 0 ? (

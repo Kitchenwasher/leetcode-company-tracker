@@ -139,7 +139,7 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({
 
         <button
           onClick={() => navigate('/questions')}
-          className="px-4 py-2.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-primary/20 cursor-pointer font-sans shrink-0"
+          className="px-4 py-2.5 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-primary/20 cursor-pointer font-sans shrink-0"
         >
           <span>Continue Solving</span>
           <ArrowRight className="w-3.5 h-3.5" />

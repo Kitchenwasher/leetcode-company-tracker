@@ -85,7 +85,7 @@ export const PrepPlannerModal: React.FC<PrepPlannerModalProps> = ({
         {/* Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#E5FF00]/20 to-[#E5FF00]/5 border border-[#E5FF00]/30 flex items-center justify-center text-[#E5FF00]">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center text-primary">
               <Target className="w-5 h-5" />
             </div>
             <div>

@@ -12,12 +12,12 @@ export default {
         surface: '#0E1217',
         surfaceElevated: '#141820',
         border: 'rgba(255, 255, 255, 0.08)',
-        borderActive: 'var(--theme-accent, #E5FF00)',
+        borderActive: 'var(--theme-accent, #A855F7)',
 
-        primary: 'var(--theme-accent, #E5FF00)',
-        primaryHover: 'var(--theme-accent-hover, #D4ED00)',
-        primaryLight: 'var(--theme-accent, #F7FF9E)',
-        primaryDim: 'var(--theme-accent-hover, #A8BC00)',
+        primary: 'var(--theme-accent, #A855F7)',
+        primaryHover: 'var(--theme-accent-hover, #9333EA)',
+        primaryLight: 'var(--theme-accent, #C084FC)',
+        primaryDim: 'var(--theme-accent-hover, #7C3AED)',
 
         easy: '#10B981',
         medium: '#F59E0B',

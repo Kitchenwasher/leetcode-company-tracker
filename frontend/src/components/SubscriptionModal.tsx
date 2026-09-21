@@ -51,7 +51,7 @@ export const SubscriptionModal: React.FC = () => {
           particleCount: 160,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#FFDD00', '#E5FF00', '#FFFFFF', '#D4ED00']
+          colors: ['#A855F7', '#C084FC', '#FFFFFF', '#7C3AED']
         });
         setSuccessMsg(res.message || '🎉 Pro access successfully verified and activated!');
         setTimeout(() => {
@@ -86,7 +86,7 @@ export const SubscriptionModal: React.FC = () => {
             particleCount: 120,
             spread: 80,
             origin: { y: 0.6 },
-            colors: ['#E5FF00', '#FFFFFF', '#D4ED00', '#F3F4F6']
+            colors: ['#A855F7', '#FFFFFF', '#C084FC', '#7C3AED']
           });
           setIsProcessing(false);
           setShowSubscriptionModal(false);

@@ -16,6 +16,7 @@ import {
 import { Question, UserStoreState, ProblemStatus, Difficulty } from '../types';
 import { sounds } from '../utils/sound';
 import { DifficultyBadge } from './ui/DifficultyBadge';
+import GlideSelect, { GlideSelectOption } from './ui/GlideSelect';
 
 interface BookmarksPageProps {
   questions: Question[];
@@ -76,6 +77,99 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
     return { pct: `${score}%`, label: 'Recall accuracy' };
   }, [store.progress]);
 
+  const rowStatusOptions: GlideSelectOption[] = useMemo(() => [
+    {
+      value: 'todo',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
+          <span>Todo</span>
+        </span>
+      ),
+      searchText: 'Todo'
+    },
+    {
+      value: 'in-progress',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+          <span>In Progress</span>
+        </span>
+      ),
+      searchText: 'In Progress'
+    },
+    {
+      value: 'solved',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+          <span>Solved</span>
+        </span>
+      ),
+      searchText: 'Solved'
+    },
+    {
+      value: 'review',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+          <span>Review</span>
+        </span>
+      ),
+      searchText: 'Review'
+    },
+    {
+      value: 'mastered',
+      label: (
+        <span className="flex items-center gap-1.5 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+          <span>Mastered</span>
+        </span>
+      ),
+      searchText: 'Mastered'
+    },
+  ], []);
+
+  const getRowStatusTheme = (st: ProblemStatus) => {
+    switch (st) {
+      case 'solved':
+        return {
+          accentColor: '#10b981',
+          textColor: '#34d399',
+          surfaceColor: 'rgba(16, 185, 129, 0.12)',
+          highlightColor: '#133526',
+        };
+      case 'mastered':
+        return {
+          accentColor: '#06b6d4',
+          textColor: '#22d3ee',
+          surfaceColor: 'rgba(6, 182, 212, 0.12)',
+          highlightColor: '#10333d',
+        };
+      case 'in-progress':
+        return {
+          accentColor: '#f59e0b',
+          textColor: '#fbbf24',
+          surfaceColor: 'rgba(245, 158, 11, 0.12)',
+          highlightColor: '#2b2210',
+        };
+      case 'review':
+        return {
+          accentColor: '#a855f7',
+          textColor: '#c084fc',
+          surfaceColor: 'rgba(168, 85, 247, 0.12)',
+          highlightColor: '#261538',
+        };
+      default:
+        return {
+          accentColor: '#71717a',
+          textColor: '#d1d5db',
+          surfaceColor: '#11141A',
+          highlightColor: '#1C222D',
+        };
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-white font-sans">
       {/* Header */}
@@ -95,7 +189,7 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
 
         <button
           onClick={() => navigate('/questions')}
-          className="px-4 py-2.5 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-primary/20 cursor-pointer font-sans shrink-0"
+          className="px-4 py-2.5 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-primary/20 cursor-pointer font-sans shrink-0"
         >
           <span>Find More Problems</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -154,14 +248,14 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
             <div className="pt-2">
               <button
                 onClick={() => navigate('/questions')}
-                className="px-4 py-2 rounded-xl bg-primary text-black font-semibold text-xs hover:bg-[#D4ED00] transition-colors cursor-pointer font-sans"
+                className="px-4 py-2 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-purple-600 transition-colors cursor-pointer font-sans"
               >
                 Browse All Questions
               </button>
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto min-h-[360px]">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="text-[11px] text-textMuted uppercase tracking-wider border-b border-white/[0.06]">
@@ -175,7 +269,8 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
                 {bookmarkedQuestions.map((q) => {
-                  const status = store.progress[String(q.id)]?.status || 'todo';
+                  const status = (store.progress[String(q.id)]?.status || 'todo') as ProblemStatus;
+                  const statusTheme = getRowStatusTheme(status);
                   return (
                     <tr key={q.id} className="hover:bg-white/[0.02] transition-colors group">
                       <td className="py-3.5 px-3 font-mono text-textMuted text-xs">#{q.id}</td>
@@ -206,21 +301,29 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
                           )}
                         </div>
                       </td>
-                      <td className="py-3.5 px-3">
-                        <select
+                      <td
+                        className="py-3.5 px-3 relative z-0 has-[[aria-expanded=true]]:z-30"
+                        onClick={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
+                        <GlideSelect
+                          options={rowStatusOptions}
                           value={status}
-                          onChange={(e) => {
+                          onChange={(val) => {
                             sounds.playClick();
-                            onUpdateStatus(q.id, e.target.value as ProblemStatus);
+                            onUpdateStatus(q.id, val as ProblemStatus);
                           }}
-                          className="bg-[#12161E] border border-white/[0.08] text-xs text-white rounded-lg px-2 py-1 outline-none cursor-pointer"
-                        >
-                          <option value="todo">Todo</option>
-                          <option value="in_progress">In Progress</option>
-                          <option value="review">Review</option>
-                          <option value="solved">Solved</option>
-                          <option value="mastered">Mastered</option>
-                        </select>
+                          showTags={false}
+                          size="sm"
+                          menuWidth={136}
+                          radius={8}
+                          accentColor={statusTheme.accentColor}
+                          surfaceColor={statusTheme.surfaceColor}
+                          highlightColor={statusTheme.highlightColor}
+                          textColor={statusTheme.textColor}
+                          className="shrink-0"
+                          ariaLabel={`Status for ${q.title}`}
+                        />
                       </td>
                       <td className="py-3.5 px-3 text-right">
                         <button

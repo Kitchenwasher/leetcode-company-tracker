@@ -47,7 +47,7 @@ const INTERVIEW_EXPERIENCES = [
     source: 'Interview Loop Analysis',
     preview: 'Emphasis on Customer Obsession and Deliver Results alongside BFS shortest paths (Word Ladder) and modular Object-Oriented Design (File Search API).',
     tags: ['BFS', 'OOD', 'Leadership Principles'],
-    badgeColor: 'text-[#E5FF00] bg-[#E5FF00]/10 border-[#E5FF00]/30',
+    badgeColor: 'text-primary bg-primary/10 border-primary/30',
   },
 ];
 

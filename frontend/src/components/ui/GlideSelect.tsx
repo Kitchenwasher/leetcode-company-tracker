@@ -68,7 +68,7 @@ export default function GlideSelect({
   onChange,
   placeholder = 'Select…',
   showTags = true,
-  accentColor = 'var(--theme-accent, #FFFFFF)',
+  accentColor = 'var(--theme-accent, #A855F7)',
   surfaceColor = '#11141A',
   highlightColor = '#1F2430',
   textColor = '#F3F4F6',

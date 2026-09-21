@@ -26,9 +26,9 @@ export const PRESET_ACCENTS: AccentPreset[] = [
   {
     id: 'purple',
     name: 'Cosmic Purple',
-    color: '#C084FC',
-    hoverColor: '#A855F7',
-    description: 'Deep nebula purple matching celestial space themes',
+    color: '#A855F7',
+    hoverColor: '#9333EA',
+    description: 'Signature cosmic purple matching the platform theme',
   },
   {
     id: 'blue',
@@ -124,43 +124,27 @@ function applyDomTheme(color: string, hover: string, presetId: string) {
 const ThemeAccentContext = createContext<ThemeAccentContextType | undefined>(undefined);
 
 export const ThemeAccentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [activePresetId, setActivePresetId] = useState<string>('white');
-  const [accentColor, setAccentColor] = useState<string>('#FFFFFF');
-  const [hoverColor, setHoverColor] = useState<string>('#E5E7EB');
+  const [activePresetId, setActivePresetId] = useState<string>('purple');
+  const [accentColor, setAccentColor] = useState<string>('#A855F7');
+  const [hoverColor, setHoverColor] = useState<string>('#9333EA');
   const [isCustom, setIsCustom] = useState<boolean>(false);
 
-  // Initialize theme from storage on mount
+  // Hardcode purple theme on mount
   useEffect(() => {
+    applyDomTheme('#A855F7', '#9333EA', 'purple');
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.isCustom && parsed.color) {
-          const hover = parsed.hoverColor || computeHoverColor(parsed.color);
-          setActivePresetId('custom');
-          setAccentColor(parsed.color);
-          setHoverColor(hover);
-          setIsCustom(true);
-          applyDomTheme(parsed.color, hover, 'custom');
-          return;
-        } else if (parsed.presetId) {
-          const match = PRESET_ACCENTS.find((p) => p.id === parsed.presetId);
-          if (match) {
-            setActivePresetId(match.id);
-            setAccentColor(match.color);
-            setHoverColor(match.hoverColor);
-            setIsCustom(false);
-            applyDomTheme(match.color, match.hoverColor, match.id);
-            return;
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to parse theme preference', e);
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          presetId: 'purple',
+          color: '#A855F7',
+          hoverColor: '#9333EA',
+          isCustom: false,
+        })
+      );
+    } catch {
+      // ignore
     }
-
-    // Default white
-    applyDomTheme('#FFFFFF', '#E5E7EB', 'white');
   }, []);
 
   const setPreset = (presetId: string) => {
@@ -218,7 +202,7 @@ export const ThemeAccentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const resetDefault = () => {
-    setPreset('white');
+    setPreset('purple');
   };
 
   const contrastTextColor = getContrastColor(accentColor);

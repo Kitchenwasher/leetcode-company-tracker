@@ -137,7 +137,7 @@ export const FlashcardModal: React.FC<FlashcardModalProps> = ({
         {/* Top Header */}
         <div className="p-4 sm:px-6 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-950/60">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-[#E5FF00]/20 border border-border flex items-center justify-center text-primary">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-border flex items-center justify-center text-primary">
               <Brain className="w-5 h-5" />
             </div>
             <div>

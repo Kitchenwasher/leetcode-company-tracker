@@ -32,7 +32,7 @@ const CURATED_TRACKS = [
     title: 'Top 30 Sprint',
     description: 'High-yield interview questions asked most frequently in the last 30 days.',
     total: 30,
-    color: 'from-[#E5FF00]/20 to-[#E5FF00]/5 border-[#E5FF00]/30',
+    color: 'from-purple-500/20 to-purple-500/5 border-purple-500/30',
   },
   {
     id: 'blind75',
@@ -225,7 +225,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({
                 sounds.playSuccess();
                 onNavigateToProblem(dailyQuestion.id);
               }}
-              className="px-4 py-2 rounded-xl bg-primary hover:bg-[#D4ED00] text-black font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-primary/20 cursor-pointer font-sans"
+              className="px-4 py-2 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-primary/20 cursor-pointer font-sans"
             >
               <span>Solve Challenge</span>
               <ArrowRight className="w-3.5 h-3.5" />

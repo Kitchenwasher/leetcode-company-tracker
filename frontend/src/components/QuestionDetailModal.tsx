@@ -323,11 +323,11 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                 onSaveProgress({ isFavorite: !isFavorite });
               }}
               className={`p-2 rounded-xl border border-border transition-colors ${
-                isFavorite ? 'bg-[#E5FF00]/10 text-[#E5FF00] border-[#E5FF00]/30' : 'bg-slate-850 text-textMuted hover:text-textPrimary'
+                isFavorite ? 'bg-primary/15 text-primary border-primary/40' : 'bg-slate-850 text-textMuted hover:text-textPrimary'
               }`}
               title={isFavorite ? 'Remove bookmark' : 'Bookmark question'}
             >
-              <Star className={`w-5 h-5 ${isFavorite ? 'fill-[#E5FF00] text-[#E5FF00]' : ''}`} />
+              <Star className={`w-5 h-5 ${isFavorite ? 'fill-primary text-primary' : ''}`} />
             </button>
 
             <a
@@ -400,7 +400,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
                     <Star
                       className={`w-5 h-5 ${
                         star <= confidence
-                          ? 'text-[#E5FF00] fill-[#E5FF00]'
+                          ? 'text-primary fill-primary'
                           : 'text-slate-600 hover:text-textMuted'
                       }`}
                     />

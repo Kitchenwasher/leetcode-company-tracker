@@ -245,7 +245,6 @@ export class BMCService {
           status: 'succeeded',
           payerEmail: {
             in: searchEmails,
-            mode: 'insensitive',
           },
           NOT: {
             stripeSessionId: {
@@ -375,7 +374,7 @@ export class BMCService {
       where: {
         userId: null,
         status: 'succeeded',
-        payerEmail: { equals: userEmail, mode: 'insensitive' },
+        payerEmail: userEmail,
         NOT: { stripeSessionId: { startsWith: 'bmc_claim_' } },
       },
       orderBy: { createdAt: 'desc' },

@@ -19,6 +19,16 @@
   display: inline-block;
 }
 
+.glide-select:has([aria-expanded='true']),
+.glide-select:focus-within {
+  z-index: 60;
+}
+
+tr:has([aria-expanded='true']) {
+  position: relative;
+  z-index: 40;
+}
+
 .glide-select[data-disabled] {
   opacity: 0.5;
 }

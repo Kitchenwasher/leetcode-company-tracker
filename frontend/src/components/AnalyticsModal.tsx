@@ -355,7 +355,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
         <div className="p-4 border-t border-white/[0.06] bg-[#0E1217] flex items-center justify-end px-5">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-primary hover:bg-[#D4ED00] text-black text-xs font-semibold cursor-pointer font-sans"
+            className="px-4 py-2 rounded-xl bg-primary hover:bg-purple-600 text-white text-xs font-semibold cursor-pointer font-sans"
           >
             Close Analytics
           </button>
