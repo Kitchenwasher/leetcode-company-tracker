@@ -706,7 +706,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             <span className="text-textSecondary">Created by Abhinav Sharma &amp; Bismeet</span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-3.5 text-xs flex-wrap justify-center md:justify-end">
             <button
               onClick={handleLaunch}
               className="text-textSecondary hover:text-primary transition-colors cursor-pointer"
@@ -718,8 +718,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
               Companies
             </a>
             <span>•</span>
-            <a href="#features" className="text-textSecondary hover:text-primary transition-colors">
-              Features
+            <a href="/privacy" className="text-textSecondary hover:text-primary transition-colors">
+              Privacy Policy
+            </a>
+            <span>•</span>
+            <a href="/terms" className="text-textSecondary hover:text-primary transition-colors">
+              Terms of Service
             </a>
             <span>•</span>
             <span>All rights reserved</span>

@@ -41,6 +41,7 @@ import { BookmarksPage } from './components/BookmarksPage';
 import { CompaniesPage } from './components/CompaniesPage';
 import { SettingsPage } from './components/SettingsPage';
 import { SubscriptionSuccessPage } from './components/SubscriptionSuccessPage';
+import { LegalPage } from './components/LegalPage';
 import { SmoothScrollProvider } from './components/ui/SmoothScrollProvider';
 import { ClickSpark } from './components/ui/ClickSpark';
 import {
@@ -590,6 +591,10 @@ export const App: React.FC = () => {
               />
             }
           />
+
+          {/* Public Compliance Legal Pages (Required for Google AdSense) */}
+          <Route path="/privacy" element={<LegalPage type="privacy" />} />
+          <Route path="/terms" element={<LegalPage type="terms" />} />
 
           {/* Persistent Protected App Layout with smoothly gliding sidebar navigation */}
           <Route
