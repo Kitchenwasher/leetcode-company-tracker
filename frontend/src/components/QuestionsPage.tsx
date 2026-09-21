@@ -28,7 +28,8 @@ import {
 import { Question, CompanyMeta, UserStoreState, ProblemStatus, Difficulty } from '../types';
 import { isQuestionInTrack } from '../data/curatedLists';
 import { sounds } from '../utils/sound';
-import { CompanyLogoStack, getCompanyDisplayName } from './CompanyLogo';
+import CompanyLogo, { CompanyLogoStack, getCompanyDisplayName } from './CompanyLogo';
+import GlideSelect, { GlideSelectOption } from './ui/GlideSelect';
 import { AdBanner } from './AdBanner';
 
 interface QuestionsPageProps {
@@ -117,123 +118,38 @@ export function matchesTopicFilter(selected: string, qTopics: string[]): boolean
   });
 }
 
-// Reusable custom dropdown menu for the toolbar
-interface FilterDropdownProps {
-  label: string;
-  icon: React.ReactNode;
-  value: string;
-  options: { value: string; label: React.ReactNode; textLabel?: string }[];
-  onChange: (value: string) => void;
-  searchable?: boolean;
-  minWidth?: string;
-}
-
-const FilterDropdown: React.FC<FilterDropdownProps> = ({
-  label,
-  icon,
-  value,
-  options,
-  onChange,
-  searchable = false,
-  minWidth = 'w-48',
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [filterSearch, setFilterSearch] = useState('');
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const activeOption = options.find((opt) => opt.value === value);
-  const isFiltered = value !== 'all' && value !== 'recent';
-
-  const visibleOptions = useMemo(() => {
-    if (!filterSearch.trim()) return options;
-    const q = filterSearch.toLowerCase().trim();
-    return options.filter((opt) => {
-      const text = (opt.textLabel || (typeof opt.label === 'string' ? opt.label : opt.value)).toLowerCase();
-      return text.includes(q);
-    });
-  }, [options, filterSearch]);
-
-  return (
-    <div className={`relative ${isOpen ? 'z-50' : 'z-20'}`} ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => {
-          sounds.playClick();
-          setIsOpen(!isOpen);
-        }}
-        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer select-none border ${
-          isFiltered
-            ? 'bg-primary/10 border-primary/40 text-white'
-            : 'bg-[#11141A] border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20'
-        }`}
-      >
-        <span className={isFiltered ? 'text-primary' : 'text-zinc-400'}>{icon}</span>
-        <span className="truncate max-w-[120px]">
-          {activeOption ? (typeof activeOption.label === 'string' ? activeOption.label : activeOption.textLabel || label) : label}
-        </span>
-        <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {isOpen && (
-        <div
-          className={`absolute left-0 top-full mt-2 ${minWidth} p-1.5 bg-[#0D1117] border border-white/[0.15] rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.85)] z-50 animate-fadeIn`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {searchable && (
-            <div className="p-1 pb-2 border-b border-white/[0.06] mb-1">
-              <input
-                type="text"
-                value={filterSearch}
-                onChange={(e) => setFilterSearch(e.target.value)}
-                placeholder="Search..."
-                className="w-full px-2.5 py-1 text-xs bg-[#161B22] border border-white/[0.08] rounded-md text-white placeholder-zinc-500 focus:outline-hidden focus:border-primary"
-                autoFocus
-              />
-            </div>
-          )}
-
-          <div className="max-h-56 overflow-y-auto space-y-0.5">
-            {visibleOptions.map((opt) => {
-              const isSelected = opt.value === value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => {
-                    sounds.playClick();
-                    onChange(opt.value);
-                    setIsOpen(false);
-                    setFilterSearch('');
-                  }}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer text-left ${
-                    isSelected
-                      ? 'bg-primary text-white font-semibold'
-                      : 'text-zinc-300 hover:bg-white/[0.06] hover:text-white'
-                  }`}
-                >
-                  <span className="truncate">{opt.label}</span>
-                  {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
-                </button>
-              );
-            })}
-            {visibleOptions.length === 0 && (
-              <p className="text-xs text-zinc-500 text-center py-2">No matching options</p>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+export const getRowStatusTheme = (st: ProblemStatus) => {
+  switch (st) {
+    case 'solved':
+    case 'mastered':
+      return {
+        accentColor: '#10b981',
+        textColor: '#34d399',
+        surfaceColor: 'rgba(16, 185, 129, 0.12)',
+        highlightColor: '#133526',
+      };
+    case 'in-progress':
+      return {
+        accentColor: '#3b82f6',
+        textColor: '#60a5fa',
+        surfaceColor: 'rgba(59, 130, 246, 0.12)',
+        highlightColor: '#172554',
+      };
+    case 'review':
+      return {
+        accentColor: '#a855f7',
+        textColor: '#c084fc',
+        surfaceColor: 'rgba(168, 85, 247, 0.12)',
+        highlightColor: '#261538',
+      };
+    default:
+      return {
+        accentColor: '#71717a',
+        textColor: '#a1a1aa',
+        surfaceColor: 'rgba(255, 255, 255, 0.04)',
+        highlightColor: '#1c202a',
+      };
+  }
 };
 
 export const QuestionsPage: React.FC<QuestionsPageProps> = ({
@@ -442,10 +358,15 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
   );
   const remainingCount = Math.max(0, questions.length - totalSolved);
 
-  // Dropdown Options
-  const companyOptions = useMemo(() => {
-    const opts: { value: string; label: React.ReactNode; textLabel?: string }[] = [
-      { value: 'all', label: 'All Companies', textLabel: 'All Companies' },
+  // Dropdown Options for GlideSelect
+  const companyGlideOptions: GlideSelectOption[] = useMemo(() => {
+    const list: GlideSelectOption[] = [
+      {
+        value: 'all',
+        label: 'All Companies',
+        tag: `${allCompaniesList.length}`,
+        searchText: 'All Companies',
+      },
     ];
     const topTech = [
       'google',
@@ -463,137 +384,217 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     ];
 
     topTech.forEach((id) => {
-      opts.push({
+      list.push({
         value: id,
         label: (
           <span className="flex items-center gap-2 truncate">
-            <span className="font-medium truncate">{getCompanyDisplayName(id)}</span>
+            <CompanyLogo companyId={id} size="xs" showTooltip={false} />
+            <span className="truncate">{getCompanyDisplayName(id)}</span>
           </span>
         ),
-        textLabel: getCompanyDisplayName(id),
+        tag: 'Top',
+        searchText: getCompanyDisplayName(id),
       });
     });
 
     allCompaniesList
       .filter((c) => !topTech.includes(c.id.toLowerCase()))
       .forEach((c) => {
-        opts.push({
+        list.push({
           value: c.id,
           label: (
-            <span className="flex items-center justify-between gap-2 w-full truncate">
+            <span className="flex items-center gap-2 truncate">
+              <CompanyLogo companyId={c.id} size="xs" showTooltip={false} />
               <span className="truncate">{c.name || c.id}</span>
-              <span className="text-[10px] text-zinc-500 font-mono shrink-0">{c.totalQuestions}</span>
             </span>
           ),
-          textLabel: c.name || c.id,
+          tag: c.totalQuestions ? `${c.totalQuestions}` : undefined,
+          searchText: c.name || c.id,
         });
       });
 
-    return opts;
+    return list;
   }, [allCompaniesList]);
 
-  const difficultyOptions = useMemo(
-    () => [
-      { value: 'all', label: 'All Difficulty', textLabel: 'All Difficulty' },
+  const difficultyGlideOptions: GlideSelectOption[] = useMemo(() => {
+    const easyCount = questions.filter((q) => q.difficulty === 'Easy').length;
+    const medCount = questions.filter((q) => q.difficulty === 'Medium').length;
+    const hardCount = questions.filter((q) => q.difficulty === 'Hard').length;
+    return [
+      { value: 'all', label: 'All Difficulty', tag: `${questions.length}`, searchText: 'All Difficulty' },
       {
         value: 'Easy',
         label: (
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
             <span>Easy</span>
           </span>
         ),
-        textLabel: 'Easy',
+        tag: `${easyCount}`,
+        searchText: 'Easy',
       },
       {
         value: 'Medium',
         label: (
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
             <span>Medium</span>
           </span>
         ),
-        textLabel: 'Medium',
+        tag: `${medCount}`,
+        searchText: 'Medium',
       },
       {
         value: 'Hard',
         label: (
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-rose-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
             <span>Hard</span>
           </span>
         ),
-        textLabel: 'Hard',
+        tag: `${hardCount}`,
+        searchText: 'Hard',
       },
-    ],
-    []
-  );
+    ];
+  }, [questions]);
 
-  const topicOptions = useMemo(() => {
-    const opts = [{ value: 'all', label: 'All Topics', textLabel: 'All Topics' }];
-    TOP_ALGORITHMS.forEach((t) => opts.push({ value: t, label: t, textLabel: t }));
+  const topicGlideOptions: GlideSelectOption[] = useMemo(() => {
+    const list: GlideSelectOption[] = [
+      { value: 'all', label: 'All Topics', tag: `${questions.length}`, searchText: 'All Topics' },
+    ];
+
+    TOP_ALGORITHMS.forEach((algo) => {
+      const matchCount = questions.filter((q) => matchesTopicFilter(algo, q.topics)).length;
+      list.push({
+        value: algo,
+        label: algo,
+        tag: `${matchCount}`,
+        searchText: algo,
+      });
+    });
+
+    const algoSet = new Set(TOP_ALGORITHMS.map((a) => a.toLowerCase()));
     allTopics
-      .filter((t) => !TOP_ALGORITHMS.includes(t))
-      .forEach((t) => opts.push({ value: t, label: t, textLabel: t }));
-    return opts;
-  }, [allTopics]);
+      .filter((t) => !algoSet.has(t.toLowerCase()))
+      .forEach((t) => {
+        const count = questions.filter((q) => q.topics.some((item) => item.toLowerCase() === t.toLowerCase())).length;
+        list.push({
+          value: t,
+          label: t,
+          tag: `${count}`,
+          searchText: t,
+        });
+      });
 
-  const statusOptions = useMemo(
+    return list;
+  }, [allTopics, questions]);
+
+  const statusGlideOptions: GlideSelectOption[] = useMemo(
     () => [
-      { value: 'all', label: 'All Status', textLabel: 'All Status' },
+      { value: 'all', label: 'All Status', tag: `${questions.length}`, searchText: 'All Status' },
       {
         value: 'todo',
         label: (
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-zinc-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
             <span>Todo</span>
           </span>
         ),
-        textLabel: 'Todo',
+        tag: 'New',
+        searchText: 'Todo',
       },
       {
         value: 'in-progress',
         label: (
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
             <span>In Progress</span>
           </span>
         ),
-        textLabel: 'In Progress',
+        tag: 'WIP',
+        searchText: 'In Progress',
       },
       {
         value: 'solved',
         label: (
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
             <span>Solved</span>
           </span>
         ),
-        textLabel: 'Solved',
+        tag: `${totalSolved}`,
+        searchText: 'Solved',
       },
       {
         value: 'favorite',
         label: (
           <span className="flex items-center gap-2">
-            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+            <Star className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" />
             <span>Starred</span>
           </span>
         ),
-        textLabel: 'Starred',
+        tag: 'Fav',
+        searchText: 'Starred Favorite',
       },
+    ],
+    [questions.length, totalSolved]
+  );
+
+  const sortGlideOptions: GlideSelectOption[] = useMemo(
+    () => [
+      { value: 'recent', label: 'Default (ID)', tag: 'Default', searchText: 'Default ID' },
+      { value: 'frequency', label: 'Frequency: High → Low', tag: 'Hot', searchText: 'Frequency Hot' },
+      { value: 'acceptance', label: 'Acceptance: High → Low', tag: 'Acc', searchText: 'Acceptance Rate' },
+      { value: 'id-asc', label: 'ID: 1 → N', tag: '1-N', searchText: 'ID Ascending' },
+      { value: 'id-desc', label: 'ID: N → 1', tag: 'N-1', searchText: 'ID Descending' },
+      { value: 'difficulty', label: 'Difficulty: Easy → Hard', tag: 'Diff', searchText: 'Difficulty' },
+      { value: 'title', label: 'Title: A → Z', tag: 'A-Z', searchText: 'Title A-Z' },
     ],
     []
   );
 
-  const sortOptions = useMemo(
+  const rowStatusOptions: GlideSelectOption[] = useMemo(
     () => [
-      { value: 'recent', label: 'Recent', textLabel: 'Recent' },
-      { value: 'frequency', label: 'Frequency: High → Low', textLabel: 'Frequency' },
-      { value: 'acceptance', label: 'Acceptance: High → Low', textLabel: 'Acceptance' },
-      { value: 'id-asc', label: 'ID: 1 → N', textLabel: 'ID Ascending' },
-      { value: 'id-desc', label: 'ID: N → 1', textLabel: 'ID Descending' },
-      { value: 'title', label: 'Title: A → Z', textLabel: 'Title' },
-      { value: 'difficulty', label: 'Difficulty: Easy → Hard', textLabel: 'Difficulty' },
+      {
+        value: 'todo',
+        label: (
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
+            <span>Todo</span>
+          </span>
+        ),
+        searchText: 'Todo',
+      },
+      {
+        value: 'in-progress',
+        label: (
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+            <span>In Progress</span>
+          </span>
+        ),
+        searchText: 'In Progress',
+      },
+      {
+        value: 'solved',
+        label: (
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+            <span>Solved</span>
+          </span>
+        ),
+        searchText: 'Solved',
+      },
+      {
+        value: 'review',
+        label: (
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+            <span>Review</span>
+          </span>
+        ),
+        searchText: 'Review',
+      },
     ],
     []
   );
@@ -652,6 +653,15 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       });
     }
 
+    if (sortBy !== 'recent') {
+      const activeSort = sortGlideOptions.find((s) => s.value === sortBy);
+      list.push({
+        key: 'sort',
+        label: `Sort: ${activeSort?.searchText || sortBy}`,
+        clear: () => updateFilters({ sort: 'recent' }),
+      });
+    }
+
     if (searchQuery) {
       list.push({
         key: 'search',
@@ -661,7 +671,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     }
 
     return list;
-  }, [selectedCompany, selectedDifficulty, selectedTopic, selectedStatus, curatedList, searchQuery, updateFilters]);
+  }, [selectedCompany, selectedDifficulty, selectedTopic, selectedStatus, curatedList, sortBy, sortGlideOptions, searchQuery, updateFilters]);
 
   const clearAllFilters = () => {
     sounds.playClick();
@@ -826,55 +836,111 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
           </div>
 
           {/* Company Filter */}
-          <FilterDropdown
-            label="All Companies"
-            icon={<Building2 className="w-3.5 h-3.5" />}
+          <GlideSelect
+            options={companyGlideOptions}
             value={selectedCompany}
-            options={companyOptions}
-            onChange={(val) => updateFilters({ company: val })}
+            onChange={(val) => {
+              sounds.playClick();
+              updateFilters({ company: val });
+            }}
+            icon={<Building2 className="w-3.5 h-3.5" />}
+            size="md"
+            menuWidth={250}
+            radius={12}
+            accentColor="var(--theme-accent, #A855F7)"
+            surfaceColor="#11141A"
+            highlightColor="#1C222D"
+            textColor="#F3F4F6"
+            className={selectedCompany !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
+            ariaLabel="Company Filter"
             searchable
-            minWidth="w-56"
+            searchPlaceholder="Search companies..."
           />
 
           {/* Difficulty Filter */}
-          <FilterDropdown
-            label="All Difficulty"
-            icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
+          <GlideSelect
+            options={difficultyGlideOptions}
             value={selectedDifficulty}
-            options={difficultyOptions}
-            onChange={(val) => updateFilters({ difficulty: val as Difficulty | 'all' })}
-            minWidth="w-40"
+            onChange={(val) => {
+              sounds.playClick();
+              updateFilters({ difficulty: val as Difficulty | 'all' });
+            }}
+            icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
+            size="md"
+            menuWidth={160}
+            radius={12}
+            accentColor={
+              selectedDifficulty === 'Easy' ? '#34D399' :
+              selectedDifficulty === 'Medium' ? '#FBBF24' :
+              selectedDifficulty === 'Hard' ? '#FB7185' : 'var(--theme-accent, #A855F7)'
+            }
+            surfaceColor="#11141A"
+            highlightColor="#1C222D"
+            textColor="#F3F4F6"
+            className={selectedDifficulty !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
+            ariaLabel="Difficulty Filter"
           />
 
           {/* Topic Filter */}
-          <FilterDropdown
-            label="All Topics"
-            icon={<Tag className="w-3.5 h-3.5" />}
+          <GlideSelect
+            options={topicGlideOptions}
             value={selectedTopic}
-            options={topicOptions}
-            onChange={(val) => updateFilters({ topic: val })}
+            onChange={(val) => {
+              sounds.playClick();
+              updateFilters({ topic: val });
+            }}
+            icon={<Tag className="w-3.5 h-3.5" />}
+            size="md"
+            menuWidth={240}
+            radius={12}
+            accentColor="var(--theme-accent, #A855F7)"
+            surfaceColor="#11141A"
+            highlightColor="#1C222D"
+            textColor="#F3F4F6"
+            className={selectedTopic !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
+            ariaLabel="Topic Filter"
             searchable
-            minWidth="w-52"
+            searchPlaceholder="Search topics..."
           />
 
           {/* Status Filter */}
-          <FilterDropdown
-            label="All Status"
-            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+          <GlideSelect
+            options={statusGlideOptions}
             value={selectedStatus}
-            options={statusOptions}
-            onChange={(val) => updateFilters({ status: val as ProblemStatus | 'favorite' | 'due-review' | 'all' })}
-            minWidth="w-44"
+            onChange={(val) => {
+              sounds.playClick();
+              updateFilters({ status: val as ProblemStatus | 'favorite' | 'due-review' | 'all' });
+            }}
+            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+            size="md"
+            menuWidth={170}
+            radius={12}
+            accentColor="var(--theme-accent, #A855F7)"
+            surfaceColor="#11141A"
+            highlightColor="#1C222D"
+            textColor="#F3F4F6"
+            className={selectedStatus !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
+            ariaLabel="Problem Status Filter"
           />
 
           {/* Sort Dropdown */}
-          <FilterDropdown
-            label="Recent"
-            icon={<ArrowUpDown className="w-3.5 h-3.5" />}
+          <GlideSelect
+            options={sortGlideOptions}
             value={sortBy}
-            options={sortOptions}
-            onChange={(val) => updateFilters({ sort: val })}
-            minWidth="w-48"
+            onChange={(val) => {
+              sounds.playClick();
+              updateFilters({ sort: val });
+            }}
+            icon={<ArrowUpDown className="w-3.5 h-3.5" />}
+            size="md"
+            menuWidth={210}
+            radius={12}
+            accentColor="var(--theme-accent, #A855F7)"
+            surfaceColor="#11141A"
+            highlightColor="#1C222D"
+            textColor="#F3F4F6"
+            className={sortBy !== 'recent' ? 'glide-select--active shrink-0' : 'shrink-0'}
+            ariaLabel="Sort Questions"
           />
 
           {/* Advanced Filters Button */}
@@ -971,6 +1037,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
               {paginatedQuestions.map((q, idx) => {
                 const p = store.progress[String(q.id)];
                 const status = p?.status || 'todo';
+                const rowTheme = getRowStatusTheme(status);
                 const isFav = !!p?.isFavorite;
                 const companyKeys = Object.keys(q.companies || {});
                 const isPopular = isPopularQuestion(q);
@@ -1063,76 +1130,30 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                       />
                     </td>
 
-                    {/* Status Pill with interactive toggle */}
-                    <td className="py-3.5 px-4 relative" onClick={(e) => e.stopPropagation()}>
-                      <div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            sounds.playClick();
-                            setActiveStatusMenuId(activeStatusMenuId === q.id ? null : q.id);
-                          }}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border ${
-                            status === 'solved' || status === 'mastered'
-                              ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800/40 hover:bg-emerald-900/50'
-                              : status === 'in-progress'
-                              ? 'bg-blue-950/60 text-blue-400 border-blue-800/40 hover:bg-blue-900/50'
-                              : status === 'review'
-                              ? 'bg-purple-950/60 text-purple-400 border-purple-800/40 hover:bg-purple-900/50'
-                              : 'bg-[#161B22] text-zinc-400 border-white/[0.08] hover:text-zinc-200'
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              status === 'solved' || status === 'mastered'
-                                ? 'bg-emerald-400'
-                                : status === 'in-progress'
-                                ? 'bg-blue-400'
-                                : status === 'review'
-                                ? 'bg-purple-400'
-                                : 'bg-zinc-500'
-                            }`}
-                          />
-                          <span>
-                            {status === 'solved' || status === 'mastered'
-                              ? 'Solved'
-                              : status === 'in-progress'
-                              ? 'In Progress'
-                              : status === 'review'
-                              ? 'Review'
-                              : 'Todo'}
-                          </span>
-                        </button>
-
-                        {activeStatusMenuId === q.id && (
-                          <div className="absolute left-4 top-full mt-1 w-36 p-1 bg-[#0D1117] border border-white/[0.12] rounded-xl shadow-2xl z-50 animate-fadeIn">
-                            {(['todo', 'in-progress', 'solved', 'review'] as ProblemStatus[]).map((st) => (
-                              <button
-                                key={st}
-                                onClick={() => {
-                                  sounds.playClick();
-                                  onUpdateStatus(q.id, st);
-                                  setActiveStatusMenuId(null);
-                                }}
-                                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs hover:bg-white/[0.06] text-zinc-200 transition-colors text-left cursor-pointer"
-                              >
-                                <span
-                                  className={`w-2 h-2 rounded-full ${
-                                    st === 'solved'
-                                      ? 'bg-emerald-400'
-                                      : st === 'in-progress'
-                                      ? 'bg-blue-400'
-                                      : st === 'review'
-                                      ? 'bg-purple-400'
-                                      : 'bg-zinc-500'
-                                  }`}
-                                />
-                                <span className="capitalize">{st.replace('-', ' ')}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                    {/* Status Pill with interactive GlideSelect */}
+                    <td
+                      className="py-3.5 px-4 relative z-0 has-[[aria-expanded=true]]:z-30"
+                      onClick={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      <GlideSelect
+                        options={rowStatusOptions}
+                        value={status === 'mastered' ? 'solved' : status}
+                        onChange={(val) => {
+                          sounds.playClick();
+                          onUpdateStatus(q.id, val as ProblemStatus);
+                        }}
+                        showTags={false}
+                        size="sm"
+                        menuWidth={140}
+                        radius={10}
+                        accentColor={rowTheme.accentColor}
+                        surfaceColor={rowTheme.surfaceColor}
+                        highlightColor={rowTheme.highlightColor}
+                        textColor={rowTheme.textColor}
+                        className="shrink-0"
+                        ariaLabel={`Status for ${q.title}`}
+                      />
                     </td>
 
                     {/* Action: Solve Button + 3 Dots Options */}

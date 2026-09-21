@@ -1,5 +1,5 @@
-import React, { useEffect, useId, useLayoutEffect, useRef, useState, ReactNode } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
+import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, ReactNode } from 'react';
+import { ChevronDown, Check, Search } from 'lucide-react';
 
 import './GlideSelect.css';
 
@@ -33,14 +33,15 @@ export interface GlideSelectProps {
   ariaLabel?: string;
   icon?: ReactNode;
   className?: string;
+  searchable?: boolean;
+  searchPlaceholder?: string;
 }
 
 const SIZES = {
-  sm: { chip: 30, row: 28, font: 12 },
-  md: { chip: 34, row: 32, font: 13 },
+  sm: { chip: 32, row: 28, font: 12 },
+  md: { chip: 36, row: 32, font: 12.5 },
   lg: { chip: 44, row: 40, font: 14 }
 };
-const PAD = 4;
 const GAP = 1;
 const MENU_GAP = 6;
 const DEFAULT_OPTIONS: string[] = ['One', 'Two', 'Three'];
@@ -83,12 +84,23 @@ export default function GlideSelect({
   disabled = false,
   ariaLabel = 'Select',
   icon,
-  className = ''
+  className = '',
+  searchable = false,
+  searchPlaceholder = 'Search...'
 }: GlideSelectProps) {
-  const items = options.map(norm);
+  const items = useMemo(() => options.map(norm), [options]);
+  const [filterQuery, setFilterQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredItems = useMemo(() => {
+    if (!searchable || !filterQuery.trim()) return items;
+    const q = filterQuery.toLowerCase().trim();
+    return items.filter(it => textOf(it).toLowerCase().includes(q));
+  }, [items, searchable, filterQuery]);
+
   const [inner, setInner] = useState(defaultValue ?? '');
   const current = value !== undefined ? value : inner;
-  const selected = items.findIndex(it => it.value === current);
+  const selected = filteredItems.findIndex(it => it.value === current);
   const [phase, setPhase] = useState<'closed' | 'open' | 'closing'>('closed');
   const [active, setActive] = useState<number | null>(null);
   const [side, setSide] = useState<'top' | 'bottom'>(placement);
@@ -103,6 +115,14 @@ export default function GlideSelect({
   const S = SIZES[size] ?? SIZES.md;
   const step = S.row + GAP;
   const popOut = Math.round((popDuration * 2) / 3);
+
+  useEffect(() => {
+    if (phase === 'open' && searchable) {
+      setFilterQuery('');
+      const timer = setTimeout(() => searchInputRef.current?.focus(), 40);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, searchable]);
 
   useLayoutEffect(() => {
     if (phase !== 'open') return;
@@ -142,7 +162,7 @@ export default function GlideSelect({
   useLayoutEffect(() => {
     const p = pillRef.current;
     if (!p || phase !== 'open') return;
-    if (active === null) {
+    if (active === null || active < 0 || active >= filteredItems.length) {
       p.style.opacity = '0';
       return;
     }
@@ -151,7 +171,7 @@ export default function GlideSelect({
     p.style.transform = `translateY(${active * step}px)`;
     p.style.opacity = '1';
     instant.current = false;
-  }, [active, phase, step]);
+  }, [active, phase, step, filteredItems.length]);
 
   const open = (viaKey: boolean) => {
     if (disabled) return;
@@ -176,7 +196,7 @@ export default function GlideSelect({
   };
 
   const pick = (i: number, viaKey: boolean) => {
-    const it = items[i];
+    const it = filteredItems[i];
     if (!it) {
       close('instant');
       return;
@@ -192,7 +212,7 @@ export default function GlideSelect({
 
   const onTriggerKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     const k = e.key;
-    const n = items.length;
+    const n = filteredItems.length;
     const cur = active ?? Math.max(0, selected);
     if (phase !== 'open') {
       if (k === 'Enter' || k === ' ' || k === 'ArrowDown' || k === 'ArrowUp') {
@@ -214,7 +234,9 @@ export default function GlideSelect({
     } else if (k === 'Escape' || k === 'Tab') {
       if (k === 'Escape') e.preventDefault();
       close('instant');
-    } else if (k.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) go(typeaheadIndex(items, cur, k));
+    } else if (k.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey && !searchable) {
+      go(typeaheadIndex(filteredItems, cur, k));
+    }
   };
 
   useEffect(() => {
@@ -237,8 +259,8 @@ export default function GlideSelect({
     if (!s) return null;
     const listEl = menuRef.current?.querySelector('.glide-select__list');
     const scrollTop = listEl ? listEl.scrollTop : 0;
-    const i = Math.floor((y - s.top - PAD + scrollTop) / step);
-    return i >= 0 && i < items.length ? i : null;
+    const i = Math.floor((y - s.top + scrollTop) / step);
+    return i >= 0 && i < filteredItems.length ? i : null;
   };
 
   const onListDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -248,20 +270,27 @@ export default function GlideSelect({
     } catch {}
     scrub.current = { id: e.pointerId, top: e.currentTarget.getBoundingClientRect().top };
     instant.current = true;
-    setActive(rowAt(e.clientY));
+    const row = (e.target as HTMLElement).closest('[data-index]') as HTMLElement | null;
+    if (row && row.dataset.index !== undefined) {
+      const idx = Number(row.dataset.index);
+      if (!isNaN(idx)) setActive(idx);
+    } else {
+      setActive(rowAt(e.clientY));
+    }
   };
 
   const onListMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!scrub.current || scrub.current.id !== e.pointerId) return;
     const i = rowAt(e.clientY);
-    if (i !== active) setActive(i);
+    if (i !== null && i !== active) setActive(i);
   };
 
   const onListUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!scrub.current || scrub.current.id !== e.pointerId) return;
-    const i = e.type === 'pointerup' ? rowAt(e.clientY) : null;
+    const row = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-index]') as HTMLElement | null;
+    const i = row && row.dataset.index !== undefined ? Number(row.dataset.index) : rowAt(e.clientY);
     scrub.current = null;
-    if (i !== null) pick(i, false);
+    if (i !== null && i >= 0 && i < filteredItems.length) pick(i, false);
     else if (!rememberPosition) setActive(null);
   };
 
@@ -270,16 +299,18 @@ export default function GlideSelect({
     const row = (e.target as HTMLElement).closest('[data-index]') as HTMLElement | null;
     if (!row) return;
     const i = Number(row.dataset.index);
-    if (i !== active) setActive(i);
+    if (!isNaN(i) && i !== active) setActive(i);
   };
 
   const origin = `${side === 'bottom' ? 'top' : 'bottom'} ${align}`;
+  const activeItem = items.find(it => it.value === current);
 
   return (
     <div
       ref={rootRef}
       className={`glide-select${className ? ` ${className}` : ''}`}
       data-size={size}
+      data-state={phase !== 'closed' ? 'open' : 'closed'}
       data-disabled={disabled ? '' : undefined}
       style={{
         '--gs-accent': accentColor,
@@ -292,6 +323,7 @@ export default function GlideSelect({
         '--gs-row': `${S.row}px`,
         '--gs-font': `${S.font}px`,
         '--gs-menu-w': `${menuWidth}px`,
+        '--gs-label-w': `${Math.max(120, menuWidth - 48)}px`,
         '--gs-pop': `${popDuration}ms`,
         '--gs-pop-out': `${popOut}ms`,
         '--gs-glide': `${glideDuration}ms`,
@@ -325,8 +357,8 @@ export default function GlideSelect({
             {icon}
           </span>
         )}
-        <span className="glide-select__label" key={current} data-empty={selected < 0 ? '' : undefined}>
-          {selected >= 0 ? items[selected].label : placeholder}
+        <span className="glide-select__label" key={current} data-empty={!activeItem ? '' : undefined}>
+          {activeItem ? activeItem.label : placeholder}
         </span>
         <span className="glide-select__chevron" aria-hidden="true">
           <ChevronDown size={12} strokeWidth={2.5} />
@@ -334,6 +366,43 @@ export default function GlideSelect({
       </button>
       {phase !== 'closed' ? (
         <div ref={menuRef} className="glide-select__menu" data-state="open" data-side={side} data-align={align}>
+          {searchable && (
+            <div className="p-1 pb-1.5 border-b border-white/[0.08] mb-1" onPointerDown={e => e.stopPropagation()}>
+              <div className="relative">
+                <Search size={13} className="text-zinc-500 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={filterQuery}
+                  onChange={e => {
+                    setFilterQuery(e.target.value);
+                    instant.current = true;
+                    setActive(0);
+                  }}
+                  placeholder={searchPlaceholder}
+                  className="w-full pl-6 pr-2 py-1 text-xs bg-[#161B22] border border-white/[0.08] focus:border-purple-500/60 rounded text-white placeholder-zinc-500 focus:outline-none"
+                  onClick={e => e.stopPropagation()}
+                  onKeyDown={e => {
+                    e.stopPropagation();
+                    if (e.key === 'Escape') close('instant');
+                    else if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const targetIdx = active !== null && active >= 0 ? active : 0;
+                      if (filteredItems[targetIdx]) {
+                        pick(targetIdx, true);
+                      }
+                    } else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      setActive(prev => Math.min(filteredItems.length - 1, (prev ?? -1) + 1));
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      setActive(prev => Math.max(0, (prev ?? 1) - 1));
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          )}
           <div
             id={`${id}-list`}
             role="listbox"
@@ -351,22 +420,28 @@ export default function GlideSelect({
             onLostPointerCapture={onListUp}
           >
             <span ref={pillRef} className="glide-select__pill" aria-hidden="true" />
-            {items.map((it, i) => (
+            {filteredItems.map((it, i) => (
               <div
                 key={it.value}
                 id={`${id}-${i}`}
                 role="option"
-                aria-selected={i === selected}
+                aria-selected={it.value === current}
+                data-active={i === active ? 'true' : undefined}
                 data-index={i}
                 className="glide-select__option"
               >
                 <span className="glide-select__name">{it.label}</span>
                 {showTags && it.tag ? <span className="glide-select__tag">{it.tag}</span> : null}
-                <span className="glide-select__check" data-on={i === selected ? '' : undefined} aria-hidden="true">
+                <span className="glide-select__check" data-on={it.value === current ? '' : undefined} aria-hidden="true">
                   <Check size={13} strokeWidth={2.5} />
                 </span>
               </div>
             ))}
+            {filteredItems.length === 0 && (
+              <div className="py-3 px-2 text-center text-xs text-zinc-500">
+                No matching options
+              </div>
+            )}
           </div>
         </div>
       ) : null}
