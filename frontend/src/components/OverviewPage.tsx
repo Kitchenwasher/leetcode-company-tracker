@@ -297,7 +297,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             sounds.playClick();
             navigate('/companies');
           }}
-          className="rounded-xl bg-[#0D1117] border border-white/[0.08] hover:border-primary/40 p-4 sm:p-5 flex items-center justify-between transition-colors cursor-pointer group"
+          className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] hover:border-primary/40 p-4 sm:p-5 flex items-center justify-between transition-all cursor-pointer group"
         >
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
@@ -321,7 +321,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             sounds.playClick();
             onNavigateToQuestions();
           }}
-          className="rounded-xl bg-[#0D1117] border border-white/[0.08] hover:border-primary/40 p-4 sm:p-5 flex items-center justify-between transition-colors cursor-pointer group"
+          className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] hover:border-primary/40 p-4 sm:p-5 flex items-center justify-between transition-all cursor-pointer group"
         >
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
@@ -345,7 +345,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             sounds.playClick();
             onNavigateToQuestions();
           }}
-          className="rounded-xl bg-[#0D1117] border border-white/[0.08] hover:border-primary/40 p-4 sm:p-5 flex items-center justify-between transition-colors cursor-pointer group"
+          className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] hover:border-primary/40 p-4 sm:p-5 flex items-center justify-between transition-all cursor-pointer group"
         >
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
@@ -369,7 +369,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         {/* LEFT COLUMN: Practice Activity + Recent Questions (8 Columns) */}
         <div className="lg:col-span-8 space-y-5 sm:space-y-6">
           {/* Card: Practice Activity */}
-          <div className="rounded-xl bg-[#0D1117] border border-white/[0.08] p-5 sm:p-6 space-y-5">
+          <div className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] p-5 sm:p-6 space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2.5">
                 <BarChart2 className="w-5 h-5 text-primary shrink-0" />
@@ -472,7 +472,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
           </div>
 
           {/* Card: Recent Questions Table */}
-          <div className="rounded-xl bg-[#0D1117] border border-white/[0.08] p-5 sm:p-6 space-y-4">
+          <div className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between pb-2">
               <div className="flex items-center gap-2.5">
                 <FileText className="w-5 h-5 text-primary shrink-0" />
@@ -564,7 +564,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         {/* RIGHT COLUMN: Your Next Step + Your Consistency + Quote (4 Columns) */}
         <div className="lg:col-span-4 space-y-5 sm:space-y-6">
           {/* Card 1: Your Next Step */}
-          <div className="rounded-xl bg-[#0D1117] border border-white/[0.08] p-5 sm:p-6 space-y-4">
+          <div className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] p-5 sm:p-6 space-y-4">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center text-primary shrink-0">
                 <Target className="w-4 h-4" />
@@ -580,7 +580,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </div>
 
             {/* Inner Recommendation Box */}
-            <div className="rounded-lg bg-[#090C12] border border-white/[0.06] p-4 space-y-1 font-sans">
+            <div className="rounded-lg bg-[#090C12]/80 border border-white/[0.06] p-4 space-y-1 font-sans">
               <p className="text-xs text-zinc-400 font-sans">Recommended for you</p>
               <p className="text-base font-bold text-primary font-sans">
                 Arrays
@@ -604,7 +604,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
           </div>
 
           {/* Card 2: Your Consistency */}
-          <div className="rounded-xl bg-[#0D1117] border border-white/[0.08] p-5 sm:p-6 space-y-4">
+          <div className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Calendar className="w-5 h-5 text-primary shrink-0" />
@@ -647,7 +647,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
           </div>
 
           {/* Card 3: Motivational Quote Card */}
-          <div className="rounded-xl bg-[#0D1117] border border-white/[0.08] p-5 sm:p-6 space-y-2">
+          <div className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] p-5 sm:p-6 space-y-2">
             <span className="text-primary text-3xl font-serif font-black leading-none select-none block">
               “
             </span>
