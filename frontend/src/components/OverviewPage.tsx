@@ -9,22 +9,30 @@ import {
   BarChart2,
   Play,
   Flame,
-  ChevronDown
 } from 'lucide-react';
 import { Question, UserStoreState, CompanyMeta } from '../types';
 import { sounds } from '../utils/sound';
 import { useAuth } from '../context/AuthContext';
-import { calculateStreaks } from '../services/storage';
+import { calculateStreaks, getTodayKey } from '../services/storage';
+import CompanyLogo, { getCompanyDisplayName } from './CompanyLogo';
+import GlideSelect from './ui/GlideSelect';
 
 interface OverviewPageProps {
   questions: Question[];
   companies?: Record<string, CompanyMeta>;
   store: UserStoreState;
   onNavigateToQuestions: () => void;
-  onNavigateToProblem: (id: number) => void;
+  onNavigateToProblem: (id: number | string) => void;
   onNavigateToCompany?: (slug: string) => void;
   onOpenMockModal?: () => void;
 }
+
+export const getDateKey = (d: Date): string => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export const OverviewPage: React.FC<OverviewPageProps> = ({
   questions,
@@ -34,128 +42,198 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [timeframe, setTimeframe] = useState<'7' | '14' | '30'>('7');
+
+  // Unified live activity: sync between store.activityLog and all store.progress records
+  const unifiedActivity = useMemo(() => {
+    const activity: Record<string, number> = { ...(store.activityLog || {}) };
+    Object.values(store.progress || {}).forEach((p) => {
+      if ((p?.status === 'solved' || p?.status === 'mastered') && p?.lastSolvedAt) {
+        try {
+          const dateKey = getDateKey(new Date(p.lastSolvedAt));
+          if (!activity[dateKey]) {
+            activity[dateKey] = 1;
+          }
+        } catch {}
+      }
+    });
+    return activity;
+  }, [store.activityLog, store.progress]);
 
   const { currentStreak } = useMemo(
-    () => calculateStreaks(store.activityLog || {}),
-    [store.activityLog]
+    () => calculateStreaks(unifiedActivity),
+    [unifiedActivity]
   );
 
+  const todayKey = getTodayKey();
   const todaySolved = useMemo(() => {
-    const todayKey = new Date().toISOString().slice(0, 10);
-    return (store.activityLog || {})[todayKey] || 0;
-  }, [store.activityLog]);
+    return unifiedActivity[todayKey] || 0;
+  }, [unifiedActivity, todayKey]);
 
   const targetGoal = user.dailyTarget || store.dailyGoal || 5;
 
   // Total questions count
   const totalQuestionsCount = questions.length || 3399;
 
-  // 7-day practice activity bar chart calculations
-  const { chartBars, weekSolved, targetPercent } = useMemo(() => {
-    const log = store.activityLog || {};
+  // Live Practice activity bar chart calculations based on selected timeframe
+  const { chartBars, periodSolved, targetPercent, yMax } = useMemo(() => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const now = new Date();
+    const numDays = parseInt(timeframe, 10) || 7;
     const bars = [];
-    let weekTotal = 0;
+    let periodTotal = 0;
 
-    // Ordered Mon -> Sun
-    const dayOffsets = [6, 5, 4, 3, 2, 1, 0];
-    for (const offset of dayOffsets) {
+    for (let offset = numDays - 1; offset >= 0; offset--) {
       const d = new Date();
       d.setDate(now.getDate() - offset);
-      const key = d.toISOString().slice(0, 10);
-      const count = log[key] || 0;
-      weekTotal += count;
+      const key = getDateKey(d);
+      const count = unifiedActivity[key] || 0;
+      periodTotal += count;
       bars.push({
         day: days[d.getDay()],
         key,
         count,
+        isToday: key === todayKey,
       });
     }
 
-    // Baseline heights if no activity recorded yet (to mirror reference image)
-    const baselineHeights = [22, 32, 52, 42, 85, 52, 32];
-    const maxCount = Math.max(...bars.map((b) => b.count), 0);
+    const maxSolved = Math.max(...bars.map((b) => b.count), 0);
+    const calculatedYMax = Math.max(Math.ceil((maxSolved || targetGoal) / 5) * 5, 5);
 
-    const formattedBars = bars.map((b, idx) => {
-      let heightPercent = baselineHeights[idx];
-      if (maxCount > 0) {
-        heightPercent = b.count === 0 ? 8 : Math.min(100, Math.round((b.count / Math.max(maxCount, 30)) * 90) + 10);
-      }
+    const formattedBars = bars.map((b) => {
+      const heightPercent = b.count === 0 ? 4 : Math.min(100, Math.round((b.count / calculatedYMax) * 100));
       return {
         day: b.day,
+        key: b.key,
         height: `${heightPercent}%`,
         count: b.count,
+        isToday: b.isToday,
       };
     });
 
-    const displayWeekSolved = weekTotal > 0 ? weekTotal : 12;
-    const progressP = Math.min(100, Math.round(((todaySolved > 0 ? todaySolved : 3) / targetGoal) * 100));
+    const progressP = Math.min(100, Math.round((todaySolved / targetGoal) * 100));
 
     return {
       chartBars: formattedBars,
-      weekSolved: displayWeekSolved,
+      periodSolved: periodTotal,
       targetPercent: progressP,
+      yMax: calculatedYMax,
     };
-  }, [store.activityLog, todaySolved, targetGoal]);
+  }, [unifiedActivity, timeframe, todayKey, todaySolved, targetGoal]);
 
-  // Curated benchmark recent questions (mirrors reference image with fallback to real data)
+  // Current month & year for Consistency Heatmap
+  const currentMonthName = useMemo(() => {
+    return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date());
+  }, []);
+
+  // Real live 11-week activity heatmap
+  const { liveHeatmapData, dayLabels } = useMemo(() => {
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const cols = 11;
+    const now = new Date();
+    const currentDay = (now.getDay() + 6) % 7; // 0=Mon, 6=Sun
+    const matrix: { count: number; key: string; dateStr: string }[][] = Array.from({ length: 7 }, () => []);
+
+    for (let c = 0; c < cols; c++) {
+      const weekOffset = cols - 1 - c;
+      for (let r = 0; r < 7; r++) {
+        const d = new Date(now);
+        const daysAgo = weekOffset * 7 + (currentDay - r);
+        d.setDate(now.getDate() - daysAgo);
+        const key = getDateKey(d);
+        const count = unifiedActivity[key] || 0;
+        const isFuture = daysAgo < 0;
+        matrix[r].push({
+          count: isFuture ? 0 : count,
+          key,
+          dateStr: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        });
+      }
+    }
+
+    return { liveHeatmapData: matrix, dayLabels: labels };
+  }, [unifiedActivity]);
+
+  const getHeatmapColor = (count: number) => {
+    if (count === 0) return 'bg-white/[0.03] border-white/[0.05]';
+    if (count <= 1) return 'bg-purple-900/60 border-purple-700/50 text-purple-300';
+    if (count <= 3) return 'bg-purple-700/80 border-purple-500/60 text-purple-200';
+    return 'bg-purple-500 border-purple-400 text-white shadow-[0_0_8px_rgba(168,85,247,0.4)]';
+  };
+
+  // Real Next Step Recommendation based on actual problem activity
+  const recommendation = useMemo(() => {
+    // 1. Check if user has an in-progress question
+    const inProgressEntries = Object.entries(store.progress || {}).filter(
+      ([_, p]) => p?.status === 'in-progress'
+    );
+    if (inProgressEntries.length > 0) {
+      const q = questions.find((item) => String(item.id) === inProgressEntries[0][0]);
+      if (q && q.topics && q.topics[0]) {
+        return {
+          topic: q.topics[0],
+          reason: 'Pick up where you left off',
+          qId: q.id,
+        };
+      }
+    }
+
+    // 2. Count solved per algorithm topic to find least practiced area
+    const topicSolveCount: Record<string, number> = {};
+    const TOP_DSA = [
+      'Arrays',
+      'Two Pointers',
+      'Sliding Window',
+      'Binary Search',
+      'Trees',
+      'Dynamic Programming',
+      'Graphs',
+      'Stack',
+      'Heap',
+    ];
+
+    TOP_DSA.forEach((t) => {
+      topicSolveCount[t] = 0;
+    });
+
+    Object.entries(store.progress || {}).forEach(([id, p]) => {
+      if (p?.status === 'solved' || p?.status === 'mastered') {
+        const q = questions.find((item) => String(item.id) === id);
+        if (q && q.topics) {
+          q.topics.forEach((top) => {
+            const match = TOP_DSA.find((dsa) => top.toLowerCase().includes(dsa.toLowerCase()));
+            if (match) topicSolveCount[match] = (topicSolveCount[match] || 0) + 1;
+          });
+        }
+      }
+    });
+
+    const sortedTopics = TOP_DSA.slice().sort((a, b) => (topicSolveCount[a] || 0) - (topicSolveCount[b] || 0));
+    const recommendedTopic = sortedTopics[0] || 'Arrays';
+
+    return {
+      topic: recommendedTopic,
+      reason: 'Recommended based on your practice progress',
+      qId: null,
+    };
+  }, [store.progress, questions]);
+
+  // Live recent questions from store progress
   const recentQuestionsList = useMemo(() => {
-    const solvedEntries = Object.entries(store.progress || {})
-      .filter(([_, p]) => p.status === 'solved' || p.status === 'mastered')
+    const activeEntries = Object.entries(store.progress || {})
+      .filter(([_, p]) => p?.status === 'solved' || p?.status === 'mastered' || p?.status === 'in-progress')
       .map(([id, p]) => ({
         id: Number(id),
         lastSolved: p.lastSolvedAt ? new Date(p.lastSolvedAt).getTime() : 0,
+        status: p.status,
       }))
       .sort((a, b) => b.lastSolved - a.lastSolved);
 
-    const fallbackQuestions = [
-      {
-        id: 7,
-        num: 1,
-        title: 'Reverse Integer',
-        difficulty: 'Medium',
-        company: 'Accenture',
-        solvedAt: '18h ago',
-      },
-      {
-        id: 1,
-        num: 2,
-        title: 'Two Sum',
-        difficulty: 'Easy',
-        company: 'Amazon',
-        solvedAt: '2 days ago',
-      },
-      {
-        id: 146,
-        num: 3,
-        title: 'LRU Cache',
-        difficulty: 'Hard',
-        company: 'Google',
-        solvedAt: '3 days ago',
-      },
-      {
-        id: 20,
-        num: 4,
-        title: 'Valid Parentheses',
-        difficulty: 'Easy',
-        company: 'Microsoft',
-        solvedAt: '5 days ago',
-      },
-      {
-        id: 21,
-        num: 5,
-        title: 'Merge Two Sorted Lists',
-        difficulty: 'Medium',
-        company: 'Meta',
-        solvedAt: '1 week ago',
-      },
-    ];
-
-    if (solvedEntries.length >= 3) {
-      return solvedEntries.slice(0, 5).map((entry, idx) => {
-        const q = questions.find((item) => item.id === entry.id);
-        const comp = q && Object.keys(q.companies || {})[0] ? Object.keys(q.companies)[0] : 'General';
+    if (activeEntries.length > 0) {
+      return activeEntries.slice(0, 5).map((entry, idx) => {
+        const q = questions.find((item) => Number(item.id) === entry.id);
+        const compKeys = Object.keys(q?.companies || {});
+        const primaryComp = compKeys[0] ? compKeys[0] : 'general';
         let solvedAt = 'Recently';
         if (entry.lastSolved > 0) {
           const diffHours = Math.floor((Date.now() - entry.lastSolved) / (1000 * 60 * 60));
@@ -167,111 +245,31 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         return {
           id: entry.id,
           num: idx + 1,
-          title: q ? q.title : `Problem #${entry.id}`,
-          difficulty: q ? q.difficulty : 'Medium',
-          company: comp,
+          title: q?.title || `Problem #${entry.id}`,
+          difficulty: q?.difficulty || 'Medium',
+          company: primaryComp,
+          status: entry.status,
           solvedAt,
         };
       });
     }
 
-    return fallbackQuestions;
+    // Default top curated questions if user has 0 activity yet
+    const defaultIds = [1, 7, 146, 20, 21];
+    return defaultIds.map((id, idx) => {
+      const q = questions.find((item) => Number(item.id) === id);
+      const compKeys = Object.keys(q?.companies || {});
+      return {
+        id,
+        num: idx + 1,
+        title: q?.title || `Problem #${id}`,
+        difficulty: q?.difficulty || 'Medium',
+        company: compKeys[0] || 'amazon',
+        status: 'todo',
+        solvedAt: 'Recommended',
+      };
+    });
   }, [store.progress, questions]);
-
-  // Render company brand logo
-  const renderCompanyBadge = (company: string) => {
-    switch (company.toLowerCase()) {
-      case 'google':
-        return (
-          <div className="flex items-center gap-1.5 font-sans">
-            <span className="font-bold text-xs">
-              <span className="text-[#4285F4]">G</span>
-            </span>
-            <span className="text-zinc-300 text-xs font-medium">Google</span>
-          </div>
-        );
-      case 'amazon':
-        return (
-          <div className="flex items-center gap-1.5 font-sans">
-            <div className="w-3.5 h-3.5 rounded bg-[#FF9900] text-black font-black text-[9px] flex items-center justify-center leading-none">
-              a
-            </div>
-            <span className="text-zinc-300 text-xs font-medium">Amazon</span>
-          </div>
-        );
-      case 'microsoft':
-        return (
-          <div className="flex items-center gap-1.5 font-sans">
-            <div className="w-3 h-3 grid grid-cols-2 gap-0.5 shrink-0">
-              <div className="bg-[#F25022] rounded-[0.5px]" />
-              <div className="bg-[#7FBA00] rounded-[0.5px]" />
-              <div className="bg-[#00A4EF] rounded-[0.5px]" />
-              <div className="bg-[#FFB900] rounded-[0.5px]" />
-            </div>
-            <span className="text-zinc-300 text-xs font-medium">Microsoft</span>
-          </div>
-        );
-      case 'meta':
-        return (
-          <div className="flex items-center gap-1.5 font-sans">
-            <svg className="w-3.5 h-3.5 text-[#0081FB] shrink-0" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16.995 6C14.622 6 13.107 7.227 12 8.358C10.893 7.227 9.378 6 7.005 6C3.768 6 1 8.788 1 12.278C1 15.767 3.768 18.555 7.005 18.555C9.645 18.555 11.082 16.993 12 15.688C12.918 16.993 14.355 18.555 16.995 18.555C20.232 18.555 23 15.767 23 12.278C23 8.788 20.232 6 16.995 6ZM7.005 16.273C4.94 16.273 3.327 14.432 3.327 12.278C3.327 10.123 4.94 8.282 7.005 8.282C9.07 8.282 10.457 10.23 11.272 11.666C10.442 13.344 9.172 16.273 7.005 16.273ZM16.995 16.273C14.93 16.273 13.66 13.344 12.83 11.666C13.645 10.23 15.032 8.282 17.097 8.282C19.162 8.282 20.775 10.123 20.775 12.278C20.775 14.432 19.06 16.273 16.995 16.273Z" />
-            </svg>
-            <span className="text-zinc-300 text-xs font-medium">Meta</span>
-          </div>
-        );
-      case 'accenture':
-        return (
-          <div className="flex items-center gap-1.5 font-sans">
-            <span className="text-primary font-mono font-bold text-xs">&lt;/&gt;</span>
-            <span className="text-zinc-300 text-xs font-medium">Accenture</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="flex items-center gap-1.5 font-sans">
-            <span className="text-primary font-mono font-bold text-xs">&lt;/&gt;</span>
-            <span className="text-zinc-300 text-xs font-medium">{company}</span>
-          </div>
-        );
-    }
-  };
-
-  // Static consistency heatmap cells layout (11 cols x 7 rows matching reference image)
-  // Rows: 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
-  const heatmapData = [
-    // Mon
-    [0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0],
-    // Tue
-    [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3],
-    // Wed
-    [0, 0, 0, 0, 0, 2, 0, 3, 0, 4, 0],
-    // Thu
-    [0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0],
-    // Fri
-    [0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
-    // Sat
-    [0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0],
-    // Sun
-    [0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0],
-  ];
-
-  const getHeatmapColor = (level: number) => {
-    switch (level) {
-      case 1:
-        return 'bg-[#7C3AED]/40 border-purple-500/20';
-      case 2:
-        return 'bg-[#7C3AED] border-purple-400/40';
-      case 3:
-        return 'bg-[#9333EA] border-purple-300/40';
-      case 4:
-        return 'bg-[#C084FC] border-purple-200/50';
-      default:
-        return 'bg-[#141A23]/80 border-white/[0.03]';
-    }
-  };
-
-  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
     <div className="p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1550px] mx-auto text-[#F3F4F6] font-sans">
@@ -281,7 +279,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
           GOOD TO SEE YOU BACK
         </p>
         <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-2 font-sans">
-          <span>Welcome back, {user.name ? user.name.split(' ')[0] : 'Nitish'}</span>
+          <span>Welcome back, {user.name ? user.name.split(' ')[0] : 'Bismeet'}</span>
           <span className="select-none">👋</span>
         </h1>
         <p className="text-xs sm:text-sm text-zinc-400 font-sans">
@@ -364,8 +362,8 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         </div>
       </div>
 
-      {/* 3. Main 2-Column Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+      {/* 3. Main Split Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         {/* LEFT COLUMN: Practice Activity + Recent Questions (8 Columns) */}
         <div className="lg:col-span-8 space-y-5 sm:space-y-6">
           {/* Card: Practice Activity */}
@@ -378,39 +376,72 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                     Practice Activity
                   </h2>
                   <p className="text-xs text-zinc-400 mt-0.5 font-sans">
-                    Questions solved over the last 7 days
+                    Questions solved over the last {timeframe} days
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-300 self-start sm:self-auto cursor-pointer hover:bg-white/[0.08] transition-colors">
-                <span>Last 7 Days</span>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
-              </div>
+              <GlideSelect
+                options={[
+                  { value: '7', label: 'Last 7 Days', searchText: 'Last 7 Days' },
+                  { value: '14', label: 'Last 14 Days', searchText: 'Last 14 Days' },
+                  { value: '30', label: 'Last 30 Days', searchText: 'Last 30 Days' },
+                ]}
+                value={timeframe}
+                onChange={(val) => {
+                  sounds.playClick();
+                  setTimeframe(val as '7' | '14' | '30');
+                }}
+                size="sm"
+                menuWidth={140}
+                radius={8}
+                accentColor="var(--theme-accent, #A855F7)"
+                surfaceColor="#11141A"
+                highlightColor="#1C222D"
+                textColor="#F3F4F6"
+                className="shrink-0 self-start sm:self-auto"
+                ariaLabel="Practice activity timeframe"
+              />
             </div>
 
             {/* Bar Chart & Target Split */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end pt-2">
-              {/* Left: 7-day Bar Chart */}
+              {/* Left: Bar Chart */}
               <div className="md:col-span-8 flex items-end gap-3 sm:gap-4 h-48 pb-2">
                 {/* Y-axis Labels */}
                 <div className="flex flex-col justify-between h-full text-[11px] font-sans text-zinc-500 pr-1 select-none">
-                  <span>30</span>
-                  <span>20</span>
-                  <span>10</span>
+                  <span>{yMax}</span>
+                  <span>{Math.round(yMax * 0.66)}</span>
+                  <span>{Math.round(yMax * 0.33)}</span>
                   <span>0</span>
                 </div>
 
-                {/* 7 Bars */}
-                <div className="flex-1 flex items-end justify-between gap-2 sm:gap-3 h-full pt-2">
+                {/* Dynamic Bars */}
+                <div className="flex-1 flex items-end justify-between gap-1 sm:gap-2.5 h-full pt-2">
                   {chartBars.map((bar, idx) => (
-                    <div key={`${bar.day}-${idx}`} className="flex-1 flex flex-col items-center gap-2.5 h-full justify-end">
+                    <div
+                      key={`${bar.key}-${idx}`}
+                      className="flex-1 flex flex-col items-center gap-2 h-full justify-end group/bar relative"
+                    >
+                      <div className="absolute -top-7 px-2 py-0.5 rounded bg-[#161B22] border border-white/[0.12] text-[10px] text-white whitespace-nowrap opacity-0 group-hover/bar:opacity-100 transition-opacity pointer-events-none z-20 shadow-lg font-sans">
+                        {bar.count} solved • {bar.day}
+                      </div>
                       <div
-                        className="w-full max-w-[36px] bg-primary rounded-t-sm hover:brightness-110 transition-all cursor-pointer"
+                        className={`w-full max-w-[36px] rounded-t-sm transition-all cursor-pointer ${
+                          bar.count > 0
+                            ? bar.isToday
+                              ? 'bg-purple-500 hover:bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
+                              : 'bg-primary/90 hover:bg-primary'
+                            : 'bg-white/[0.05] hover:bg-white/[0.1]'
+                        }`}
                         style={{ height: bar.height }}
-                        title={`${bar.count} questions solved on ${bar.day}`}
+                        title={`${bar.count} questions solved on ${bar.day} (${bar.key})`}
                       />
-                      <span className="text-xs text-zinc-400 font-sans">
+                      <span
+                        className={`text-[10px] sm:text-xs font-sans truncate max-w-[28px] sm:max-w-none text-center ${
+                          bar.isToday ? 'text-primary font-bold' : 'text-zinc-400'
+                        }`}
+                      >
                         {bar.day}
                       </span>
                     </div>
@@ -422,7 +453,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
               <div className="md:col-span-4 border-t md:border-t-0 md:border-l border-white/[0.08] pt-4 md:pt-0 md:pl-6 space-y-4">
                 <div>
                   <p className="text-2xl font-bold text-white font-sans tracking-tight leading-none">
-                    {weekSolved}
+                    {periodSolved}
                   </p>
                   <p className="text-xs text-zinc-400 mt-1 font-sans">
                     Questions solved
@@ -463,7 +494,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                   <div>
                     <p className="text-xs text-zinc-400 font-sans">Daily Target</p>
                     <p className="text-sm font-semibold text-white font-sans mt-0.5">
-                      {todaySolved > 0 ? todaySolved : 3} / {targetGoal}
+                      {todaySolved} / {targetGoal}
                     </p>
                   </div>
                 </div>
@@ -521,11 +552,14 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                       }}
                       className="hover:bg-white/[0.02] transition-colors cursor-pointer group"
                     >
-                      <td className="py-3.5 px-3 text-zinc-500">{q.num}</td>
-                      <td className="py-3.5 px-3 font-medium text-white group-hover:text-primary transition-colors">
-                        {q.title}
+                      <td className="py-3 px-3 text-zinc-500 font-mono">{q.num}</td>
+                      <td className="py-3 px-3 font-medium text-white group-hover:text-primary transition-colors">
+                        <div className="flex items-center gap-2">
+                          <span>{q.title}</span>
+                          <span className="text-[10px] font-mono text-zinc-500">#{q.id}</span>
+                        </div>
                       </td>
-                      <td className="py-3.5 px-3">
+                      <td className="py-3 px-3">
                         <span
                           className={`px-2 py-0.5 rounded text-[11px] font-medium font-sans border ${
                             q.difficulty === 'Easy'
@@ -538,9 +572,16 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                           {q.difficulty}
                         </span>
                       </td>
-                      <td className="py-3.5 px-3">{renderCompanyBadge(q.company)}</td>
-                      <td className="py-3.5 px-3 text-zinc-400">{q.solvedAt}</td>
-                      <td className="py-3.5 px-3 text-right">
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-1.5">
+                          <CompanyLogo companyId={q.company} size="xs" showTooltip={false} />
+                          <span className="text-zinc-300 text-xs font-medium">
+                            {getCompanyDisplayName(q.company)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 text-zinc-400">{q.solvedAt}</td>
+                      <td className="py-3 px-3 text-right">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -583,10 +624,10 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             <div className="rounded-lg bg-[#090C12]/80 border border-white/[0.06] p-4 space-y-1 font-sans">
               <p className="text-xs text-zinc-400 font-sans">Recommended for you</p>
               <p className="text-base font-bold text-primary font-sans">
-                Arrays
+                {recommendation.topic}
               </p>
               <p className="text-xs text-zinc-500 font-sans">
-                Based on your recent activity
+                {recommendation.reason}
               </p>
             </div>
 
@@ -594,7 +635,11 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             <button
               onClick={() => {
                 sounds.playClick();
-                navigate('/practice');
+                if (recommendation.qId) {
+                  onNavigateToProblem(recommendation.qId);
+                } else {
+                  navigate(`/questions?topic=${encodeURIComponent(recommendation.topic)}`);
+                }
               }}
               className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer font-sans"
             >
@@ -613,23 +658,30 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                 </h2>
               </div>
               <span className="text-xs text-zinc-400 font-sans">
-                Sep 2025
+                {currentMonthName}
               </span>
             </div>
 
             {/* Heatmap Matrix */}
             <div className="space-y-1.5 pt-1">
-              {heatmapData.map((row, rowIdx) => (
+              {liveHeatmapData.map((row, rowIdx) => (
                 <div key={dayLabels[rowIdx]} className="flex items-center gap-2">
                   <span className="w-7 text-[11px] text-zinc-500 font-sans">
                     {dayLabels[rowIdx]}
                   </span>
-                  <div className="flex-1 flex items-center justify-between gap-1.5">
-                    {row.map((val, colIdx) => (
+                  <div className="flex-1 flex items-center justify-between gap-1 sm:gap-1.5">
+                    {row.map((cell, colIdx) => (
                       <div
                         key={`cell-${rowIdx}-${colIdx}`}
-                        className={`w-4 h-4 sm:w-5 sm:h-5 rounded-[3px] border transition-colors ${getHeatmapColor(val)}`}
-                      />
+                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[3px] border transition-colors cursor-pointer relative group/cell ${getHeatmapColor(
+                          cell.count
+                        )}`}
+                        title={`${cell.count} questions solved on ${cell.dateStr}`}
+                      >
+                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-[#161B22] border border-white/[0.12] text-[9px] text-white whitespace-nowrap opacity-0 group-hover/cell:opacity-100 transition-opacity pointer-events-none z-20 shadow-md font-sans">
+                          {cell.count} solved • {cell.dateStr}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -639,10 +691,10 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             {/* Streak Footer */}
             <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-xs font-sans">
               <div className="flex items-center gap-1.5 text-white font-semibold">
-                <Flame className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>{currentStreak > 0 ? currentStreak : 12} day streak</span>
+                <Flame className={`w-4 h-4 shrink-0 ${currentStreak > 0 ? 'text-amber-500' : 'text-zinc-600'}`} />
+                <span>{currentStreak > 0 ? `${currentStreak} day streak` : 'Start your streak today'}</span>
               </div>
-              <span className="text-zinc-500 font-sans">Keep going!</span>
+              <span className="text-zinc-500 font-sans">{currentStreak > 0 ? 'Keep going!' : 'Solve a problem'}</span>
             </div>
           </div>
 

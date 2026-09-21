@@ -22,12 +22,12 @@ export const SmoothScrollProvider: React.FC<SmoothScrollProviderProps> = ({
         wheelMultiplier: 1.0,
         touchMultiplier: 1.5,
         prevent: (node) => {
-          // Allow native scrolling inside elements with data-lenis-prevent or horizontal scroll tables/code blocks
+          // Only prevent Lenis for elements that explicitly have data-lenis-prevent,
+          // or Monaco Editor which has its own independent virtualized scroll system.
           return (
             node.hasAttribute('data-lenis-prevent') ||
-            node.classList.contains('overflow-x-auto') ||
+            node.closest('[data-lenis-prevent]') !== null ||
             node.classList.contains('monaco-editor') ||
-            node.closest('.overflow-x-auto') !== null ||
             node.closest('.monaco-editor') !== null
           );
         },

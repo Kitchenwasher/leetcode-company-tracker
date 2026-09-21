@@ -267,6 +267,8 @@ export const App: React.FC = () => {
     const updatedActivity = { ...store.activityLog };
     if (isNowSolved && !wasAlreadySolved) {
       updatedActivity[todayStr] = (updatedActivity[todayStr] || 0) + 1;
+    } else if (!isNowSolved && wasAlreadySolved && updatedActivity[todayStr]) {
+      updatedActivity[todayStr] = Math.max(0, updatedActivity[todayStr] - 1);
     }
 
     const updatedItem = {
