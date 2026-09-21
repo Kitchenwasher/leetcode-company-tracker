@@ -164,7 +164,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
   }, [options, filterSearch]);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative ${isOpen ? 'z-50' : 'z-20'}`} ref={dropdownRef}>
       <button
         type="button"
         onClick={() => {
@@ -186,7 +186,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
       {isOpen && (
         <div
-          className={`absolute left-0 top-full mt-2 ${minWidth} p-1.5 bg-[#0D1117] border border-white/[0.12] rounded-xl shadow-2xl z-50 animate-fadeIn`}
+          className={`absolute left-0 top-full mt-2 ${minWidth} p-1.5 bg-[#0D1117] border border-white/[0.15] rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.85)] z-50 animate-fadeIn`}
           onClick={(e) => e.stopPropagation()}
         >
           {searchable && (
@@ -263,7 +263,6 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(curatedList !== 'all');
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [activeStatusMenuId, setActiveStatusMenuId] = useState<string | number | null>(null);
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(new Set());
 
   // Close menus on outside click
   useEffect(() => {
@@ -442,25 +441,6 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     Math.round((totalSolved / Math.max(questions.length, 1)) * 100)
   );
   const remainingCount = Math.max(0, questions.length - totalSolved);
-
-  // Checkbox selection
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const newSet = new Set(paginatedQuestions.map((q) => q.id));
-      setSelectedRowIds(newSet);
-    } else {
-      setSelectedRowIds(new Set());
-    }
-  };
-
-  const handleToggleRowSelect = (id: string | number) => {
-    setSelectedRowIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   // Dropdown Options
   const companyOptions = useMemo(() => {
@@ -702,9 +682,28 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     return [1, '...', current - 1, current, current + 1, '...', total];
   };
 
+  // Handpicked iconic benchmark interview questions (only top classic problems get 🔥 Popular)
   const isPopularQuestion = (q: Question) => {
-    const compCount = Object.keys(q.companies || {}).length;
-    return q.isBlind75 || q.isGrind169 || compCount >= 5;
+    const id = Number(q.id);
+    return (
+      id === 1 ||
+      id === 4 ||
+      id === 15 ||
+      id === 21 ||
+      id === 33 ||
+      id === 42 ||
+      id === 53 ||
+      id === 56 ||
+      id === 70 ||
+      id === 121 ||
+      id === 146 ||
+      id === 200 ||
+      id === 206 ||
+      id === 215 ||
+      id === 238 ||
+      id === 300 ||
+      id === 322
+    );
   };
 
   return (
@@ -804,8 +803,8 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       <AdBanner format="horizontal" variant="aws" slotId="questions-top-banner" className="my-1" />
 
       {/* 3. Search and Filters Toolbar matching reference image */}
-      <div className="space-y-3">
-        <div className="bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] rounded-2xl p-2.5 sm:p-3 flex items-center gap-2 flex-wrap lg:flex-nowrap">
+      <div className="space-y-3 relative z-30">
+        <div className="bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] rounded-2xl p-2.5 sm:p-3 flex items-center gap-2 flex-wrap lg:flex-nowrap relative z-30">
           {/* Search Box */}
           <div className="relative flex-1 min-w-[240px]">
             <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -954,20 +953,12 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       </div>
 
       {/* 4. Questions Table matching the reference layout */}
-      <div className="rounded-2xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] overflow-hidden shadow-xl relative z-10">
         <div className="overflow-x-auto min-h-[440px]">
           <table className="w-full text-left border-collapse text-sm font-sans">
             <thead>
               <tr className="text-xs text-zinc-400 border-b border-white/[0.08] bg-white/[0.01]">
-                <th className="py-3.5 px-4 w-10">
-                  <input
-                    type="checkbox"
-                    checked={selectedRowIds.size === paginatedQuestions.length && paginatedQuestions.length > 0}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="w-4 h-4 rounded border-zinc-700 bg-[#161B22] text-primary focus:ring-primary/20 cursor-pointer"
-                  />
-                </th>
-                <th className="py-3.5 px-3 w-12 font-mono text-zinc-500 font-normal">#</th>
+                <th className="py-3.5 px-4 w-14 font-mono text-zinc-400 font-semibold text-xs">#</th>
                 <th className="py-3.5 px-4 font-semibold text-zinc-300 min-w-[260px]">Question</th>
                 <th className="py-3.5 px-4 font-semibold text-zinc-300 w-28">Difficulty</th>
                 <th className="py-3.5 px-4 font-semibold text-zinc-300 min-w-[180px]">Topics</th>
@@ -982,7 +973,6 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                 const status = p?.status || 'todo';
                 const isFav = !!p?.isFavorite;
                 const companyKeys = Object.keys(q.companies || {});
-                const isChecked = selectedRowIds.has(q.id);
                 const isPopular = isPopularQuestion(q);
                 const rowNumber = (safePage - 1) * pageSize + idx + 1;
 
@@ -995,18 +985,8 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                     }}
                     className="hover:bg-white/[0.02] transition-colors cursor-pointer group"
                   >
-                    {/* Checkbox */}
-                    <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => handleToggleRowSelect(q.id)}
-                        className="w-4 h-4 rounded border-zinc-700 bg-[#161B22] text-primary focus:ring-primary/20 cursor-pointer"
-                      />
-                    </td>
-
                     {/* Number */}
-                    <td className="py-3.5 px-3 font-mono text-zinc-500 text-xs">{rowNumber}</td>
+                    <td className="py-3.5 px-4 font-mono text-zinc-500 text-xs font-medium">{rowNumber}</td>
 
                     {/* Question Title + Metadata */}
                     <td className="py-3.5 px-4">
@@ -1020,11 +1000,6 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-medium">
                               <Flame className="w-2.5 h-2.5 fill-rose-400 text-rose-400" />
                               <span>Popular</span>
-                            </span>
-                          )}
-                          {q.isBlind75 && (
-                            <span className="px-1.5 py-0.2 rounded bg-primary/10 text-primary border border-primary/25 text-[10px] font-mono">
-                              B75
                             </span>
                           )}
                         </div>

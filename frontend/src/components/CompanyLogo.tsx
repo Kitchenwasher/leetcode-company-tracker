@@ -377,6 +377,43 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   );
 };
 
+const PROMINENT_COMPANIES_ORDER = [
+  'google',
+  'amazon',
+  'meta',
+  'facebook',
+  'microsoft',
+  'apple',
+  'netflix',
+  'uber',
+  'bloomberg',
+  'tiktok',
+  'bytedance',
+  'twitter',
+  'x',
+  'adobe',
+  'linkedin',
+  'spotify',
+  'oracle',
+  'salesforce',
+  'nvidia',
+  'intel',
+  'paypal',
+  'stripe',
+  'airbnb',
+  'tesla',
+  'goldman-sachs',
+  'jpmorgan',
+  'walmart',
+  'walmart-labs',
+  'cisco',
+  'ibm',
+  'accenture',
+  'tcs',
+  'infosys',
+  'zoho',
+];
+
 export interface CompanyLogoStackProps {
   companies: string[];
   maxDisplay?: number;
@@ -406,12 +443,25 @@ export const CompanyLogoStack: React.FC<CompanyLogoStackProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showPopover]);
 
-  if (!companies || companies.length === 0) {
+  const sortedCompanies = React.useMemo(() => {
+    if (!companies || companies.length === 0) return [];
+    const list = [...companies];
+    return list.sort((a, b) => {
+      const idxA = PROMINENT_COMPANIES_ORDER.indexOf(a.toLowerCase());
+      const idxB = PROMINENT_COMPANIES_ORDER.indexOf(b.toLowerCase());
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+  }, [companies]);
+
+  if (!sortedCompanies || sortedCompanies.length === 0) {
     return <span className="text-xs text-zinc-600 font-mono">—</span>;
   }
 
-  const visible = companies.slice(0, maxDisplay);
-  const remaining = companies.slice(maxDisplay);
+  const visible = sortedCompanies.slice(0, maxDisplay);
+  const remaining = sortedCompanies.slice(maxDisplay);
 
   return (
     <div className={`flex items-center gap-1.5 relative ${className}`}>
