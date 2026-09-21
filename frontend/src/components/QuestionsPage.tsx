@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -6,29 +6,29 @@ import {
   Star,
   CheckCircle2,
   Clock,
-  RotateCcw,
-  LayoutGrid,
-  List,
-  Sparkles,
-  ExternalLink,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   Filter,
   X,
-  Code2,
   Building2,
   BookOpen,
   ArrowUpDown,
-  ArrowRight,
   Flame,
+  ExternalLink,
+  MoreVertical,
+  Check,
+  RotateCcw,
+  Sparkles,
+  Copy,
+  Tag,
+  BarChart2,
+  Code2,
 } from 'lucide-react';
 import { Question, CompanyMeta, UserStoreState, ProblemStatus, Difficulty } from '../types';
 import { isQuestionInTrack } from '../data/curatedLists';
 import { sounds } from '../utils/sound';
-import { DifficultyBadge } from './ui/DifficultyBadge';
-import { Button } from './ui/Button';
-import GlideSelect, { GlideSelectOption } from './ui/GlideSelect';
+import { CompanyLogoStack, getCompanyDisplayName } from './CompanyLogo';
 import { AdBanner } from './AdBanner';
 
 interface QuestionsPageProps {
@@ -40,17 +40,6 @@ interface QuestionsPageProps {
   onNavigateToProblem: (id: number | string) => void;
   onSelectCompany?: (companyId: string) => void;
 }
-
-const TOP_COMPANIES = [
-  { id: 'all', name: 'All Companies' },
-  { id: 'google', name: 'Google' },
-  { id: 'amazon', name: 'Amazon' },
-  { id: 'meta', name: 'Meta' },
-  { id: 'microsoft', name: 'Microsoft' },
-  { id: 'apple', name: 'Apple' },
-  { id: 'netflix', name: 'Netflix' },
-  { id: 'uber', name: 'Uber' },
-];
 
 export const TOP_ALGORITHMS = [
   'Dynamic Programming',
@@ -81,7 +70,6 @@ export function matchesTopicFilter(selected: string, qTopics: string[]): boolean
     const t = topic.toLowerCase().trim();
     if (t === s) return true;
 
-    // Graph paradigm: Graph Theory, BFS, DFS, Union-Find
     if (s === 'graph' || s === 'graphs') {
       return (
         t.includes('graph') ||
@@ -93,142 +81,159 @@ export function matchesTopicFilter(selected: string, qTopics: string[]): boolean
       );
     }
 
-    // Tree paradigm: Tree, Binary Tree, Binary Search Tree
     if (s === 'tree' || s === 'trees') {
       return t.includes('tree');
     }
 
-    // Dynamic Programming paradigm: Dynamic Programming, Memoization
     if (s === 'dynamic programming' || s === 'dp') {
       return t.includes('dynamic programming') || t.includes('memoization');
     }
 
-    // Array / Arrays & Hashing
     if (s === 'array' || s === 'arrays') {
       return t.includes('array');
     }
 
-    // String / Strings
     if (s === 'string' || s === 'strings') {
       return t.includes('string');
     }
 
-    // Hash Table / Hash Map / Arrays & Hashing
     if (s === 'hash table' || s === 'hash map' || s === 'hashing') {
       return t.includes('hash');
     }
 
-    // Stack
-    if (s === 'stack') {
-      return t.includes('stack');
-    }
+    if (s === 'stack') return t.includes('stack');
+    if (s === 'queue') return t.includes('queue');
+    if (s === 'heap' || s.includes('priority queue')) return t.includes('heap') || t.includes('priority queue');
+    if (s === 'linked list') return t.includes('linked list');
+    if (s === 'math') return t.includes('math') || t.includes('geometry');
+    if (s === 'binary search') return t.includes('binary search');
+    if (s === 'two pointers') return t.includes('two pointer') || t.includes('two-pointer');
+    if (s === 'sliding window') return t.includes('sliding window');
+    if (s === 'greedy') return t.includes('greedy');
+    if (s === 'backtracking') return t.includes('backtracking');
+    if (s === 'bit manipulation' || s === 'bit') return t.includes('bit');
 
-    // Queue
-    if (s === 'queue') {
-      return t.includes('queue');
-    }
-
-    // Heap / Priority Queue
-    if (s === 'heap' || s.includes('priority queue')) {
-      return t.includes('heap') || t.includes('priority queue');
-    }
-
-    // Linked List
-    if (s === 'linked list') {
-      return t.includes('linked list');
-    }
-
-    // Math & Geometry
-    if (s === 'math') {
-      return (
-        t.includes('math') ||
-        t.includes('geometry') ||
-        t.includes('combinatorics') ||
-        t.includes('number theory')
-      );
-    }
-
-    // Binary Search
-    if (s === 'binary search') {
-      return t.includes('binary search');
-    }
-
-    // Two Pointers
-    if (s === 'two pointers') {
-      return t.includes('two pointer') || t.includes('two-pointer');
-    }
-
-    // Sliding Window
-    if (s === 'sliding window') {
-      return t.includes('sliding window');
-    }
-
-    // Greedy
-    if (s === 'greedy') {
-      return t.includes('greedy');
-    }
-
-    // Backtracking
-    if (s === 'backtracking') {
-      return t.includes('backtracking');
-    }
-
-    // Bit Manipulation
-    if (s === 'bit manipulation' || s === 'bit') {
-      return t.includes('bit');
-    }
-
-    // General substring match
     return t.includes(s) || s.includes(t);
   });
 }
 
-const renderCompanyLogo = (company: string) => {
-  switch (company.toLowerCase()) {
-    case 'google':
-      return (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-        </svg>
-      );
-    case 'amazon':
-      return (
-        <div className="w-3.5 h-3.5 rounded bg-[#FF9900] text-black font-black text-[9px] flex items-center justify-center shrink-0">
-          a
-        </div>
-      );
-    case 'microsoft':
-      return (
-        <div className="w-3.5 h-3.5 grid grid-cols-2 gap-0.5 shrink-0">
-          <div className="bg-[#F25022] rounded-[1px]" />
-          <div className="bg-[#7FBA00] rounded-[1px]" />
-          <div className="bg-[#00A4EF] rounded-[1px]" />
-          <div className="bg-[#FFB900] rounded-[1px]" />
-        </div>
-      );
-    case 'meta':
-    case 'facebook':
-      return (
-        <svg className="w-3.5 h-3.5 shrink-0 text-[#0081FB]" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-        </svg>
-      );
-    case 'apple':
-      return (
-        <svg className="w-3.5 h-3.5 shrink-0 text-white" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.93-2.85-.9.04-1.99.6-2.61 1.34-.55.63-1.03 1.68-.9 2.71 1 .08 2.04-.45 2.58-1.2z"/>
-        </svg>
-      );
-    default:
-      return (
-        <span className="w-3.5 h-3.5 rounded bg-zinc-800 border border-white/10 text-[9px] font-sans flex items-center justify-center text-zinc-300">
-          {company.charAt(0).toUpperCase()}
+// Reusable custom dropdown menu for the toolbar
+interface FilterDropdownProps {
+  label: string;
+  icon: React.ReactNode;
+  value: string;
+  options: { value: string; label: React.ReactNode; textLabel?: string }[];
+  onChange: (value: string) => void;
+  searchable?: boolean;
+  minWidth?: string;
+}
+
+const FilterDropdown: React.FC<FilterDropdownProps> = ({
+  label,
+  icon,
+  value,
+  options,
+  onChange,
+  searchable = false,
+  minWidth = 'w-48',
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [filterSearch, setFilterSearch] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const activeOption = options.find((opt) => opt.value === value);
+  const isFiltered = value !== 'all' && value !== 'recent';
+
+  const visibleOptions = useMemo(() => {
+    if (!filterSearch.trim()) return options;
+    const q = filterSearch.toLowerCase().trim();
+    return options.filter((opt) => {
+      const text = (opt.textLabel || (typeof opt.label === 'string' ? opt.label : opt.value)).toLowerCase();
+      return text.includes(q);
+    });
+  }, [options, filterSearch]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => {
+          sounds.playClick();
+          setIsOpen(!isOpen);
+        }}
+        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer select-none border ${
+          isFiltered
+            ? 'bg-primary/10 border-primary/40 text-white'
+            : 'bg-[#11141A] border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20'
+        }`}
+      >
+        <span className={isFiltered ? 'text-primary' : 'text-zinc-400'}>{icon}</span>
+        <span className="truncate max-w-[120px]">
+          {activeOption ? (typeof activeOption.label === 'string' ? activeOption.label : activeOption.textLabel || label) : label}
         </span>
-      );
-  }
+        <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div
+          className={`absolute left-0 top-full mt-2 ${minWidth} p-1.5 bg-[#0D1117] border border-white/[0.12] rounded-xl shadow-2xl z-50 animate-fadeIn`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {searchable && (
+            <div className="p-1 pb-2 border-b border-white/[0.06] mb-1">
+              <input
+                type="text"
+                value={filterSearch}
+                onChange={(e) => setFilterSearch(e.target.value)}
+                placeholder="Search..."
+                className="w-full px-2.5 py-1 text-xs bg-[#161B22] border border-white/[0.08] rounded-md text-white placeholder-zinc-500 focus:outline-hidden focus:border-primary"
+                autoFocus
+              />
+            </div>
+          )}
+
+          <div className="max-h-56 overflow-y-auto space-y-0.5">
+            {visibleOptions.map((opt) => {
+              const isSelected = opt.value === value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    onChange(opt.value);
+                    setIsOpen(false);
+                    setFilterSearch('');
+                  }}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer text-left ${
+                    isSelected
+                      ? 'bg-primary text-white font-semibold'
+                      : 'text-zinc-300 hover:bg-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
+                </button>
+              );
+            })}
+            {visibleOptions.length === 0 && (
+              <p className="text-xs text-zinc-500 text-center py-2">No matching options</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const QuestionsPage: React.FC<QuestionsPageProps> = ({
@@ -243,22 +248,33 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Active filters from URL search params with defaults
+  // Active filters from URL search params
   const rawCompany = searchParams.get('company');
   const selectedCompany = rawCompany ? rawCompany.toLowerCase() : 'all';
-
   const selectedDifficulty = (searchParams.get('difficulty') as Difficulty | 'all') || 'all';
   const selectedTopic = searchParams.get('topic') || 'all';
   const selectedStatus = (searchParams.get('status') as ProblemStatus | 'favorite' | 'due-review' | 'all') || 'all';
   const curatedList = (searchParams.get('curated') || 'all') as UserStoreState['curatedList'];
-  const sortBy = (searchParams.get('sort') as 'frequency' | 'acceptance' | 'id' | 'title' | 'difficulty') || 'frequency';
-  const sortOrder = (searchParams.get('order') as 'asc' | 'desc') || 'desc';
+  const sortBy = (searchParams.get('sort') as string) || 'recent';
   const searchQuery = searchParams.get('search') || '';
-  const viewMode = (searchParams.get('view') as 'table' | 'card') || 'table';
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-  const pageSize = 50;
+  const pageSize = 25;
 
-  // Helper to update search params safely without dependency on previous searchParams object
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(curatedList !== 'all');
+  const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
+  const [activeStatusMenuId, setActiveStatusMenuId] = useState<string | number | null>(null);
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string | number>>(new Set());
+
+  // Close menus on outside click
+  useEffect(() => {
+    const handleOutside = () => {
+      setActiveMenuId(null);
+      setActiveStatusMenuId(null);
+    };
+    document.addEventListener('click', handleOutside);
+    return () => document.removeEventListener('click', handleOutside);
+  }, []);
+
   const updateFilters = useCallback(
     (patch: Record<string, string | number | undefined | null>) => {
       setSearchParams(
@@ -270,6 +286,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
               val === null ||
               val === '' ||
               val === 'all' ||
+              (key === 'sort' && val === 'recent') ||
               (key === 'page' && val === 1)
             ) {
               next.delete(key);
@@ -288,14 +305,14 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     [setSearchParams]
   );
 
-  // Distinct topics list from all questions
+  // Topics list
   const allTopics = useMemo(() => {
     const set = new Set<string>();
     questions.forEach((q) => q.topics?.forEach((t) => set.add(t)));
     return Array.from(set).sort();
   }, [questions]);
 
-  // All companies list sorted by question count
+  // Companies list
   const allCompaniesList = useMemo(() => {
     return Object.values(companies).sort((a, b) => (b.totalQuestions || 0) - (a.totalQuestions || 0));
   }, [companies]);
@@ -317,7 +334,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
           return false;
         }
 
-        // 3. Topic / DSA algorithm filter
+        // 3. Topic filter
         if (selectedTopic !== 'all') {
           if (!matchesTopicFilter(selectedTopic, q.topics)) return false;
         }
@@ -363,7 +380,6 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
               compObj['thirty-days'] ||
               compObj['three-months'] ||
               compObj['six-months'] ||
-              compObj['more-than-six-months'] ||
               '0.0%';
             return parseFloat(String(str).replace('%', '')) || 0;
           }
@@ -374,35 +390,25 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
           return parseFloat(String(item.acceptance || '0').replace('%', '')) || 0;
         };
 
-        let comparison = 0;
         switch (sortBy) {
           case 'frequency':
-            comparison = getFreq(a) - getFreq(b);
-            break;
+            return getFreq(b) - getFreq(a);
           case 'acceptance':
-            comparison = getAcc(a) - getAcc(b);
-            break;
-          case 'id':
-            comparison = (Number(a.id) || 0) - (Number(b.id) || 0);
-            break;
+            return getAcc(b) - getAcc(a);
+          case 'id-asc':
+            return (Number(a.id) || 0) - (Number(b.id) || 0);
+          case 'id-desc':
+            return (Number(b.id) || 0) - (Number(a.id) || 0);
           case 'title':
-            comparison = (a.title || '').localeCompare(b.title || '');
-            break;
+            return (a.title || '').localeCompare(b.title || '');
           case 'difficulty': {
             const rank: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
-            comparison = (rank[a.difficulty] || 2) - (rank[b.difficulty] || 2);
-            break;
+            return (rank[a.difficulty] || 2) - (rank[b.difficulty] || 2);
           }
+          case 'recent':
           default:
-            comparison = (Number(a.id) || 0) - (Number(b.id) || 0);
+            return (Number(a.id) || 0) - (Number(b.id) || 0);
         }
-
-        if (comparison !== 0) {
-          return sortOrder === 'desc' ? -comparison : comparison;
-        }
-
-        // Stable secondary tie-breaker by problem ID ascending
-        return (Number(a.id) || 0) - (Number(b.id) || 0);
       });
   }, [
     questions,
@@ -413,7 +419,6 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     selectedStatus,
     searchQuery,
     sortBy,
-    sortOrder,
     store.progress,
   ]);
 
@@ -425,951 +430,893 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     return filteredQuestions.slice(start, start + pageSize);
   }, [filteredQuestions, safePage, pageSize]);
 
-  const easyCount = useMemo(() => filteredQuestions.filter((q) => q.difficulty === 'Easy').length, [filteredQuestions]);
-  const medCount = useMemo(() => filteredQuestions.filter((q) => q.difficulty === 'Medium').length, [filteredQuestions]);
-  const hardCount = useMemo(() => filteredQuestions.filter((q) => q.difficulty === 'Hard').length, [filteredQuestions]);
+  // Metrics
+  const totalSolved = useMemo(() => {
+    return Object.values(store.progress || {}).filter(
+      (p) => p?.status === 'solved' || p?.status === 'mastered'
+    ).length;
+  }, [store.progress]);
 
-  const solvedCount = useMemo(() => {
-    return filteredQuestions.filter((q) => {
-      const st = store.progress[String(q.id)]?.status;
-      return st === 'solved' || st === 'mastered';
-    }).length;
-  }, [filteredQuestions, store.progress]);
+  const percentSolved = Math.min(
+    100,
+    Math.round((totalSolved / Math.max(questions.length, 1)) * 100)
+  );
+  const remainingCount = Math.max(0, questions.length - totalSolved);
 
-  // GlideSelect options
-  const curatedGlideOptions = useMemo(() => [
-    { value: 'all', label: 'All Sheets', tag: 'All', searchText: 'All Sheets' },
-    { value: 'sprint30', label: 'Top 30 Sprint', tag: 'Sprint', searchText: 'Top 30 Sprint' },
-    { value: 'blind75', label: 'Blind 75', tag: '75', searchText: 'Blind 75' },
-    { value: 'neetcode150', label: 'NeetCode 150', tag: '150', searchText: 'NeetCode 150' },
-    { value: 'striver180', label: 'Striver 180', tag: '180', searchText: 'Striver 180' },
-    { value: 'grind169', label: 'Grind 169', tag: '169', searchText: 'Grind 169' },
-  ], []);
+  // Checkbox selection
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const newSet = new Set(paginatedQuestions.map((q) => q.id));
+      setSelectedRowIds(newSet);
+    } else {
+      setSelectedRowIds(new Set());
+    }
+  };
 
-  const TOP_TECH_IDS = useMemo(() => new Set(['google', 'amazon', 'meta', 'microsoft', 'apple', 'netflix', 'uber']), []);
+  const handleToggleRowSelect = (id: string | number) => {
+    setSelectedRowIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
-  const companyGlideOptions = useMemo(() => {
-    const list: GlideSelectOption[] = [
-      {
-        value: 'all',
-        label: 'All Companies',
-        tag: `${allCompaniesList.length}`,
-        searchText: 'All Companies'
-      }
+  // Dropdown Options
+  const companyOptions = useMemo(() => {
+    const opts: { value: string; label: React.ReactNode; textLabel?: string }[] = [
+      { value: 'all', label: 'All Companies', textLabel: 'All Companies' },
     ];
-
     const topTech = [
-      { id: 'google', name: 'Google' },
-      { id: 'amazon', name: 'Amazon' },
-      { id: 'meta', name: 'Meta' },
-      { id: 'microsoft', name: 'Microsoft' },
-      { id: 'apple', name: 'Apple' },
-      { id: 'netflix', name: 'Netflix' },
-      { id: 'uber', name: 'Uber' },
+      'google',
+      'amazon',
+      'meta',
+      'microsoft',
+      'apple',
+      'netflix',
+      'uber',
+      'adobe',
+      'bloomberg',
+      'tiktok',
+      'oracle',
+      'salesforce',
     ];
 
-    topTech.forEach((c) => {
-      list.push({
-        value: c.id,
+    topTech.forEach((id) => {
+      opts.push({
+        value: id,
         label: (
-          <span className="flex items-center gap-1.5 truncate">
-            {renderCompanyLogo(c.id)}
-            <span className="truncate">{c.name}</span>
+          <span className="flex items-center gap-2 truncate">
+            <span className="font-medium truncate">{getCompanyDisplayName(id)}</span>
           </span>
         ),
-        tag: 'Top',
-        searchText: c.name
+        textLabel: getCompanyDisplayName(id),
       });
     });
 
     allCompaniesList
-      .filter((c) => !TOP_TECH_IDS.has(c.id.toLowerCase()))
+      .filter((c) => !topTech.includes(c.id.toLowerCase()))
       .forEach((c) => {
-        list.push({
+        opts.push({
           value: c.id,
           label: (
-            <span className="flex items-center gap-1.5 truncate">
-              {renderCompanyLogo(c.id)}
-              <span className="truncate">{c.name}</span>
+            <span className="flex items-center justify-between gap-2 w-full truncate">
+              <span className="truncate">{c.name || c.id}</span>
+              <span className="text-[10px] text-zinc-500 font-mono shrink-0">{c.totalQuestions}</span>
             </span>
           ),
-          tag: `${c.totalQuestions}Q`,
-          searchText: c.name
+          textLabel: c.name || c.id,
         });
       });
 
-    if (selectedCompany !== 'all' && !list.some((it) => it.value.toLowerCase() === selectedCompany.toLowerCase())) {
-      const cMeta = companies[selectedCompany.toLowerCase()] || companies[selectedCompany];
-      const displayName = cMeta?.name || (selectedCompany.charAt(0).toUpperCase() + selectedCompany.slice(1));
-      list.push({
-        value: selectedCompany,
+    return opts;
+  }, [allCompaniesList]);
+
+  const difficultyOptions = useMemo(
+    () => [
+      { value: 'all', label: 'All Difficulty', textLabel: 'All Difficulty' },
+      {
+        value: 'Easy',
         label: (
-          <span className="flex items-center gap-1.5 truncate">
-            {renderCompanyLogo(selectedCompany)}
-            <span className="truncate">{displayName}</span>
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>Easy</span>
           </span>
         ),
-        tag: cMeta ? `${cMeta.totalQuestions}Q` : 'Selected',
-        searchText: displayName,
-      });
-    }
+        textLabel: 'Easy',
+      },
+      {
+        value: 'Medium',
+        label: (
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <span>Medium</span>
+          </span>
+        ),
+        textLabel: 'Medium',
+      },
+      {
+        value: 'Hard',
+        label: (
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-rose-400" />
+            <span>Hard</span>
+          </span>
+        ),
+        textLabel: 'Hard',
+      },
+    ],
+    []
+  );
 
-    return list;
-  }, [allCompaniesList, TOP_TECH_IDS, selectedCompany, companies]);
-
-  const topicGlideOptions = useMemo(() => {
-    const list: GlideSelectOption[] = [
-      { value: 'all', label: 'All Topics', tag: `${questions.length}`, searchText: 'All Topics' }
-    ];
-
-    TOP_ALGORITHMS.forEach((algo) => {
-      const matchCount = questions.filter((q) => matchesTopicFilter(algo, q.topics)).length;
-      list.push({
-        value: algo,
-        label: algo,
-        tag: `${matchCount}`,
-        searchText: algo
-      });
-    });
-
-    const algoSet = new Set(TOP_ALGORITHMS.map((a) => a.toLowerCase()));
+  const topicOptions = useMemo(() => {
+    const opts = [{ value: 'all', label: 'All Topics', textLabel: 'All Topics' }];
+    TOP_ALGORITHMS.forEach((t) => opts.push({ value: t, label: t, textLabel: t }));
     allTopics
-      .filter((t) => !algoSet.has(t.toLowerCase()))
-      .forEach((t) => {
-        const count = questions.filter((q) => q.topics.some((item) => item.toLowerCase() === t.toLowerCase())).length;
-        list.push({
-          value: t,
-          label: t,
-          tag: `${count}`,
-          searchText: t
-        });
+      .filter((t) => !TOP_ALGORITHMS.includes(t))
+      .forEach((t) => opts.push({ value: t, label: t, textLabel: t }));
+    return opts;
+  }, [allTopics]);
+
+  const statusOptions = useMemo(
+    () => [
+      { value: 'all', label: 'All Status', textLabel: 'All Status' },
+      {
+        value: 'todo',
+        label: (
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-zinc-400" />
+            <span>Todo</span>
+          </span>
+        ),
+        textLabel: 'Todo',
+      },
+      {
+        value: 'in-progress',
+        label: (
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-400" />
+            <span>In Progress</span>
+          </span>
+        ),
+        textLabel: 'In Progress',
+      },
+      {
+        value: 'solved',
+        label: (
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>Solved</span>
+          </span>
+        ),
+        textLabel: 'Solved',
+      },
+      {
+        value: 'favorite',
+        label: (
+          <span className="flex items-center gap-2">
+            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+            <span>Starred</span>
+          </span>
+        ),
+        textLabel: 'Starred',
+      },
+    ],
+    []
+  );
+
+  const sortOptions = useMemo(
+    () => [
+      { value: 'recent', label: 'Recent', textLabel: 'Recent' },
+      { value: 'frequency', label: 'Frequency: High → Low', textLabel: 'Frequency' },
+      { value: 'acceptance', label: 'Acceptance: High → Low', textLabel: 'Acceptance' },
+      { value: 'id-asc', label: 'ID: 1 → N', textLabel: 'ID Ascending' },
+      { value: 'id-desc', label: 'ID: N → 1', textLabel: 'ID Descending' },
+      { value: 'title', label: 'Title: A → Z', textLabel: 'Title' },
+      { value: 'difficulty', label: 'Difficulty: Easy → Hard', textLabel: 'Difficulty' },
+    ],
+    []
+  );
+
+  const curatedOptions = [
+    { value: 'all', label: 'All Questions' },
+    { value: 'sprint30', label: 'Top 30 Sprint' },
+    { value: 'blind75', label: 'Blind 75' },
+    { value: 'neetcode150', label: 'NeetCode 150' },
+    { value: 'striver180', label: 'Striver 180' },
+    { value: 'grind169', label: 'Grind 169' },
+  ];
+
+  // Active filter pills list
+  const activeFilters = useMemo(() => {
+    const list: { key: string; label: string; clear: () => void }[] = [];
+
+    if (selectedCompany !== 'all') {
+      list.push({
+        key: 'company',
+        label: `Company: ${getCompanyDisplayName(selectedCompany)}`,
+        clear: () => updateFilters({ company: 'all' }),
       });
+    }
+
+    if (selectedDifficulty !== 'all') {
+      list.push({
+        key: 'difficulty',
+        label: `Difficulty: ${selectedDifficulty}`,
+        clear: () => updateFilters({ difficulty: 'all' }),
+      });
+    }
+
+    if (selectedTopic !== 'all') {
+      list.push({
+        key: 'topic',
+        label: `Topic: ${selectedTopic}`,
+        clear: () => updateFilters({ topic: 'all' }),
+      });
+    }
+
+    if (selectedStatus !== 'all') {
+      list.push({
+        key: 'status',
+        label: `Status: ${selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1)}`,
+        clear: () => updateFilters({ status: 'all' }),
+      });
+    }
+
+    if (curatedList !== 'all') {
+      const cur = curatedOptions.find((c) => c.value === curatedList);
+      list.push({
+        key: 'curated',
+        label: `List: ${cur?.label || curatedList}`,
+        clear: () => updateFilters({ curated: 'all' }),
+      });
+    }
+
+    if (searchQuery) {
+      list.push({
+        key: 'search',
+        label: `Search: "${searchQuery}"`,
+        clear: () => updateFilters({ search: '' }),
+      });
+    }
 
     return list;
-  }, [allTopics, questions]);
-
-  const difficultyGlideOptions = useMemo(() => [
-    { value: 'all', label: 'All Diff', tag: 'All', searchText: 'All Diff' },
-    {
-      value: 'Easy',
-      label: (
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          <span>Easy</span>
-        </span>
-      ),
-      tag: `${easyCount}`,
-      searchText: 'Easy'
-    },
-    {
-      value: 'Medium',
-      label: (
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-          <span>Medium</span>
-        </span>
-      ),
-      tag: `${medCount}`,
-      searchText: 'Medium'
-    },
-    {
-      value: 'Hard',
-      label: (
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-          <span>Hard</span>
-        </span>
-      ),
-      tag: `${hardCount}`,
-      searchText: 'Hard'
-    },
-  ], [easyCount, medCount, hardCount]);
-
-  const statusGlideOptions = useMemo(() => [
-    { value: 'all', label: 'All Status', tag: `${totalCount}`, searchText: 'All Status' },
-    {
-      value: 'todo',
-      label: (
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-          <span>Todo</span>
-        </span>
-      ),
-      tag: 'New',
-      searchText: 'Todo'
-    },
-    {
-      value: 'in-progress',
-      label: (
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-          <span>In Progress</span>
-        </span>
-      ),
-      tag: 'WIP',
-      searchText: 'In Progress'
-    },
-    {
-      value: 'solved',
-      label: (
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          <span>Solved</span>
-        </span>
-      ),
-      tag: `${solvedCount}`,
-      searchText: 'Solved'
-    },
-    {
-      value: 'due-review',
-      label: (
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-          <span>Review</span>
-        </span>
-      ),
-      tag: 'Spaced',
-      searchText: 'Review'
-    },
-    {
-      value: 'favorite',
-      label: (
-        <span className="flex items-center gap-1.5">
-          <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-          <span>Starred</span>
-        </span>
-      ),
-      tag: 'Saved',
-      searchText: 'Starred'
-    },
-  ], [totalCount, solvedCount]);
-
-  const sortGlideOptions = useMemo(() => [
-    { value: 'frequency-desc', label: 'Freq: High → Low', tag: 'Popular', searchText: 'Frequency High' },
-    { value: 'frequency-asc', label: 'Freq: Low → High', tag: 'Rare', searchText: 'Frequency Low' },
-    { value: 'acceptance-desc', label: 'Acc: High → Low', tag: 'Easiest', searchText: 'Acceptance High' },
-    { value: 'acceptance-asc', label: 'Acc: Low → High', tag: 'Hardest', searchText: 'Acceptance Low' },
-    { value: 'id-asc', label: 'ID: 1 → N', tag: 'Index', searchText: 'ID Ascending' },
-    { value: 'id-desc', label: 'ID: N → 1', tag: 'Latest', searchText: 'ID Descending' },
-    { value: 'title-asc', label: 'Title: A → Z', tag: 'Alpha', searchText: 'Title A-Z' },
-    { value: 'difficulty-asc', label: 'Diff: Easy → Hard', tag: 'Asc', searchText: 'Difficulty Easy' },
-    { value: 'difficulty-desc', label: 'Diff: Hard → Easy', tag: 'Desc', searchText: 'Difficulty Hard' },
-  ], []);
-
-  const rowStatusOptions: GlideSelectOption[] = useMemo(() => [
-    {
-      value: 'todo',
-      label: (
-        <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
-          <span>Todo</span>
-        </span>
-      ),
-      searchText: 'Todo'
-    },
-    {
-      value: 'in-progress',
-      label: (
-        <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-          <span>In Progress</span>
-        </span>
-      ),
-      searchText: 'In Progress'
-    },
-    {
-      value: 'solved',
-      label: (
-        <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-          <span>Solved</span>
-        </span>
-      ),
-      searchText: 'Solved'
-    },
-    {
-      value: 'review',
-      label: (
-        <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
-          <span>Review</span>
-        </span>
-      ),
-      searchText: 'Review'
-    },
-    {
-      value: 'mastered',
-      label: (
-        <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-          <span>Mastered</span>
-        </span>
-      ),
-      searchText: 'Mastered'
-    },
-  ], []);
-
-  const getRowStatusTheme = (st: ProblemStatus) => {
-    switch (st) {
-      case 'solved':
-        return {
-          accentColor: '#10b981',
-          textColor: '#34d399',
-          surfaceColor: 'rgba(16, 185, 129, 0.12)',
-          highlightColor: '#133526',
-        };
-      case 'mastered':
-        return {
-          accentColor: '#06b6d4',
-          textColor: '#22d3ee',
-          surfaceColor: 'rgba(6, 182, 212, 0.12)',
-          highlightColor: '#10333d',
-        };
-      case 'in-progress':
-        return {
-          accentColor: '#f59e0b',
-          textColor: '#fbbf24',
-          surfaceColor: 'rgba(245, 158, 11, 0.12)',
-          highlightColor: '#2b2210',
-        };
-      case 'review':
-        return {
-          accentColor: '#a855f7',
-          textColor: '#c084fc',
-          surfaceColor: 'rgba(168, 85, 247, 0.12)',
-          highlightColor: '#261538',
-        };
-      default:
-        return {
-          accentColor: '#71717a',
-          textColor: '#d1d5db',
-          surfaceColor: '#11141A',
-          highlightColor: '#1C222D',
-        };
-    }
-  };
-
-  const hasActiveFilters =
-    selectedCompany !== 'all' ||
-    selectedDifficulty !== 'all' ||
-    selectedTopic !== 'all' ||
-    selectedStatus !== 'all' ||
-    curatedList !== 'all' ||
-    searchQuery !== '';
+  }, [selectedCompany, selectedDifficulty, selectedTopic, selectedStatus, curatedList, searchQuery, updateFilters]);
 
   const clearAllFilters = () => {
     sounds.playClick();
     setSearchParams(new URLSearchParams(), { replace: true });
   };
 
+  // Pagination calculation
+  const getPaginationPages = (current: number, total: number) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    if (current <= 3) {
+      return [1, 2, 3, 4, 5, '...', total];
+    }
+    if (current >= total - 3) {
+      return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+    }
+    return [1, '...', current - 1, current, current + 1, '...', total];
+  };
+
+  const isPopularQuestion = (q: Question) => {
+    const compCount = Object.keys(q.companies || {}).length;
+    return q.isBlind75 || q.isGrind169 || compCount >= 5;
+  };
+
   return (
     <div className="p-5 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-[#F3F4F6] font-sans">
-      {/* Top Banner & Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
+      {/* 1. Page Header matching reference */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold tracking-wider text-zinc-400 uppercase">
-              EXPLORE QUESTIONS
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-accent-subtle text-accent border border-accent-subtle text-[11px] font-semibold">
-              {questions.length.toLocaleString()} Questions
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
-            Interview Questions
+          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider font-mono">
+            PRACTICE &gt; QUESTIONS
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-0.5">
+            Questions
           </h1>
-          <p className="text-sm text-zinc-400 mt-1 max-w-2xl">
-            Unified question tracker across 659 companies, curated lists, and core DSA algorithmic paradigms.
+          <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+            Find and practice company-specific coding questions.
           </p>
         </div>
 
-        {/* Quick KPI stats strip */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="px-3.5 py-2 rounded-xl bg-[#0E1217] border border-white/[0.08] text-center">
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium">Matching</p>
-            <p className="text-sm font-bold text-white font-mono">{totalCount.toLocaleString()}</p>
+        {/* Atmospheric Slogan matching reference image */}
+        <div className="hidden md:block text-right select-none">
+          <p className="text-base font-bold text-zinc-400 leading-tight">
+            Better Developers
+          </p>
+          <p className="text-base font-bold text-purple-400/90 leading-tight">
+            Brighter Futures.
+          </p>
+        </div>
+      </div>
+
+      {/* 2. Top 4 Metric Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Total Questions */}
+        <div className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] p-4 sm:p-5 flex items-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center text-primary shrink-0">
+            <BookOpen className="w-5 h-5" />
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-[#0E1217] border border-white/[0.08] text-center">
-            <p className="text-[10px] text-emerald-400 uppercase tracking-wider font-medium">Easy</p>
-            <p className="text-sm font-bold text-emerald-400 font-mono">{easyCount}</p>
+          <div>
+            <p className="text-2xl font-bold text-white tracking-tight leading-none font-sans">
+              {questions.length.toLocaleString()}
+            </p>
+            <p className="text-xs text-zinc-400 mt-1 font-sans">Total Questions</p>
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-[#0E1217] border border-white/[0.08] text-center">
-            <p className="text-[10px] text-amber-400 uppercase tracking-wider font-medium">Medium</p>
-            <p className="text-sm font-bold text-amber-400 font-mono">{medCount}</p>
+        </div>
+
+        {/* Card 2: Solved */}
+        <div className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] p-4 sm:p-5 flex items-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-[#0E1217] border border-white/[0.08] text-center">
-            <p className="text-[10px] text-rose-400 uppercase tracking-wider font-medium">Hard</p>
-            <p className="text-sm font-bold text-rose-400 font-mono">{hardCount}</p>
+          <div>
+            <p className="text-2xl font-bold text-white tracking-tight leading-none font-sans">
+              {totalSolved.toLocaleString()}
+            </p>
+            <p className="text-xs text-zinc-400 mt-1 font-sans">Solved ({percentSolved}%)</p>
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-[#0E1217] border border-white/[0.08] text-center">
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium">Solved</p>
-            <p className="text-sm font-bold text-accent font-mono">{solvedCount}</p>
+        </div>
+
+        {/* Card 3: Remaining */}
+        <div className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] p-4 sm:p-5 flex items-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-purple-500/15 border border-purple-500/25 flex items-center justify-center text-purple-400 shrink-0">
+            <Clock className="w-5 h-5" />
           </div>
+          <div>
+            <p className="text-2xl font-bold text-white tracking-tight leading-none font-sans">
+              {remainingCount.toLocaleString()}
+            </p>
+            <p className="text-xs text-zinc-400 mt-1 font-sans">Remaining</p>
+          </div>
+        </div>
+
+        {/* Card 4: Action CTA Card */}
+        <div
+          onClick={() => {
+            sounds.playClick();
+            navigate('/practice');
+          }}
+          className="rounded-xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] hover:border-primary/40 p-4 sm:p-5 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center text-primary group-hover:scale-105 transition-transform shrink-0">
+              <BarChart2 className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white font-sans group-hover:text-primary transition-colors leading-tight">
+                Keep practicing!
+              </p>
+              <p className="text-xs text-zinc-400 mt-1 font-sans">
+                Consistency beats everything.
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
         </div>
       </div>
 
       {/* Top Banner Ad (Free Tier only) */}
-      <AdBanner format="horizontal" variant="aws" slotId="questions-top-banner" className="my-2" />
+      <AdBanner format="horizontal" variant="aws" slotId="questions-top-banner" className="my-1" />
 
-      {/* Sleek Single-Line Filter Toolbar */}
-      <div className="bg-[#0E1217] border border-white/[0.08] rounded-xl p-2 sm:p-2.5 relative z-30">
-        <div className="flex items-center gap-1.5 flex-wrap lg:flex-nowrap">
-          {/* Search Input */}
-          <div className="relative shrink-0 w-36 lg:w-44 xl:w-52">
-            <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+      {/* 3. Search and Filters Toolbar matching reference image */}
+      <div className="space-y-3">
+        <div className="bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] rounded-2xl p-2.5 sm:p-3 flex items-center gap-2 flex-wrap lg:flex-nowrap">
+          {/* Search Box */}
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => updateFilters({ search: e.target.value })}
-              placeholder="Search ID, title, topic..."
-              className="w-full pl-8 pr-7 py-1.5 text-xs bg-[#11141A] border border-white/[0.08] focus:border-accent rounded-lg text-white placeholder-zinc-500 focus:outline-hidden transition-colors"
+              placeholder="Search questions by title or ID..."
+              className="w-full pl-9 pr-8 py-2 text-xs bg-[#161B22] border border-white/[0.08] focus:border-primary rounded-xl text-white placeholder-zinc-500 focus:outline-hidden transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => updateFilters({ search: '' })}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white cursor-pointer"
               >
-                <X className="w-3 h-3" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Curated List GlideSelect */}
-          <GlideSelect
-            options={curatedGlideOptions}
-            value={curatedList}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ curated: val });
-            }}
-            icon={<Sparkles className="w-3.5 h-3.5" />}
-            size="sm"
-            menuWidth={180}
-            radius={8}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={curatedList !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Curated Study Sheets"
-          />
-
-          {/* Company GlideSelect */}
-          <GlideSelect
-            options={companyGlideOptions}
-            value={selectedCompany}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ company: val });
-            }}
+          {/* Company Filter */}
+          <FilterDropdown
+            label="All Companies"
             icon={<Building2 className="w-3.5 h-3.5" />}
-            size="sm"
-            menuWidth={220}
-            radius={8}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={selectedCompany !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Company Filter"
+            value={selectedCompany}
+            options={companyOptions}
+            onChange={(val) => updateFilters({ company: val })}
+            searchable
+            minWidth="w-56"
           />
 
-          {/* DSA Algorithm / Topic GlideSelect */}
-          <GlideSelect
-            options={topicGlideOptions}
-            value={selectedTopic}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ topic: val });
-            }}
-            icon={<Code2 className="w-3.5 h-3.5" />}
-            size="sm"
-            menuWidth={210}
-            radius={8}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={selectedTopic !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Algorithm Paradigm / Topic Filter"
-          />
-
-          {/* Difficulty GlideSelect */}
-          <GlideSelect
-            options={difficultyGlideOptions}
-            value={selectedDifficulty}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ difficulty: val as Difficulty | 'all' });
-            }}
+          {/* Difficulty Filter */}
+          <FilterDropdown
+            label="All Difficulty"
             icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
-            size="sm"
-            menuWidth={135}
-            radius={8}
-            accentColor={
-              selectedDifficulty === 'Easy' ? '#34D399' :
-              selectedDifficulty === 'Medium' ? '#FBBF24' :
-              selectedDifficulty === 'Hard' ? '#FB7185' : 'var(--theme-accent, #A855F7)'
-            }
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={selectedDifficulty !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Difficulty Filter"
+            value={selectedDifficulty}
+            options={difficultyOptions}
+            onChange={(val) => updateFilters({ difficulty: val as Difficulty | 'all' })}
+            minWidth="w-40"
           />
 
-          {/* Status GlideSelect */}
-          <GlideSelect
-            options={statusGlideOptions}
-            value={selectedStatus}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ status: val as ProblemStatus | 'favorite' | 'due-review' | 'all' });
-            }}
+          {/* Topic Filter */}
+          <FilterDropdown
+            label="All Topics"
+            icon={<Tag className="w-3.5 h-3.5" />}
+            value={selectedTopic}
+            options={topicOptions}
+            onChange={(val) => updateFilters({ topic: val })}
+            searchable
+            minWidth="w-52"
+          />
+
+          {/* Status Filter */}
+          <FilterDropdown
+            label="All Status"
             icon={<CheckCircle2 className="w-3.5 h-3.5" />}
-            size="sm"
-            menuWidth={155}
-            radius={8}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={selectedStatus !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Problem Status Filter"
+            value={selectedStatus}
+            options={statusOptions}
+            onChange={(val) => updateFilters({ status: val as ProblemStatus | 'favorite' | 'due-review' | 'all' })}
+            minWidth="w-44"
           />
 
-          {/* Sort GlideSelect */}
-          <GlideSelect
-            options={sortGlideOptions}
-            value={`${sortBy}-${sortOrder}`}
-            onChange={(val) => {
-              sounds.playClick();
-              const [by, order] = val.split('-') as [typeof sortBy, 'asc' | 'desc'];
-              updateFilters({ sort: by, order });
-            }}
+          {/* Sort Dropdown */}
+          <FilterDropdown
+            label="Recent"
             icon={<ArrowUpDown className="w-3.5 h-3.5" />}
-            size="sm"
-            menuWidth={195}
-            radius={8}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className="shrink-0"
-            ariaLabel="Sort Questions"
+            value={sortBy}
+            options={sortOptions}
+            onChange={(val) => updateFilters({ sort: val })}
+            minWidth="w-48"
           />
 
-          {/* Reset Filters Button (when active) */}
-          {hasActiveFilters && (
+          {/* Advanced Filters Button */}
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              setShowAdvancedFilters(!showAdvancedFilters);
+            }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none border shrink-0 ${
+              showAdvancedFilters || curatedList !== 'all'
+                ? 'bg-primary text-white border-primary shadow-sm'
+                : 'bg-[#161B22] text-zinc-300 hover:text-white border-white/[0.08] hover:border-white/20'
+            }`}
+          >
+            <Filter className="w-3.5 h-3.5" />
+            <span>Advanced Filters</span>
+          </button>
+        </div>
+
+        {/* Expandable Advanced Curated Study Sheets Bar */}
+        {showAdvancedFilters && (
+          <div className="bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] rounded-xl p-3 flex items-center gap-2 flex-wrap animate-fadeIn">
+            <span className="text-xs text-zinc-400 font-medium flex items-center gap-1 mr-1 font-mono">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <span>Curated Tracks:</span>
+            </span>
+            {curatedOptions.map((opt) => {
+              const isActive = curatedList === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    sounds.playClick();
+                    updateFilters({ curated: opt.value });
+                  }}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
+                    isActive
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'bg-[#161B22] text-zinc-400 hover:text-white border-white/[0.06] hover:border-white/15'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Active Filter Chips Strip */}
+        {activeFilters.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap pt-1 text-xs">
+            {activeFilters.map((f) => (
+              <span
+                key={f.key}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#161B22] text-zinc-300 border border-white/[0.08]"
+              >
+                <span>{f.label}</span>
+                <button
+                  onClick={f.clear}
+                  className="hover:text-white text-zinc-500 cursor-pointer transition-colors"
+                  title="Remove filter"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
             <button
               onClick={clearAllFilters}
-              className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-semibold text-accent bg-accent/10 border border-accent/30 hover:bg-accent/20 transition-all cursor-pointer shrink-0 ml-auto"
-              title="Reset all filters"
+              className="text-primary hover:text-purple-300 font-semibold cursor-pointer transition-colors ml-1"
             >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset</span>
-            </button>
-          )}
-
-          {/* View Mode Toggle */}
-          <div className={`flex items-center bg-[#11141A] border border-white/[0.08] p-0.5 rounded-lg shrink-0 ${!hasActiveFilters ? 'ml-auto' : ''}`}>
-            <button
-              onClick={() => {
-                sounds.playClick();
-                updateFilters({ view: 'table' });
-              }}
-              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                viewMode === 'table' ? 'bg-accent text-black font-semibold' : 'text-zinc-400 hover:text-white'
-              }`}
-              title="Table View"
-            >
-              <List className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => {
-                sounds.playClick();
-                updateFilters({ view: 'card' });
-              }}
-              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                viewMode === 'card' ? 'bg-accent text-black font-semibold' : 'text-zinc-400 hover:text-white'
-              }`}
-              title="Card View"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
+              Clear all
             </button>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Questions List / Table */}
-      {viewMode === 'table' ? (
-        <div className="bg-[#0E1217] border border-white/[0.08] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto min-h-[420px]">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="text-xs text-zinc-400 border-b border-white/[0.06] bg-white/[0.01]">
-                  <th className="py-3 px-4 w-12 font-mono text-xs">#</th>
-                  <th className="py-3 px-4 font-medium">Question</th>
-                  <th className="py-3 px-4 font-medium w-28">Difficulty</th>
-                  <th className="py-3 px-4 font-medium">DSA Topics</th>
-                  <th className="py-3 px-4 font-medium">
-                    {selectedCompany !== 'all' ? 'Frequency' : 'Companies'}
-                  </th>
-                  <th className="py-3 px-4 font-medium w-24">Acceptance</th>
-                  <th className="py-3 px-4 font-medium w-32">Status</th>
-                  <th className="py-3 px-4 font-medium text-right w-24">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {paginatedQuestions.map((q) => {
-                  const p = store.progress[String(q.id)];
-                  const status = p?.status || 'todo';
-                  const statusTheme = getRowStatusTheme(status as ProblemStatus);
-                  const isFav = !!p?.isFavorite;
-                  const companyKeys = Object.keys(q.companies || {});
+      {/* 4. Questions Table matching the reference layout */}
+      <div className="rounded-2xl bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] overflow-hidden shadow-xl">
+        <div className="overflow-x-auto min-h-[440px]">
+          <table className="w-full text-left border-collapse text-sm font-sans">
+            <thead>
+              <tr className="text-xs text-zinc-400 border-b border-white/[0.08] bg-white/[0.01]">
+                <th className="py-3.5 px-4 w-10">
+                  <input
+                    type="checkbox"
+                    checked={selectedRowIds.size === paginatedQuestions.length && paginatedQuestions.length > 0}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="w-4 h-4 rounded border-zinc-700 bg-[#161B22] text-primary focus:ring-primary/20 cursor-pointer"
+                  />
+                </th>
+                <th className="py-3.5 px-3 w-12 font-mono text-zinc-500 font-normal">#</th>
+                <th className="py-3.5 px-4 font-semibold text-zinc-300 min-w-[260px]">Question</th>
+                <th className="py-3.5 px-4 font-semibold text-zinc-300 w-28">Difficulty</th>
+                <th className="py-3.5 px-4 font-semibold text-zinc-300 min-w-[180px]">Topics</th>
+                <th className="py-3.5 px-4 font-semibold text-zinc-300 min-w-[180px]">Companies</th>
+                <th className="py-3.5 px-4 font-semibold text-zinc-300 w-36">Status</th>
+                <th className="py-3.5 px-4 font-semibold text-zinc-300 text-right w-32">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04]">
+              {paginatedQuestions.map((q, idx) => {
+                const p = store.progress[String(q.id)];
+                const status = p?.status || 'todo';
+                const isFav = !!p?.isFavorite;
+                const companyKeys = Object.keys(q.companies || {});
+                const isChecked = selectedRowIds.has(q.id);
+                const isPopular = isPopularQuestion(q);
+                const rowNumber = (safePage - 1) * pageSize + idx + 1;
 
-                  return (
-                    <tr
-                      key={q.id}
-                      onClick={() => {
-                        sounds.playClick();
-                        onNavigateToProblem(q.id);
-                      }}
-                      className="hover:bg-white/[0.03] transition-colors cursor-pointer group"
-                    >
-                      {/* ID */}
-                      <td className="py-3.5 px-4 font-mono text-zinc-500 text-xs">{q.id}</td>
-
-                      {/* Title */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-zinc-200 group-hover:text-accent transition-colors">
-                            {q.title}
-                          </span>
-                          {q.isBlind75 && (
-                            <span className="px-1.5 py-0.2 rounded bg-accent-subtle text-accent text-[9px] font-mono font-medium border border-accent-subtle">
-                              B75
-                            </span>
-                          )}
-                          {q.isGrind169 && (
-                            <span className="px-1.5 py-0.2 rounded bg-purple-400/10 text-purple-400 text-[9px] font-mono font-medium border border-purple-400/25">
-                              G169
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Difficulty */}
-                      <td className="py-3.5 px-4">
-                        <DifficultyBadge difficulty={q.difficulty} size="sm" />
-                      </td>
-
-                      {/* DSA Topics */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5 flex-wrap max-w-sm">
-                          {q.topics.slice(0, 3).map((t) => (
-                            <span
-                              key={t}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                sounds.playClick();
-                                updateFilters({ topic: t });
-                              }}
-                              className="px-2 py-0.5 rounded text-xs bg-[#11141A] text-zinc-400 border border-white/[0.06] hover:text-white transition-colors"
-                            >
-                              {t}
-                            </span>
-                          ))}
-                          {q.topics.length > 3 && (
-                            <span className="text-[11px] text-zinc-500">
-                              +{q.topics.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Companies / Frequency */}
-                      <td className="py-3.5 px-4">
-                        {selectedCompany !== 'all' ? (
-                          (() => {
-                            const compKey = selectedCompany.toLowerCase();
-                            const compObj = q.companies[compKey] || q.companies[selectedCompany] || {};
-                            const freqStr =
-                              compObj.all ||
-                              compObj['thirty-days'] ||
-                              compObj['three-months'] ||
-                              compObj['six-months'] ||
-                              compObj['more-than-six-months'] ||
-                              '0.0%';
-                            const freqVal = parseFloat(freqStr.replace('%', '')) || 0;
-                            const isHot = freqVal >= 75;
-                            const compName = companies[compKey]?.name || selectedCompany;
-                            return (
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-bold border transition-colors ${
-                                    isHot
-                                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                      : 'bg-white/[0.04] text-zinc-300 border-white/[0.08]'
-                                  }`}
-                                  title={`${freqStr} interview frequency at ${compName}`}
-                                >
-                                  {isHot && <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />}
-                                  <span>{freqStr}</span>
-                                </span>
-                                {companyKeys.length > 1 && (
-                                  <span
-                                    className="text-[11px] text-zinc-500 font-sans"
-                                    title={`Also asked by ${companyKeys.length - 1} other companies`}
-                                  >
-                                    +{companyKeys.length - 1} cos
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })()
-                        ) : (
-                          <div className="flex items-center gap-1.5">
-                            {companyKeys.slice(0, 3).map((comp) => (
-                              <span
-                                key={comp}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  sounds.playClick();
-                                  updateFilters({ company: comp });
-                                }}
-                                title={comp}
-                                className="p-1 rounded-md bg-[#11141A] border border-white/[0.06] hover:border-white/20 transition-colors cursor-pointer"
-                              >
-                                {renderCompanyLogo(comp)}
-                              </span>
-                            ))}
-                            {companyKeys.length > 3 && (
-                              <span className="text-xs text-zinc-500 font-mono font-medium">
-                                +{companyKeys.length - 3}
-                              </span>
-                            )}
-                            <span className="text-[11px] text-zinc-500 ml-1 font-mono hidden xl:inline">
-                              ({companyKeys.length})
-                            </span>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Acceptance */}
-                      <td className="py-3.5 px-4 font-mono text-zinc-400 text-xs">
-                        {q.acceptance}
-                      </td>
-
-                      {/* Status */}
-                      <td
-                        className="py-3.5 px-4 relative z-0 has-[[aria-expanded=true]]:z-30"
-                        onClick={(e) => e.stopPropagation()}
-                        onPointerDown={(e) => e.stopPropagation()}
-                      >
-                        <div className="flex items-center gap-2">
-                          <GlideSelect
-                            options={rowStatusOptions}
-                            value={status}
-                            onChange={(val) => {
-                              sounds.playClick();
-                              onUpdateStatus(q.id, val as ProblemStatus);
-                            }}
-                            showTags={false}
-                            size="sm"
-                            menuWidth={136}
-                            radius={8}
-                            accentColor={statusTheme.accentColor}
-                            surfaceColor={statusTheme.surfaceColor}
-                            highlightColor={statusTheme.highlightColor}
-                            textColor={statusTheme.textColor}
-                            className="shrink-0"
-                            ariaLabel={`Status for ${q.title}`}
-                          />
-
-                          <button
-                            onClick={() => {
-                              sounds.playClick();
-                              onToggleFavorite(q.id);
-                            }}
-                            className="p-1 rounded text-zinc-500 hover:text-accent transition-colors"
-                            title="Bookmark"
-                          >
-                            <Star
-                              className={`w-4 h-4 ${
-                                isFav ? 'text-accent fill-accent' : 'text-zinc-600 hover:text-zinc-400'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* Action */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              sounds.playClick();
-                              onNavigateToProblem(q.id);
-                            }}
-                            className="px-3 py-1 rounded-lg bg-accent hover:opacity-90 text-black font-semibold text-xs transition-all cursor-pointer"
-                          >
-                            Solve &rarr;
-                          </button>
-                          <a
-                            href={q.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="p-1 rounded text-zinc-500 hover:text-white transition-colors"
-                            title="Open on LeetCode"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
-        /* Card Grid View */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paginatedQuestions.map((q) => {
-            const p = store.progress[String(q.id)];
-            const status = p?.status || 'todo';
-            const isFav = !!p?.isFavorite;
-            const companyKeys = Object.keys(q.companies || {});
-
-            return (
-              <div
-                key={q.id}
-                onClick={() => {
-                  sounds.playClick();
-                  onNavigateToProblem(q.id);
-                }}
-                className="bg-[#0E1217] border border-white/[0.08] hover:border-white/20 rounded-xl p-5 transition-all cursor-pointer group flex flex-col justify-between space-y-4"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-zinc-500">#{q.id}</span>
-                    <DifficultyBadge difficulty={q.difficulty} size="sm" />
-                  </div>
-                  <h3 className="font-semibold text-base text-zinc-100 group-hover:text-accent transition-colors mt-2">
-                    {q.title}
-                  </h3>
-                  <div className="flex items-center gap-1.5 flex-wrap mt-2.5">
-                    {q.topics.slice(0, 3).map((t) => (
-                      <span
-                        key={t}
-                        className="px-2 py-0.5 rounded text-xs bg-[#11141A] text-zinc-400 border border-white/[0.06]"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-                  <div className="flex items-center gap-1.5">
-                    {selectedCompany !== 'all' ? (
-                      (() => {
-                        const compKey = selectedCompany.toLowerCase();
-                        const compObj = q.companies[compKey] || q.companies[selectedCompany] || {};
-                        const freqStr =
-                          compObj.all ||
-                          compObj['thirty-days'] ||
-                          compObj['three-months'] ||
-                          compObj['six-months'] ||
-                          '0.0%';
-                        const freqVal = parseFloat(freqStr.replace('%', '')) || 0;
-                        const isHot = freqVal >= 75;
-                        return (
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-bold border ${
-                              isHot
-                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                : 'bg-white/[0.04] text-zinc-300 border-white/[0.08]'
-                            }`}
-                          >
-                            {isHot && <Flame className="w-3 h-3 text-amber-400 fill-amber-400" />}
-                            <span>{freqStr}</span>
-                          </span>
-                        );
-                      })()
-                    ) : (
-                      companyKeys.slice(0, 3).map((comp) => (
-                        <span key={comp} className="p-1 rounded bg-[#11141A] border border-white/[0.06]">
-                          {renderCompanyLogo(comp)}
-                        </span>
-                      ))
-                    )}
-                    <span className="text-xs text-zinc-400 font-mono ml-1">
-                      {q.acceptance}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
+                return (
+                  <tr
+                    key={q.id}
+                    onClick={() => {
                       sounds.playClick();
                       onNavigateToProblem(q.id);
                     }}
-                    className="px-3 py-1 rounded-lg bg-accent hover:opacity-90 text-black font-semibold text-xs transition-all"
+                    className="hover:bg-white/[0.02] transition-colors cursor-pointer group"
                   >
-                    Solve &rarr;
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+                    {/* Checkbox */}
+                    <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => handleToggleRowSelect(q.id)}
+                        className="w-4 h-4 rounded border-zinc-700 bg-[#161B22] text-primary focus:ring-primary/20 cursor-pointer"
+                      />
+                    </td>
 
-      {/* Pagination */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-        <div className="flex items-center gap-2">
+                    {/* Number */}
+                    <td className="py-3.5 px-3 font-mono text-zinc-500 text-xs">{rowNumber}</td>
+
+                    {/* Question Title + Metadata */}
+                    <td className="py-3.5 px-4">
+                      <div className="space-y-1">
+                        <p className="font-semibold text-white group-hover:text-primary transition-colors text-sm">
+                          {q.title}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-mono text-zinc-500">#{q.id}</span>
+                          {isPopular && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-medium">
+                              <Flame className="w-2.5 h-2.5 fill-rose-400 text-rose-400" />
+                              <span>Popular</span>
+                            </span>
+                          )}
+                          {q.isBlind75 && (
+                            <span className="px-1.5 py-0.2 rounded bg-primary/10 text-primary border border-primary/25 text-[10px] font-mono">
+                              B75
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Difficulty Badge */}
+                    <td className="py-3.5 px-4">
+                      {q.difficulty === 'Easy' && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+                          Easy
+                        </span>
+                      )}
+                      {q.difficulty === 'Medium' && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-950/60 text-amber-400 border border-amber-800/40">
+                          Medium
+                        </span>
+                      )}
+                      {q.difficulty === 'Hard' && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-rose-950/60 text-rose-400 border border-rose-800/40">
+                          Hard
+                        </span>
+                      )}
+                    </td>
+
+                    {/* DSA Topics */}
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1.5 flex-wrap max-w-xs">
+                        {q.topics.slice(0, 2).map((t) => (
+                          <span
+                            key={t}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              sounds.playClick();
+                              updateFilters({ topic: t });
+                            }}
+                            className="px-2.5 py-0.5 rounded-md text-xs bg-[#161B22] text-zinc-300 border border-white/[0.08] hover:border-white/20 transition-colors cursor-pointer"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                        {q.topics.length > 2 && (
+                          <span className="px-1.5 py-0.5 rounded text-[11px] font-mono text-zinc-400 bg-[#161B22] border border-white/[0.06]">
+                            +{q.topics.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Companies with REAL Logos */}
+                    <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
+                      <CompanyLogoStack
+                        companies={companyKeys}
+                        maxDisplay={3}
+                        size="sm"
+                        onSelectCompany={(comp) => {
+                          sounds.playClick();
+                          if (onSelectCompany) onSelectCompany(comp);
+                          updateFilters({ company: comp });
+                        }}
+                      />
+                    </td>
+
+                    {/* Status Pill with interactive toggle */}
+                    <td className="py-3.5 px-4 relative" onClick={(e) => e.stopPropagation()}>
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sounds.playClick();
+                            setActiveStatusMenuId(activeStatusMenuId === q.id ? null : q.id);
+                          }}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                            status === 'solved' || status === 'mastered'
+                              ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800/40 hover:bg-emerald-900/50'
+                              : status === 'in-progress'
+                              ? 'bg-blue-950/60 text-blue-400 border-blue-800/40 hover:bg-blue-900/50'
+                              : status === 'review'
+                              ? 'bg-purple-950/60 text-purple-400 border-purple-800/40 hover:bg-purple-900/50'
+                              : 'bg-[#161B22] text-zinc-400 border-white/[0.08] hover:text-zinc-200'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              status === 'solved' || status === 'mastered'
+                                ? 'bg-emerald-400'
+                                : status === 'in-progress'
+                                ? 'bg-blue-400'
+                                : status === 'review'
+                                ? 'bg-purple-400'
+                                : 'bg-zinc-500'
+                            }`}
+                          />
+                          <span>
+                            {status === 'solved' || status === 'mastered'
+                              ? 'Solved'
+                              : status === 'in-progress'
+                              ? 'In Progress'
+                              : status === 'review'
+                              ? 'Review'
+                              : 'Todo'}
+                          </span>
+                        </button>
+
+                        {activeStatusMenuId === q.id && (
+                          <div className="absolute left-4 top-full mt-1 w-36 p-1 bg-[#0D1117] border border-white/[0.12] rounded-xl shadow-2xl z-50 animate-fadeIn">
+                            {(['todo', 'in-progress', 'solved', 'review'] as ProblemStatus[]).map((st) => (
+                              <button
+                                key={st}
+                                onClick={() => {
+                                  sounds.playClick();
+                                  onUpdateStatus(q.id, st);
+                                  setActiveStatusMenuId(null);
+                                }}
+                                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs hover:bg-white/[0.06] text-zinc-200 transition-colors text-left cursor-pointer"
+                              >
+                                <span
+                                  className={`w-2 h-2 rounded-full ${
+                                    st === 'solved'
+                                      ? 'bg-emerald-400'
+                                      : st === 'in-progress'
+                                      ? 'bg-blue-400'
+                                      : st === 'review'
+                                      ? 'bg-purple-400'
+                                      : 'bg-zinc-500'
+                                  }`}
+                                />
+                                <span className="capitalize">{st.replace('-', ' ')}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Action: Solve Button + 3 Dots Options */}
+                    <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="inline-flex items-center justify-end gap-2 relative">
+                        <button
+                          onClick={() => {
+                            sounds.playClick();
+                            onNavigateToProblem(q.id);
+                          }}
+                          className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-purple-600 text-white font-semibold text-xs transition-all cursor-pointer shadow-sm flex items-center gap-1 font-sans"
+                        >
+                          <span>Solve</span>
+                          <span>&rarr;</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            sounds.playClick();
+                            setActiveMenuId(activeMenuId === q.id ? null : q.id);
+                          }}
+                          className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+                          title="More options"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+
+                        {activeMenuId === q.id && (
+                          <div className="absolute right-0 top-full mt-1 w-44 p-1.5 bg-[#0D1117] border border-white/[0.12] rounded-xl shadow-2xl z-50 text-left animate-fadeIn">
+                            <button
+                              onClick={() => {
+                                sounds.playClick();
+                                onToggleFavorite(q.id);
+                                setActiveMenuId(null);
+                              }}
+                              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs hover:bg-white/[0.06] text-zinc-200 transition-colors cursor-pointer"
+                            >
+                              <Star
+                                className={`w-3.5 h-3.5 ${
+                                  isFav ? 'text-amber-400 fill-amber-400' : 'text-zinc-400'
+                                }`}
+                              />
+                              <span>{isFav ? 'Remove Favorite' : 'Add to Favorites'}</span>
+                            </button>
+
+                            <a
+                              href={q.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => setActiveMenuId(null)}
+                              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs hover:bg-white/[0.06] text-zinc-200 transition-colors cursor-pointer"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                              <span>Open on LeetCode</span>
+                            </a>
+
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(`${window.location.origin}/problem/${q.id}`);
+                                setActiveMenuId(null);
+                              }}
+                              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs hover:bg-white/[0.06] text-zinc-200 transition-colors cursor-pointer"
+                            >
+                              <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                              <span>Copy Problem Link</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {paginatedQuestions.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-16 text-center text-zinc-400">
+                    <p className="text-base font-semibold text-white">No questions matched your filters</p>
+                    <p className="text-xs text-zinc-500 mt-1">Try clearing some filters or searching for another term.</p>
+                    <button
+                      onClick={clearAllFilters}
+                      className="mt-3 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold cursor-pointer"
+                    >
+                      Clear all filters
+                    </button>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 5. Pagination matching reference image */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 select-none">
+        <div className="text-xs text-zinc-400 font-sans">
+          Showing {(safePage - 1) * pageSize + 1}–{Math.min(safePage * pageSize, totalCount)} of{' '}
+          {totalCount.toLocaleString()} questions
+        </div>
+
+        <div className="flex items-center gap-1.5 self-center sm:self-auto">
+          {/* Previous Button */}
           <button
             onClick={() => {
               sounds.playClick();
               updateFilters({ page: safePage - 1 });
             }}
             disabled={safePage <= 1}
-            className="px-3 py-1.5 rounded-lg bg-[#0E1217] border border-white/[0.08] hover:border-white/20 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium text-zinc-300 hover:text-white flex items-center gap-1 transition-colors"
+            className="w-8 h-8 rounded-lg bg-[#11141A] border border-white/[0.08] hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Previous Page"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>Previous</span>
           </button>
 
-          <span className="text-xs text-zinc-400 px-2 font-sans">
-            Page <span className="font-semibold text-white">{safePage}</span> of{' '}
-            <span className="font-semibold text-white">{totalPages}</span>
-          </span>
+          {/* Numbered Page Buttons */}
+          {getPaginationPages(safePage, totalPages).map((pageNum, i) => {
+            if (pageNum === '...') {
+              return (
+                <span key={`ellipsis-${i}`} className="w-8 text-center text-xs text-zinc-500">
+                  ...
+                </span>
+              );
+            }
 
+            const isPageActive = pageNum === safePage;
+            return (
+              <button
+                key={`page-${pageNum}`}
+                onClick={() => {
+                  sounds.playClick();
+                  updateFilters({ page: pageNum });
+                }}
+                className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center ${
+                  isPageActive
+                    ? 'bg-primary text-white shadow-md'
+                    : 'bg-[#11141A] border border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20'
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          {/* Next Button */}
           <button
             onClick={() => {
               sounds.playClick();
               updateFilters({ page: safePage + 1 });
             }}
             disabled={safePage >= totalPages}
-            className="px-3 py-1.5 rounded-lg bg-[#0E1217] border border-white/[0.08] hover:border-white/20 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium text-zinc-300 hover:text-white flex items-center gap-1 transition-colors"
+            className="w-8 h-8 rounded-lg bg-[#11141A] border border-white/[0.08] hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Next Page"
           >
-            <span>Next</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
-
-        <div className="text-xs text-zinc-400 font-sans">
-          Showing {(safePage - 1) * pageSize + 1}–
-          {Math.min(safePage * pageSize, totalCount)} of {totalCount.toLocaleString()} questions
-        </div>
       </div>
 
-      {/* Sponsored Ad Banner for Free Users (100% Ad-Free for Pro) */}
+      {/* Bottom Ad Banner for Free Users */}
       <AdBanner slotId="questions-table-bottom" />
     </div>
   );
