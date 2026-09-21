@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Shield,
   Users,
   MessageSquare,
   Trophy,
-  ExternalLink,
   Flame,
   Sparkles,
   Building2,
@@ -97,18 +95,6 @@ export const CommunityPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <a
-            href="https://github.com/Kitchenwasher/leetcode-company-tracker"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2.5 rounded-xl bg-[#0E1217] border border-white/[0.08] hover:border-white/20 text-white hover:text-primary text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer"
-          >
-            <Shield className="w-4 h-4" />
-            <span>GitHub Repository</span>
-            <ExternalLink className="w-3.5 h-3.5 opacity-60" />
-          </a>
-        </div>
       </div>
 
       {/* Top Banner Ad (Free Tier only) */}
