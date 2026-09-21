@@ -124,6 +124,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
     loadGsi();
   }, [showAuthModal, googleClientId]);
 
+  const handleClose = () => {
+    setLocalError(null);
+    setAuthError(null);
+    setInfoMessage(null);
+    setShowAuthModal(false);
+  };
+
+  // Close on Escape key press (must be before early return to follow React Hook rules)
+  useEffect(() => {
+    if (!showAuthModal) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAuthModal]);
+
+  // ALL HOOKS ABOVE THIS LINE
   if (!showAuthModal) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,28 +193,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
     }
   };
 
-  const handleClose = () => {
-    setLocalError(null);
-    setAuthError(null);
-    setInfoMessage(null);
-    setShowAuthModal(false);
-  };
-
-  // Close on Escape key press
-  useEffect(() => {
-    if (!showAuthModal) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        handleClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showAuthModal]);
-
   const handleGoogleManualClick = () => {
     if (googleClientId && window.google?.accounts?.id) {
       window.google.accounts.id.prompt();
@@ -222,9 +223,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
         if (e.target === e.currentTarget) handleClose();
       }}
     >
-      <div className="relative w-full max-w-md rounded-2xl bg-black border border-white/[0.12] shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-md rounded-2xl bg-[#090C12] border border-white/[0.16] shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(168,85,247,0.12)] overflow-hidden">
         {/* MacBook Window Header Bar */}
-        <div className="px-4 py-3 border-b border-white/[0.08] bg-white/[0.03] backdrop-blur-md flex items-center justify-between select-none">
+        <div className="px-4 py-3 border-b border-white/[0.08] bg-[#0B0E14] flex items-center justify-between select-none">
           <div className="flex items-center gap-3">
             {/* macOS Traffic Lights */}
             <div className="flex items-center gap-2">
@@ -270,7 +271,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
           </button>
         </div>
 
-        <div className="p-5 sm:p-6 bg-black">
+        <div className="p-5 sm:p-6 bg-[#07090E]">
           {/* Header */}
           <div className="text-center mb-4">
             <h2 className="text-base font-bold text-primary uppercase tracking-wide">
