@@ -101,7 +101,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
     const calculatedYMax = Math.max(Math.ceil((maxSolved || targetGoal) / 5) * 5, 5);
 
     const formattedBars = bars.map((b) => {
-      const heightPercent = b.count === 0 ? 4 : Math.min(100, Math.round((b.count / calculatedYMax) * 100));
+      const heightPercent = b.count > 0 ? Math.min(100, Math.max(12, Math.round((b.count / calculatedYMax) * 100))) : 0;
       return {
         day: b.day,
         key: b.key,
@@ -407,45 +407,73 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             {/* Bar Chart & Target Split */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end pt-2">
               {/* Left: Bar Chart */}
-              <div className="md:col-span-8 flex items-end gap-3 sm:gap-4 h-48 pb-2">
+              <div className="md:col-span-8 flex items-stretch gap-3 sm:gap-4 h-52 pb-1">
                 {/* Y-axis Labels */}
-                <div className="flex flex-col justify-between h-full text-[11px] font-sans text-zinc-500 pr-1 select-none">
+                <div className="flex flex-col justify-between h-40 text-[11px] font-sans text-zinc-500 pr-1 select-none shrink-0">
                   <span>{yMax}</span>
                   <span>{Math.round(yMax * 0.66)}</span>
                   <span>{Math.round(yMax * 0.33)}</span>
                   <span>0</span>
                 </div>
 
-                {/* Dynamic Bars */}
-                <div className="flex-1 flex items-end justify-between gap-1 sm:gap-2.5 h-full pt-2">
-                  {chartBars.map((bar, idx) => (
-                    <div
-                      key={`${bar.key}-${idx}`}
-                      className="flex-1 flex flex-col items-center gap-2 h-full justify-end group/bar relative"
-                    >
-                      <div className="absolute -top-7 px-2 py-0.5 rounded bg-[#161B22] border border-white/[0.12] text-[10px] text-white whitespace-nowrap opacity-0 group-hover/bar:opacity-100 transition-opacity pointer-events-none z-20 shadow-lg font-sans">
-                        {bar.count} solved • {bar.day}
-                      </div>
+                {/* Plotting Area & X-axis */}
+                <div className="flex-1 flex flex-col justify-between h-full">
+                  {/* Bars Area (fixed height with gridlines) */}
+                  <div className="h-40 w-full flex items-end justify-between gap-1.5 sm:gap-3 px-1 relative">
+                    {/* Background grid lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                      <div className="border-b border-white/[0.04] w-full" />
+                      <div className="border-b border-white/[0.04] w-full" />
+                      <div className="border-b border-white/[0.04] w-full" />
+                      <div className="border-b border-white/[0.08] w-full" />
+                    </div>
+
+                    {chartBars.map((bar, idx) => (
                       <div
-                        className={`w-full max-w-[36px] rounded-t-sm transition-all cursor-pointer ${
-                          bar.count > 0
-                            ? bar.isToday
-                              ? 'bg-purple-500 hover:bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
-                              : 'bg-primary/90 hover:bg-primary'
-                            : 'bg-white/[0.05] hover:bg-white/[0.1]'
-                        }`}
-                        style={{ height: bar.height }}
-                        title={`${bar.count} questions solved on ${bar.day} (${bar.key})`}
-                      />
+                        key={`${bar.key}-${idx}`}
+                        className="flex-1 h-full flex items-end justify-center group/bar relative z-10"
+                      >
+                        {/* Tooltip */}
+                        <div className="absolute -top-8 px-2 py-0.5 rounded bg-[#161B22] border border-white/[0.15] text-[10px] text-white whitespace-nowrap opacity-0 group-hover/bar:opacity-100 transition-opacity pointer-events-none z-30 shadow-xl font-sans">
+                          {bar.count} solved • {bar.day}
+                        </div>
+
+                        {/* Bar Track & Fill */}
+                        <div
+                          className="w-full max-w-[36px] h-full rounded-t-md bg-white/[0.03] hover:bg-white/[0.06] flex items-end overflow-hidden transition-colors cursor-pointer"
+                          title={`${bar.count} questions solved on ${bar.day} (${bar.key})`}
+                        >
+                          <div
+                            className={`w-full rounded-t-md transition-all duration-500 ${
+                              bar.count > 0
+                                ? bar.isToday
+                                  ? 'bg-purple-500 hover:bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.5)]'
+                                  : 'bg-primary/95 hover:bg-primary'
+                                : 'bg-transparent'
+                            }`}
+                            style={{
+                              height: bar.count > 0 ? bar.height : '0%',
+                              minHeight: bar.count > 0 ? '8px' : '0px',
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* X-axis Day Labels */}
+                  <div className="h-6 flex items-center justify-between gap-1.5 sm:gap-3 px-1 pt-1 border-t border-white/[0.08]">
+                    {chartBars.map((bar, idx) => (
                       <span
-                        className={`text-[10px] sm:text-xs font-sans truncate max-w-[28px] sm:max-w-none text-center ${
+                        key={`label-${bar.key}-${idx}`}
+                        className={`flex-1 text-[10px] sm:text-xs font-sans truncate text-center ${
                           bar.isToday ? 'text-primary font-bold' : 'text-zinc-400'
                         }`}
                       >
                         {bar.day}
                       </span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
 

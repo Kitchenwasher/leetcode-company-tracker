@@ -438,21 +438,7 @@ export const App: React.FC = () => {
         return;
       }
 
-      // Global Search Shortcut (/ or Ctrl+K / Cmd+K)
-      if (e.key === '/' || (e.ctrlKey && e.key === 'k') || (e.metaKey && e.key === 'k')) {
-        e.preventDefault();
-        const searchInput = (document.getElementById('questions-search-input') ||
-          document.querySelector('input[data-testid="questions-search-input"]') ||
-          document.querySelector('input[placeholder*="Search questions"]')) as HTMLInputElement | null;
-        if (searchInput) {
-          searchInput.focus();
-          searchInput.select();
-          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-          navigate('/questions?focus=search');
-        }
-        return;
-      }
+
 
       // Global Shortcuts Modal (?)
       if (e.key === '?') {
@@ -619,18 +605,6 @@ export const App: React.FC = () => {
                   onOpenPlanner={() => setShowPlannerModal(true)}
                   onOpenFlashcards={() => setShowFlashcardModal(true)}
                   onOpenLeetCodeSync={() => setShowLeetCodeSyncModal(true)}
-                  onSearchFocus={() => {
-                    const searchInput = (document.getElementById('questions-search-input') ||
-                      document.querySelector('input[data-testid="questions-search-input"]') ||
-                      document.querySelector('input[placeholder*="Search questions"]')) as HTMLInputElement | null;
-                    if (searchInput) {
-                      searchInput.focus();
-                      searchInput.select();
-                      searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    } else {
-                      navigate('/questions?focus=search');
-                    }
-                  }}
                 />
               </ProtectedRoute>
             }

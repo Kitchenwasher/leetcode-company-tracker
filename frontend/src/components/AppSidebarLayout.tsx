@@ -11,7 +11,6 @@ import {
   Shield,
   Bookmark,
   Settings,
-  Search,
   Menu,
   Bell,
   ChevronDown,
@@ -31,7 +30,6 @@ interface AppSidebarLayoutProps {
   onOpenPlanner: () => void;
   onOpenFlashcards: () => void;
   onOpenLeetCodeSync: () => void;
-  onSearchFocus?: () => void;
   hideTopBar?: boolean;
 }
 
@@ -43,7 +41,6 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
   onOpenPlanner,
   onOpenFlashcards,
   onOpenLeetCodeSync,
-  onSearchFocus,
   hideTopBar = false,
 }) => {
   const navigate = useNavigate();
@@ -186,28 +183,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
             </button>
           </div>
 
-          {/* Center: Search Bar with Ctrl+K shortcut */}
-          <div className="flex-1 max-w-md mx-6 hidden md:block">
-            <button
-              onClick={() => {
-                sounds.playClick();
-                if (onSearchFocus) {
-                  onSearchFocus();
-                } else {
-                  navigate('/questions');
-                }
-              }}
-              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-[#11141A] border border-white/[0.08] text-xs text-zinc-400 hover:border-white/20 transition-colors cursor-pointer group"
-            >
-              <div className="flex items-center gap-2.5 truncate font-sans">
-                <Search className="w-4 h-4 text-zinc-500 group-hover:text-accent transition-colors shrink-0" />
-                <span className="truncate">Search questions, companies, topics...</span>
-              </div>
-              <kbd className="inline-block px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08] text-[10px] font-mono text-zinc-400 shrink-0">
-                Ctrl K
-              </kbd>
-            </button>
-          </div>
+
 
           {/* Right: Notifications & User Profile */}
           <div className="flex items-center gap-2 sm:gap-3">

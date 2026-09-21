@@ -61,19 +61,7 @@ export const TOP_ALGORITHMS = [
   'Math',
 ];
 
-export const TOPIC_ACRONYMS: Record<string, string[]> = {
-  dp: ['dynamic programming', 'memoization'],
-  dfs: ['depth-first search', 'dfs'],
-  bfs: ['breadth-first search', 'bfs'],
-  bst: ['binary search tree', 'tree'],
-  bt: ['binary tree', 'tree'],
-  ll: ['linked list'],
-  tp: ['two pointers'],
-  sw: ['sliding window'],
-  bs: ['binary search'],
-  pq: ['priority queue', 'heap'],
-  dsa: ['data structures', 'algorithms'],
-};
+
 
 export function matchesTopicFilter(selected: string, qTopics: string[]): boolean {
   if (!selected || selected === 'all') return true;
@@ -234,54 +222,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     [setSearchParams]
   );
 
-  // Search input state & ref
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [localSearchInput, setLocalSearchInput] = useState(searchQuery);
-  const searchDebounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Keep local search input synchronized if URL searchQuery changes externally
-  useEffect(() => {
-    setLocalSearchInput(searchQuery);
-  }, [searchQuery]);
-
-  // If redirected with ?focus=search, auto-focus search input
-  useEffect(() => {
-    if (searchParams.get('focus') === 'search') {
-      searchInputRef.current?.focus();
-      searchInputRef.current?.select();
-      updateFilters({ focus: undefined });
-    }
-  }, [searchParams, updateFilters]);
-
-  const handleSearchChange = (val: string) => {
-    setLocalSearchInput(val);
-    if (searchDebounceTimer.current) {
-      clearTimeout(searchDebounceTimer.current);
-    }
-    searchDebounceTimer.current = setTimeout(() => {
-      updateFilters({ search: val });
-    }, 180);
-  };
-
-  const handleSearchClear = () => {
-    if (searchDebounceTimer.current) {
-      clearTimeout(searchDebounceTimer.current);
-    }
-    setLocalSearchInput('');
-    updateFilters({ search: '' });
-    searchInputRef.current?.focus();
-  };
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      if (searchDebounceTimer.current) {
-        clearTimeout(searchDebounceTimer.current);
-      }
-      updateFilters({ search: localSearchInput });
-    } else if (e.key === 'Escape') {
-      handleSearchClear();
-    }
-  };
 
   // Topics list
   const allTopics = useMemo(() => {
@@ -298,29 +239,6 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
   // Filtered & sorted questions
   const filteredQuestions = useMemo(() => {
     const rawQuery = searchQuery.trim().toLowerCase();
-
-    // Prepare search tokens and query helpers
-    let tokens: string[] = [];
-    let queryNum: number | null = null;
-    let isPureNumber = false;
-
-    if (rawQuery) {
-      const cleaned = rawQuery
-        .replace(/^#+/, '')
-        .replace(/^lc[-_\s]*/, '')
-        .replace(/^leetcode[-_\s]*/, '')
-        .replace(/^problem[-_\s]*/, '')
-        .trim();
-
-      const numMatch = cleaned.match(/^(\d+)(?:\.|\s|$)/);
-      queryNum = numMatch ? parseInt(numMatch[1], 10) : null;
-      isPureNumber = /^\d+$/.test(cleaned);
-
-      tokens = cleaned
-        .split(/[\s,.-]+/)
-        .map((t) => t.trim().toLowerCase())
-        .filter(Boolean);
-    }
 
     return questions
       .filter((q) => {
@@ -361,83 +279,16 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
           return false;
         }
 
-        // 6. Search query
+        // 6. Search query (fallback if query param in URL)
         if (rawQuery) {
-          const qIdStr = String(q.id);
-          const qTitleLower = (q.title || '').toLowerCase();
-          const qTopicsLower = (q.topics || []).map((t) => t.toLowerCase());
-          const qCompaniesKeys = Object.keys(q.companies || {});
-          const qDifficultyLower = (q.difficulty || '').toLowerCase();
-
-          // If pure number query like "1", "#1", "146", prioritize ID or title containing that number
-          if (isPureNumber && queryNum !== null) {
-            if (Number(q.id) === queryNum) return true;
-            if (qIdStr.startsWith(rawQuery.replace(/^#+/, ''))) return true;
-            if (qTitleLower.includes(rawQuery.replace(/^#+/, ''))) return true;
-            return false;
-          }
-
-          // Direct whole string match on title or ID
-          if (qTitleLower.includes(rawQuery) || qIdStr === rawQuery) {
-            return true;
-          }
-
-          // Check if every token matches at least one question attribute
-          const allTokensMatch = tokens.every((tok) => {
-            if (qIdStr === tok || qIdStr.startsWith(tok)) return true;
-            if (qTitleLower.includes(tok)) return true;
-            if (qDifficultyLower === tok) return true;
-
-            const acronymExpansions = TOPIC_ACRONYMS[tok] || [];
-            const matchesTopic = qTopicsLower.some(
-              (top) =>
-                top.includes(tok) ||
-                acronymExpansions.some((exp) => top.includes(exp))
-            );
-            if (matchesTopic) return true;
-
-            const matchesComp = qCompaniesKeys.some((compKey) => {
-              const keyLower = compKey.toLowerCase();
-              const keyNoHyphen = keyLower.replace(/-/g, ' ');
-              const dispName = getCompanyDisplayName(compKey).toLowerCase();
-              return (
-                keyLower.includes(tok) ||
-                keyNoHyphen.includes(tok) ||
-                dispName.includes(tok)
-              );
-            });
-            if (matchesComp) return true;
-
-            return false;
-          });
-
-          if (!allTokensMatch) return false;
+          const matchesId = String(q.id) === rawQuery || String(q.id).includes(rawQuery);
+          const matchesTitle = (q.title || '').toLowerCase().includes(rawQuery);
+          if (!matchesId && !matchesTitle) return false;
         }
 
         return true;
       })
       .sort((a, b) => {
-        // Priority relevance when search is active
-        if (rawQuery) {
-          const cleaned = rawQuery.replace(/^#+/, '').replace(/^lc[-_\s]*/, '');
-          const queryNum = /^\d+$/.test(cleaned) ? parseInt(cleaned, 10) : null;
-          if (queryNum !== null) {
-            const aExact = Number(a.id) === queryNum;
-            const bExact = Number(b.id) === queryNum;
-            if (aExact && !bExact) return -1;
-            if (bExact && !aExact) return 1;
-          }
-
-          const aTitle = (a.title || '').toLowerCase();
-          const bTitle = (b.title || '').toLowerCase();
-          if (aTitle === cleaned && bTitle !== cleaned) return -1;
-          if (bTitle === cleaned && aTitle !== cleaned) return 1;
-
-          const aStarts = aTitle.startsWith(cleaned);
-          const bStarts = bTitle.startsWith(cleaned);
-          if (aStarts && !bStarts) return -1;
-          if (bStarts && !aStarts) return 1;
-        }
 
         const getFreq = (item: Question) => {
           if (selectedCompany !== 'all') {
@@ -815,16 +666,8 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       });
     }
 
-    if (searchQuery) {
-      list.push({
-        key: 'search',
-        label: `Search: "${searchQuery}"`,
-        clear: () => updateFilters({ search: '' }),
-      });
-    }
-
     return list;
-  }, [selectedCompany, selectedDifficulty, selectedTopic, selectedStatus, curatedList, sortBy, sortGlideOptions, searchQuery, updateFilters]);
+  }, [selectedCompany, selectedDifficulty, selectedTopic, selectedStatus, curatedList, sortBy, sortGlideOptions, updateFilters]);
 
   const clearAllFilters = () => {
     sounds.playClick();
@@ -968,31 +811,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       {/* 3. Search and Filters Toolbar matching reference image */}
       <div className="space-y-3 relative z-30">
         <div className="bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] rounded-2xl p-2.5 sm:p-3 flex items-center gap-2 flex-wrap lg:flex-nowrap relative z-30">
-          {/* Search Box */}
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              id="questions-search-input"
-              data-testid="questions-search-input"
-              ref={searchInputRef}
-              type="text"
-              value={localSearchInput}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Search questions by title, ID, topic, company..."
-              className="w-full pl-9 pr-8 py-2 text-xs bg-[#161B22] border border-white/[0.08] focus:border-primary rounded-xl text-white placeholder-zinc-500 focus:outline-hidden transition-colors"
-            />
-            {localSearchInput && (
-              <button
-                type="button"
-                onClick={handleSearchClear}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white cursor-pointer"
-                title="Clear search"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+
 
           {/* Company Filter */}
           <GlideSelect
