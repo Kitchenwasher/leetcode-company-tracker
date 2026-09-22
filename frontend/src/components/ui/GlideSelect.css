@@ -139,6 +139,7 @@ tr:has([aria-expanded='true']) {
     opacity var(--gs-pop) var(--gs-ease-out),
     transform var(--gs-pop) var(--gs-ease-out);
   backdrop-filter: blur(12px);
+  overscroll-behavior: contain;
 }
 
 .glide-select__menu[data-state='open'] {
@@ -171,9 +172,11 @@ tr:has([aria-expanded='true']) {
   position: relative;
   display: grid;
   gap: 1px;
-  touch-action: none;
+  touch-action: pan-y;
   max-height: 280px;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
 }
 
 .glide-select__pill {

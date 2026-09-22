@@ -367,7 +367,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
   const companyFreq = q?.companies?.[companyId]?.all || q?.companies?.[companyId]?.['thirty-days'] || 'Asked';
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background text-textPrimary overflow-hidden select-none">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background text-textPrimary overflow-hidden select-none" data-lenis-prevent>
       {/* ========================================================= */}
       {/* TOP CONTROL BAR (LeetCode Style Header)                  */}
       {/* ========================================================= */}
@@ -565,7 +565,11 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
           </div>
 
           {/* Left Pane Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+          <div
+            className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5"
+            data-lenis-prevent
+            onWheel={e => e.stopPropagation()}
+          >
             {/* TAB 0: AUTHENTIC LEETCODE PROBLEM DESCRIPTION */}
             {leftTab === 'description' && (
               <div className="space-y-6">
@@ -881,7 +885,11 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                           <span>{copiedSolutionCode ? 'Copied' : 'Copy'}</span>
                         </button>
                       </div>
-                      <pre className="p-4 text-xs font-mono text-primary overflow-x-auto leading-relaxed max-h-80">
+                      <pre
+                        className="p-4 text-xs font-mono text-primary overflow-x-auto leading-relaxed max-h-80"
+                        data-lenis-prevent
+                        onWheel={e => e.stopPropagation()}
+                      >
                         <code>{getActiveApproachCode(currentApproach)}</code>
                       </pre>
                     </div>
@@ -1092,7 +1100,11 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                 <p className="text-xs text-textMuted">
                   This question has been asked by <strong className="text-white">{askingCompanies.length}</strong> companies in recent interview rounds:
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto p-1">
+                <div
+                  className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto p-1"
+                  data-lenis-prevent
+                  onWheel={e => e.stopPropagation()}
+                >
                   {askingCompanies.map((c) => {
                     const freq = q?.companies?.[c]?.all || q?.companies?.[c]?.['thirty-days'] || 'Asked';
                     const isCurrent = c === companyId;
@@ -1119,7 +1131,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
         {/* ========================================================= */}
         {/* RIGHT PANE (50%): Code Editor & Runner + Whiteboard Canvas */}
         {/* ========================================================= */}
-        <div className="w-full md:w-1/2 flex flex-col bg-background overflow-hidden">
+        <div className="w-full md:w-1/2 flex flex-col bg-background overflow-hidden" data-lenis-prevent>
           {/* Right Pane Navigation Header */}
           <div className="h-10 border-b border-border bg-surface/90 px-3 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-1">

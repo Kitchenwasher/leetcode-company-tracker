@@ -264,14 +264,19 @@ export default function GlideSelect({
   };
 
   const onListDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const targetEl = e.target as HTMLElement | null;
+    const row = targetEl?.closest('[data-index]') as HTMLElement | null;
+    if (!row) {
+      // User clicked on scrollbar or list padding: allow native scrollbar drag without scrubbing
+      return;
+    }
     if (scrub.current) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {}
     scrub.current = { id: e.pointerId, top: e.currentTarget.getBoundingClientRect().top };
     instant.current = true;
-    const row = (e.target as HTMLElement).closest('[data-index]') as HTMLElement | null;
-    if (row && row.dataset.index !== undefined) {
+    if (row.dataset.index !== undefined) {
       const idx = Number(row.dataset.index);
       if (!isNaN(idx)) setActive(idx);
     } else {
@@ -365,9 +370,21 @@ export default function GlideSelect({
         </span>
       </button>
       {phase !== 'closed' ? (
-        <div ref={menuRef} className="glide-select__menu" data-state="open" data-side={side} data-align={align}>
+        <div
+          ref={menuRef}
+          className="glide-select__menu"
+          data-state="open"
+          data-side={side}
+          data-align={align}
+          data-lenis-prevent
+          onWheel={e => e.stopPropagation()}
+        >
           {searchable && (
-            <div className="p-1 pb-1.5 border-b border-white/[0.08] mb-1" onPointerDown={e => e.stopPropagation()}>
+            <div
+              className="p-1 pb-1.5 border-b border-white/[0.08] mb-1"
+              onPointerDown={e => e.stopPropagation()}
+              onWheel={e => e.stopPropagation()}
+            >
               <div className="relative">
                 <Search size={13} className="text-zinc-500 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
@@ -408,7 +425,9 @@ export default function GlideSelect({
             role="listbox"
             aria-label={ariaLabel}
             className="glide-select__list"
+            data-lenis-prevent
             data-live={active !== null ? '' : undefined}
+            onWheel={e => e.stopPropagation()}
             onPointerOver={onListOver}
             onPointerLeave={() => {
               if (!scrub.current && !rememberPosition) setActive(null);

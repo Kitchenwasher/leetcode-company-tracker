@@ -22,13 +22,19 @@ export const SmoothScrollProvider: React.FC<SmoothScrollProviderProps> = ({
         wheelMultiplier: 1.0,
         touchMultiplier: 1.5,
         prevent: (node) => {
-          // Only prevent Lenis for elements that explicitly have data-lenis-prevent,
-          // or Monaco Editor which has its own independent virtualized scroll system.
+          if (!node) return false;
+          // Prevent Lenis for elements that have data-lenis-prevent,
+          // GlideSelect dropdowns, Monaco Editor, dialogs, or internal scroll containers
           return (
             node.hasAttribute('data-lenis-prevent') ||
             node.closest('[data-lenis-prevent]') !== null ||
             node.classList.contains('monaco-editor') ||
-            node.closest('.monaco-editor') !== null
+            node.closest('.monaco-editor') !== null ||
+            node.closest('.glide-select__menu') !== null ||
+            node.closest('.glide-select__list') !== null ||
+            node.closest('.overflow-y-auto') !== null ||
+            node.closest('.overflow-auto') !== null ||
+            node.closest('[role="dialog"]') !== null
           );
         },
       }}

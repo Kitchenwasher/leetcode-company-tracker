@@ -92,14 +92,14 @@ html.lenis body {
   pointer-events: none;
 }
 
-/* Smooth scrolling for internal scrollable elements (tables, modals, lists) */
+/* Internal scrollable elements (tables, modals, lists) */
 .overflow-y-auto,
 .overflow-x-auto,
 .overflow-auto,
 [data-lenis-prevent],
 .glide-select__list {
-  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 /* Global Premium Tactile Clicks & Smooth Micro-Interactions (ReactBits / Aceternity style) */
