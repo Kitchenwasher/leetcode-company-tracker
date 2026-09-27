@@ -1,8 +1,17 @@
+import dns from 'dns';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ENV } from './config/env.js';
+
+// Configure reliable DNS servers (Google + Cloudflare) to ensure resilient connection to cloud Neon PostgreSQL
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+} catch {
+  // Gracefully fallback to OS default resolver
+}
+
 import { prisma } from './config/db.js';
 import { checkMailerHealth } from './config/mailer.js';
 import { PaymentController } from './controllers/paymentController.js';
@@ -41,7 +50,11 @@ app.use(
         return callback(null, true);
       }
 
-      // Allow custom subdomains
+      // In production, reject unauthorized origins
+      if (ENV.NODE_ENV === 'production') {
+        return callback(new Error(`CORS blocked for origin: ${origin}`));
+      }
+
       return callback(null, true);
     },
     credentials: true,

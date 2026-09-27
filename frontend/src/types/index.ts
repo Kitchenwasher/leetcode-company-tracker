@@ -82,3 +82,12 @@ export interface MockInterviewState {
   currentQuestionIndex: number;
   company: string;
 }
+
+export interface MockSessionConfig {
+  company: string;
+  difficulty: string;
+  questionCount: number;
+  topic: string;
+  type: 'Coding' | 'Behavioral' | 'Mixed';
+}
+

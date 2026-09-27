@@ -6,6 +6,7 @@ import paymentRoutes from './paymentRoutes.js';
 import emailRoutes from './emailRoutes.js';
 import communityRoutes from './communityRoutes.js';
 import judgeRoutes from './judgeRoutes.js';
+import mockRoutes from './mockRoutes.js';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/payments', paymentRoutes);
 router.use('/mail', emailRoutes);
 router.use('/community', communityRoutes);
 router.use('/judge', judgeRoutes);
+router.use('/mock', mockRoutes);
 
 export default router;

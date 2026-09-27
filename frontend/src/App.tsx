@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
-import { Question, CompanyMeta, UserProgressItem, UserStoreState, ProblemStatus, Timeframe, Difficulty } from './types';
+import { Question, CompanyMeta, UserProgressItem, UserStoreState, ProblemStatus, Timeframe, Difficulty, MockSessionConfig } from './types';
 import companyMetaData from './data/company_meta.json';
 import {
   loadStoredState, saveStoredState, getTodayKey, calculateStreaks,
@@ -160,6 +160,7 @@ export const App: React.FC = () => {
   const [detailQuestion, setDetailQuestion] = useState<Question | null>(null);
   const [showOverlapModal, setShowOverlapModal] = useState<boolean>(false);
   const [showMockModal, setShowMockModal] = useState<boolean>(false);
+  const [activeMockConfig, setActiveMockConfig] = useState<MockSessionConfig | undefined>();
   const [showAnalyticsModal, setShowAnalyticsModal] = useState<boolean>(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState<boolean>(false);
   const [showPlannerModal, setShowPlannerModal] = useState<boolean>(false);
@@ -669,6 +670,7 @@ export const App: React.FC = () => {
                   questions={allQuestions}
                   store={store}
                   onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
+                  onUpdateStatus={handleUpdateStatus}
                 />
               }
             />
@@ -681,7 +683,10 @@ export const App: React.FC = () => {
                   questions={allQuestions}
                   companies={companiesDict}
                   store={store}
-                  onOpenMockModal={() => setShowMockModal(true)}
+                  onOpenMockModal={(cfg) => {
+                    setActiveMockConfig(cfg);
+                    setShowMockModal(true);
+                  }}
                 />
               }
             />
@@ -710,6 +715,8 @@ export const App: React.FC = () => {
                   onNavigateToProblem={(id) => navigate(`/problem/${id}`)}
                   onToggleFavorite={handleToggleFavorite}
                   onUpdateStatus={handleUpdateStatus}
+                  onSaveProgressPatch={handleSaveProgressPatch}
+                  onOpenReviewDrill={() => setShowFlashcardModal(true)}
                 />
               }
             />
@@ -788,9 +795,10 @@ export const App: React.FC = () => {
 
       {showMockModal && (
         <MockInterviewModal
-          company={store.selectedCompany}
-          companyMeta={activeCompanyMeta}
+          company={activeMockConfig?.company || store.selectedCompany}
+          companyMeta={companiesDict[activeMockConfig?.company?.toLowerCase() || ''] || activeCompanyMeta}
           questions={allQuestions}
+          config={activeMockConfig}
           onClose={() => setShowMockModal(false)}
           onUpdateStatus={handleUpdateStatus}
         />

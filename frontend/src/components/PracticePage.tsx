@@ -14,16 +14,19 @@ import {
   RotateCcw,
   BookOpen
 } from 'lucide-react';
-import { Question, UserStoreState, Difficulty } from '../types';
+import { Question, UserStoreState, Difficulty, ProblemStatus } from '../types';
 import { sounds } from '../utils/sound';
 import { DifficultyBadge } from './ui/DifficultyBadge';
 import { calculateStreaks, getTodayKey } from '../services/storage';
 import { useAuth } from '../context/AuthContext';
+import { isQuestionInTrack } from '../data/curatedLists';
+import { SprintSessionModal } from './SprintSessionModal';
 
 interface PracticePageProps {
   questions: Question[];
   store: UserStoreState;
   onNavigateToProblem: (id: number | string) => void;
+  onUpdateStatus?: (qId: number | string, status: ProblemStatus) => void;
 }
 
 const CURATED_TRACKS = [
@@ -77,10 +80,12 @@ export const PracticePage: React.FC<PracticePageProps> = ({
   questions,
   store,
   onNavigateToProblem,
+  onUpdateStatus,
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedDuration, setSelectedDuration] = useState<number>(30);
+  const [showSprintModal, setShowSprintModal] = useState<boolean>(false);
 
   const todayFormatted = useMemo(() => {
     return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -121,15 +126,42 @@ export const PracticePage: React.FC<PracticePageProps> = ({
   const todaySolved = (store.activityLog && store.activityLog[todayKey]) || 0;
   const targetGoal = user?.dailyTarget || store.dailyGoal || 3;
 
-  // Real paradigm question counts
+  // Real paradigm question counts & solved counts
   const paradigms = useMemo(() => {
     return PARADIGM_DEFS.map((p) => {
-      const count = questions.filter((q) =>
+      const pQs = questions.filter((q) =>
         q.topics?.some((t) => t.toLowerCase().includes(p.slug.toLowerCase()))
-      ).length;
-      return { ...p, count };
+      );
+      const solvedCount = pQs.filter((q) => {
+        const st = store.progress[String(q.id)]?.status;
+        return st === 'solved' || st === 'mastered';
+      }).length;
+      return { ...p, count: pQs.length, solvedCount };
     });
-  }, [questions]);
+  }, [questions, store.progress]);
+
+  // Dynamic roadmap progress for Blind 75, NeetCode 150, Striver 180, Grind 169, and Top 30
+  const trackProgress = useMemo(() => {
+    const result: Record<string, { solved: number; total: number; percent: number }> = {};
+    CURATED_TRACKS.forEach((track) => {
+      let trackQs = questions.filter((q) => isQuestionInTrack(q.id, track.id as any));
+      if (track.id === 'sprint30') {
+        trackQs = questions.slice(0, 30);
+      }
+      const total = trackQs.length || track.total;
+      const solved = trackQs.filter((q) => {
+        const st = store.progress[String(q.id)]?.status;
+        return st === 'solved' || st === 'mastered';
+      }).length;
+      const percent = total > 0 ? Math.round((solved / total) * 100) : 0;
+      result[track.id] = { solved, total, percent };
+    });
+    return result;
+  }, [questions, store.progress]);
+
+  const isDailySolved =
+    store.progress[String(dailyQuestion.id)]?.status === 'solved' ||
+    store.progress[String(dailyQuestion.id)]?.status === 'mastered';
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto text-white font-sans">
@@ -158,30 +190,32 @@ export const PracticePage: React.FC<PracticePageProps> = ({
             <Flame className="w-4 h-4 text-primary fill-primary" />
             <div className="text-left">
               <p className="text-[10px] text-textMuted uppercase font-medium">Streak</p>
-              <p className="text-sm sm:text-base font-bold text-primary font-mono">
-                {currentStreak} {currentStreak === 1 ? 'Day' : 'Days'}
-              </p>
+              <p className="text-sm sm:text-base font-bold text-white font-mono">{currentStreak} Days</p>
             </div>
           </div>
           <div className="px-4 py-2.5 rounded-xl bg-[#0E1217] border border-white/[0.08] text-center">
-            <p className="text-[10px] text-emerald-400 uppercase font-medium">Today's Goal</p>
-            <p className="text-sm sm:text-base font-bold text-emerald-400 font-mono">
-              {todaySolved} / {targetGoal}
+            <p className="text-[10px] text-textMuted uppercase font-medium">Daily Goal</p>
+            <p className="text-sm sm:text-base font-bold text-white font-mono">
+              <span className={todaySolved >= targetGoal ? 'text-primary' : 'text-white'}>
+                {todaySolved}
+              </span>
+              <span className="text-textMuted">/{targetGoal}</span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Row 1: Daily Challenge Card + Timed Speed Run Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Card 1: Daily Coding Challenge (7 cols) */}
-        <div className="lg:col-span-7 bg-[#0E1217] border border-white/[0.08] rounded-2xl p-6 flex flex-col justify-between space-y-4 relative overflow-hidden">
+      {/* Row 1: Daily Challenge + Timed Sprint */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Card 1: Today's Featured Challenge (7 cols) */}
+        <div className="lg:col-span-7 bg-[#0E1217] border border-white/[0.08] rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
-                Problem of the Day
+              <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <span className="text-xs font-semibold text-white uppercase tracking-wider">
+                Daily Focus Challenge
               </span>
-              <span className="text-xs text-textMuted font-mono">{todayFormatted}</span>
+              <span className="text-xs text-textMuted font-mono">• {todayFormatted}</span>
             </div>
             <DifficultyBadge difficulty={dailyQuestion.difficulty} />
           </div>
@@ -189,7 +223,8 @@ export const PracticePage: React.FC<PracticePageProps> = ({
           <div>
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-xs text-textMuted">#{dailyQuestion.id}</span>
-              <h2 className="text-lg sm:text-xl font-bold text-white hover:text-primary transition-colors cursor-pointer"
+              <h2
+                className="text-lg sm:text-xl font-bold text-white hover:text-primary transition-colors cursor-pointer"
                 onClick={() => {
                   sounds.playSuccess();
                   onNavigateToProblem(dailyQuestion.id);
@@ -220,16 +255,34 @@ export const PracticePage: React.FC<PracticePageProps> = ({
               </span>
             </div>
 
-            <button
-              onClick={() => {
-                sounds.playSuccess();
-                onNavigateToProblem(dailyQuestion.id);
-              }}
-              className="px-4 py-2 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-primary/20 cursor-pointer font-sans"
-            >
-              <span>Solve Challenge</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            {isDailySolved ? (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Solved Today</span>
+                </span>
+                <button
+                  onClick={() => {
+                    sounds.playSuccess();
+                    onNavigateToProblem(dailyQuestion.id);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 text-xs font-medium cursor-pointer"
+                >
+                  Review Code
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  sounds.playSuccess();
+                  onNavigateToProblem(dailyQuestion.id);
+                }}
+                className="px-4 py-2 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-primary/20 cursor-pointer font-sans"
+              >
+                <span>Solve Challenge</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -237,14 +290,16 @@ export const PracticePage: React.FC<PracticePageProps> = ({
         <div className="lg:col-span-5 bg-[#0E1217] border border-white/[0.08] rounded-2xl p-6 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-primary" />
+              <Zap className="w-4 h-4 text-amber-400" />
               <h2 className="text-sm sm:text-base font-semibold text-white">Timed Sprint Session</h2>
             </div>
-            <span className="text-[11px] text-textMuted uppercase font-mono">Speed Run</span>
+            <span className="text-[11px] text-amber-400 uppercase font-mono font-medium px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20">
+              Speed Run
+            </span>
           </div>
 
           <p className="text-xs text-textSecondary leading-relaxed">
-            Simulate realistic technical screen pressure. Complete 2–3 algorithmic problems within the allotted countdown.
+            Simulate fast-paced technical assessments. Pick a time limit and solve randomized problem sets against the clock.
           </p>
 
           <div className="space-y-2">
@@ -259,7 +314,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({
                   }}
                   className={`py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer font-sans ${
                     selectedDuration === mins
-                      ? 'bg-primary text-black shadow-md shadow-primary/20'
+                      ? 'bg-amber-400 text-black shadow-md shadow-amber-400/20 font-bold'
                       : 'bg-[#12161E] border border-white/[0.08] text-textSecondary hover:text-white hover:border-white/20'
                   }`}
                 >
@@ -272,11 +327,11 @@ export const PracticePage: React.FC<PracticePageProps> = ({
           <button
             onClick={() => {
               sounds.playSuccess();
-              navigate('/questions?curated=sprint30');
+              setShowSprintModal(true);
             }}
-            className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-white font-medium text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md shadow-amber-500/20"
           >
-            <Play className="w-3.5 h-3.5 text-primary fill-primary" />
+            <Play className="w-3.5 h-3.5 fill-black" />
             <span>Launch {selectedDuration}-Min Sprint</span>
           </button>
         </div>
@@ -299,40 +354,48 @@ export const PracticePage: React.FC<PracticePageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {CURATED_TRACKS.map((track) => (
-            <div
-              key={track.id}
-              onClick={() => {
-                sounds.playClick();
-                navigate(`/questions?curated=${track.id}`);
-              }}
-              className="p-4 rounded-xl bg-[#12161E]/60 border border-white/[0.06] hover:border-primary/50 hover:bg-[#12161E] transition-all cursor-pointer group flex flex-col justify-between space-y-3"
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-sm text-white group-hover:text-primary transition-colors">
-                    {track.title}
-                  </h3>
-                  <span className="text-[11px] font-mono text-textMuted px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.06]">
-                    {track.total} Qs
-                  </span>
+          {CURATED_TRACKS.map((track) => {
+            const prog = trackProgress[track.id] || { solved: 0, total: track.total, percent: 0 };
+            return (
+              <div
+                key={track.id}
+                onClick={() => {
+                  sounds.playClick();
+                  navigate(`/questions?curated=${track.id}`);
+                }}
+                className="p-4 rounded-xl bg-[#12161E]/60 border border-white/[0.06] hover:border-primary/50 hover:bg-[#12161E] transition-all cursor-pointer group flex flex-col justify-between space-y-3"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm text-white group-hover:text-primary transition-colors">
+                      {track.title}
+                    </h3>
+                    <span className="text-[11px] font-mono text-textMuted px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.06]">
+                      {prog.total} Qs
+                    </span>
+                  </div>
+                  <p className="text-xs text-textSecondary mt-1.5 line-clamp-2">
+                    {track.description}
+                  </p>
                 </div>
-                <p className="text-xs text-textSecondary mt-1.5 line-clamp-2">
-                  {track.description}
-                </p>
-              </div>
 
-              <div className="space-y-1.5 pt-2 border-t border-white/[0.04]">
-                <div className="flex items-center justify-between text-xs text-textMuted">
-                  <span>Track Progress</span>
-                  <span className="text-primary font-mono">0 / {track.total}</span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div className="h-full bg-primary rounded-full w-0 transition-all" />
+                <div className="space-y-1.5 pt-2 border-t border-white/[0.04]">
+                  <div className="flex items-center justify-between text-xs text-textMuted">
+                    <span>Track Progress</span>
+                    <span className="text-primary font-mono font-medium">
+                      {prog.solved} / {prog.total} ({prog.percent}%)
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-500"
+                      style={{ width: `${prog.percent}%` }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -363,13 +426,24 @@ export const PracticePage: React.FC<PracticePageProps> = ({
                 </h4>
               </div>
               <div className="mt-3 flex items-center justify-between text-xs text-textMuted font-mono">
-                <span>{p.count} Qs</span>
+                <span>{p.solvedCount}/{p.count} Solved</span>
                 <ArrowRight className="w-3 h-3 text-textMuted group-hover:text-white transition-transform group-hover:translate-x-0.5" />
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Speed Run Sprint Modal */}
+      {showSprintModal && (
+        <SprintSessionModal
+          durationMinutes={selectedDuration}
+          questions={questions}
+          onClose={() => setShowSprintModal(false)}
+          onUpdateStatus={onUpdateStatus || (() => {})}
+          onNavigateToProblem={onNavigateToProblem}
+        />
+      )}
     </div>
   );
 };

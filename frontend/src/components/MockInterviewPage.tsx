@@ -14,9 +14,10 @@ import {
   Crown,
   Lock
 } from 'lucide-react';
-import { Question, CompanyMeta, UserStoreState } from '../types';
+import { Question, CompanyMeta, UserStoreState, MockSessionConfig } from '../types';
 import { sounds } from '../utils/sound';
 import { getMockInterviews, CompletedMockSession } from '../utils/mockInterviewStorage';
+import { mockApi } from '../api/mockApi';
 import { useAuth } from '../context/AuthContext';
 import { getRemainingDailyMocks, recordMockInterviewTaken } from '../utils/tierPermissions';
 
@@ -24,7 +25,7 @@ interface MockInterviewPageProps {
   questions: Question[];
   companies: Record<string, CompanyMeta>;
   store: UserStoreState;
-  onOpenMockModal: () => void;
+  onOpenMockModal: (config?: MockSessionConfig) => void;
 }
 
 export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
@@ -40,6 +41,12 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
 
   const remainingMocks = getRemainingDailyMocks(user?.id || 'guest', isPro);
 
+  // Form selections
+  const [selectedCompany, setSelectedCompany] = useState<string>('Google');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('Medium');
+  const [selectedQuestionsCount, setSelectedQuestionsCount] = useState<string>('5 Questions');
+  const [selectedTopic, setSelectedTopic] = useState<string>('Arrays, Trees');
+
   const handleStartMock = () => {
     if (!isPro && remainingMocks <= 0) {
       sounds.playTimerAlert();
@@ -50,12 +57,47 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
       recordMockInterviewTaken(user?.id || 'guest');
     }
     sounds.playSuccess();
-    onOpenMockModal();
+    const countNum = parseInt(selectedQuestionsCount, 10) || 3;
+    const config: MockSessionConfig = {
+      company: selectedCompany,
+      difficulty: selectedDifficulty,
+      questionCount: countNum,
+      topic: selectedTopic,
+      type: (interviewType.charAt(0).toUpperCase() + interviewType.slice(1)) as 'Coding' | 'Behavioral' | 'Mixed',
+    };
+    onOpenMockModal(config);
   };
 
   useEffect(() => {
-    setMockSessions(getMockInterviews());
-  }, []);
+    const local = getMockInterviews();
+    setMockSessions(local);
+
+    if (user?.id && user.id !== 'guest') {
+      mockApi.getSessions().then((serverSessions) => {
+        if (serverSessions && serverSessions.length > 0) {
+          const mapped: CompletedMockSession[] = serverSessions.map((s) => ({
+            id: s.id,
+            company: s.company,
+            role: s.role,
+            type: (s.type as any) || 'Coding',
+            difficulty: s.difficulty || undefined,
+            score: s.score,
+            durationMinutes: s.durationMinutes,
+            solvedCount: s.solvedCount,
+            totalQuestions: s.totalQuestions,
+            date: s.date,
+            timestamp: new Date(s.createdAt).getTime(),
+          }));
+          const idSet = new Set(mapped.map((m) => m.id));
+          const merged = [...mapped, ...local.filter((l) => !idSet.has(l.id))];
+          setMockSessions(merged);
+        }
+      }).catch((err) => {
+        console.warn('Failed to load mock sessions from Neon DB:', err);
+      });
+    }
+  }, [user?.id]);
+
 
   const interviewsTaken = mockSessions.length;
   const completedCount = mockSessions.filter((s) => s.solvedCount > 0 || s.score >= 50).length;
@@ -78,12 +120,6 @@ export const MockInterviewPage: React.FC<MockInterviewPageProps> = ({
     if (mockSessions.length === 0) return null;
     return Math.round(mockSessions.reduce((acc, s) => acc + s.score, 0) / mockSessions.length);
   }, [mockSessions]);
-
-  // Form selections
-  const [selectedCompany, setSelectedCompany] = useState<string>('Google');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('Medium');
-  const [selectedQuestionsCount, setSelectedQuestionsCount] = useState<string>('5 Questions');
-  const [selectedTopic, setSelectedTopic] = useState<string>('Arrays, Trees');
 
   // Dropdown open states
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
