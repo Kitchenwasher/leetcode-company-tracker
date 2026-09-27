@@ -28,31 +28,35 @@ const allowedOrigins = [
   ENV.FRONTEND_URL,
   'http://localhost:3000',
   'http://127.0.0.1:3000',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ].filter(Boolean);
+
+const isOriginAllowed = (origin: string): boolean => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  // Allow all Vercel deployment preview / prod URLs
+  if (origin.endsWith('.vercel.app')) return true;
+  // Allow any localhost / 127.0.0.1 on any port (3000, 4173, 5173, 8080, etc.)
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+  // Allow local private network IP addresses (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+  if (/^https?:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(origin)) return true;
+  return false;
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, curl, server-to-server)
-      if (!origin) {
-        return callback(null, true);
-      }
-      
-      // Allow configured frontend URL or localhost
-      if (allowedOrigins.includes(origin)) {
+      if (!origin || isOriginAllowed(origin)) {
         return callback(null, true);
       }
 
-      // Allow any vercel.app deployment (production or preview branches)
-      if (origin.endsWith('.vercel.app')) {
-        return callback(null, true);
-      }
-
-      // In production, reject unauthorized origins
+      // In production, reject unauthorized origins cleanly without crashing with 500
       if (ENV.NODE_ENV === 'production') {
-        return callback(new Error(`CORS blocked for origin: ${origin}`));
+        return callback(null, false);
       }
 
       return callback(null, true);

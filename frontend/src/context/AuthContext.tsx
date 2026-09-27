@@ -162,7 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return 'Database connection timed out during cold start. Please retry in a moment.';
     }
     if (err.code === 'ERR_NETWORK') {
-      return 'Cannot connect to backend server. Please verify your connection.';
+      return 'Cannot connect to backend server. If running locally, ensure backend is running with "npm run dev".';
     }
     return err.message || fallback;
   };
