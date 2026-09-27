@@ -26,6 +26,10 @@ app.use(helmet({ contentSecurityPolicy: false }));
 // CORS configuration
 const allowedOrigins = [
   ENV.FRONTEND_URL,
+  'https://cheat-code.in',
+  'https://www.cheat-code.in',
+  'http://cheat-code.in',
+  'http://www.cheat-code.in',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:4173',
@@ -37,6 +41,8 @@ const allowedOrigins = [
 const isOriginAllowed = (origin: string): boolean => {
   if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
+  // Allow all cheat-code.in domains and subdomains
+  if (/^https?:\/\/([a-zA-Z0-9-]+\.)*cheat-code\.in(:\d+)?$/.test(origin)) return true;
   // Allow all Vercel deployment preview / prod URLs
   if (origin.endsWith('.vercel.app')) return true;
   // Allow any localhost / 127.0.0.1 on any port (3000, 4173, 5173, 8080, etc.)
