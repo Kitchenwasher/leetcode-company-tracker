@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db.js';
 import { AiSolutionService } from '../services/aiSolutionService.js';
+import { cache } from '../utils/cache.js';
 
 export class QuestionController {
   static async getQuestions(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -224,17 +225,27 @@ export class QuestionController {
       const forceRegenerate = req.query.regenerate === 'true';
 
       if (!forceRegenerate) {
+        const cached = cache.get<any>(`question:solution:${id}`);
+        if (cached) {
+          res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
+          res.json(cached);
+          return;
+        }
+
         const solution = await prisma.solution.findUnique({
           where: { questionId: id },
         });
 
         if (solution) {
-          res.json({
+          const formatted = {
             questionId: solution.questionId,
             corePattern: solution.corePattern,
             interviewTips: JSON.parse(solution.interviewTips || '[]'),
             approaches: JSON.parse(solution.approaches || '[]'),
-          });
+          };
+          cache.set(`question:solution:${id}`, formatted, 3600);
+          res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
+          res.json(formatted);
           return;
         }
       }
@@ -279,6 +290,8 @@ export class QuestionController {
         },
       });
 
+      cache.set(`question:solution:${id}`, aiSolution, 3600);
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
       res.json(aiSolution);
     } catch (err) {
       next(err);
@@ -331,6 +344,8 @@ export class QuestionController {
         },
       });
 
+      cache.set(`question:solution:${id}`, aiSolution, 3600);
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
       res.json(aiSolution);
     } catch (err) {
       next(err);
@@ -339,6 +354,13 @@ export class QuestionController {
 
   static async getCompanies(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const cached = cache.get<Record<string, { totalQuestions: number; thirtyDaysCount: number }>>('questions:companies');
+      if (cached) {
+        res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
+        res.json(cached);
+        return;
+      }
+
       // Group by companyId and count questions
       const companyStats = await prisma.questionCompany.groupBy({
         by: ['companyId'],
@@ -355,6 +377,8 @@ export class QuestionController {
         };
       });
 
+      cache.set('questions:companies', result, 3600);
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
       res.json(result);
     } catch (err) {
       next(err);
@@ -366,6 +390,13 @@ export class QuestionController {
       const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) {
         res.status(400).json({ error: 'Invalid question ID' });
+        return;
+      }
+
+      const cachedDesc = cache.get<any>(`question:desc:${id}`);
+      if (cachedDesc) {
+        res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
+        res.json(cachedDesc);
         return;
       }
 
@@ -415,7 +446,7 @@ export class QuestionController {
         }
 
         // Return cached data immediately without any network calls to LeetCode
-        res.json({
+        const payload = {
           id: question.id,
           title: question.title,
           titleSlug: slug,
@@ -425,7 +456,10 @@ export class QuestionController {
           topicTags: parsedTopics,
           codeSnippets: cachedSnippets,
           cached: true,
-        });
+        };
+        cache.set(`question:desc:${id}`, payload, 3600);
+        res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
+        res.json(payload);
         return;
       }
 
@@ -487,7 +521,7 @@ export class QuestionController {
           console.error(`[DB Cache] Failed to cache question #${question.id} in DB:`, dbErr);
         }
 
-        res.json({
+        const fetchedPayload = {
           id: question.id,
           title: question.title,
           titleSlug: slug,
@@ -497,7 +531,10 @@ export class QuestionController {
           topicTags: tags,
           codeSnippets: snippets,
           cached: false,
-        });
+        };
+        cache.set(`question:desc:${id}`, fetchedPayload, 3600);
+        res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
+        res.json(fetchedPayload);
         return;
       }
 

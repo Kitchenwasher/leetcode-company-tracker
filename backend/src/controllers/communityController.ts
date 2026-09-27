@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db.js';
 import { CreatePostInput } from '../types/community.js';
+import { cache } from '../utils/cache.js';
 
 const INITIAL_SEEDED_POSTS = [
   {
@@ -95,10 +96,13 @@ Cheat Code company frequency filters were spot-on for the 30-day window!`,
 ];
 
 export class CommunityController {
+  private static hasCheckedSeed = false;
+
   /**
    * Helper to ensure seed data is populated if community table is empty
    */
   private static async ensureSeeded(): Promise<void> {
+    if (CommunityController.hasCheckedSeed) return;
     try {
       const count = await prisma.communityPost.count();
       if (count === 0) {
@@ -137,6 +141,7 @@ export class CommunityController {
           });
         }
       }
+      CommunityController.hasCheckedSeed = true;
     } catch (err) {
       console.warn('Auto-seed check non-blocking warning:', err);
     }
@@ -144,6 +149,13 @@ export class CommunityController {
 
   static async getCommunityStats(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const cached = cache.get<any>('community:stats');
+      if (cached) {
+        res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=180, stale-while-revalidate=300');
+        res.json(cached);
+        return;
+      }
+
       const [userCount, solvedCount, postCount] = await Promise.all([
         prisma.user.count(),
         prisma.userProgress.count({
@@ -154,13 +166,17 @@ export class CommunityController {
         prisma.communityPost.count(),
       ]);
 
-      res.json({
+      const result = {
         activeEngineers: Math.max(userCount, 1280),
         solutionsSolved: solvedCount,
         companiesIndexed: 659,
         verifiedQuestions: 3399,
         communityPosts: postCount,
-      });
+      };
+
+      cache.set('community:stats', result, 180); // 3 minutes
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=180, stale-while-revalidate=300');
+      res.json(result);
     } catch (err) {
       next(err);
     }
@@ -168,7 +184,15 @@ export class CommunityController {
 
   static async getLeaderboard(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const cached = cache.get<any>('community:leaderboard');
+      if (cached) {
+        res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
+        res.json(cached);
+        return;
+      }
+
       const users = await prisma.user.findMany({
+        take: 50,
         select: {
           id: true,
           name: true,
@@ -220,6 +244,8 @@ export class CommunityController {
         rank: idx + 1,
       }));
 
+      cache.set('community:leaderboard', ranked, 120); // 2 minutes
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
       res.json(ranked);
     } catch (err) {
       next(err);
@@ -234,6 +260,38 @@ export class CommunityController {
       const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
       const limitNum = Math.min(50, Math.max(1, parseInt(limit as string, 10) || 20));
       const skip = (pageNum - 1) * limitNum;
+
+      const cacheKey = `community:posts:${category || 'all'}:${company || 'all'}:${search || ''}:${sortBy}:${pageNum}:${limitNum}`;
+      const cached = cache.get<{ total: number; posts: any[] }>(cacheKey);
+
+      if (cached) {
+        let userUpvotedIds = new Set<string>();
+        if (req.user && cached.posts.length > 0) {
+          const postIds = cached.posts.map((p) => p.id);
+          const upvotes = await prisma.communityUpvote.findMany({
+            where: {
+              userId: req.user.id,
+              postId: { in: postIds },
+            },
+            select: { postId: true },
+          });
+          userUpvotedIds = new Set(upvotes.map((u) => u.postId));
+        }
+
+        const postsWithUpvotes = cached.posts.map((p) => ({
+          ...p,
+          hasUpvoted: userUpvotedIds.has(p.id),
+        }));
+
+        res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120');
+        res.json({
+          total: cached.total,
+          page: pageNum,
+          totalPages: Math.ceil(cached.total / limitNum) || 1,
+          posts: postsWithUpvotes,
+        });
+        return;
+      }
 
       const where: any = {};
       if (category && category !== 'all') {
@@ -322,6 +380,11 @@ export class CommunityController {
         };
       });
 
+      // Cache normalized posts (without user-specific upvote) for 60 seconds
+      const cacheablePosts = formatted.map((p) => ({ ...p, hasUpvoted: false }));
+      cache.set(cacheKey, { total, posts: cacheablePosts }, 60);
+
+      res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120');
       res.json({
         total,
         page: pageNum,
@@ -336,6 +399,28 @@ export class CommunityController {
   static async getPostById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = String(req.params.id);
+      const postCacheKey = `community:post:${id}`;
+      const cached = cache.get<any>(postCacheKey);
+
+      if (cached) {
+        let hasUpvoted = false;
+        if (req.user) {
+          const uv = await prisma.communityUpvote.findUnique({
+            where: {
+              userId_postId: {
+                userId: req.user.id,
+                postId: id,
+              },
+            },
+          });
+          hasUpvoted = Boolean(uv);
+        }
+
+        res.setHeader('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=60');
+        res.json({ ...cached, hasUpvoted });
+        return;
+      }
+
       const post: any = await prisma.communityPost.findUnique({
         where: { id },
         include: {
@@ -389,7 +474,7 @@ export class CommunityController {
         createdAt: c.createdAt.toISOString(),
       }));
 
-      res.json({
+      const postData = {
         id: post.id,
         userId: post.userId,
         authorName: post.user?.name || 'Anonymous Engineer',
@@ -407,7 +492,13 @@ export class CommunityController {
         createdAt: post.createdAt.toISOString(),
         updatedAt: post.updatedAt.toISOString(),
         comments,
-      });
+      };
+
+      // Store in memory cache for 60 seconds
+      cache.set(postCacheKey, { ...postData, hasUpvoted: false }, 60);
+
+      res.setHeader('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=60');
+      res.json(postData);
     } catch (err) {
       next(err);
     }
@@ -465,6 +556,9 @@ export class CommunityController {
         parsedTags = [];
       }
 
+      cache.delPrefix('community:posts');
+      cache.del('community:stats');
+
       res.status(201).json({
         id: post.id,
         userId: post.userId,
@@ -521,6 +615,9 @@ export class CommunityController {
           },
         },
       });
+
+      cache.delPrefix('community:posts');
+      cache.del(`community:post:${id}`);
 
       res.status(201).json({
         id: comment.id,
@@ -590,6 +687,9 @@ export class CommunityController {
         });
         upvoted = true;
       }
+
+      cache.delPrefix('community:posts');
+      cache.del(`community:post:${id}`);
 
       res.json({
         upvoted,

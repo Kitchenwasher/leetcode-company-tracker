@@ -22,6 +22,9 @@ export interface QuestionsApiResponse {
   questions: Question[];
 }
 
+const descCache = new Map<string, any>();
+const solutionCache = new Map<string, QuestionSolution>();
+
 export const questionsApi = {
   getQuestions: async (params: QuestionsQueryParams): Promise<QuestionsApiResponse> => {
     const res = await api.get<QuestionsApiResponse>('/questions', { params });
@@ -34,17 +37,34 @@ export const questionsApi = {
   },
 
   getDescription: async (id: number | string): Promise<any> => {
+    const key = String(id);
+    if (descCache.has(key)) {
+      return descCache.get(key);
+    }
     const res = await api.get(`/questions/${id}/description`);
+    if (res.data) {
+      descCache.set(key, res.data);
+    }
     return res.data;
   },
 
   getSolution: async (id: number | string, forceRegenerate: boolean = false): Promise<QuestionSolution> => {
+    const key = String(id);
+    if (!forceRegenerate && solutionCache.has(key)) {
+      return solutionCache.get(key)!;
+    }
     const res = await api.get<QuestionSolution>(`/questions/${id}/solution${forceRegenerate ? '?regenerate=true' : ''}`);
+    if (res.data) {
+      solutionCache.set(key, res.data);
+    }
     return res.data;
   },
 
   generateAiSolution: async (id: number | string): Promise<QuestionSolution> => {
     const res = await api.post<QuestionSolution>(`/questions/${id}/ai-solution`);
+    if (res.data) {
+      solutionCache.set(String(id), res.data);
+    }
     return res.data;
   },
 

@@ -27,11 +27,17 @@ import { useAuth } from '../context/AuthContext';
 
 export const CommunityPage: React.FC = () => {
   const { isAuthenticated, setShowAuthModal } = useAuth();
-  const [stats, setStats] = useState<CommunityStats | null>(null);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [postsLoading, setPostsLoading] = useState(true);
+  
+  // Instant Fast SWR Initializers: Load immediately from sessionStorage so 0ms loading spinner flash
+  const [stats, setStats] = useState<CommunityStats | null>(() => communityApi.getStoredStats());
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>(() => communityApi.getStoredLeaderboard() || []);
+  const [posts, setPosts] = useState<CommunityPost[]>(() => {
+    const cached = communityApi.getStoredPosts('all:all::hot');
+    return cached ? cached.posts : [];
+  });
+  const [loading, setLoading] = useState<boolean>(() => !communityApi.getStoredStats() || !communityApi.getStoredLeaderboard());
+  const [postsLoading, setPostsLoading] = useState<boolean>(() => !communityApi.getStoredPosts('all:all::hot'));
+
   const [activeTab, setActiveTab] = useState<'all' | 'interview_experience' | 'question_help' | 'compensation' | 'leaderboard'>('all');
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,7 +49,7 @@ export const CommunityPage: React.FC = () => {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [submittingComment, setSubmittingComment] = useState<string | null>(null);
 
-  // Load KPI Stats & Leaderboard
+  // Load KPI Stats & Leaderboard (silently revalidates in background)
   useEffect(() => {
     let isMounted = true;
     const fetchMetadata = async () => {
@@ -68,14 +74,22 @@ export const CommunityPage: React.FC = () => {
     };
   }, []);
 
-  // Load Posts when active tab, company, or search changes
+  // Load Posts when active tab, company, or search changes (Instant SWR + Background Revalidate)
   useEffect(() => {
     if (activeTab === 'leaderboard') return;
+
+    const cacheKey = `${activeTab}:${selectedCompany}:${searchQuery.trim()}:hot`;
+    const cached = communityApi.getStoredPosts(cacheKey);
+    if (cached && cached.posts) {
+      setPosts(cached.posts);
+      setPostsLoading(false);
+    } else {
+      setPostsLoading(true);
+    }
 
     let isMounted = true;
     const fetchPosts = async () => {
       try {
-        setPostsLoading(true);
         const res = await communityApi.getPosts({
           category: activeTab === 'all' ? undefined : activeTab,
           company: selectedCompany === 'all' ? undefined : selectedCompany,

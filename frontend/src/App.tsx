@@ -14,6 +14,7 @@ import { PrepPlannerModal } from './components/PrepPlannerModal';
 import { FlashcardModal } from './components/FlashcardModal';
 import { LeetCodeSyncModal } from './components/LeetCodeSyncModal';
 import { isQuestionInTrack } from './data/curatedLists';
+import { getCachedQuestions, setCachedQuestions } from './utils/datasetCache';
 import { sounds } from './utils/sound';
 import { Navbar } from './components/Navbar';
 import { TimeframeTabs } from './components/TimeframeTabs';
@@ -226,25 +227,61 @@ export const App: React.FC = () => {
     }
   }, [store, user?.id]);
 
-  // Load complete questions dataset asynchronously
+  // Load complete questions dataset with Stale-While-Revalidate via IndexedDB
   useEffect(() => {
-    const fetchData = async () => {
+    let isMounted = true;
+
+    const loadDataset = async () => {
+      // 1. Instant Fast Path: Load from native IndexedDB in ~15ms
       try {
-        setIsLoading(true);
+        const cached = await getCachedQuestions();
+        if (cached && cached.questions && cached.questions.length > 0 && isMounted) {
+          setAllQuestions(cached.questions);
+          setIsLoading(false);
+
+          // If dataset in cache was loaded less than 24 hours ago, skip network refetch
+          const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+          if (Date.now() - cached.timestamp < ONE_DAY_MS) {
+            return;
+          }
+        }
+      } catch (cacheErr) {
+        console.warn('Dataset cache read error:', cacheErr);
+      }
+
+      // 2. Fetch fresh dataset over network (background revalidation if cached, or blocking if first visit)
+      try {
         const res = await fetch('/data/leetcode_company_data.json');
         if (!res.ok) {
           throw new Error(`Failed to load questions dataset: ${res.statusText}`);
         }
         const data = await res.json();
-        setAllQuestions(data.questions || []);
-        setIsLoading(false);
+        const questions = data.questions || [];
+        if (isMounted) {
+          setAllQuestions(questions);
+          setIsLoading(false);
+        }
+        // Save to IndexedDB asynchronously
+        setCachedQuestions(questions).catch(() => {});
       } catch (err: unknown) {
         console.error('Error fetching question data:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setIsLoading(false);
+        if (isMounted) {
+          setAllQuestions((prev) => {
+            if (prev.length === 0) {
+              setError(err instanceof Error ? err.message : 'Unknown error');
+            }
+            return prev;
+          });
+          setIsLoading(false);
+        }
       }
     };
-    fetchData();
+
+    loadDataset();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Update store helper
