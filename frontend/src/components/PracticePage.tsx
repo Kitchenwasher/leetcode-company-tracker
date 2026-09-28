@@ -290,10 +290,10 @@ export const PracticePage: React.FC<PracticePageProps> = ({
         <div className="lg:col-span-5 bg-[#0E1217] border border-white/[0.08] rounded-2xl p-6 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400" />
+              <Zap className="w-4 h-4 text-primary" />
               <h2 className="text-sm sm:text-base font-semibold text-white">Timed Sprint Session</h2>
             </div>
-            <span className="text-[11px] text-amber-400 uppercase font-mono font-medium px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20">
+            <span className="text-[11px] text-primary uppercase font-mono font-medium px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
               Speed Run
             </span>
           </div>
@@ -314,7 +314,7 @@ export const PracticePage: React.FC<PracticePageProps> = ({
                   }}
                   className={`py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer font-sans ${
                     selectedDuration === mins
-                      ? 'bg-amber-400 text-black shadow-md shadow-amber-400/20 font-bold'
+                      ? 'bg-primary text-white shadow-md shadow-primary/25 font-bold'
                       : 'bg-[#12161E] border border-white/[0.08] text-textSecondary hover:text-white hover:border-white/20'
                   }`}
                 >
@@ -329,9 +329,9 @@ export const PracticePage: React.FC<PracticePageProps> = ({
               sounds.playSuccess();
               setShowSprintModal(true);
             }}
-            className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md shadow-amber-500/20"
+            className="w-full py-2.5 rounded-xl bg-primary hover:bg-purple-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md shadow-primary/25"
           >
-            <Play className="w-3.5 h-3.5 fill-black" />
+            <Play className="w-3.5 h-3.5 fill-white text-white" />
             <span>Launch {selectedDuration}-Min Sprint</span>
           </button>
         </div>

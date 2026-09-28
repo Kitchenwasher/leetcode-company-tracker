@@ -25,7 +25,6 @@ import { useAuth } from '../context/AuthContext';
 import { exportBackupJSON, exportQuestionsCSV } from '../services/storage';
 import { sounds } from '../utils/sound';
 import { paymentApi } from '../api/paymentApi';
-import { ThemeToolkitCard } from './ThemeToolkit';
 
 interface SettingsPageProps {
   store: UserStoreState;
@@ -149,9 +148,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           <span>Profile configuration successfully saved!</span>
         </div>
       )}
-
-      {/* Theme Accent Customization Toolkit */}
-      <ThemeToolkitCard />
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Left Column: Profile & Account Settings (7 cols) */}

@@ -183,15 +183,15 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
         {/* Top Header Bar */}
         <div className="p-3.5 sm:p-4 bg-[#0E1217] border-b border-white/[0.08] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
-              <Zap className="w-4 h-4 fill-amber-400" />
+            <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <Zap className="w-4 h-4 fill-primary text-primary" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-bold text-white font-sans">
                   {durationMinutes}-Minute Speed Run Sprint
                 </h2>
-                <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">
                   {sprintQuestions.length} Problems
                 </span>
               </div>
@@ -203,7 +203,7 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
 
           {/* Center Timer Controls */}
           <div className="flex items-center gap-2 sm:gap-3 bg-[#080B0F] px-3 py-1.5 rounded-xl border border-white/[0.08]">
-            <Clock className="w-4 h-4 text-amber-400" />
+            <Clock className="w-4 h-4 text-primary" />
             <span
               className={`text-lg sm:text-xl font-bold font-mono tracking-wider ${
                 secondsRemaining < 120
@@ -243,9 +243,9 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handleFinishSprint}
-              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-purple-600 text-white text-xs font-bold shadow-md shadow-primary/20 transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <Award className="w-3.5 h-3.5 fill-black" />
+              <Award className="w-3.5 h-3.5 fill-white text-white" />
               <span>Finish Sprint</span>
             </button>
             <button
@@ -285,7 +285,7 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
                 }}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-all cursor-pointer shrink-0 font-medium ${
                   activeIndex === idx
-                    ? 'bg-amber-500/15 border-amber-500/50 text-white shadow-sm'
+                    ? 'bg-primary/15 border-primary/50 text-white shadow-sm'
                     : 'bg-[#12161E]/60 border-white/[0.06] text-textSecondary hover:text-white hover:border-white/15'
                 }`}
               >
@@ -376,9 +376,9 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
                 )}
 
                 {/* Speed Tip */}
-                <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-300 space-y-1">
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-xs text-primaryLight space-y-1">
                   <div className="font-semibold flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    <Zap className="w-3.5 h-3.5 text-primary" />
                     <span>Sprint Speed Rule</span>
                   </div>
                   <p className="text-[11px] text-zinc-300">
@@ -439,7 +439,7 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
             ) : (
               <button
                 onClick={handleFinishSprint}
-                className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-xs font-bold text-black shadow-md shadow-amber-500/20 transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-purple-600 text-xs font-bold text-white shadow-md shadow-primary/20 transition-all cursor-pointer flex items-center gap-1.5"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Finish Sprint</span>
@@ -453,7 +453,7 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
       {isFinished && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in font-sans">
           <div className="w-full max-w-lg bg-[#0E1217] border border-white/[0.1] rounded-2xl p-6 sm:p-7 shadow-2xl text-center space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mx-auto text-amber-400">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center mx-auto text-primary">
               <Trophy className="w-8 h-8" />
             </div>
 
@@ -471,7 +471,7 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
 
             {/* Score Ring */}
             <div className="py-4 bg-[#12161E] rounded-xl border border-white/[0.06] space-y-2">
-              <div className="text-5xl font-black font-mono text-amber-400">
+              <div className="text-5xl font-black font-mono text-primary">
                 {sprintQuestions.length > 0
                   ? Math.round((solvedInSession.size / sprintQuestions.length) * 100)
                   : 0}
@@ -481,7 +481,7 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
                 {solvedInSession.size === sprintQuestions.length ? (
                   <span className="text-emerald-400">Speed Demon • 100% Cleared</span>
                 ) : solvedInSession.size > 0 ? (
-                  <span className="text-amber-400">Solid Pacing</span>
+                  <span className="text-primary">Solid Pacing</span>
                 ) : (
                   <span className="text-rose-400">Needs More Acceleration</span>
                 )}
@@ -508,7 +508,7 @@ export const SprintSessionModal: React.FC<SprintSessionModalProps> = ({
 
             <button
               onClick={onClose}
-              className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold text-sm shadow-lg shadow-amber-500/25 transition-all cursor-pointer"
+              className="w-full py-3 rounded-xl bg-primary hover:bg-purple-600 text-white font-bold text-sm shadow-lg shadow-primary/25 transition-all cursor-pointer"
             >
               Return to Practice Hub
             </button>
