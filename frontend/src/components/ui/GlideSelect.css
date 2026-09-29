@@ -127,6 +127,7 @@ tr:has([aria-expanded='true']) {
   z-index: 50;
   width: var(--gs-menu-w);
   min-width: 100%;
+  max-width: calc(100vw - 32px);
   padding: 4px;
   border-radius: var(--gs-radius);
   background: var(--gs-surface);

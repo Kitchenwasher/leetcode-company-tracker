@@ -1140,6 +1140,7 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
                 icon={<ArrowUpDown className="w-3.5 h-3.5" />}
                 size="md"
                 menuWidth={210}
+                align="right"
                 radius={12}
                 accentColor="var(--theme-accent, #A855F7)"
                 surfaceColor="#11141A"

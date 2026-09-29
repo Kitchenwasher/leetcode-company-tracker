@@ -104,6 +104,7 @@ export default function GlideSelect({
   const [phase, setPhase] = useState<'closed' | 'open' | 'closing'>('closed');
   const [active, setActive] = useState<number | null>(null);
   const [side, setSide] = useState<'top' | 'bottom'>(placement);
+  const [currentAlign, setCurrentAlign] = useState<'left' | 'right'>(align);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -115,6 +116,10 @@ export default function GlideSelect({
   const S = SIZES[size] ?? SIZES.md;
   const step = S.row + GAP;
   const popOut = Math.round((popDuration * 2) / 3);
+
+  useEffect(() => {
+    setCurrentAlign(align);
+  }, [align]);
 
   useEffect(() => {
     if (phase === 'open' && searchable) {
@@ -138,6 +143,16 @@ export default function GlideSelect({
           ? 'bottom'
           : placement
     );
+
+    // Auto-detect horizontal viewport collision to prevent going out of screen
+    const menuW = menuWidth || el.offsetWidth || 180;
+    if (align === 'left' && r.left + menuW > window.innerWidth - 12) {
+      setCurrentAlign('right');
+    } else if (align === 'right' && r.right - menuW < 12) {
+      setCurrentAlign('left');
+    } else {
+      setCurrentAlign(align);
+    }
     el.style.transitionDuration = instant.current ? '0ms' : '';
     el.dataset.state = 'closed';
     void el.offsetHeight;
@@ -375,7 +390,7 @@ export default function GlideSelect({
           className="glide-select__menu"
           data-state="open"
           data-side={side}
-          data-align={align}
+          data-align={currentAlign}
           data-lenis-prevent
           onWheel={e => e.stopPropagation()}
         >
