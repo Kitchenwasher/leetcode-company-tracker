@@ -74,18 +74,11 @@ export const CommunityPage: React.FC = () => {
     };
   }, []);
 
-  // Load Posts when active tab, company, or search changes (Instant SWR + Background Revalidate)
+  // Load Posts when active tab, company, or search changes
   useEffect(() => {
     if (activeTab === 'leaderboard') return;
 
-    const cacheKey = `${activeTab}:${selectedCompany}:${searchQuery.trim()}:hot`;
-    const cached = communityApi.getStoredPosts(cacheKey);
-    if (cached && cached.posts) {
-      setPosts(cached.posts);
-      setPostsLoading(false);
-    } else {
-      setPostsLoading(true);
-    }
+    setPostsLoading(true);
 
     let isMounted = true;
     const fetchPosts = async () => {
@@ -114,14 +107,8 @@ export const CommunityPage: React.FC = () => {
   }, [activeTab, selectedCompany, searchQuery]);
 
   const handleToggleUpvote = async (postId: string) => {
-    if (!isAuthenticated) {
-      sounds.playTimerAlert();
-      setShowAuthModal(true);
-      return;
-    }
-
+    sounds.playClick();
     try {
-      sounds.playClick();
       // Optimistic update
       setPosts((prev) =>
         prev.map((p) => {
@@ -168,12 +155,6 @@ export const CommunityPage: React.FC = () => {
   };
 
   const handleAddComment = async (postId: string) => {
-    if (!isAuthenticated) {
-      sounds.playTimerAlert();
-      setShowAuthModal(true);
-      return;
-    }
-
     const text = commentInputs[postId]?.trim();
     if (!text || text.length < 2) return;
 
@@ -202,8 +183,15 @@ export const CommunityPage: React.FC = () => {
   };
 
   const handlePostCreated = (newPost: CommunityPost) => {
-    setPosts((prev) => [newPost, ...prev]);
-    setActiveTab(newPost.category as any);
+    sounds.playSuccess();
+    setPosts((prev) => [newPost, ...prev.filter((p) => p.id !== newPost.id)]);
+    if (activeTab !== 'all' && activeTab !== newPost.category) {
+      setActiveTab(newPost.category as any);
+    }
+    if (selectedCompany !== 'all' && newPost.companyId && selectedCompany !== newPost.companyId) {
+      setSelectedCompany('all');
+    }
+    setStats((prev) => (prev ? { ...prev, communityPosts: (prev.communityPosts || 0) + 1 } : null));
   };
 
   return (
@@ -226,11 +214,7 @@ export const CommunityPage: React.FC = () => {
         <button
           onClick={() => {
             sounds.playClick();
-            if (!isAuthenticated) {
-              setShowAuthModal(true);
-            } else {
-              setShowCreateModal(true);
-            }
+            setShowCreateModal(true);
           }}
           className="px-4 py-2.5 rounded-xl bg-primary hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-primary/20 cursor-pointer shrink-0 font-sans"
         >

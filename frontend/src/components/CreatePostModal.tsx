@@ -17,7 +17,8 @@ const CATEGORIES = [
 ];
 
 export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPostCreated }) => {
-  const { isAuthenticated, setShowAuthModal } = useAuth();
+  const { isAuthenticated, user, setShowAuthModal } = useAuth();
+  const [guestName, setGuestName] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState<'interview_experience' | 'question_help' | 'general' | 'compensation'>('interview_experience');
@@ -41,11 +42,6 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPos
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) {
-      sounds.playTimerAlert();
-      setShowAuthModal(true);
-      return;
-    }
 
     if (title.trim().length < 5) {
       setError('Title must be at least 5 characters long.');
@@ -67,6 +63,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPos
         category,
         companyId: companyId ? companyId.toLowerCase() : undefined,
         tags,
+        authorName: (!isAuthenticated && guestName.trim()) ? guestName.trim() : undefined,
       });
 
       sounds.playSuccess();
@@ -111,6 +108,40 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPos
           {error && (
             <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium">
               {error}
+            </div>
+          )}
+
+          {/* Author Attribution Indicator */}
+          <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-[11px]">
+                {isAuthenticated ? (user.name?.charAt(0) || 'U') : 'G'}
+              </div>
+              <span className="text-zinc-300">
+                Posting as: <strong className="text-white font-medium">{isAuthenticated ? user.name : (guestName.trim() || 'Community Engineer')}</strong>
+              </span>
+            </div>
+            {!isAuthenticated && (
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(true)}
+                className="text-[11px] text-primary hover:underline font-medium cursor-pointer"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
+
+          {!isAuthenticated && (
+            <div className="space-y-1.5">
+              <label className="text-xs text-textSecondary font-medium">Your Name / Handle (Optional)</label>
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="e.g., Alex Chen or Anonymous Dev"
+                className="w-full bg-[#12161E] border border-white/[0.08] focus:border-primary rounded-xl px-4 py-2 text-xs text-white focus:outline-none placeholder:text-textMuted"
+              />
             </div>
           )}
 

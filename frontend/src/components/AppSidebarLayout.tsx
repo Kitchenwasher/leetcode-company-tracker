@@ -12,6 +12,7 @@ import {
   Bookmark,
   Settings,
   Menu,
+  X,
   Bell,
   ChevronDown,
   Sparkles,
@@ -57,6 +58,30 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
     setHoveredNav(null);
   }, [location.pathname]);
 
+  // Prevent background scroll when mobile sidebar is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+        setShowUserDropdown(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const isOverview = location.pathname === '/dashboard' || location.pathname === '/overview';
   const isCompanies = location.pathname === '/companies';
   const isQuestions = location.pathname === '/questions' || location.pathname.startsWith('/company') || location.pathname.startsWith('/dashboard/company');
@@ -73,6 +98,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: LayoutDashboard,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/dashboard');
       },
       isActive: isOverview,
@@ -82,6 +108,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: Building2,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/companies');
       },
       isActive: isCompanies,
@@ -91,6 +118,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: FileText,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/questions');
       },
       isActive: isQuestions,
@@ -100,6 +128,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: SlidersHorizontal,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/practice');
       },
       isActive: isPractice,
@@ -109,6 +138,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: Users,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/mock-interview');
       },
       isActive: isMockInterview,
@@ -118,6 +148,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: TrendingUp,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/progress');
       },
       isActive: isProgress,
@@ -127,6 +158,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: Shield,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/community');
       },
       isActive: isCommunity,
@@ -136,6 +168,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: Bookmark,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/bookmarks');
       },
       isActive: isBookmarks,
@@ -145,6 +178,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
       icon: Settings,
       action: () => {
         sounds.playClick();
+        setMobileMenuOpen(false);
         navigate('/settings');
       },
       isActive: isSettings,
@@ -155,20 +189,24 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
     <div className="min-h-screen bg-[#080B0F] text-[#F3F4F6] flex flex-col font-sans selection:bg-primary/25 selection:text-white">
       {/* Top Bar Header */}
       {!hideTopBar && (
-        <header className="sticky top-0 z-40 w-full h-16 bg-[#0B0E14]/90 backdrop-blur-md border-b border-white/[0.08] px-4 sm:px-6 flex items-center justify-between select-none">
+        <header className="sticky top-0 z-30 w-full h-16 bg-[#0B0E14]/90 backdrop-blur-md border-b border-white/[0.08] px-4 sm:px-6 flex items-center justify-between select-none">
           {/* Left: Brand + Beta Pill */}
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
-              aria-label="Open Sidebar"
+              onClick={() => {
+                sounds.playClick();
+                setMobileMenuOpen(!mobileMenuOpen);
+              }}
+              className="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+              aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
             >
-              <Menu className="w-5 h-5" />
+              {mobileMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5" />}
             </button>
 
             <button
               onClick={() => {
                 sounds.playClick();
+                setMobileMenuOpen(false);
                 navigate('/dashboard');
               }}
               className="flex items-center text-left cursor-pointer group"
@@ -290,18 +328,22 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
 
       {/* Main Container: Sidebar + Content */}
       <div className="flex-1 flex min-h-0 relative">
-        {/* Mobile Backdrop */}
+        {/* Mobile Backdrop - dims and blurs background page behind drawer */}
         {mobileMenuOpen && (
           <div
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm lg:hidden"
-            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden transition-opacity duration-200"
+            onClick={() => {
+              sounds.playClick();
+              setMobileMenuOpen(false);
+            }}
+            aria-hidden="true"
           />
         )}
 
-        {/* Left Sidebar */}
+        {/* Left Sidebar Drawer */}
         <aside
-          className={`fixed top-16 bottom-0 left-0 z-40 w-60 border-r border-white/[0.08] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 overflow-hidden bg-[#09090b] ${
-            mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+          className={`fixed top-0 lg:top-16 bottom-0 left-0 z-50 lg:z-30 w-64 lg:w-60 border-r border-white/[0.08] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 overflow-hidden bg-[#09090b] ${
+            mobileMenuOpen ? 'translate-x-0 shadow-2xl ring-1 ring-white/10' : '-translate-x-full'
           }`}
         >
           {/* Full-Height Background Astronaut on Moon Image (Mirrored & Positioned to match original) */}
@@ -314,6 +356,27 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
           {/* Gradients: Strong contrast at top for navigation icons, soft in mid/bottom */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/95 via-[#09090b]/65 to-transparent pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-black/30 pointer-events-none" />
+
+          {/* Mobile Drawer Top Brand Bar */}
+          <div className="lg:hidden relative z-10 px-4 py-3.5 border-b border-white/[0.08] flex items-center justify-between bg-[#0B0E14]/95">
+            <div className="flex items-center">
+              <span className="text-accent font-mono font-bold text-base mr-1.5">&gt;</span>
+              <span className="text-white font-sans font-bold text-base tracking-tight">CHEAT_CODE</span>
+              <span className="inline-flex items-center px-2 py-0.5 ml-2 rounded-full text-[10px] font-semibold tracking-wide bg-accent-subtle text-accent border border-accent-subtle">
+                BETA
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                sounds.playClick();
+                setMobileMenuOpen(false);
+              }}
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer"
+              aria-label="Close sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           {/* Nav Items Container */}
           <div

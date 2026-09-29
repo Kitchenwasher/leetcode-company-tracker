@@ -3,159 +3,40 @@ import { prisma } from '../config/db.js';
 import { CreatePostInput } from '../types/community.js';
 import { cache } from '../utils/cache.js';
 
-const INITIAL_SEEDED_POSTS = [
-  {
-    title: 'Google L4 Interview Loop (Mountain View) - Passed & Offer Received',
-    content: `Sharing my recent experience interviewing for Google L4 (Software Engineer, Core Infrastructure):
-
-**Round 1: Graph Traversal & Course Schedule II Variant**
-- Problem: Detect cyclic dependencies in a distributed build tree with weighted edge costs.
-- Approach: Topological sort using Kahn's algorithm (indegree counting), then memoized DFS to compute critical path latency.
-- Interviewer focused heavily on clarifying input sizes ($V \le 10^5, E \le 5 \times 10^5$) and memory usage.
-
-**Round 2: Distributed LRU Cache with TTL Eviction**
-- Evaluated doubly linked list + hash map data structure with a min-heap tracking expiration timestamps.
-- Key discussion was thread-safety and lock-free read concurrency.
-
-**Round 3: String Parsing & Dynamic Programming**
-- Wildcard matching variant with special quantifier tokens. Used $O(M \times N)$ 2D DP table with space optimization to $O(N)$.
-
-**Round 4: Googleyness & Leadership**
-- Questions about disagreeing with tech lead on refactoring timelines and handling a production sev-2 incident.
-- Recommendation: Use structured STAR method with quantified results.`,
-    category: 'interview_experience',
-    companyId: 'google',
-    tags: JSON.stringify(['Google', 'L4', 'Graphs', 'Topological Sort', 'System Design']),
-    upvotesCount: 42,
-  },
-  {
-    title: 'Meta E4 Full-Loop Breakdown (Menlo Park / Remote)',
-    content: `Completed Meta E4 interview loop recently:
-
-**Coding 1 (45 mins): 2 Questions**
-1. Valid Parentheses with wildcard operators (similar to LeetCode #678).
-2. Subarray Sum Equals K (LeetCode #560).
-- Meta emphasizes speed and bug-free code. Had 10 minutes left to write edge test cases.
-
-**Coding 2 (45 mins): 2 Questions**
-1. Lowest Common Ancestor of a Binary Tree (LeetCode #236).
-2. Vertical Order Traversal of a Binary Tree (LeetCode #314).
-- Used BFS with column coordinate offset tracking.
-
-**Behavioral:**
-- Discussed working across teams to deprecate a legacy API under strict SLA requirements.`,
-    category: 'interview_experience',
-    companyId: 'meta',
-    tags: JSON.stringify(['Meta', 'E4', 'Binary Tree', 'Prefix Sum', 'Speed']),
-    upvotesCount: 38,
-  },
-  {
-    title: 'Amazon SDE II Loop - Heavy focus on Leadership Principles & BFS',
-    content: `Got an offer for Amazon SDE II (AWS DynamoDB team):
-
-1. **Word Ladder II (LeetCode #126)**: BFS shortest path exploration followed by DFS backtracking for all minimal transformation paths.
-2. **Modular File Search API**: Object-Oriented Design pattern with Filter/Specification pattern (size, extension, owner).
-3. **Leadership Principles**: Customer Obsession, Ownership, and Dive Deep took up 50% of every 60-minute round!
-
-Tips: Have at least 2 distinct concrete stories for every single Amazon Leadership Principle!`,
-    category: 'interview_experience',
-    companyId: 'amazon',
-    tags: JSON.stringify(['Amazon', 'AWS', 'SDE II', 'BFS', 'Leadership Principles']),
-    upvotesCount: 29,
-  },
-  {
-    title: 'Optimal Intuition for Trapping Rain Water (#42) - Two Pointers vs Monotonic Stack',
-    content: `A quick theoretical summary of why Two Pointers runs in $O(N)$ time and $O(1)$ auxiliary space for LeetCode #42:
-
-At any index $i$, the water trapped is strictly bounded by:
-$$\\min(\\text{left\\_max}, \\text{right\\_max}) - \\text{height}[i]$$
-
-When \`left_max < right_max\`, the bottleneck for \`left\` is guaranteed to be \`left_max\`, regardless of what happens in between. Hence we can advance the left pointer monotonically. When \`right_max <= left_max\`, the bottleneck is guaranteed by \`right_max\`.
-
-This avoids needing extra memory arrays!`,
-    category: 'question_help',
-    companyId: 'google',
-    questionId: 42,
-    tags: JSON.stringify(['Two Pointers', 'Array', 'Optimal Approach', 'Problem #42']),
-    upvotesCount: 51,
-  },
-  {
-    title: 'How I passed Microsoft SWE Screening in 3 weeks of targeted practice',
-    content: `Key patterns Microsoft interviewers test repeatedly:
-1. Linked List Reversal & Cycle Detection (Fast & Slow pointers)
-2. String Manipulation and Anagram grouping
-3. Binary Tree Traversals (Inorder iterative, level order)
-4. Matrix manipulations (Rotate Image, Spiral Matrix)
-
-Cheat Code company frequency filters were spot-on for the 30-day window!`,
-    category: 'general',
-    companyId: 'microsoft',
-    tags: JSON.stringify(['Microsoft', 'Preparation', 'Linked List', 'Fast-Track']),
-    upvotesCount: 24,
-  },
-];
-
 export class CommunityController {
-  private static hasCheckedSeed = false;
-
   /**
-   * Helper to ensure seed data is populated if community table is empty
+   * Helper to resolve or create a community guest user when a request is unauthenticated
    */
-  private static async ensureSeeded(): Promise<void> {
-    if (CommunityController.hasCheckedSeed) return;
-    try {
-      const count = await prisma.communityPost.count();
-      if (count === 0) {
-        // Find or create a verified system user for seed posts
-        let seedUser = await prisma.user.findFirst({
-          where: { email: 'verified@cheatcode.dev' },
-        });
+  private static async getOrCreateGuestUser(authorName?: string): Promise<{ id: string; name: string; tier: string; avatarUrl: string | null }> {
+    const email = 'community-guest@cheatcode.in';
+    let guest = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, name: true, tier: true, avatarUrl: true },
+    });
 
-        if (!seedUser) {
-          seedUser = await prisma.user.findFirst();
-        }
-
-        if (!seedUser) {
-          seedUser = await prisma.user.create({
-            data: {
-              email: 'verified@cheatcode.dev',
-              name: 'CheatCode Verified Engineer',
-              tier: 'pro',
-              targetCompany: 'google',
-            },
-          });
-        }
-
-        for (const p of INITIAL_SEEDED_POSTS) {
-          await prisma.communityPost.create({
-            data: {
-              userId: seedUser.id,
-              title: p.title,
-              content: p.content,
-              category: p.category,
-              companyId: p.companyId,
-              questionId: (p as any).questionId || null,
-              tags: p.tags,
-              upvotesCount: p.upvotesCount,
-            },
-          });
-        }
-      }
-      CommunityController.hasCheckedSeed = true;
-    } catch (err) {
-      console.warn('Auto-seed check non-blocking warning:', err);
+    if (!guest) {
+      guest = await prisma.user.create({
+        data: {
+          email,
+          name: authorName?.trim() || 'Community Engineer',
+          tier: 'free',
+          targetCompany: 'google',
+        },
+        select: { id: true, name: true, tier: true, avatarUrl: true },
+      });
+    } else if (authorName?.trim() && guest.name !== authorName.trim()) {
+      guest = await prisma.user.update({
+        where: { id: guest.id },
+        data: { name: authorName.trim() },
+        select: { id: true, name: true, tier: true, avatarUrl: true },
+      });
     }
+
+    return guest;
   }
 
   static async getCommunityStats(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const cached = cache.get<any>('community:stats');
-      if (cached) {
-        res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=180, stale-while-revalidate=300');
-        res.json(cached);
-        return;
-      }
-
       const [userCount, solvedCount, postCount] = await Promise.all([
         prisma.user.count(),
         prisma.userProgress.count({
@@ -167,15 +48,16 @@ export class CommunityController {
       ]);
 
       const result = {
-        activeEngineers: Math.max(userCount, 1280),
+        activeEngineers: userCount,
         solutionsSolved: solvedCount,
         companiesIndexed: 659,
         verifiedQuestions: 3399,
         communityPosts: postCount,
       };
 
-      cache.set('community:stats', result, 180); // 3 minutes
-      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=180, stale-while-revalidate=300');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.json(result);
     } catch (err) {
       next(err);
@@ -184,14 +66,10 @@ export class CommunityController {
 
   static async getLeaderboard(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const cached = cache.get<any>('community:leaderboard');
-      if (cached) {
-        res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
-        res.json(cached);
-        return;
-      }
-
       const users = await prisma.user.findMany({
+        where: {
+          email: { not: 'community-guest@cheatcode.in' },
+        },
         take: 50,
         select: {
           id: true,
@@ -244,8 +122,9 @@ export class CommunityController {
         rank: idx + 1,
       }));
 
-      cache.set('community:leaderboard', ranked, 120); // 2 minutes
-      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.json(ranked);
     } catch (err) {
       next(err);
@@ -254,44 +133,10 @@ export class CommunityController {
 
   static async getPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      await CommunityController.ensureSeeded();
-
       const { category, company, search, sortBy = 'hot', page = '1', limit = '20' } = req.query;
       const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
       const limitNum = Math.min(50, Math.max(1, parseInt(limit as string, 10) || 20));
       const skip = (pageNum - 1) * limitNum;
-
-      const cacheKey = `community:posts:${category || 'all'}:${company || 'all'}:${search || ''}:${sortBy}:${pageNum}:${limitNum}`;
-      const cached = cache.get<{ total: number; posts: any[] }>(cacheKey);
-
-      if (cached) {
-        let userUpvotedIds = new Set<string>();
-        if (req.user && cached.posts.length > 0) {
-          const postIds = cached.posts.map((p) => p.id);
-          const upvotes = await prisma.communityUpvote.findMany({
-            where: {
-              userId: req.user.id,
-              postId: { in: postIds },
-            },
-            select: { postId: true },
-          });
-          userUpvotedIds = new Set(upvotes.map((u) => u.postId));
-        }
-
-        const postsWithUpvotes = cached.posts.map((p) => ({
-          ...p,
-          hasUpvoted: userUpvotedIds.has(p.id),
-        }));
-
-        res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120');
-        res.json({
-          total: cached.total,
-          page: pageNum,
-          totalPages: Math.ceil(cached.total / limitNum) || 1,
-          posts: postsWithUpvotes,
-        });
-        return;
-      }
 
       const where: any = {};
       if (category && category !== 'all') {
@@ -363,7 +208,7 @@ export class CommunityController {
         return {
           id: p.id,
           userId: p.userId,
-          authorName: p.user?.name || 'Anonymous Engineer',
+          authorName: p.user?.name || 'Community Engineer',
           authorAvatar: p.user?.avatarUrl || null,
           authorTier: p.user?.tier || 'free',
           title: p.title,
@@ -380,11 +225,9 @@ export class CommunityController {
         };
       });
 
-      // Cache normalized posts (without user-specific upvote) for 60 seconds
-      const cacheablePosts = formatted.map((p) => ({ ...p, hasUpvoted: false }));
-      cache.set(cacheKey, { total, posts: cacheablePosts }, 60);
-
-      res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.json({
         total,
         page: pageNum,
@@ -399,29 +242,8 @@ export class CommunityController {
   static async getPostById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = String(req.params.id);
-      const postCacheKey = `community:post:${id}`;
-      const cached = cache.get<any>(postCacheKey);
 
-      if (cached) {
-        let hasUpvoted = false;
-        if (req.user) {
-          const uv = await prisma.communityUpvote.findUnique({
-            where: {
-              userId_postId: {
-                userId: req.user.id,
-                postId: id,
-              },
-            },
-          });
-          hasUpvoted = Boolean(uv);
-        }
-
-        res.setHeader('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=60');
-        res.json({ ...cached, hasUpvoted });
-        return;
-      }
-
-      const post: any = await prisma.communityPost.findUnique({
+      const post = await prisma.communityPost.findUnique({
         where: { id },
         include: {
           user: {
@@ -434,9 +256,6 @@ export class CommunityController {
               },
             },
             orderBy: { createdAt: 'asc' },
-          },
-          _count: {
-            select: { upvotes: true, comments: true },
           },
           ...(req.user
             ? {
@@ -467,7 +286,7 @@ export class CommunityController {
         id: c.id,
         postId: c.postId,
         userId: c.userId,
-        authorName: c.user?.name || 'Engineer',
+        authorName: c.user?.name || 'Community Engineer',
         authorAvatar: c.user?.avatarUrl || null,
         authorTier: c.user?.tier || 'free',
         content: c.content,
@@ -477,7 +296,7 @@ export class CommunityController {
       const postData = {
         id: post.id,
         userId: post.userId,
-        authorName: post.user?.name || 'Anonymous Engineer',
+        authorName: post.user?.name || 'Community Engineer',
         authorAvatar: post.user?.avatarUrl || null,
         authorTier: post.user?.tier || 'free',
         title: post.title,
@@ -494,10 +313,9 @@ export class CommunityController {
         comments,
       };
 
-      // Store in memory cache for 60 seconds
-      cache.set(postCacheKey, { ...postData, hasUpvoted: false }, 60);
-
-      res.setHeader('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=60');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.json(postData);
     } catch (err) {
       next(err);
@@ -506,11 +324,6 @@ export class CommunityController {
 
   static async createPost(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'Authentication required to create a post.' });
-        return;
-      }
-
       const { title, content, category = 'general', companyId, questionId, tags }: CreatePostInput = req.body;
 
       if (!title || title.trim().length < 5) {
@@ -523,9 +336,17 @@ export class CommunityController {
         return;
       }
 
+      let userId: string;
+      if (req.user) {
+        userId = req.user.id;
+      } else {
+        const guest = await CommunityController.getOrCreateGuestUser(req.body.authorName);
+        userId = guest.id;
+      }
+
       const post: any = await prisma.communityPost.create({
         data: {
-          userId: req.user.id,
+          userId,
           title: title.trim(),
           content: content.trim(),
           category,
@@ -544,7 +365,7 @@ export class CommunityController {
       // Register initial author upvote
       await prisma.communityUpvote.create({
         data: {
-          userId: req.user.id,
+          userId,
           postId: post.id,
         },
       }).catch(() => {});
@@ -556,8 +377,7 @@ export class CommunityController {
         parsedTags = [];
       }
 
-      cache.delPrefix('community:posts');
-      cache.del('community:stats');
+      cache.delPrefix('community:');
 
       res.status(201).json({
         id: post.id,
@@ -584,11 +404,6 @@ export class CommunityController {
 
   static async addComment(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'Authentication required to post a comment.' });
-        return;
-      }
-
       const id = String(req.params.id);
       const { content } = req.body;
 
@@ -603,10 +418,18 @@ export class CommunityController {
         return;
       }
 
+      let userId: string;
+      if (req.user) {
+        userId = req.user.id;
+      } else {
+        const guest = await CommunityController.getOrCreateGuestUser(req.body.authorName);
+        userId = guest.id;
+      }
+
       const comment: any = await prisma.communityComment.create({
         data: {
           postId: id,
-          userId: req.user.id,
+          userId,
           content: content.trim(),
         },
         include: {
@@ -616,8 +439,7 @@ export class CommunityController {
         },
       });
 
-      cache.delPrefix('community:posts');
-      cache.del(`community:post:${id}`);
+      cache.delPrefix('community:');
 
       res.status(201).json({
         id: comment.id,
@@ -636,16 +458,19 @@ export class CommunityController {
 
   static async toggleUpvote(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'Authentication required to upvote.' });
-        return;
+      let userId: string;
+      if (req.user) {
+        userId = req.user.id;
+      } else {
+        const guest = await CommunityController.getOrCreateGuestUser();
+        userId = guest.id;
       }
 
       const id = String(req.params.id);
       const existing = await prisma.communityUpvote.findUnique({
         where: {
           userId_postId: {
-            userId: req.user.id,
+            userId,
             postId: id,
           },
         },
@@ -659,7 +484,7 @@ export class CommunityController {
         await prisma.communityUpvote.delete({
           where: {
             userId_postId: {
-              userId: req.user.id,
+              userId,
               postId: id,
             },
           },
@@ -675,7 +500,7 @@ export class CommunityController {
         // Add upvote
         await prisma.communityUpvote.create({
           data: {
-            userId: req.user.id,
+            userId,
             postId: id,
           },
         });
@@ -688,8 +513,7 @@ export class CommunityController {
         upvoted = true;
       }
 
-      cache.delPrefix('community:posts');
-      cache.del(`community:post:${id}`);
+      cache.delPrefix('community:');
 
       res.json({
         upvoted,

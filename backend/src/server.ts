@@ -26,6 +26,8 @@ app.use(helmet({ contentSecurityPolicy: false }));
 // CORS configuration
 const allowedOrigins = [
   ENV.FRONTEND_URL,
+  'https://cheatcode.lasers.app',
+  'https://www.cheatcode.lasers.app',
   'https://cheat-code.in',
   'https://www.cheat-code.in',
   'http://cheat-code.in',
@@ -41,6 +43,8 @@ const allowedOrigins = [
 const isOriginAllowed = (origin: string): boolean => {
   if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
+  // Allow production cheatcode.lasers.app domain
+  if (/^https?:\/\/(www\.)?cheatcode\.lasers\.app(:\d+)?$/.test(origin)) return true;
   // Allow all cheat-code.in domains and subdomains
   if (/^https?:\/\/([a-zA-Z0-9-]+\.)*cheat-code\.in(:\d+)?$/.test(origin)) return true;
   // Allow all Vercel deployment preview / prod URLs
@@ -52,24 +56,28 @@ const isOriginAllowed = (origin: string): boolean => {
   return false;
 };
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, server-to-server)
-      if (!origin || isOriginAllowed(origin)) {
-        return callback(null, true);
-      }
-
-      // In production, reject unauthorized origins cleanly without crashing with 500
-      if (ENV.NODE_ENV === 'production') {
-        return callback(null, false);
-      }
-
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin || isOriginAllowed(origin)) {
       return callback(null, true);
-    },
-    credentials: true,
-  })
-);
+    }
+
+    // In production, reject unauthorized origins cleanly without crashing with 500
+    if (ENV.NODE_ENV === 'production') {
+      return callback(null, false);
+    }
+
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Stripe webhook requires raw body BEFORE express.json() parser
 app.post(

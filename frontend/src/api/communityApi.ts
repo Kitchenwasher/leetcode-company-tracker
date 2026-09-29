@@ -66,11 +66,11 @@ export interface CreatePostParams {
   companyId?: string;
   questionId?: number;
   tags?: string[];
+  authorName?: string;
 }
 
 const STATS_STORAGE_KEY = 'leettracker_community_stats_v1';
 const LEADERBOARD_STORAGE_KEY = 'leettracker_community_leaderboard_v1';
-const POSTS_STORAGE_PREFIX = 'leettracker_community_posts_';
 
 export const communityApi = {
   getStoredStats: (): CommunityStats | null => {
@@ -91,20 +91,15 @@ export const communityApi = {
     }
   },
 
-  getStoredPosts: (cacheKey: string): PostsResponse | null => {
-    try {
-      const raw = sessionStorage.getItem(POSTS_STORAGE_PREFIX + cacheKey);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
+  getStoredPosts: (_cacheKey: string): PostsResponse | null => {
+    return null;
   },
 
   clearClientPostsCache: (): void => {
     try {
       for (let i = sessionStorage.length - 1; i >= 0; i--) {
         const key = sessionStorage.key(i);
-        if (key && key.startsWith(POSTS_STORAGE_PREFIX)) {
+        if (key && key.startsWith('leettracker_community_')) {
           sessionStorage.removeItem(key);
         }
       }
@@ -112,7 +107,9 @@ export const communityApi = {
   },
 
   getStats: async (): Promise<CommunityStats> => {
-    const { data } = await api.get<CommunityStats>('/community/stats');
+    const { data } = await api.get<CommunityStats>('/community/stats', {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
     try {
       sessionStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(data));
     } catch {}
@@ -120,7 +117,9 @@ export const communityApi = {
   },
 
   getLeaderboard: async (): Promise<LeaderboardUser[]> => {
-    const { data } = await api.get<LeaderboardUser[]>('/community/leaderboard');
+    const { data } = await api.get<LeaderboardUser[]>('/community/leaderboard', {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
     try {
       sessionStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(data));
     } catch {}
@@ -135,16 +134,17 @@ export const communityApi = {
     page?: number;
     limit?: number;
   }): Promise<PostsResponse> => {
-    const { data } = await api.get<PostsResponse>('/community/posts', { params });
-    try {
-      const cacheKey = `${params?.category || 'all'}:${params?.company || 'all'}:${params?.search || ''}:${params?.sortBy || 'hot'}`;
-      sessionStorage.setItem(POSTS_STORAGE_PREFIX + cacheKey, JSON.stringify(data));
-    } catch {}
+    const { data } = await api.get<PostsResponse>('/community/posts', {
+      params,
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
     return data;
   },
 
   getPostById: async (id: string): Promise<CommunityPost> => {
-    const { data } = await api.get<CommunityPost>(`/community/posts/${id}`);
+    const { data } = await api.get<CommunityPost>(`/community/posts/${id}`, {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
     return data;
   },
 
@@ -154,8 +154,8 @@ export const communityApi = {
     return data;
   },
 
-  addComment: async (postId: string, content: string): Promise<CommunityComment> => {
-    const { data } = await api.post<CommunityComment>(`/community/posts/${postId}/comments`, { content });
+  addComment: async (postId: string, content: string, authorName?: string): Promise<CommunityComment> => {
+    const { data } = await api.post<CommunityComment>(`/community/posts/${postId}/comments`, { content, authorName });
     communityApi.clearClientPostsCache();
     return data;
   },

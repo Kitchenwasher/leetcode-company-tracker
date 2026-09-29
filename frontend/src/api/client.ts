@@ -74,14 +74,16 @@ const formatUrl = (url?: string) => {
   return url.endsWith('/api') ? url : url.replace(/\/+$/, '') + '/api';
 };
 
-const PRIMARY_URL = formatUrl(import.meta.env.VITE_API_URL);
+const DEFAULT_API_URL =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000'
+    : 'https://leettracker-backend-production.up.railway.app';
+
+const PRIMARY_URL = formatUrl(import.meta.env.VITE_API_URL || DEFAULT_API_URL);
 const FALLBACK_URL = import.meta.env.VITE_FALLBACK_API_URL
   ? formatUrl(import.meta.env.VITE_FALLBACK_API_URL)
-  : (PRIMARY_URL.includes('railway.app')
-      ? '/api'
-      : (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-          ? 'http://localhost:5000/api'
-          : 'https://leettracker-backend-production.up.railway.app/api'));
+  : '';
 const TIMEOUT_MS = parseInt(import.meta.env.VITE_API_TIMEOUT_MS || '15000', 10);
 
 // Circuit Breaker State

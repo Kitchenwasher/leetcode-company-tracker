@@ -10,7 +10,7 @@ export const ENV = {
   DATABASE_URL: process.env.DATABASE_URL || 'file:./dev.db',
   JWT_SECRET: process.env.JWT_SECRET || 'leettracker_super_secret_jwt_access_key_2026_x99',
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'leettracker_super_secret_jwt_refresh_key_2026_z88',
-  FRONTEND_URL: process.env.FRONTEND_URL || 'https://cheat-code.in',
+  FRONTEND_URL: process.env.FRONTEND_URL || 'https://cheatcode.lasers.app',
   
   // SMTP Email
   SMTP_HOST: process.env.SMTP_HOST || 'localhost',

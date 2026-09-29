@@ -5,6 +5,14 @@ import { sounds } from '../utils/sound';
 
 export type AdVariant = 'google-cloud' | 'aws' | 'jetbrains' | 'copilot' | 'auto';
 
+export const DEFAULT_ADSENSE_CLIENT_ID = 'ca-pub-1661006527957477';
+
+export const AD_SLOTS: Record<string, string> = {
+  'questions-top-banner': '2282373316',
+  'companies-top-banner': '7491477127',
+  'progress-top-banner': '8260708979',
+};
+
 interface AdBannerProps {
   slotId?: string;
   format?: 'horizontal' | 'sidebar' | 'rectangle';
@@ -26,14 +34,19 @@ export const AdBanner: React.FC<AdBannerProps> = ({
     return null;
   }
 
-  const clientId = (import.meta as any).env?.VITE_GOOGLE_ADSENSE_CLIENT_ID || '';
-  const isRealAdSense = !!clientId && clientId !== 'ca-pub-placeholder';
+  const clientId = import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT_ID || DEFAULT_ADSENSE_CLIENT_ID;
+  const numericSlotId = AD_SLOTS[slotId] || (/^\d+$/.test(slotId) ? slotId : undefined);
+  const isRealAdSense = !!clientId && clientId !== 'ca-pub-placeholder' && !!numericSlotId;
 
-  // Dynamically inject AdSense script if client ID is configured
+  // Dynamically inject AdSense script if client ID is configured and script is not yet in DOM
   useEffect(() => {
-    if (isRealAdSense) {
+    if (isRealAdSense && numericSlotId) {
       const scriptId = 'google-adsense-sdk';
-      if (!document.getElementById(scriptId)) {
+      const existingScript =
+        document.getElementById(scriptId) ||
+        document.querySelector('script[src*="adsbygoogle.js"]');
+
+      if (!existingScript) {
         const script = document.createElement('script');
         script.id = scriptId;
         script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`;
@@ -43,14 +56,14 @@ export const AdBanner: React.FC<AdBannerProps> = ({
       }
 
       try {
-        if (typeof window !== 'undefined' && (window as any).adsbygoogle) {
-          ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+        if (typeof window !== 'undefined') {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
         }
       } catch {
         // Suppress adblocker/pre-render errors
       }
     }
-  }, [slotId, isRealAdSense, clientId]);
+  }, [numericSlotId, isRealAdSense, clientId]);
 
   // Determine active display variant
   const activeVariant: AdVariant = (() => {
@@ -76,7 +89,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({
   return (
     <div className={`relative group select-none font-sans ${className}`}>
       {/* Real AdSense Unit when configured */}
-      {isRealAdSense ? (
+      {isRealAdSense && numericSlotId ? (
         <div className="w-full overflow-hidden rounded-2xl bg-[#0B0F15] border border-white/[0.08] p-2 flex flex-col items-center justify-center">
           <div className="w-full flex items-center justify-between text-[10px] text-zinc-500 pb-1 px-1">
             <span className="font-mono text-[9px] uppercase tracking-wider font-semibold">AD</span>
@@ -92,8 +105,8 @@ export const AdBanner: React.FC<AdBannerProps> = ({
             className="adsbygoogle"
             style={{ display: 'block', minHeight: format === 'horizontal' ? '90px' : '250px' }}
             data-ad-client={clientId}
-            data-ad-slot={slotId}
-            data-ad-format={format === 'horizontal' ? 'horizontal' : 'auto'}
+            data-ad-slot={numericSlotId}
+            data-ad-format="auto"
             data-full-width-responsive="true"
           />
         </div>
