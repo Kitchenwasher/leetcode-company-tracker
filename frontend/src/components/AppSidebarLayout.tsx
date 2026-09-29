@@ -46,7 +46,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, isPro, logout, setShowAuthModal } = useAuth();
+  const { user, isAuthenticated, isPro, logout, setShowAuthModal, setShowSubscriptionModal } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
@@ -468,11 +468,36 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
                 </div>
                 <span className="text-[10px] font-mono text-zinc-500">v2.4</span>
               </div>
-              <div>
-                <p className="text-xs font-bold text-white font-sans flex items-center gap-1">
-                  <span>Cheat Code Pro</span>
-                  <Sparkles className="w-3 h-3 text-accent" />
-                </p>
+              <div className="space-y-1">
+                {isPro ? (
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-white font-sans flex items-center gap-1">
+                      <span>Cheat Code Pro</span>
+                      <Sparkles className="w-3 h-3 text-accent" />
+                    </p>
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-accent/20 text-accent border border-accent/30 leading-none">
+                      PRO
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-white font-sans">
+                      Cheat Code Free
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playClick();
+                        setShowSubscriptionModal(true);
+                      }}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-accent/20 hover:bg-accent text-accent hover:text-white border border-accent/30 transition-all cursor-pointer flex items-center gap-1 group shadow-xs leading-none"
+                      title="Upgrade to Pro"
+                    >
+                      <span>Upgrade</span>
+                      <Sparkles className="w-2.5 h-2.5 group-hover:rotate-12 transition-transform" />
+                    </button>
+                  </div>
+                )}
                 <p className="text-[11px] text-zinc-400 font-sans mt-0.5">
                   659 Companies • 3,399 Questions
                 </p>
