@@ -24,6 +24,7 @@ import {
   Tag,
   BarChart2,
   Code2,
+  Dices,
 } from 'lucide-react';
 import { Question, CompanyMeta, UserStoreState, ProblemStatus, Difficulty } from '../types';
 import { isQuestionInTrack } from '../data/curatedLists';
@@ -31,6 +32,14 @@ import { sounds } from '../utils/sound';
 import CompanyLogo, { CompanyLogoStack, getCompanyDisplayName } from './CompanyLogo';
 import GlideSelect, { GlideSelectOption } from './ui/GlideSelect';
 import { AdBanner } from './AdBanner';
+import {
+  getStoredQuestionFilters,
+  saveStoredQuestionFilters,
+  clearStoredQuestionFilters,
+  getRollAnimationEnabled,
+} from '../utils/filterStorage';
+import { matchIntelligentSearch, scoreIntelligentSearch } from '../utils/intelligentSearch';
+import { RandomQuestionRollModal } from './RandomQuestionRollModal';
 
 interface QuestionsPageProps {
   questions: Question[];
@@ -182,15 +191,12 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
   const [activeMenuId, setActiveMenuId] = useState<string | number | null>(null);
   const [activeStatusMenuId, setActiveStatusMenuId] = useState<string | number | null>(null);
 
-  // Close menus on outside click
-  useEffect(() => {
-    const handleOutside = () => {
-      setActiveMenuId(null);
-      setActiveStatusMenuId(null);
-    };
-    document.addEventListener('click', handleOutside);
-    return () => document.removeEventListener('click', handleOutside);
-  }, []);
+  // Search input state with live debounced sync
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Random Question Roll Modal State
+  const [isRollModalOpen, setIsRollModalOpen] = useState(false);
 
   const updateFilters = useCallback(
     (patch: Record<string, string | number | undefined | null>) => {
@@ -222,7 +228,97 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     [setSearchParams]
   );
 
+  // 1. Restore saved filters on mount if URL has no filters
+  const hasInitializedRef = useRef(false);
+  useEffect(() => {
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
 
+    // Check if URL currently has any filter params
+    const hasAnyParams = Array.from(searchParams.keys()).some((k) =>
+      ['company', 'difficulty', 'topic', 'status', 'curated', 'sort', 'search', 'page'].includes(k)
+    );
+
+    if (!hasAnyParams) {
+      const stored = getStoredQuestionFilters();
+      if (stored && Object.keys(stored).length > 0) {
+        const next = new URLSearchParams();
+        if (stored.company) next.set('company', stored.company);
+        if (stored.difficulty) next.set('difficulty', stored.difficulty);
+        if (stored.topic) next.set('topic', stored.topic);
+        if (stored.status) next.set('status', stored.status);
+        if (stored.curated) next.set('curated', stored.curated);
+        if (stored.sort) next.set('sort', stored.sort);
+        if (stored.search) {
+          next.set('search', stored.search);
+          setSearchInput(stored.search);
+        }
+        if (stored.page && stored.page > 1) next.set('page', String(stored.page));
+        setSearchParams(next, { replace: true });
+      }
+    }
+  }, [searchParams, setSearchParams]);
+
+  // 2. Synchronize current filters to localStorage whenever active filters change
+  useEffect(() => {
+    saveStoredQuestionFilters({
+      company: selectedCompany !== 'all' ? selectedCompany : undefined,
+      difficulty: selectedDifficulty !== 'all' ? selectedDifficulty : undefined,
+      topic: selectedTopic !== 'all' ? selectedTopic : undefined,
+      status: selectedStatus !== 'all' ? selectedStatus : undefined,
+      curated: curatedList !== 'all' ? curatedList : undefined,
+      sort: sortBy !== 'recent' ? sortBy : undefined,
+      search: searchQuery.trim() || undefined,
+      page: currentPage > 1 ? currentPage : undefined,
+    });
+  }, [
+    selectedCompany,
+    selectedDifficulty,
+    selectedTopic,
+    selectedStatus,
+    curatedList,
+    sortBy,
+    searchQuery,
+    currentPage,
+  ]);
+
+  // Sync search input if URL changes externally
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
+
+  // Debounced search query update to URL search params
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== searchQuery) {
+        updateFilters({ search: searchInput.trim() || undefined });
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchInput, searchQuery, updateFilters]);
+
+  // Global Ctrl+K / Cmd+K shortcut to focus search input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Close menus on outside click
+  useEffect(() => {
+    const handleOutside = () => {
+      setActiveMenuId(null);
+      setActiveStatusMenuId(null);
+    };
+    document.addEventListener('click', handleOutside);
+    return () => document.removeEventListener('click', handleOutside);
+  }, []);
 
   // Topics list
   const allTopics = useMemo(() => {
@@ -236,99 +332,106 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     return Object.values(companies).sort((a, b) => (b.totalQuestions || 0) - (a.totalQuestions || 0));
   }, [companies]);
 
-  // Filtered & sorted questions
+  // Filtered & sorted questions using Intelligent Search and active filters
   const filteredQuestions = useMemo(() => {
-    const rawQuery = searchQuery.trim().toLowerCase();
+    const hasSearch = Boolean(searchQuery && searchQuery.trim());
+    const rawQuery = searchQuery.trim();
 
-    return questions
-      .filter((q) => {
-        // 1. Company filter
+    const matched = questions.filter((q) => {
+      // 1. Company filter
+      if (selectedCompany !== 'all') {
+        const compKey = selectedCompany.toLowerCase();
+        if (!q.companies[compKey] && !q.companies[selectedCompany]) return false;
+      }
+
+      // 2. Difficulty filter
+      if (selectedDifficulty !== 'all' && q.difficulty !== selectedDifficulty) {
+        return false;
+      }
+
+      // 3. Topic filter
+      if (selectedTopic !== 'all') {
+        if (!matchesTopicFilter(selectedTopic, q.topics)) return false;
+      }
+
+      // 4. Curated lists
+      if (curatedList === 'blind75' && !isQuestionInTrack(q.id, 'blind75')) return false;
+      if (curatedList === 'neetcode150' && !isQuestionInTrack(q.id, 'neetcode150')) return false;
+      if (curatedList === 'striver180' && !isQuestionInTrack(q.id, 'striver180')) return false;
+      if (curatedList === 'sprint30' && !isQuestionInTrack(q.id, 'sprint30')) return false;
+      if (curatedList === 'grind169' && !q.isGrind169) return false;
+
+      // 5. Status filter
+      const p = store.progress[String(q.id)];
+      const st = p?.status || 'todo';
+      if (selectedStatus === 'favorite' && !p?.isFavorite) return false;
+      if (selectedStatus === 'due-review' && p?.status !== 'review') return false;
+      if (
+        selectedStatus !== 'all' &&
+        selectedStatus !== 'favorite' &&
+        selectedStatus !== 'due-review' &&
+        st !== selectedStatus
+      ) {
+        return false;
+      }
+
+      // 6. Intelligent search (matches ID, title, topics, acronyms, companies, difficulties)
+      if (hasSearch) {
+        if (!matchIntelligentSearch(q, rawQuery)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // If search is active and sort is 'recent' (default), sort by search relevance score
+    if (hasSearch && sortBy === 'recent') {
+      return matched.sort(
+        (a, b) => scoreIntelligentSearch(b, rawQuery) - scoreIntelligentSearch(a, rawQuery)
+      );
+    }
+
+    return matched.sort((a, b) => {
+      const getFreq = (item: Question) => {
         if (selectedCompany !== 'all') {
           const compKey = selectedCompany.toLowerCase();
-          if (!q.companies[compKey] && !q.companies[selectedCompany]) return false;
+          const compObj = (item.companies && (item.companies[compKey] || item.companies[selectedCompany])) || {};
+          const str =
+            compObj.all ||
+            compObj['thirty-days'] ||
+            compObj['three-months'] ||
+            compObj['six-months'] ||
+            '0.0%';
+          return parseFloat(String(str).replace('%', '')) || 0;
         }
+        return Object.keys(item.companies || {}).length;
+      };
 
-        // 2. Difficulty filter
-        if (selectedDifficulty !== 'all' && q.difficulty !== selectedDifficulty) {
-          return false;
+      const getAcc = (item: Question) => {
+        return parseFloat(String(item.acceptance || '0').replace('%', '')) || 0;
+      };
+
+      switch (sortBy) {
+        case 'frequency':
+          return getFreq(b) - getFreq(a);
+        case 'acceptance':
+          return getAcc(b) - getAcc(a);
+        case 'id-asc':
+          return (Number(a.id) || 0) - (Number(b.id) || 0);
+        case 'id-desc':
+          return (Number(b.id) || 0) - (Number(a.id) || 0);
+        case 'title':
+          return (a.title || '').localeCompare(b.title || '');
+        case 'difficulty': {
+          const rank: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
+          return (rank[a.difficulty] || 2) - (rank[b.difficulty] || 2);
         }
-
-        // 3. Topic filter
-        if (selectedTopic !== 'all') {
-          if (!matchesTopicFilter(selectedTopic, q.topics)) return false;
-        }
-
-        // 4. Curated lists
-        if (curatedList === 'blind75' && !isQuestionInTrack(q.id, 'blind75')) return false;
-        if (curatedList === 'neetcode150' && !isQuestionInTrack(q.id, 'neetcode150')) return false;
-        if (curatedList === 'striver180' && !isQuestionInTrack(q.id, 'striver180')) return false;
-        if (curatedList === 'sprint30' && !isQuestionInTrack(q.id, 'sprint30')) return false;
-        if (curatedList === 'grind169' && !q.isGrind169) return false;
-
-        // 5. Status filter
-        const p = store.progress[String(q.id)];
-        const st = p?.status || 'todo';
-        if (selectedStatus === 'favorite' && !p?.isFavorite) return false;
-        if (selectedStatus === 'due-review' && p?.status !== 'review') return false;
-        if (
-          selectedStatus !== 'all' &&
-          selectedStatus !== 'favorite' &&
-          selectedStatus !== 'due-review' &&
-          st !== selectedStatus
-        ) {
-          return false;
-        }
-
-        // 6. Search query (fallback if query param in URL)
-        if (rawQuery) {
-          const matchesId = String(q.id) === rawQuery || String(q.id).includes(rawQuery);
-          const matchesTitle = (q.title || '').toLowerCase().includes(rawQuery);
-          if (!matchesId && !matchesTitle) return false;
-        }
-
-        return true;
-      })
-      .sort((a, b) => {
-
-        const getFreq = (item: Question) => {
-          if (selectedCompany !== 'all') {
-            const compKey = selectedCompany.toLowerCase();
-            const compObj = (item.companies && (item.companies[compKey] || item.companies[selectedCompany])) || {};
-            const str =
-              compObj.all ||
-              compObj['thirty-days'] ||
-              compObj['three-months'] ||
-              compObj['six-months'] ||
-              '0.0%';
-            return parseFloat(String(str).replace('%', '')) || 0;
-          }
-          return Object.keys(item.companies || {}).length;
-        };
-
-        const getAcc = (item: Question) => {
-          return parseFloat(String(item.acceptance || '0').replace('%', '')) || 0;
-        };
-
-        switch (sortBy) {
-          case 'frequency':
-            return getFreq(b) - getFreq(a);
-          case 'acceptance':
-            return getAcc(b) - getAcc(a);
-          case 'id-asc':
-            return (Number(a.id) || 0) - (Number(b.id) || 0);
-          case 'id-desc':
-            return (Number(b.id) || 0) - (Number(a.id) || 0);
-          case 'title':
-            return (a.title || '').localeCompare(b.title || '');
-          case 'difficulty': {
-            const rank: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 };
-            return (rank[a.difficulty] || 2) - (rank[b.difficulty] || 2);
-          }
-          case 'recent':
-          default:
-            return (Number(a.id) || 0) - (Number(b.id) || 0);
-        }
-      });
+        case 'recent':
+        default:
+          return (Number(a.id) || 0) - (Number(b.id) || 0);
+      }
+    });
   }, [
     questions,
     selectedCompany,
@@ -340,6 +443,37 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
     sortBy,
     store.progress,
   ]);
+
+  // Active Filter Summary string for Roll Modal
+  const activeFilterSummary = useMemo(() => {
+    const parts: string[] = [];
+    if (selectedCompany !== 'all') parts.push(getCompanyDisplayName(selectedCompany));
+    if (selectedDifficulty !== 'all') parts.push(selectedDifficulty);
+    if (selectedTopic !== 'all') parts.push(selectedTopic);
+    if (curatedList !== 'all') parts.push(curatedList);
+    if (selectedStatus !== 'all') parts.push(`Status: ${selectedStatus}`);
+    if (searchQuery.trim()) parts.push(`"${searchQuery.trim()}"`);
+    return parts.length > 0 ? parts.join(' • ') : 'All Questions';
+  }, [selectedCompany, selectedDifficulty, selectedTopic, curatedList, selectedStatus, searchQuery]);
+
+  // Roll random question handler
+  const handleRollRandom = useCallback(() => {
+    if (filteredQuestions.length === 0) {
+      sounds.playTimerAlert();
+      return;
+    }
+
+    const animationEnabled = getRollAnimationEnabled();
+    if (animationEnabled) {
+      setIsRollModalOpen(true);
+    } else {
+      // Instant selection without animation
+      const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
+      const chosen = filteredQuestions[randomIndex];
+      sounds.playSuccess();
+      onNavigateToProblem(chosen.id);
+    }
+  }, [filteredQuestions, onNavigateToProblem]);
 
   const totalCount = filteredQuestions.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -666,11 +800,24 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       });
     }
 
+    if (searchQuery.trim()) {
+      list.push({
+        key: 'search',
+        label: `Search: "${searchQuery.trim()}"`,
+        clear: () => {
+          setSearchInput('');
+          updateFilters({ search: undefined });
+        },
+      });
+    }
+
     return list;
-  }, [selectedCompany, selectedDifficulty, selectedTopic, selectedStatus, curatedList, sortBy, sortGlideOptions, updateFilters]);
+  }, [selectedCompany, selectedDifficulty, selectedTopic, selectedStatus, curatedList, sortBy, searchQuery, sortGlideOptions, updateFilters]);
 
   const clearAllFilters = () => {
     sounds.playClick();
+    clearStoredQuestionFilters();
+    setSearchInput('');
     setSearchParams(new URLSearchParams(), { replace: true });
   };
 
@@ -812,6 +959,40 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       <div className="space-y-3 relative z-30">
         <div className="bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] rounded-2xl p-2.5 sm:p-3 flex items-center gap-2 flex-wrap lg:flex-nowrap relative z-30">
 
+          {/* Intelligent Search Input */}
+          <div className="relative flex-1 min-w-[200px] sm:min-w-[240px]">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
+              <Search className="w-3.5 h-3.5 text-zinc-400" />
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search by title, #ID, topic, company..."
+              className="w-full pl-9 pr-14 py-2 bg-[#12161E] hover:bg-[#151922] focus:bg-[#12161E] border border-white/[0.08] focus:border-primary/60 rounded-xl text-xs text-white placeholder-zinc-500 outline-none transition-all font-sans"
+            />
+            {searchInput ? (
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setSearchInput('');
+                  updateFilters({ search: undefined });
+                }}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-white cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+                <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 bg-white/[0.04] border border-white/[0.08] rounded">
+                  Ctrl K
+                </kbd>
+              </div>
+            )}
+          </div>
 
           {/* Company Filter */}
           <GlideSelect
@@ -936,6 +1117,25 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
           >
             <Filter className="w-3.5 h-3.5" />
             <span>Advanced Filters</span>
+          </button>
+
+          {/* Roll Random Question Button */}
+          <button
+            type="button"
+            onClick={handleRollRandom}
+            disabled={filteredQuestions.length === 0}
+            title={
+              filteredQuestions.length === 0
+                ? 'No questions match your current filters'
+                : `Roll a random question from ${filteredQuestions.length} matches`
+            }
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer select-none border shrink-0 bg-gradient-to-r from-purple-600/90 to-indigo-600/90 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-500/40 shadow-sm shadow-purple-500/20 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed group font-sans"
+          >
+            <Dices className="w-3.5 h-3.5 text-purple-200 group-hover:rotate-45 transition-transform" />
+            <span>Roll Random</span>
+            <span className="hidden sm:inline-block px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-white/20 text-white ml-0.5">
+              {filteredQuestions.length}
+            </span>
           </button>
         </div>
 
@@ -1292,6 +1492,16 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
 
       {/* Bottom Ad Banner for Free Users */}
       <AdBanner slotId="questions-table-bottom" />
+
+      {/* Random Question Rolling Reel Modal */}
+      <RandomQuestionRollModal
+        isOpen={isRollModalOpen}
+        onClose={() => setIsRollModalOpen(false)}
+        candidateQuestions={filteredQuestions}
+        activeFilterSummary={activeFilterSummary}
+        onSelectQuestion={(id) => onNavigateToProblem(id)}
+        animationEnabled={getRollAnimationEnabled()}
+      />
     </div>
   );
 };

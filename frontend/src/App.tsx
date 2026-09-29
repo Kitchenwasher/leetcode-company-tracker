@@ -81,8 +81,12 @@ const ProblemRouteView: React.FC<ProblemRouteViewProps> = ({
   }, [problemId, allQuestions]);
 
   const handleBack = useCallback(() => {
-    navigate(`/questions${store.selectedCompany ? `?company=${encodeURIComponent(store.selectedCompany.toLowerCase())}` : ''}`);
-  }, [navigate, store.selectedCompany]);
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/questions');
+    }
+  }, [navigate]);
 
   if (isLoading) {
     return (

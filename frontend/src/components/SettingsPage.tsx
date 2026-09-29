@@ -18,7 +18,8 @@ import {
   Building2,
   Calendar,
   Code,
-  ExternalLink
+  ExternalLink,
+  Dices,
 } from 'lucide-react';
 import { Question, UserStoreState } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -26,6 +27,7 @@ import { exportBackupJSON, exportQuestionsCSV } from '../services/storage';
 import { sounds } from '../utils/sound';
 import { paymentApi } from '../api/paymentApi';
 import { openGoogleConsentSettings } from '../utils/consent';
+import { getRollAnimationEnabled, setRollAnimationEnabled } from '../utils/filterStorage';
 
 interface SettingsPageProps {
   store: UserStoreState;
@@ -50,6 +52,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+  const [rollAnimationEnabled, setRollAnimationState] = useState<boolean>(() => getRollAnimationEnabled());
 
   const handleOpenStripePortal = async () => {
     setIsOpeningPortal(true);
@@ -323,6 +326,48 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </button>
               </div>
             )}
+          </div>
+
+          {/* App & Question Experience Preferences Card */}
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0E1217] p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <span className="text-sm font-semibold text-white flex items-center gap-2">
+                <Dices className="w-4 h-4 text-primary" />
+                <span>Question Experience &amp; Animation</span>
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-[#12161E] border border-white/[0.06]">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-white">Random Question Roll Animation</p>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Display an animated spinning reel and celebration when rolling a random question from filters.
+                </p>
+              </div>
+
+              {/* iOS-style Smooth Switch */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={rollAnimationEnabled}
+                onClick={() => {
+                  sounds.playClick();
+                  const next = !rollAnimationEnabled;
+                  setRollAnimationState(next);
+                  setRollAnimationEnabled(next);
+                }}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  rollAnimationEnabled ? 'bg-primary' : 'bg-zinc-700'
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    rollAnimationEnabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
 
