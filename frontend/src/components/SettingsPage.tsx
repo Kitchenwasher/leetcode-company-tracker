@@ -25,6 +25,7 @@ import { useAuth } from '../context/AuthContext';
 import { exportBackupJSON, exportQuestionsCSV } from '../services/storage';
 import { sounds } from '../utils/sound';
 import { paymentApi } from '../api/paymentApi';
+import { openGoogleConsentSettings } from '../utils/consent';
 
 interface SettingsPageProps {
   store: UserStoreState;
@@ -392,6 +393,41 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     <span className="text-[11px] text-textMuted">Spreadsheet with notes &amp; status</span>
                   </div>
                 </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Privacy & Cookie Preferences (GDPR / Google CMP) */}
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0E1217] p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <span className="text-sm font-semibold text-white flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-primary" />
+                <span>Privacy &amp; Cookie Preferences</span>
+              </span>
+            </div>
+            <p className="text-xs text-textSecondary leading-relaxed">
+              If you are visiting from the European Economic Area (EEA), United Kingdom, or Switzerland, you can review and update your consent choices for personalized advertising and cookies at any time via our Google-certified CMP.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  openGoogleConsentSettings();
+                }}
+                className="px-4 py-2 rounded-xl bg-[#12161E] hover:bg-[#161B24] border border-white/[0.08] hover:border-primary/40 text-xs font-semibold text-white transition-all cursor-pointer"
+              >
+                Manage Cookie Choices
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  navigate('/privacy');
+                }}
+                className="px-4 py-2 rounded-xl bg-transparent hover:bg-white/[0.04] text-xs text-textSecondary hover:text-white transition-colors cursor-pointer"
+              >
+                View Privacy Policy
               </button>
             </div>
           </div>

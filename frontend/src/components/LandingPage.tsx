@@ -27,6 +27,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { sounds } from '../utils/sound';
 import EvilEye from './ui/EvilEye';
+import { openGoogleConsentSettings } from '../utils/consent';
 
 const MacWindowBar: React.FC<{
   title: string;
@@ -725,6 +726,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             <a href="/terms" className="text-textSecondary hover:text-primary transition-colors">
               Terms of Service
             </a>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={openGoogleConsentSettings}
+              className="text-textSecondary hover:text-primary transition-colors cursor-pointer text-xs"
+            >
+              Cookie Settings
+            </button>
             <span>•</span>
             <span>All rights reserved</span>
           </div>

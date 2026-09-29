@@ -11,6 +11,14 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
+interface GoogleFC {
+  callbackQueue?: Array<(() => void) | Record<string, unknown>>;
+  showRevocationMessage?: () => void;
+  [key: string]: unknown;
+}
+
 interface Window {
   adsbygoogle?: unknown[];
+  googlefc?: GoogleFC;
+  __tcfapi?: (...args: unknown[]) => void;
 }
