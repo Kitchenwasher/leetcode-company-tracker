@@ -955,188 +955,201 @@ export const QuestionsPage: React.FC<QuestionsPageProps> = ({
       {/* Top Banner Ad (Free Tier only) */}
       <AdBanner format="horizontal" variant="aws" slotId="questions-top-banner" className="my-1" />
 
-      {/* 3. Search and Filters Toolbar matching reference image */}
-      <div className="space-y-3 relative z-30">
-        <div className="bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] rounded-2xl p-2.5 sm:p-3 flex items-center gap-2 flex-wrap lg:flex-nowrap relative z-30">
+      {/* 3. Search and Filters Toolbar */}
+      <div className="space-y-2.5 relative z-30">
+        <div className="bg-[#0D1117]/85 backdrop-blur-md border border-white/[0.08] rounded-2xl p-3 sm:p-3.5 space-y-3 relative z-30 shadow-sm">
 
-          {/* Intelligent Search Input */}
-          <div className="relative flex-1 min-w-[200px] sm:min-w-[240px]">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
-              <Search className="w-3.5 h-3.5 text-zinc-400" />
+          {/* Tier 1: Intelligent Search Input (Left) + Primary Action Buttons (Right) */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            {/* Intelligent Search Input */}
+            <div className="relative flex-1 min-w-0">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+                <Search className="w-4 h-4 text-zinc-400" />
+              </div>
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search questions by title, #ID, topic, company..."
+                className="w-full h-9 pl-10 pr-20 bg-[#12161E] hover:bg-[#151922] focus:bg-[#12161E] border border-white/[0.08] focus:border-primary/60 rounded-xl text-xs text-white placeholder-zinc-500 outline-none transition-all font-sans"
+              />
+              {searchInput ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClick();
+                    setSearchInput('');
+                    updateFilters({ search: undefined });
+                  }}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-white cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 bg-white/[0.04] border border-white/[0.08] rounded">
+                    Ctrl K
+                  </kbd>
+                </div>
+              )}
             </div>
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search by title, #ID, topic, company..."
-              className="w-full pl-9 pr-14 py-2 bg-[#12161E] hover:bg-[#151922] focus:bg-[#12161E] border border-white/[0.08] focus:border-primary/60 rounded-xl text-xs text-white placeholder-zinc-500 outline-none transition-all font-sans"
-            />
-            {searchInput ? (
+
+            {/* Actions: Curated Tracks Toggle & Roll Random Question */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Curated Tracks Button */}
               <button
                 type="button"
                 onClick={() => {
                   sounds.playClick();
-                  setSearchInput('');
-                  updateFilters({ search: undefined });
+                  setShowAdvancedFilters(!showAdvancedFilters);
                 }}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-white cursor-pointer"
-                title="Clear search"
+                className={`h-9 flex items-center gap-1.5 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none border shrink-0 ${
+                  showAdvancedFilters || curatedList !== 'all'
+                    ? 'bg-primary text-white border-primary shadow-sm'
+                    : 'bg-[#161B22] text-zinc-300 hover:text-white border-white/[0.08] hover:border-white/20'
+                }`}
               >
-                <X className="w-3.5 h-3.5" />
+                <Filter className="w-3.5 h-3.5" />
+                <span>Curated Tracks</span>
               </button>
-            ) : (
-              <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
-                <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 bg-white/[0.04] border border-white/[0.08] rounded">
-                  Ctrl K
-                </kbd>
-              </div>
-            )}
+
+              {/* Roll Random Question Button */}
+              <button
+                type="button"
+                onClick={handleRollRandom}
+                disabled={filteredQuestions.length === 0}
+                title={
+                  filteredQuestions.length === 0
+                    ? 'No questions match your current filters'
+                    : `Roll a random question from ${filteredQuestions.length} matches`
+                }
+                className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer select-none border shrink-0 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-500/40 shadow-sm shadow-purple-500/25 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed group font-sans"
+              >
+                <Dices className="w-3.5 h-3.5 text-purple-200 group-hover:rotate-45 transition-transform" />
+                <span>Roll Random</span>
+                <span className="inline-block px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-black/30 border border-white/20 text-white ml-0.5">
+                  {filteredQuestions.length.toLocaleString()}
+                </span>
+              </button>
+            </div>
           </div>
 
-          {/* Company Filter */}
-          <GlideSelect
-            options={companyGlideOptions}
-            value={selectedCompany}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ company: val });
-            }}
-            icon={<Building2 className="w-3.5 h-3.5" />}
-            size="md"
-            menuWidth={250}
-            radius={12}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={selectedCompany !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Company Filter"
-            searchable
-            searchPlaceholder="Search companies..."
-          />
+          {/* Tier 2: Filter Selectors (Left) + Sort By (Right) */}
+          <div className="pt-2.5 border-t border-white/[0.06] flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Company Filter */}
+              <GlideSelect
+                options={companyGlideOptions}
+                value={selectedCompany}
+                onChange={(val) => {
+                  sounds.playClick();
+                  updateFilters({ company: val });
+                }}
+                icon={<Building2 className="w-3.5 h-3.5" />}
+                size="md"
+                menuWidth={250}
+                radius={12}
+                accentColor="var(--theme-accent, #A855F7)"
+                surfaceColor="#11141A"
+                highlightColor="#1C222D"
+                textColor="#F3F4F6"
+                className={selectedCompany !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
+                ariaLabel="Company Filter"
+                searchable
+                searchPlaceholder="Search companies..."
+              />
 
-          {/* Difficulty Filter */}
-          <GlideSelect
-            options={difficultyGlideOptions}
-            value={selectedDifficulty}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ difficulty: val as Difficulty | 'all' });
-            }}
-            icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
-            size="md"
-            menuWidth={160}
-            radius={12}
-            accentColor={
-              selectedDifficulty === 'Easy' ? '#34D399' :
-              selectedDifficulty === 'Medium' ? '#FBBF24' :
-              selectedDifficulty === 'Hard' ? '#FB7185' : 'var(--theme-accent, #A855F7)'
-            }
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={selectedDifficulty !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Difficulty Filter"
-          />
+              {/* Difficulty Filter */}
+              <GlideSelect
+                options={difficultyGlideOptions}
+                value={selectedDifficulty}
+                onChange={(val) => {
+                  sounds.playClick();
+                  updateFilters({ difficulty: val as Difficulty | 'all' });
+                }}
+                icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
+                size="md"
+                menuWidth={160}
+                radius={12}
+                accentColor={
+                  selectedDifficulty === 'Easy' ? '#34D399' :
+                  selectedDifficulty === 'Medium' ? '#FBBF24' :
+                  selectedDifficulty === 'Hard' ? '#FB7185' : 'var(--theme-accent, #A855F7)'
+                }
+                surfaceColor="#11141A"
+                highlightColor="#1C222D"
+                textColor="#F3F4F6"
+                className={selectedDifficulty !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
+                ariaLabel="Difficulty Filter"
+              />
 
-          {/* Topic Filter */}
-          <GlideSelect
-            options={topicGlideOptions}
-            value={selectedTopic}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ topic: val });
-            }}
-            icon={<Tag className="w-3.5 h-3.5" />}
-            size="md"
-            menuWidth={240}
-            radius={12}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={selectedTopic !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Topic Filter"
-            searchable
-            searchPlaceholder="Search topics..."
-          />
+              {/* Topic Filter */}
+              <GlideSelect
+                options={topicGlideOptions}
+                value={selectedTopic}
+                onChange={(val) => {
+                  sounds.playClick();
+                  updateFilters({ topic: val });
+                }}
+                icon={<Tag className="w-3.5 h-3.5" />}
+                size="md"
+                menuWidth={240}
+                radius={12}
+                accentColor="var(--theme-accent, #A855F7)"
+                surfaceColor="#11141A"
+                highlightColor="#1C222D"
+                textColor="#F3F4F6"
+                className={selectedTopic !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
+                ariaLabel="Topic Filter"
+                searchable
+                searchPlaceholder="Search topics..."
+              />
 
-          {/* Status Filter */}
-          <GlideSelect
-            options={statusGlideOptions}
-            value={selectedStatus}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ status: val as ProblemStatus | 'favorite' | 'due-review' | 'all' });
-            }}
-            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
-            size="md"
-            menuWidth={170}
-            radius={12}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={selectedStatus !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Problem Status Filter"
-          />
+              {/* Status Filter */}
+              <GlideSelect
+                options={statusGlideOptions}
+                value={selectedStatus}
+                onChange={(val) => {
+                  sounds.playClick();
+                  updateFilters({ status: val as ProblemStatus | 'favorite' | 'due-review' | 'all' });
+                }}
+                icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+                size="md"
+                menuWidth={170}
+                radius={12}
+                accentColor="var(--theme-accent, #A855F7)"
+                surfaceColor="#11141A"
+                highlightColor="#1C222D"
+                textColor="#F3F4F6"
+                className={selectedStatus !== 'all' ? 'glide-select--active shrink-0' : 'shrink-0'}
+                ariaLabel="Problem Status Filter"
+              />
+            </div>
 
-          {/* Sort Dropdown */}
-          <GlideSelect
-            options={sortGlideOptions}
-            value={sortBy}
-            onChange={(val) => {
-              sounds.playClick();
-              updateFilters({ sort: val });
-            }}
-            icon={<ArrowUpDown className="w-3.5 h-3.5" />}
-            size="md"
-            menuWidth={210}
-            radius={12}
-            accentColor="var(--theme-accent, #A855F7)"
-            surfaceColor="#11141A"
-            highlightColor="#1C222D"
-            textColor="#F3F4F6"
-            className={sortBy !== 'recent' ? 'glide-select--active shrink-0' : 'shrink-0'}
-            ariaLabel="Sort Questions"
-          />
-
-          {/* Advanced Filters Button */}
-          <button
-            type="button"
-            onClick={() => {
-              sounds.playClick();
-              setShowAdvancedFilters(!showAdvancedFilters);
-            }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none border shrink-0 ${
-              showAdvancedFilters || curatedList !== 'all'
-                ? 'bg-primary text-white border-primary shadow-sm'
-                : 'bg-[#161B22] text-zinc-300 hover:text-white border-white/[0.08] hover:border-white/20'
-            }`}
-          >
-            <Filter className="w-3.5 h-3.5" />
-            <span>Advanced Filters</span>
-          </button>
-
-          {/* Roll Random Question Button */}
-          <button
-            type="button"
-            onClick={handleRollRandom}
-            disabled={filteredQuestions.length === 0}
-            title={
-              filteredQuestions.length === 0
-                ? 'No questions match your current filters'
-                : `Roll a random question from ${filteredQuestions.length} matches`
-            }
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer select-none border shrink-0 bg-gradient-to-r from-purple-600/90 to-indigo-600/90 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-500/40 shadow-sm shadow-purple-500/20 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed group font-sans"
-          >
-            <Dices className="w-3.5 h-3.5 text-purple-200 group-hover:rotate-45 transition-transform" />
-            <span>Roll Random</span>
-            <span className="hidden sm:inline-block px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-white/20 text-white ml-0.5">
-              {filteredQuestions.length}
-            </span>
-          </button>
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-2 sm:ml-auto shrink-0">
+              <GlideSelect
+                options={sortGlideOptions}
+                value={sortBy}
+                onChange={(val) => {
+                  sounds.playClick();
+                  updateFilters({ sort: val });
+                }}
+                icon={<ArrowUpDown className="w-3.5 h-3.5" />}
+                size="md"
+                menuWidth={210}
+                radius={12}
+                accentColor="var(--theme-accent, #A855F7)"
+                surfaceColor="#11141A"
+                highlightColor="#1C222D"
+                textColor="#F3F4F6"
+                className={sortBy !== 'recent' ? 'glide-select--active shrink-0' : 'shrink-0'}
+                ariaLabel="Sort Questions"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Expandable Advanced Curated Study Sheets Bar */}

@@ -186,7 +186,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-[#080B0F] text-[#F3F4F6] flex flex-col font-sans selection:bg-primary/25 selection:text-white">
+    <div className="min-h-screen bg-[#080B0F] text-[#F3F4F6] flex flex-col font-sans selection:bg-primary/25 selection:text-white overflow-x-hidden">
       {/* Top Bar Header */}
       {!hideTopBar && (
         <header className="sticky top-0 z-30 w-full h-16 bg-[#0B0E14]/90 backdrop-blur-md border-b border-white/[0.08] px-4 sm:px-6 flex items-center justify-between select-none">
@@ -483,7 +483,7 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
 
         {/* Dynamic Page Content */}
         <main
-          className="flex-1 lg:pl-60 min-w-0 relative bg-[#080B0F] min-h-[calc(100vh-4rem)]"
+          className="flex-1 lg:pl-60 min-w-0 relative bg-[#080B0F] min-h-[calc(100vh-4rem)] overflow-x-hidden"
           style={{
             backgroundImage: `linear-gradient(180deg, rgba(8, 11, 15, 0.75) 0%, rgba(8, 11, 15, 0.55) 45%, rgba(8, 11, 15, 0.85) 100%), url('/images/dashboard/space-bg.png')`,
             backgroundSize: 'cover',
