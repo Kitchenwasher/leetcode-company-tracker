@@ -42,8 +42,8 @@ export interface AiSolutionPayload {
 export class AiSolutionService {
   /**
    * Generates a FAANG-grade editorial.
-   * Priority 1: Fetch authentic curated solutions from verified LeetCode repository.
-   * Priority 2: Attempt Meta Muse LLM completion (if key/billing active).
+   * Priority 1: OpenRouter with user's configured nvidia/nemotron-3-ultra-550b-a55b:free
+   * Priority 2: Fetch authentic curated solutions from verified LeetCode repository.
    * Priority 3: Fall back to deterministic algorithmic synthesis.
    */
   static async generateSolution(params: {
@@ -54,7 +54,17 @@ export class AiSolutionService {
   }): Promise<AiSolutionPayload> {
     const { id } = params;
 
-    // 1. Try verified curated solution repository (fastest, authentic LeetCode solutions)
+    // 1. Try OpenRouter with requested nvidia/nemotron-3-ultra-550b-a55b:free
+    try {
+      const openRouterSolution = await this.fetchOpenRouterCompletion(params);
+      if (openRouterSolution && openRouterSolution.approaches?.length > 0) {
+        return openRouterSolution;
+      }
+    } catch (err: any) {
+      console.warn(`[AI Solution Service] OpenRouter completion failed for #${id}:`, err?.message || err);
+    }
+
+    // 2. Try verified curated solution repository (authentic LeetCode solutions)
     try {
       const curated = await this.fetchVerifiedCuratedSolution(params);
       if (curated && curated.approaches?.length > 0) {
@@ -64,7 +74,7 @@ export class AiSolutionService {
       console.warn(`[AI Solution Service] Curated solution fetch failed for #${id}:`, err?.message || err);
     }
 
-    // 2. Try Meta Muse LLM completion if available
+    // 3. Try Meta Muse LLM completion if available
     try {
       const externalEditorial = await this.fetchMetaMuseCompletion(params);
       if (externalEditorial && externalEditorial.approaches?.length > 0) {
@@ -74,8 +84,206 @@ export class AiSolutionService {
       console.warn(`[AI Solution Service] External LLM completion failed for #${id}:`, err?.message || err);
     }
 
-    // 3. Fallback to algorithmic synthesis
+    // 4. Fallback to algorithmic synthesis
     return this.synthesizeAlgorithmicSolution(params);
+  }
+
+  /**
+   * Generates FAANG-grade editorial using OpenRouter
+   * Primary model: nvidia/nemotron-3-ultra-550b-a55b:free
+   */
+  static async fetchOpenRouterCompletion(params: {
+    id: number;
+    title: string;
+    difficulty: string;
+    topics: string[];
+  }): Promise<AiSolutionPayload | null> {
+    const { id, title, difficulty, topics } = params;
+
+    if (!ENV.OPENROUTER_API_KEY) {
+      return null;
+    }
+
+    const systemPrompt = `You are a Principal Software Engineer at Google and Meta.
+Your task is to write a production-grade LeetCode solution editorial for the problem.
+Output strictly a valid raw JSON object. Do not include markdown code fences or conversational text outside the JSON object.
+
+Format strictly as:
+{
+  "corePattern": "Algorithmic Pattern Name",
+  "interviewTips": ["clarifying question 1", "trade-off 2", "edge-case tip 3"],
+  "approaches": [
+    {
+      "id": "brute-force",
+      "name": "Approach 1: Brute Force",
+      "tag": "Brute Force",
+      "intuition": "first principles intuition...",
+      "theory": "theoretical reasoning...",
+      "code": {
+        "python": "class Solution:\\n    def ...",
+        "cpp": "class Solution {\\npublic:\\n    ...\\n};",
+        "java": "class Solution {\\n    public ...\\n}"
+      },
+      "timeComplexity": { "complexity": "O(...)", "explanation": "..." },
+      "spaceComplexity": { "complexity": "O(...)", "explanation": "..." },
+      "dryRunExample": { "input": "...", "steps": ["step 1", "step 2"], "output": "..." },
+      "edgeCases": ["case 1", "case 2"]
+    },
+    {
+      "id": "optimal",
+      "name": "Approach 2: Optimal ...",
+      "tag": "Optimal",
+      "intuition": "...",
+      "theory": "...",
+      "code": {
+        "python": "class Solution:\\n    def ...",
+        "cpp": "class Solution {\\npublic:\\n    ...\\n};",
+        "java": "class Solution {\\n    public ...\\n}"
+      },
+      "timeComplexity": { "complexity": "O(...)", "explanation": "..." },
+      "spaceComplexity": { "complexity": "O(...)", "explanation": "..." },
+      "dryRunExample": { "input": "...", "steps": ["step 1", "step 2"], "output": "..." },
+      "edgeCases": ["case 1", "case 2"]
+    }
+  ]
+}`;
+
+    const userPrompt = `Generate a multi-approach editorial for Problem #${id}: "${title}" (${difficulty}) [Topics: ${topics.join(', ')}]. Provide working Python 3, C++, and Java code matching LeetCode specifications for each approach.`;
+    const endpoint = `${ENV.OPENROUTER_BASE_URL.replace(/\/+$/, '')}/chat/completions`;
+
+    // Attempt primary model first, with fallback to other verified active free models if overloaded (503)
+    const candidateModels = [
+      ENV.OPENROUTER_MODEL,
+      'nvidia/nemotron-3-ultra-550b-a55b:free',
+      'nvidia/nemotron-3-super-120b-a12b:free',
+      'qwen/qwen3.8-27b:free',
+    ].filter((m, i, arr) => arr.indexOf(m) === i);
+
+    for (const model of candidateModels) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s timeout for large models
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${ENV.OPENROUTER_API_KEY}`,
+            'HTTP-Referer': 'https://cheat-code.in',
+            'X-Title': 'CheatCode LeetTracker',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+            max_tokens: 8192,
+            temperature: 0.2,
+          }),
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => '');
+          console.warn(`[OpenRouter ${model}] HTTP ${response.status}: ${errText.substring(0, 200)}`);
+          continue; // Try next candidate model if 503 overloaded
+        }
+
+        const data = (await response.json()) as any;
+        const rawContent = data?.choices?.[0]?.message?.content;
+        if (!rawContent) continue;
+
+        const startIdx = rawContent.indexOf('{');
+        const endIdx = rawContent.lastIndexOf('}');
+        if (startIdx === -1 || endIdx <= startIdx) continue;
+
+        const jsonSub = rawContent.substring(startIdx, endIdx + 1);
+        let parsed: any;
+        try {
+          parsed = JSON.parse(jsonSub);
+        } catch {
+          const sanitized = jsonSub.replace(/,\s*([}\]])/g, '$1');
+          parsed = JSON.parse(sanitized);
+        }
+
+        const rawApproaches = parsed.approaches || parsed.solutions || [];
+        if (!rawApproaches || rawApproaches.length === 0) continue;
+
+        const formattedApproaches: AiApproachPayload[] = rawApproaches.map((app: any, idx: number) => {
+          let cpp = '';
+          let python = '';
+          let java = '';
+
+          if (typeof app.code === 'string') {
+            if (app.code.includes('def ') || app.code.includes('class Solution:\n')) {
+              python = app.code;
+            } else if (app.code.includes('public class') || (app.code.includes('class Solution {') && app.code.includes('public '))) {
+              java = app.code;
+            } else {
+              cpp = app.code;
+            }
+          } else if (typeof app.code === 'object' && app.code !== null) {
+            cpp = app.code.cpp || app.cppCode || '';
+            python = app.code.python || app.code.python3 || '';
+            java = app.code.java || '';
+          } else if (app.cppCode) {
+            cpp = app.cppCode;
+          }
+
+          const timeComp = typeof app.timeComplexity === 'object' && app.timeComplexity !== null
+            ? app.timeComplexity
+            : {
+                complexity: app.time_complexity || app.timeComplexity || 'O(N)',
+                explanation: app.time_complexity_explanation || 'Derivation from problem operations.',
+              };
+
+          const spaceComp = typeof app.spaceComplexity === 'object' && app.spaceComplexity !== null
+            ? app.spaceComplexity
+            : {
+                complexity: app.space_complexity || app.spaceComplexity || 'O(1)',
+                explanation: app.space_complexity_explanation || 'Auxiliary memory allocated.',
+              };
+
+          return {
+            id: String(app.id || `approach-${idx + 1}`),
+            name: app.name || (idx === 0 ? 'Approach 1: Brute Force Baseline' : `Approach ${idx + 1}: Optimal`),
+            tag: app.tag || (idx === (rawApproaches.length - 1) ? 'Optimal' : 'Brute Force'),
+            intuition: app.intuition || '',
+            theory: app.theory || app.pros || '',
+            cppCode: cpp || python || java || '// Implementation',
+            code: {
+              cpp: cpp || (python ? `// C++ implementation\n// See Python 3 tab` : ''),
+              python: python || (cpp ? `# Python implementation\n# See C++ tab` : ''),
+              java: java || '',
+            },
+            timeComplexity: timeComp,
+            spaceComplexity: spaceComp,
+            dryRunExample: app.dryRunExample,
+            edgeCases: app.edgeCases || ['Empty or single-element inputs.', 'Boundary integer limits.'],
+          };
+        });
+
+        console.log(`[OpenRouter SUCCESS] Generated editorial for #${id} using ${model}`);
+        return {
+          questionId: id,
+          title: parsed.title || title,
+          difficulty: parsed.difficulty || difficulty,
+          corePattern: parsed.corePattern || parsed.core_pattern || 'Algorithmic Pattern & Invariant',
+          interviewTips: parsed.interviewTips || parsed.interview_tips || [
+            'Clarify constraints and edge cases upfront.',
+            'Discuss Time and Space trade-offs before writing code.',
+          ],
+          approaches: formattedApproaches,
+        };
+      } catch (err: any) {
+        console.warn(`[OpenRouter ${model}] Error for #${id}:`, err?.message || err);
+      }
+    }
+
+    return null;
   }
 
   /**

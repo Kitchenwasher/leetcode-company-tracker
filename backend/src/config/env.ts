@@ -36,9 +36,14 @@ export const ENV = {
   BMC_CREATOR_PAGE: process.env.BMC_CREATOR_PAGE || 'https://buymeacoffee.com/cheatcode69',
 
   // Meta Muse LLM (Contributor Tier)
-  MUSE_API_KEY: process.env.MUSE_API_KEY || 'LLM_1611329520586286_g-veMmNkfLODJLJu3eUWqyCJEv4',
+  MUSE_API_KEY: process.env.MUSE_API_KEY || '',
   MUSE_API_URL: process.env.MUSE_API_URL || 'https://api.meta.ai/v1',
   MUSE_MODEL: process.env.MUSE_MODEL || 'muse-spark-1.3-contributor',
+
+  // OpenRouter LLM (Nvidia Nemotron 3 Ultra 550B)
+  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || '',
+  OPENROUTER_BASE_URL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+  OPENROUTER_MODEL: process.env.OPENROUTER_MODEL || 'nvidia/nemotron-3-ultra-550b-a55b:free',
 
   // VIP / Friend Promo Codes (comma separated)
   VIP_PROMO_CODES: process.env.VIP_PROMO_CODES || 'CHEATCODE_VIP_2026,CHEATCODE_FRIENDS_FREE,CHEATCODE_FOUNDER_GIFT,CHEATCODE_PRO_PASS,FRIENDS2026',

@@ -819,12 +819,12 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-bold text-white">Meta Muse Editorial Synthesizer</h3>
+                            <h3 className="text-sm font-bold text-white">Nvidia Nemotron Editorial Synthesizer</h3>
                             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 animate-pulse">
-                              LIVE SYNTHESIS
+                              NEMOTRON 550B
                             </span>
                           </div>
-                          <p className="text-xs text-textMuted">Synthesizing optimal algorithms, proofs, and multi-language code for #{q.id}</p>
+                          <p className="text-xs text-textMuted">Nvidia Nemotron 3 Ultra 550B is formulating optimal algorithms, proofs, and multi-language code for #{q.id}</p>
                         </div>
                       </div>
 
@@ -920,7 +920,7 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                         )}
                         <span>
                           {isPro
-                            ? '✨ Generate with Meta Muse AI'
+                            ? '✨ Generate with Nemotron AI'
                             : 'Generate with AI [PRO]'}
                         </span>
                       </button>
