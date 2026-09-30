@@ -144,5 +144,72 @@ export class PaymentController {
       next(err);
     }
   }
+
+  /**
+   * Redeem a VIP / Friend Pass promo code to get instant Pro Lifetime access for free
+   */
+  static async redeemVipCode(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+
+      const { code } = req.body;
+      if (!code || typeof code !== 'string') {
+        res.status(400).json({ error: 'Please provide a valid VIP promo code' });
+        return;
+      }
+
+      const normalizedInput = code.trim().toUpperCase();
+      const validCodes = (ENV.VIP_PROMO_CODES || '')
+        .split(',')
+        .map((c) => c.trim().toUpperCase())
+        .filter(Boolean);
+
+      const isValid = validCodes.includes(normalizedInput);
+
+      if (!isValid) {
+        res.status(400).json({
+          error: 'Invalid or expired VIP promo code. Please double-check with the admin.',
+        });
+        return;
+      }
+
+      // Upgrade user to Pro Lifetime
+      const updatedUser = await prisma.user.update({
+        where: { id: req.user.id },
+        data: {
+          tier: 'pro',
+          subscriptionStatus: 'lifetime',
+        },
+      });
+
+      // Record a 0-amount succeeded lifetime payment so subscription sync remains permanent
+      const paymentRef = `vip_gift_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      await prisma.payment.create({
+        data: {
+          userId: req.user.id,
+          payerEmail: updatedUser.email,
+          amount: 0,
+          currency: 'INR',
+          status: 'succeeded',
+          plan: 'pro_lifetime',
+          stripeSessionId: paymentRef,
+        },
+      });
+
+      res.json({
+        success: true,
+        message: '🎉 VIP Lifetime Pass activated! Welcome to CheatCode Pro.',
+        tier: 'pro',
+        isPro: true,
+        subscriptionStatus: 'lifetime',
+        plan: 'Lifetime Access Pass (VIP Friend)',
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 

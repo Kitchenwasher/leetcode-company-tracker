@@ -347,9 +347,31 @@ export class QuestionController {
         return;
       }
 
-      const question = await prisma.question.findUnique({
+      let question = await prisma.question.findUnique({
         where: { id },
       });
+
+      if (!question) {
+        const meta = questionDataService.getQuestionMeta(id);
+        if (meta) {
+          question = await prisma.question.upsert({
+            where: { id },
+            update: {},
+            create: {
+              id: meta.id,
+              title: meta.title,
+              difficulty: meta.difficulty,
+              acceptance: meta.acceptance,
+              url: meta.url,
+              topics: JSON.stringify(meta.topics || []),
+              isBlind75: !!meta.isBlind75,
+              isNeetCode150: !!meta.isNeetCode150,
+              isStriver180: !!meta.isStriver180,
+              isGrind169: !!meta.isGrind169,
+            },
+          });
+        }
+      }
 
       if (!question) {
         res.status(404).json({ error: 'Question not found' });

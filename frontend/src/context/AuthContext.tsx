@@ -44,6 +44,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   upgradeToPro: (planId?: string) => Promise<void>;
   updateProfile: (patch: Partial<User>) => Promise<void>;
+  refreshSession: () => Promise<void>;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
   showSubscriptionModal: boolean;
@@ -311,6 +312,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(updated);
   };
 
+  const refreshSession = useCallback(async () => {
+    try {
+      const res = await authApi.getMe();
+      if (res?.user) {
+        setCurrentUser(res.user);
+        setStoredUserProfile(res.user);
+        setIsAuthenticated(true);
+      }
+    } catch (err) {
+      console.error('Failed to refresh session:', err);
+    }
+  }, []);
+
   const isPro = currentUser.tier === 'pro' || currentUser.tier === 'enterprise';
 
   return (
@@ -328,6 +342,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         upgradeToPro,
         updateProfile,
+        refreshSession,
         showAuthModal,
         setShowAuthModal,
         showSubscriptionModal,

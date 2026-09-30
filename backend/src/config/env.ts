@@ -39,4 +39,8 @@ export const ENV = {
   MUSE_API_KEY: process.env.MUSE_API_KEY || 'LLM_1611329520586286_g-veMmNkfLODJLJu3eUWqyCJEv4',
   MUSE_API_URL: process.env.MUSE_API_URL || 'https://api.meta.ai/v1',
   MUSE_MODEL: process.env.MUSE_MODEL || 'muse-spark-1.3-contributor',
+
+  // VIP / Friend Promo Codes (comma separated)
+  VIP_PROMO_CODES: process.env.VIP_PROMO_CODES || 'CHEATCODE_VIP_2026,CHEATCODE_FRIENDS_FREE,CHEATCODE_FOUNDER_GIFT,CHEATCODE_PRO_PASS,FRIENDS2026',
 };
+

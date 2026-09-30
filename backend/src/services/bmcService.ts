@@ -399,6 +399,17 @@ export class BMCService {
 
     // 3. If no payment exists:
     if (!payment) {
+      if (user.subscriptionStatus === 'lifetime' || user.subscriptionStatus === 'vip_lifetime') {
+        return {
+          tier: 'pro',
+          subscriptionStatus: 'lifetime',
+          isPro: true,
+          plan: 'Lifetime Access Pass (VIP/Admin)',
+          planType: 'lifetime',
+          expiresAt: null,
+          daysRemaining: null,
+        };
+      }
       if (user.tier !== 'free' || user.subscriptionStatus !== null) {
         await prisma.user.update({
           where: { id: user.id },
@@ -413,6 +424,8 @@ export class BMCService {
       payment.plan === 'pro_lifetime' ||
       payment.plan === 'pro_yearly' ||
       payment.plan === 'annual_special' ||
+      payment.plan === 'vip_gift' ||
+      payment.plan === 'vip_lifetime' ||
       payment.amount >= 100000;
 
     if (isLifetime) {

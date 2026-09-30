@@ -73,4 +73,16 @@ export const paymentApi = {
     const res = await api.post('/payments/bmc-verify', { payerEmail });
     return res.data;
   },
+
+  redeemVipCode: async (code: string): Promise<{
+    success: boolean;
+    message: string;
+    tier: string;
+    isPro: boolean;
+    subscriptionStatus: string;
+    plan: string;
+  }> => {
+    const res = await api.post('/payments/redeem-code', { code });
+    return res.data;
+  },
 };

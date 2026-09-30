@@ -20,6 +20,7 @@ import {
   Code,
   ExternalLink,
   Dices,
+  Ticket,
 } from 'lucide-react';
 import { Question, UserStoreState } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -43,7 +44,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   onResetProgress,
 }) => {
   const navigate = useNavigate();
-  const { user, isPro, isAuthenticated, updateProfile, logout, setShowSubscriptionModal } = useAuth();
+  const { user, isPro, isAuthenticated, updateProfile, refreshSession, logout, setShowSubscriptionModal } = useAuth();
 
   const [name, setName] = useState(user.name || '');
   const [targetCompany, setTargetCompany] = useState(user.targetCompany || 'google');
@@ -53,6 +54,36 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
   const [rollAnimationEnabled, setRollAnimationState] = useState<boolean>(() => getRollAnimationEnabled());
+
+  const [vipCode, setVipCode] = useState('');
+  const [isRedeemingVip, setIsRedeemingVip] = useState(false);
+  const [vipRedeemMessage, setVipRedeemMessage] = useState<string | null>(null);
+  const [vipRedeemError, setVipRedeemError] = useState<string | null>(null);
+
+  const handleRedeemVipCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vipCode.trim()) return;
+    setIsRedeemingVip(true);
+    setVipRedeemError(null);
+    setVipRedeemMessage(null);
+    sounds.playClick();
+
+    try {
+      const res = await paymentApi.redeemVipCode(vipCode.trim());
+      if (res.success) {
+        sounds.playSuccess();
+        setVipRedeemMessage(res.message || '🎉 VIP Lifetime Pass activated!');
+        setVipCode('');
+        await refreshSession();
+      } else {
+        setVipRedeemError(res.message || 'Failed to redeem code.');
+      }
+    } catch (err: any) {
+      setVipRedeemError(err?.response?.data?.error || err?.message || 'Invalid or expired VIP code.');
+    } finally {
+      setIsRedeemingVip(false);
+    }
+  };
 
   const handleOpenStripePortal = async () => {
     setIsOpeningPortal(true);
@@ -326,6 +357,48 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </button>
               </div>
             )}
+
+            {/* VIP / Friend Pass Promo Code */}
+            <div className="pt-3 border-t border-white/[0.06] space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
+                <Ticket className="w-3.5 h-3.5 text-amber-400" />
+                <span>Redeem VIP / Friend Pass</span>
+              </div>
+              <p className="text-[11px] text-textSecondary">
+                Have a VIP promo code or friend pass? Enter it below to unlock Pro access for free.
+              </p>
+
+              {vipRedeemMessage && (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{vipRedeemMessage}</span>
+                </div>
+              )}
+
+              {vipRedeemError && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{vipRedeemError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleRedeemVipCode} className="flex gap-2">
+                <input
+                  type="text"
+                  value={vipCode}
+                  onChange={(e) => setVipCode(e.target.value)}
+                  placeholder="e.g. CHEATCODE_VIP_2026"
+                  className="flex-1 px-3 py-2 rounded-xl bg-[#12161E] border border-white/[0.08] focus:border-amber-400 text-xs text-white uppercase font-mono tracking-wider outline-none placeholder:normal-case placeholder:font-sans placeholder:tracking-normal"
+                />
+                <button
+                  type="submit"
+                  disabled={isRedeemingVip || !vipCode.trim()}
+                  className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shrink-0"
+                >
+                  {isRedeemingVip ? 'Redeeming...' : 'Redeem Pass'}
+                </button>
+              </form>
+            </div>
           </div>
 
           {/* App & Question Experience Preferences Card */}

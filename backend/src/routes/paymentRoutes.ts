@@ -9,5 +9,6 @@ router.post('/create-checkout-session', authenticateToken, PaymentController.cre
 router.post('/create-portal-session', authenticateToken, PaymentController.createPortalSession);
 router.get('/status', authenticateToken, PaymentController.getSubscriptionStatus);
 router.post('/bmc-verify', authenticateToken, PaymentController.verifyBMCPayment);
+router.post('/redeem-code', authenticateToken, PaymentController.redeemVipCode);
 
 export default router;

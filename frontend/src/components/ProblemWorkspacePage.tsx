@@ -10,7 +10,8 @@ import {
   ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Star, CheckCircle2,
   Clock, RotateCcw, Award, Circle, Code2, FileText, Calendar, Copy, Check,
   Sparkles, Building2, Terminal, Lightbulb, ShieldAlert, Tag, Plus, Zap,
-  Palette, Play, Pause, RefreshCw, Send, BookOpen, Crown, Lock
+  Palette, Play, Pause, RefreshCw, Send, BookOpen, Crown, Lock,
+  Loader2, AlertTriangle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/sound';
@@ -61,6 +62,10 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
     return (localStorage.getItem('cheatcode_preferred_lang') as 'python' | 'cpp' | 'java') || 'python';
   });
   const [isGeneratingAi, setIsGeneratingAi] = useState<boolean>(false);
+  const [aiProgressPercent, setAiProgressPercent] = useState<number>(0);
+  const [aiProgressStage, setAiProgressStage] = useState<number>(0);
+  const [aiElapsedTime, setAiElapsedTime] = useState<number>(0);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   // Scratchpad state
   const [codeLang, setCodeLang] = useState<string>(initialProgress.codeSnippet?.lang || 'cpp');
@@ -321,17 +326,59 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
       setShowSubscriptionModal(true);
       return;
     }
+
+    setIsGeneratingAi(true);
+    setAiError(null);
+    setAiProgressPercent(12);
+    setAiProgressStage(0);
+    setAiElapsedTime(0);
+    sounds.playClick();
+
+    const startTime = Date.now();
+    const timerInterval = window.setInterval(() => {
+      setAiElapsedTime(Number(((Date.now() - startTime) / 1000).toFixed(1)));
+    }, 100);
+
+    const timeouts: number[] = [];
+    timeouts.push(
+      window.setTimeout(() => {
+        setAiProgressPercent(35);
+        setAiProgressStage(1);
+      }, 700)
+    );
+    timeouts.push(
+      window.setTimeout(() => {
+        setAiProgressPercent(62);
+        setAiProgressStage(2);
+      }, 1500)
+    );
+    timeouts.push(
+      window.setTimeout(() => {
+        setAiProgressPercent(86);
+        setAiProgressStage(3);
+      }, 2300)
+    );
+
     try {
-      setIsGeneratingAi(true);
-      sounds.playClick();
       const freshSolution = await questionsApi.generateAiSolution(q.id);
       if (freshSolution && freshSolution.approaches && freshSolution.approaches.length > 0) {
+        setAiProgressPercent(100);
+        setAiProgressStage(4);
+        sounds.playSuccess();
+        // Brief pause to allow the user to see the 100% completion milestone
+        await new Promise((resolve) => setTimeout(resolve, 500));
         setSolutionData(freshSolution);
         setSelectedApproachIndex(0);
+      } else {
+        throw new Error('Received an empty editorial payload from the generator.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to generate AI solution:', err);
+      sounds.playTimerAlert();
+      setAiError(err?.response?.data?.error || err?.message || 'Failed to synthesize solution. Please try again.');
     } finally {
+      clearInterval(timerInterval);
+      timeouts.forEach(clearTimeout);
       setIsGeneratingAi(false);
     }
   };
@@ -717,6 +764,15 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleGenerateWithAi}
+                        disabled={isGeneratingAi}
+                        title="Regenerate editorial with Meta Muse AI"
+                        className="flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 px-2.5 py-1 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Regenerate with AI</span>
+                      </button>
                       <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
                         Verified FAANG Editorial
@@ -725,24 +781,112 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                   </div>
                 )}
 
-                {/* Empty / Loading State for Editorial */}
-                {(!solutionData || isLoadingSolution || isGeneratingAi) && (
+                {/* AI Error Alert with Retry */}
+                {aiError && !isGeneratingAi && (
+                  <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                      <span>{aiError}</span>
+                    </div>
+                    <button
+                      onClick={handleGenerateWithAi}
+                      className="px-3 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition-all cursor-pointer shrink-0"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                )}
+
+                {/* Live AI Generation Progress Console */}
+                {isGeneratingAi && (
+                  <div className="p-6 rounded-2xl bg-surfaceElevated border border-primary/30 shadow-xl space-y-5 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary">
+                          <Sparkles className="w-5 h-5 animate-spin" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-bold text-white">Meta Muse Editorial Synthesizer</h3>
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 animate-pulse">
+                              LIVE SYNTHESIS
+                            </span>
+                          </div>
+                          <p className="text-xs text-textMuted">Synthesizing optimal algorithms, proofs, and multi-language code for #{q.id}</p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="font-mono text-base font-bold text-primary">{Math.min(100, Math.round(aiProgressPercent))}%</span>
+                        <p className="text-[11px] text-textMuted font-mono">⏱️ {aiElapsedTime.toFixed(1)}s elapsed</p>
+                      </div>
+                    </div>
+
+                    {/* Glowing Progress Bar */}
+                    <div className="w-full bg-[#12161E] rounded-full h-2.5 overflow-hidden border border-white/[0.08]">
+                      <div
+                        className="h-full bg-gradient-to-r from-primary via-purple-400 to-emerald-400 transition-all duration-300 ease-out rounded-full shadow-terminal-glow"
+                        style={{ width: `${Math.min(100, Math.round(aiProgressPercent))}%` }}
+                      />
+                    </div>
+
+                    {/* Stage Checklist */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs pt-1">
+                      {[
+                        { title: 'Constraint & Invariant Analysis', desc: 'Parsing input bounds and edge conditions', stage: 0 },
+                        { title: 'Algorithmic Strategy Formulation', desc: 'Deriving optimal time and space structures', stage: 1 },
+                        { title: 'Multi-Language Synthesis', desc: 'Generating idiomatic Python 3, C++, and Java', stage: 2 },
+                        { title: 'Formal Big-O Proof & Dry Runs', desc: 'Constructing trace tables and verification steps', stage: 3 },
+                      ].map((step, idx) => {
+                        const isDone = aiProgressStage > step.stage;
+                        const isCurrent = aiProgressStage === step.stage;
+                        return (
+                          <div
+                            key={idx}
+                            className={`p-3 rounded-xl border transition-all flex items-start gap-2.5 ${
+                              isDone
+                                ? 'bg-emerald-500/5 border-emerald-500/20 text-white'
+                                : isCurrent
+                                ? 'bg-primary/10 border-primary/30 text-white shadow-sm'
+                                : 'bg-[#12161E]/60 border-white/[0.05] text-textMuted opacity-60'
+                            }`}
+                          >
+                            <div className="mt-0.5 shrink-0">
+                              {isDone ? (
+                                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                              ) : isCurrent ? (
+                                <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                              ) : (
+                                <div className="w-4 h-4 rounded-full border border-white/20" />
+                              )}
+                            </div>
+                            <div className="space-y-0.5">
+                              <p className={`text-xs font-semibold ${isDone ? 'text-emerald-300' : isCurrent ? 'text-primary' : 'text-zinc-400'}`}>
+                                {step.title}
+                              </p>
+                              <p className="text-[11px] text-zinc-500 leading-tight">{step.desc}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty / Initial Loading State for Editorial */}
+                {(!solutionData || isLoadingSolution) && !isGeneratingAi && (
                   <div className="p-8 rounded-2xl bg-surfaceElevated border border-border flex flex-col items-center justify-center text-center space-y-4">
                     <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-                      <Sparkles className={`w-6 h-6 ${isLoadingSolution || isGeneratingAi ? 'animate-spin' : ''}`} />
+                      <Sparkles className={`w-6 h-6 ${isLoadingSolution ? 'animate-spin' : ''}`} />
                     </div>
                     <div className="space-y-1 max-w-md">
                       <h3 className="text-sm font-bold text-white">
-                        {isGeneratingAi
-                          ? 'Generating FAANG-Grade Editorial with Meta Muse...'
-                          : isLoadingSolution
+                        {isLoadingSolution
                           ? 'Retrieving Problem Solution...'
                           : 'No Pre-Baked Solution Available'}
                       </h3>
                       <p className="text-xs text-textMuted leading-relaxed">
-                        {isGeneratingAi
-                          ? 'Meta Muse Spark 1.3 is formulating multi-approach algorithms, complexity derivations, and multi-language code...'
-                          : isLoadingSolution
+                        {isLoadingSolution
                           ? 'Checking database and static solutions...'
                           : 'Generate an instant, gold-standard multi-approach editorial with C++, Python, and Java code.'}
                       </p>
@@ -758,14 +902,12 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                         }`}
                       >
                         {isPro ? (
-                          <Sparkles className={`w-4 h-4 ${isGeneratingAi ? 'animate-spin' : ''}`} />
+                          <Sparkles className="w-4 h-4" />
                         ) : (
                           <Crown className="w-4 h-4" />
                         )}
                         <span>
-                          {isGeneratingAi
-                            ? 'Generating...'
-                            : isPro
+                          {isPro
                             ? '✨ Generate with Meta Muse AI'
                             : 'Generate with AI [PRO]'}
                         </span>
