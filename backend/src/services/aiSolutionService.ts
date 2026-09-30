@@ -28,6 +28,8 @@ export interface AiApproachPayload {
     output: string;
   };
   edgeCases?: string[];
+  source?: 'openrouter' | 'curated' | 'meta-muse' | 'script';
+  model?: string;
 }
 
 export interface AiSolutionPayload {
@@ -37,6 +39,9 @@ export interface AiSolutionPayload {
   corePattern: string;
   interviewTips: string[];
   approaches: AiApproachPayload[];
+  source?: 'openrouter' | 'curated' | 'meta-muse' | 'script';
+  model?: string;
+  generatedAt?: string;
 }
 
 export class AiSolutionService {
@@ -263,6 +268,8 @@ Format strictly as:
             spaceComplexity: spaceComp,
             dryRunExample: app.dryRunExample,
             edgeCases: app.edgeCases || ['Empty or single-element inputs.', 'Boundary integer limits.'],
+            source: 'openrouter',
+            model,
           };
         });
 
@@ -277,6 +284,9 @@ Format strictly as:
             'Discuss Time and Space trade-offs before writing code.',
           ],
           approaches: formattedApproaches,
+          source: 'openrouter',
+          model,
+          generatedAt: new Date().toISOString(),
         };
       } catch (err: any) {
         console.warn(`[OpenRouter ${model}] Error for #${id}:`, err?.message || err);
@@ -470,38 +480,17 @@ Format strictly as:
           'Boundary integer values and overflow prevention.',
           'Zeroes, duplicates, and symmetric boundary conditions.',
         ],
+        source: 'curated',
+        model: 'GitHub doocs/leetcode',
       });
     }
 
     if (approaches.length === 0) return null;
 
-    // If only 1 approach was found, construct a comparative baseline so the user has 2 approaches
     if (approaches.length === 1) {
       approaches[0].tag = 'Optimal';
       const optimalName = approaches[0].name.replace(/^Approach \d+:\s*/, '');
-      approaches[0].name = `Approach 2: Optimal (${optimalName})`;
-
-      const baselineApproach: AiApproachPayload = {
-        id: 'approach-1-baseline',
-        name: 'Approach 1: Naive Simulation / Baseline',
-        tag: 'Brute Force',
-        intuition: `Before presenting the optimal solution, examine the baseline simulation: exhaustively generate or test all candidates without specialized pruning to verify the correctness contract.`,
-        theory: `Exhaustive generation incurs exponential or higher polynomial cost due to exploring non-viable branches. Comparing against this establishes the exact optimization delivered in Approach 2.`,
-        cppCode: approaches[0].cppCode,
-        code: approaches[0].code,
-        timeComplexity: {
-          complexity: 'O(Kᴺ) or O(N²)',
-          explanation: 'Exhaustive permutation or brute-force search over all candidate states.',
-        },
-        spaceComplexity: {
-          complexity: approaches[0].spaceComplexity.complexity,
-          explanation: 'Auxiliary stack or candidate collector.',
-        },
-        dryRunExample: approaches[0].dryRunExample,
-        edgeCases: approaches[0].edgeCases,
-      };
-
-      approaches.unshift(baselineApproach);
+      approaches[0].name = `Approach 1: Optimal (${optimalName})`;
     }
 
     return {
@@ -511,10 +500,13 @@ Format strictly as:
       corePattern,
       interviewTips: [
         `Clarify constraints: Ask about empty or minimum inputs and whether duplicates or negative inputs are permitted.`,
-        `Discuss trade-offs: Explain why ${approaches[approaches.length - 1].name} reduces repeated work compared to naive exploration.`,
+        `Discuss trade-offs: Explain time and memory bounds across typical inputs.`,
         `Dry run edge cases: Trace through small test cases like "${sampleInput}" before writing full code on the whiteboard.`,
       ],
       approaches,
+      source: 'curated',
+      model: 'GitHub doocs/leetcode',
+      generatedAt: new Date().toISOString(),
     };
   }
 
@@ -833,6 +825,8 @@ public:
           'Empty input or boundary edge cases.',
           'Boundary integer limits.',
         ],
+        source: 'script',
+        model: 'algorithmic-template',
       },
     ];
 
@@ -847,6 +841,9 @@ public:
         'Dry run sample test cases before writing code.',
       ],
       approaches,
+      source: 'script',
+      model: 'algorithmic-template',
+      generatedAt: new Date().toISOString(),
     };
   }
 }

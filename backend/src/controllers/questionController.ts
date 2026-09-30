@@ -262,15 +262,23 @@ export class QuestionController {
             !solution.approaches ||
             solution.approaches.includes('nums = [2, 1, -3, 4]') ||
             solution.approaches.includes('solveNaive') ||
-            solution.approaches.includes('solveOptimal'))
+            solution.approaches.includes('solveOptimal') ||
+            solution.approaches.includes('Before presenting the optimal solution') ||
+            solution.approaches.includes('Exhaustive permutation or brute-force search'))
         );
 
         if (solution && !isPlaceholder) {
+          const parsedApproaches = JSON.parse(solution.approaches || '[]');
+          const source = parsedApproaches[0]?.source || 'curated';
+          const model = parsedApproaches[0]?.model || (source === 'openrouter' ? 'nvidia/nemotron-3-ultra-550b-a55b:free' : 'GitHub doocs/leetcode');
+
           const formatted = {
             questionId: solution.questionId,
             corePattern: solution.corePattern,
             interviewTips: JSON.parse(solution.interviewTips || '[]'),
-            approaches: JSON.parse(solution.approaches || '[]'),
+            approaches: parsedApproaches,
+            source,
+            model,
           };
           cache.set(`question:solution:${id}`, formatted, 3600);
           res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
@@ -393,6 +401,8 @@ export class QuestionController {
       } catch {
         topics = [];
       }
+
+      cache.del(`question:solution:${id}`);
 
       const aiSolution = await AiSolutionService.generateSolution({
         id: question.id,

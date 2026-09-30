@@ -779,16 +779,47 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
                       <button
                         onClick={handleGenerateWithAi}
                         disabled={isGeneratingAi}
-                        title="Regenerate editorial with Meta Muse AI"
+                        title="Force fresh generation with Nvidia Nemotron 550B AI"
                         className="flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 px-2.5 py-1 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                       >
                         <Sparkles className="w-3.5 h-3.5" />
                         <span>Regenerate with AI</span>
                       </button>
-                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        Verified FAANG Editorial
-                      </span>
+
+                      {/* Explicit Provenance Badge: AI vs Curated vs Script */}
+                      {solutionData.source === 'openrouter' ||
+                      solutionData.model?.includes('nemotron') ||
+                      solutionData.approaches.some((a) => a.source === 'openrouter' || a.model?.includes('nemotron')) ? (
+                        <span
+                          className="flex items-center gap-1.5 text-[11px] font-semibold text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2.5 py-1 rounded-lg shadow-sm"
+                          title="Synthesized live by Nvidia Nemotron 3 Ultra 550B via OpenRouter"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                          <span>AI Generated (Nemotron 550B)</span>
+                        </span>
+                      ) : solutionData.source === 'curated' ||
+                        (!solutionData.source &&
+                          !solutionData.approaches.some(
+                            (a) =>
+                              a.name.includes('Baseline') ||
+                              a.intuition.includes('Before presenting the optimal solution')
+                          )) ? (
+                        <span
+                          className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg"
+                          title="Verified authentic LeetCode solutions curated from GitHub community repository"
+                        >
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Curated Editorial (GitHub)</span>
+                        </span>
+                      ) : (
+                        <span
+                          className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-lg"
+                          title="Algorithmic fallback template. Click 'Regenerate with AI' for live Nemotron synthesis."
+                        >
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Algorithmic Baseline</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}

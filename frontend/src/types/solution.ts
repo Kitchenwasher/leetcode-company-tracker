@@ -25,6 +25,8 @@ export interface SolutionApproach {
     output: string;
   };
   edgeCases: string[]; // C++ traps, overflow, boundary conditions
+  source?: 'openrouter' | 'curated' | 'meta-muse' | 'script';
+  model?: string;
 }
 
 export interface QuestionSolution {
@@ -34,6 +36,9 @@ export interface QuestionSolution {
   corePattern: string; // e.g. "Hash Map Lookup", "Two Pointers", "Sliding Window"
   approaches: SolutionApproach[];
   interviewTips: string[]; // Advice on how to present in an interview
+  source?: 'openrouter' | 'curated' | 'meta-muse' | 'script';
+  model?: string;
+  generatedAt?: string;
 }
 
 export interface CodeSnippet {
