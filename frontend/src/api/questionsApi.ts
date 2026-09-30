@@ -36,13 +36,16 @@ export const questionsApi = {
     return res.data;
   },
 
-  getDescription: async (id: number | string): Promise<any> => {
+  getDescription: async (
+    id: number | string,
+    params?: { titleSlug?: string; title?: string; difficulty?: string; url?: string }
+  ): Promise<any> => {
     const key = String(id);
     if (descCache.has(key)) {
       return descCache.get(key);
     }
-    const res = await api.get(`/questions/${id}/description`);
-    if (res.data) {
+    const res = await api.get(`/questions/${id}/description`, { params });
+    if (res.data && res.data.content) {
       descCache.set(key, res.data);
     }
     return res.data;

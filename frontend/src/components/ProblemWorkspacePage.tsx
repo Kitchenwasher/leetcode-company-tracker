@@ -149,7 +149,22 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
         // 2. If not found or empty, fallback to backend on-demand LeetCode GraphQL fetch
         if (!data || !data.content) {
           try {
-            data = await questionsApi.getDescription(q.id);
+            let slug = '';
+            if (q.url) {
+              const parts = q.url.replace(/\/+$/, '').split('/');
+              const last = parts[parts.length - 1];
+              if (last && last !== 'problems') slug = last;
+            }
+            if (!slug && q.title) {
+              slug = q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            }
+
+            data = await questionsApi.getDescription(q.id, {
+              titleSlug: slug,
+              title: q.title,
+              difficulty: q.difficulty,
+              url: q.url,
+            });
           } catch {}
         }
 

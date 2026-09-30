@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db.js';
 import { AiSolutionService } from '../services/aiSolutionService.js';
 import { cache } from '../utils/cache.js';
+import { questionDataService } from '../services/questionDataService.js';
 
 export class QuestionController {
   static async getQuestions(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -175,7 +176,26 @@ export class QuestionController {
       });
 
       if (!question) {
-        res.status(404).json({ error: 'Question not found' });
+        const meta = questionDataService.getQuestionMeta(id);
+        if (!meta) {
+          res.status(404).json({ error: 'Question not found' });
+          return;
+        }
+
+        res.json({
+          id: meta.id,
+          title: meta.title,
+          difficulty: meta.difficulty,
+          acceptance: meta.acceptance,
+          url: meta.url,
+          topics: meta.topics || [],
+          isBlind75: !!meta.isBlind75,
+          isNeetCode150: !!meta.isNeetCode150,
+          isStriver180: !!meta.isStriver180,
+          isGrind169: !!meta.isGrind169,
+          companies: meta.companies || {},
+          userProgress: null,
+        });
         return;
       }
 
@@ -250,10 +270,31 @@ export class QuestionController {
         }
       }
 
-      // Not cached or regeneration requested: Generate with Meta Muse AI
-      const question = await prisma.question.findUnique({
+      let question = await prisma.question.findUnique({
         where: { id },
       });
+
+      if (!question) {
+        const meta = questionDataService.getQuestionMeta(id);
+        if (meta) {
+          question = await prisma.question.upsert({
+            where: { id },
+            update: {},
+            create: {
+              id: meta.id,
+              title: meta.title,
+              difficulty: meta.difficulty,
+              acceptance: meta.acceptance,
+              url: meta.url,
+              topics: JSON.stringify(meta.topics || []),
+              isBlind75: !!meta.isBlind75,
+              isNeetCode150: !!meta.isNeetCode150,
+              isStriver180: !!meta.isStriver180,
+              isGrind169: !!meta.isGrind169,
+            },
+          });
+        }
+      }
 
       if (!question) {
         res.status(404).json({ error: 'Question not found' });
@@ -393,59 +434,45 @@ export class QuestionController {
         return;
       }
 
+      // Check fast in-memory cache
       const cachedDesc = cache.get<any>(`question:desc:${id}`);
-      if (cachedDesc) {
+      if (cachedDesc && cachedDesc.content) {
         res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400');
         res.json(cachedDesc);
         return;
       }
 
-      const question = await prisma.question.findUnique({
+      // Query params passed by client
+      const clientTitle = (req.query.title as string) || '';
+      const clientSlug = (req.query.titleSlug as string) || '';
+      const clientDifficulty = (req.query.difficulty as string) || '';
+      const clientUrl = (req.query.url as string) || '';
+
+      // 1. Check if already stored in PostgreSQL Neon Database with full description
+      let question = await prisma.question.findUnique({
         where: { id },
         include: {
           solution: true,
         },
       });
 
-      if (!question) {
-        res.status(404).json({ error: 'Question not found' });
-        return;
-      }
-
-      // Determine slug from URL or title
-      let slug = '';
-      if (question.url) {
-        const parts = question.url.replace(/\/+$/, '').split('/');
-        const last = parts[parts.length - 1];
-        if (last && last !== 'problems') slug = last;
-      }
-      if (!slug) {
-        slug = question.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      }
-
-      let parsedTopics: string[] = [];
-      try {
-        parsedTopics = JSON.parse(question.topics);
-      } catch {
-        parsedTopics = [];
-      }
-
-      // 1. Check if already cached permanently in PostgreSQL Neon Database
-      if (question.descriptionContent && question.codeSnippets) {
+      if (question && question.descriptionContent && question.codeSnippets) {
         let cachedTestcases: string[] = [];
         let cachedSnippets: any[] = [];
         try {
           cachedTestcases = question.exampleTestcases ? JSON.parse(question.exampleTestcases) : [];
-        } catch {
-          cachedTestcases = [];
-        }
+        } catch {}
         try {
           cachedSnippets = question.codeSnippets ? JSON.parse(question.codeSnippets) : [];
-        } catch {
-          cachedSnippets = [];
-        }
+        } catch {}
 
-        // Return cached data immediately without any network calls to LeetCode
+        let parsedTopics: string[] = [];
+        try {
+          parsedTopics = JSON.parse(question.topics);
+        } catch {}
+
+        const slug = clientSlug || questionDataService.resolveSlug(id, question.url, question.title);
+
         const payload = {
           id: question.id,
           title: question.title,
@@ -463,69 +490,68 @@ export class QuestionController {
         return;
       }
 
-      // 2. Not cached in DB yet: Fetch once from LeetCode GraphQL
-      let detail: any = null;
-      try {
-        const gqlRes = await fetch('https://leetcode.com/graphql', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Referer': 'https://leetcode.com',
-            'Origin': 'https://leetcode.com',
-          },
-          body: JSON.stringify({
-            query: `query questionData($titleSlug: String!) {
-              question(titleSlug: $titleSlug) {
-                questionId
-                title
-                content
-                difficulty
-                exampleTestcaseList
-                topicTags { name }
-                codeSnippets {
-                  lang
-                  langSlug
-                  code
-                }
-              }
-            }`,
-            variables: { titleSlug: slug },
-          }),
-        });
+      // 2. Resolve metadata from bundled dataset or query params if not in DB
+      const meta = questionDataService.getQuestionMeta(id);
+      const title = question?.title || clientTitle || meta?.title || `Problem ${id}`;
+      const difficulty = question?.difficulty || clientDifficulty || meta?.difficulty || 'Medium';
+      const url = question?.url || clientUrl || meta?.url || '';
+      const slug = clientSlug || questionDataService.resolveSlug(id, url, title);
 
-        if (gqlRes.ok) {
-          const gqlData = (await gqlRes.json()) as any;
-          detail = gqlData?.data?.question;
-        }
-      } catch (fetchErr) {
-        console.warn(`[LeetCode GraphQL] Fetch failed for slug '${slug}':`, fetchErr);
+      let parsedTopics: string[] = [];
+      if (question?.topics) {
+        try { parsedTopics = JSON.parse(question.topics); } catch {}
+      } else if (meta?.topics) {
+        parsedTopics = meta.topics;
       }
 
-      // 3. If fetched successfully, persist permanently into database
+      if (!slug) {
+        res.status(404).json({ error: 'Question slug could not be determined' });
+        return;
+      }
+
+      // 3. Fetch on-demand from LeetCode GraphQL
+      const detail = await questionDataService.fetchLeetCodeGraphQL(slug);
+
       if (detail && detail.content) {
         const snippets = detail.codeSnippets || [];
         const testcases = detail.exampleTestcaseList || [];
         const tags = detail.topicTags?.map((t: any) => t.name) || parsedTopics;
 
+        // Persist permanently into PostgreSQL Neon DB so subsequent requests never hit LeetCode again
         try {
-          await prisma.question.update({
-            where: { id: question.id },
-            data: {
+          await prisma.question.upsert({
+            where: { id },
+            update: {
+              descriptionContent: detail.content,
+              exampleTestcases: JSON.stringify(testcases),
+              codeSnippets: JSON.stringify(snippets),
+            },
+            create: {
+              id,
+              title: detail.title || title,
+              difficulty: detail.difficulty || difficulty,
+              acceptance: meta?.acceptance || '50.0%',
+              url: url || `https://leetcode.com/problems/${slug}`,
+              topics: JSON.stringify(tags),
+              isBlind75: !!meta?.isBlind75,
+              isGrind169: !!meta?.isGrind169,
+              isNeetCode150: !!meta?.isNeetCode150,
+              isStriver180: !!meta?.isStriver180,
               descriptionContent: detail.content,
               exampleTestcases: JSON.stringify(testcases),
               codeSnippets: JSON.stringify(snippets),
             },
           });
+          console.log(`[DB Cache] Successfully cached question #${id} (${slug}) in Neon DB`);
         } catch (dbErr) {
-          console.error(`[DB Cache] Failed to cache question #${question.id} in DB:`, dbErr);
+          console.error(`[DB Cache] Failed to cache question #${id} in DB:`, dbErr);
         }
 
         const fetchedPayload = {
-          id: question.id,
-          title: question.title,
+          id,
+          title: detail.title || title,
           titleSlug: slug,
-          difficulty: question.difficulty,
+          difficulty: detail.difficulty || difficulty,
           content: detail.content,
           exampleTestcases: testcases,
           topicTags: tags,
@@ -538,32 +564,26 @@ export class QuestionController {
         return;
       }
 
-      // 4. Fallback if LeetCode GraphQL is blocked/down: extract snippets from solution if available
+      // 4. Fallback if LeetCode GraphQL is temporarily unreachable: extract snippets from solution if available
       let fallbackSnippets: any[] = [];
-      if (question.solution?.approaches) {
+      if (question?.solution?.approaches) {
         try {
           const approaches = JSON.parse(question.solution.approaches);
           const firstApp = approaches[0];
           if (firstApp?.code) {
-            if (firstApp.code.cpp) {
-              fallbackSnippets.push({ lang: 'C++', langSlug: 'cpp', code: firstApp.code.cpp });
-            }
-            if (firstApp.code.python) {
-              fallbackSnippets.push({ lang: 'Python3', langSlug: 'python3', code: firstApp.code.python });
-            }
-            if (firstApp.code.java) {
-              fallbackSnippets.push({ lang: 'Java', langSlug: 'java', code: firstApp.code.java });
-            }
+            if (firstApp.code.cpp) fallbackSnippets.push({ lang: 'C++', langSlug: 'cpp', code: firstApp.code.cpp });
+            if (firstApp.code.python) fallbackSnippets.push({ lang: 'Python3', langSlug: 'python3', code: firstApp.code.python });
+            if (firstApp.code.java) fallbackSnippets.push({ lang: 'Java', langSlug: 'java', code: firstApp.code.java });
           }
         } catch {}
       }
 
       res.json({
-        id: question.id,
-        title: question.title,
+        id,
+        title,
         titleSlug: slug,
-        difficulty: question.difficulty,
-        content: question.descriptionContent || '<p>Problem description is loading or temporarily unavailable from LeetCode.</p>',
+        difficulty,
+        content: question?.descriptionContent || null,
         exampleTestcases: [],
         topicTags: parsedTopics,
         codeSnippets: fallbackSnippets,
