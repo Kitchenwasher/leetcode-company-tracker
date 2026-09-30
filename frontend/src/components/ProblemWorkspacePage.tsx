@@ -90,23 +90,35 @@ export const ProblemWorkspacePage: React.FC<ProblemWorkspacePageProps> = ({
         setIsLoadingSolution(true);
         let data: QuestionSolution | null = null;
 
+        const isStub = (d: any) => {
+          if (!d || !d.approaches || d.approaches.length === 0) return true;
+          const s = JSON.stringify(d);
+          return (
+            s.includes('/* window condition violated */') ||
+            s.includes('solveNaive') ||
+            s.includes('nums = [2, 1, -3, 4]') ||
+            s.includes('Approach 2: Optimal (Optimal Pattern)')
+          );
+        };
+
         // 1. Try pre-baked static solution
         try {
           const res = await fetch(`/solutions/${q.id}.json`);
           if (res.ok) {
             const parsed = await res.json();
-            const isStub = JSON.stringify(parsed).includes('/* window condition violated */') ||
-                           JSON.stringify(parsed).includes('solveNaive');
-            if (!isStub && parsed.approaches && parsed.approaches.length > 0) {
+            if (!isStub(parsed)) {
               data = parsed;
             }
           }
         } catch {}
 
-        // 2. If not found or empty approaches, fallback to backend API (or AI generation)
-        if (!data || !data.approaches || data.approaches.length === 0) {
+        // 2. If not found or empty approaches, fallback to backend API
+        if (!data || isStub(data)) {
           try {
-            data = await questionsApi.getSolution(q.id);
+            const res = await questionsApi.getSolution(q.id);
+            if (!isStub(res)) {
+              data = res;
+            }
           } catch {}
         }
 

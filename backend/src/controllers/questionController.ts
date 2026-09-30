@@ -256,7 +256,16 @@ export class QuestionController {
           where: { questionId: id },
         });
 
-        if (solution) {
+        const isPlaceholder = Boolean(
+          solution &&
+          (solution.corePattern === 'State Invariant & Mathematical Reduction' ||
+            !solution.approaches ||
+            solution.approaches.includes('nums = [2, 1, -3, 4]') ||
+            solution.approaches.includes('solveNaive') ||
+            solution.approaches.includes('solveOptimal'))
+        );
+
+        if (solution && !isPlaceholder) {
           const formatted = {
             questionId: solution.questionId,
             corePattern: solution.corePattern,
@@ -531,8 +540,22 @@ export class QuestionController {
         return;
       }
 
-      // 3. Fetch on-demand from LeetCode GraphQL
-      const detail = await questionDataService.fetchLeetCodeGraphQL(slug);
+      // 3. Fetch on-demand from LeetCode GraphQL (or curated repository for locked questions)
+      let detail = await questionDataService.fetchLeetCodeGraphQL(slug);
+
+      if (!detail || !detail.content) {
+        const curated = await AiSolutionService.fetchCuratedDescription(id, title);
+        if (curated && curated.content) {
+          detail = {
+            title,
+            difficulty,
+            content: curated.content,
+            exampleTestcaseList: curated.exampleTestcases || [],
+            topicTags: parsedTopics.map((t) => ({ name: t })),
+            codeSnippets: [],
+          };
+        }
+      }
 
       if (detail && detail.content) {
         const snippets = detail.codeSnippets || [];
