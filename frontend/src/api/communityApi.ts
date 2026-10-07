@@ -69,6 +69,54 @@ export interface CreatePostParams {
   authorName?: string;
 }
 
+export const DEFAULT_LEADERBOARD: LeaderboardUser[] = [
+  {
+    id: 'fd28c830-aebb-469a-ba38-e8f3edd5aa26',
+    name: 'Abhinav sharma',
+    solved: 25,
+    streak: 11,
+    badge: 'Expert',
+    tier: 'pro',
+    rank: 1,
+  },
+  {
+    id: '4505a147-217f-497d-87b4-420c28320d32',
+    name: 'NikkiKush14',
+    solved: 10,
+    streak: 9,
+    badge: 'Specialist',
+    tier: 'pro',
+    rank: 2,
+  },
+  {
+    id: 'bd73b881-ea50-4e06-8b12-0b7dd8cb27ac',
+    name: 'Bismeet Singh',
+    solved: 3,
+    streak: 2,
+    badge: 'Novice',
+    tier: 'free',
+    rank: 3,
+  },
+  {
+    id: '0bed43c8-0d57-4d60-bca9-ed185ca07109',
+    name: 'Bruce wayne',
+    solved: 1,
+    streak: 1,
+    badge: 'Novice',
+    tier: 'free',
+    rank: 4,
+  },
+  {
+    id: '466902a9-90aa-495f-9010-624138094048',
+    name: 'Aditya_36',
+    solved: 1,
+    streak: 1,
+    badge: 'Novice',
+    tier: 'free',
+    rank: 5,
+  },
+];
+
 const STATS_STORAGE_KEY = 'leettracker_community_stats_v1';
 const LEADERBOARD_STORAGE_KEY = 'leettracker_community_leaderboard_v1';
 
@@ -82,13 +130,15 @@ export const communityApi = {
     }
   },
 
-  getStoredLeaderboard: (): LeaderboardUser[] | null => {
+  getStoredLeaderboard: (): LeaderboardUser[] => {
     try {
       const raw = sessionStorage.getItem(LEADERBOARD_STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return DEFAULT_LEADERBOARD;
   },
 
   getStoredPosts: (_cacheKey: string): PostsResponse | null => {
@@ -107,23 +157,40 @@ export const communityApi = {
   },
 
   getStats: async (): Promise<CommunityStats> => {
-    const { data } = await api.get<CommunityStats>('/community/stats', {
-      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
-    });
     try {
-      sessionStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(data));
-    } catch {}
-    return data;
+      const { data } = await api.get<CommunityStats>('/community/stats', {
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+      });
+      try {
+        sessionStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(data));
+      } catch {}
+      return data;
+    } catch {
+      return {
+        activeEngineers: 6,
+        solutionsSolved: 39,
+        companiesIndexed: 659,
+        verifiedQuestions: 3399,
+        communityPosts: 0,
+      };
+    }
   },
 
   getLeaderboard: async (): Promise<LeaderboardUser[]> => {
-    const { data } = await api.get<LeaderboardUser[]>('/community/leaderboard', {
-      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
-    });
     try {
-      sessionStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(data));
-    } catch {}
-    return data;
+      const { data } = await api.get<LeaderboardUser[]>('/community/leaderboard', {
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+      });
+      if (Array.isArray(data) && data.length > 0) {
+        try {
+          sessionStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(data));
+        } catch {}
+        return data;
+      }
+    } catch (err) {
+      console.warn('[communityApi] Failed to fetch live leaderboard, falling back:', err);
+    }
+    return communityApi.getStoredLeaderboard();
   },
 
   getPosts: async (params?: {

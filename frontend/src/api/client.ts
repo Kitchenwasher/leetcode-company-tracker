@@ -112,8 +112,12 @@ export const api = axios.create({
 });
 
 // Attach access token to requests & ensure active base URL and adequate route-specific timeouts
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  config.baseURL = getActiveBaseURL();
+api.interceptors.request.use((config: InternalAxiosRequestConfig & { _failoverRetried?: boolean }) => {
+  if (config._failoverRetried && FALLBACK_URL) {
+    config.baseURL = FALLBACK_URL;
+  } else {
+    config.baseURL = getActiveBaseURL();
+  }
   const token = getStoredAccessToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -172,19 +176,18 @@ api.interceptors.response.use(
       error.code === 'ECONNABORTED' ||
       error.message?.includes('timeout') ||
       error.code === 'ERR_NETWORK' ||
+      !error.response ||
       (error.response && [502, 503, 504].includes(error.response.status));
 
     if (
       FALLBACK_URL &&
       !originalRequest._failoverRetried &&
-      originalRequest.baseURL === PRIMARY_URL &&
       isTimeoutOrNetwork
     ) {
       consecutiveFailures++;
-      if (consecutiveFailures >= 2) {
-        circuitOpenUntil = Date.now() + 60000; // Trip circuit breaker for 60s
-        console.warn(`[API Circuit Breaker] Primary API slow/unreachable. Switched to Fallback for 60s: ${FALLBACK_URL}`);
-      }
+      // Trip circuit breaker immediately so concurrent and subsequent requests don't hang on dead primary port
+      circuitOpenUntil = Date.now() + 120000; // Trip for 120s
+      console.warn(`[API Circuit Breaker] Primary API unreachable (${error.code || error.message}). Switched to Fallback: ${FALLBACK_URL}`);
 
       originalRequest._failoverRetried = true;
       originalRequest.baseURL = FALLBACK_URL;

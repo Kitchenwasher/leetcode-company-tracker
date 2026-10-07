@@ -20,7 +20,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { sounds } from '../utils/sound';
-import { communityApi, CommunityStats, LeaderboardUser, CommunityPost, CommunityComment } from '../api/communityApi';
+import { communityApi, CommunityStats, LeaderboardUser, CommunityPost, CommunityComment, DEFAULT_LEADERBOARD } from '../api/communityApi';
 import { AdBanner } from './AdBanner';
 import { CreatePostModal } from './CreatePostModal';
 import { useAuth } from '../context/AuthContext';
@@ -28,14 +28,14 @@ import { useAuth } from '../context/AuthContext';
 export const CommunityPage: React.FC = () => {
   const { isAuthenticated, setShowAuthModal } = useAuth();
   
-  // Instant Fast SWR Initializers: Load immediately from sessionStorage so 0ms loading spinner flash
+  // Instant Fast SWR Initializers: Load immediately from sessionStorage or default fallback so 0ms loading flash
   const [stats, setStats] = useState<CommunityStats | null>(() => communityApi.getStoredStats());
-  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>(() => communityApi.getStoredLeaderboard() || []);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>(() => communityApi.getStoredLeaderboard());
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
     const cached = communityApi.getStoredPosts('all:all::hot');
     return cached ? cached.posts : [];
   });
-  const [loading, setLoading] = useState<boolean>(() => !communityApi.getStoredStats() || !communityApi.getStoredLeaderboard());
+  const [loading, setLoading] = useState<boolean>(false);
   const [postsLoading, setPostsLoading] = useState<boolean>(() => !communityApi.getStoredPosts('all:all::hot'));
 
   const [activeTab, setActiveTab] = useState<'all' | 'interview_experience' | 'question_help' | 'compensation' | 'leaderboard'>('all');
@@ -49,18 +49,24 @@ export const CommunityPage: React.FC = () => {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [submittingComment, setSubmittingComment] = useState<string | null>(null);
 
-  // Load KPI Stats & Leaderboard (silently revalidates in background)
+  const displayLeaderboard = leaderboard && leaderboard.length > 0 ? leaderboard : DEFAULT_LEADERBOARD;
+
+  // Load KPI Stats & Leaderboard (silently revalidates in background with independent resilience)
   useEffect(() => {
     let isMounted = true;
     const fetchMetadata = async () => {
       try {
-        const [s, l] = await Promise.all([
+        const [statsRes, leaderboardRes] = await Promise.allSettled([
           communityApi.getStats(),
           communityApi.getLeaderboard(),
         ]);
         if (isMounted) {
-          setStats(s);
-          setLeaderboard(l);
+          if (statsRes.status === 'fulfilled' && statsRes.value) {
+            setStats(statsRes.value);
+          }
+          if (leaderboardRes.status === 'fulfilled' && Array.isArray(leaderboardRes.value) && leaderboardRes.value.length > 0) {
+            setLeaderboard(leaderboardRes.value);
+          }
         }
       } catch (err) {
         console.error('Failed to load community metrics:', err);
@@ -344,7 +350,7 @@ export const CommunityPage: React.FC = () => {
           </div>
 
           <div className="divide-y divide-white/[0.04]">
-            {leaderboard.map((u) => (
+            {displayLeaderboard.map((u) => (
               <div key={u.id} className="py-4 flex items-center justify-between hover:bg-white/[0.01] px-2 rounded-xl transition-colors">
                 <div className="flex items-center gap-4">
                   <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold font-mono ${
@@ -607,9 +613,9 @@ export const CommunityPage: React.FC = () => {
                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
                   <span className="text-xs">Loading rankings...</span>
                 </div>
-              ) : leaderboard.length > 0 ? (
+              ) : displayLeaderboard.length > 0 ? (
                 <div className="divide-y divide-white/[0.04]">
-                  {leaderboard.slice(0, 5).map((u) => (
+                  {displayLeaderboard.slice(0, 5).map((u) => (
                     <div key={u.id} className="py-3 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold font-mono ${
@@ -618,9 +624,16 @@ export const CommunityPage: React.FC = () => {
                           {u.rank}
                         </span>
                         <div>
-                          <p className="text-xs font-semibold text-white truncate max-w-[130px]">
-                            {u.name || 'Engineer'}
-                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-semibold text-white truncate max-w-[120px]">
+                              {u.name || 'Engineer'}
+                            </p>
+                            {u.tier === 'pro' && (
+                              <span className="px-1 py-0.2 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[9px] font-bold">
+                                PRO
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[11px] text-textMuted">{u.badge}</p>
                         </div>
                       </div>
