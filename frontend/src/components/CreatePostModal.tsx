@@ -21,8 +21,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPos
   const [guestName, setGuestName] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState<'interview_experience' | 'question_help' | 'general' | 'compensation'>('interview_experience');
-  const [companyId, setCompanyId] = useState('google');
+  const [category, setCategory] = useState<'interview_experience' | 'question_help' | 'general' | 'compensation'>('general');
+  const [companyId, setCompanyId] = useState('all');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>(['Interview', 'Coding']);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,7 +61,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPos
         title: title.trim(),
         content: content.trim(),
         category,
-        companyId: companyId ? companyId.toLowerCase() : undefined,
+        companyId: (companyId && companyId !== 'all' && companyId !== 'general') ? companyId.toLowerCase() : undefined,
         tags,
         authorName: (!isAuthenticated && guestName.trim()) ? guestName.trim() : undefined,
       });
@@ -181,8 +181,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPos
               <select
                 value={companyId}
                 onChange={(e) => setCompanyId(e.target.value)}
-                className="w-full bg-[#12161E] border border-white/[0.08] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-primary"
+                className="w-full bg-[#12161E] border border-white/[0.08] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-primary cursor-pointer"
               >
+                <option value="all">General / All Companies</option>
                 <option value="google">Google</option>
                 <option value="meta">Meta</option>
                 <option value="amazon">Amazon</option>
@@ -191,7 +192,6 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onPos
                 <option value="netflix">Netflix</option>
                 <option value="uber">Uber</option>
                 <option value="stripe">Stripe</option>
-                <option value="general">General / Other</option>
               </select>
             </div>
 

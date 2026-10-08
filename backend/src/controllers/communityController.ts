@@ -151,7 +151,15 @@ export class CommunityController {
         where.category = String(category);
       }
       if (company && company !== 'all') {
-        where.companyId = String(company).toLowerCase();
+        if (company === 'general') {
+          where.OR = [
+            { companyId: null },
+            { companyId: '' },
+            { companyId: 'general' },
+          ];
+        } else {
+          where.companyId = String(company).toLowerCase();
+        }
       }
       if (search) {
         const q = String(search).trim();

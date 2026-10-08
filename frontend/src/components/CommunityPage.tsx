@@ -38,7 +38,7 @@ export const CommunityPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [postsLoading, setPostsLoading] = useState<boolean>(() => !communityApi.getStoredPosts('all:all::hot'));
 
-  const [activeTab, setActiveTab] = useState<'all' | 'interview_experience' | 'question_help' | 'compensation' | 'leaderboard'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'general' | 'interview_experience' | 'question_help' | 'compensation' | 'leaderboard'>('all');
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -191,12 +191,16 @@ export const CommunityPage: React.FC = () => {
   const handlePostCreated = (newPost: CommunityPost) => {
     sounds.playSuccess();
     setPosts((prev) => [newPost, ...prev.filter((p) => p.id !== newPost.id)]);
+    // If on a specific tab that doesn't match the new post's category, switch to the category or 'all'
     if (activeTab !== 'all' && activeTab !== newPost.category) {
-      setActiveTab(newPost.category as any);
+      setActiveTab((newPost.category as any) || 'all');
     }
+    // Reset company filter so the new post is not filtered out
     if (selectedCompany !== 'all' && newPost.companyId && selectedCompany !== newPost.companyId) {
       setSelectedCompany('all');
     }
+    // Clear search filter
+    setSearchQuery('');
     setStats((prev) => (prev ? { ...prev, communityPosts: (prev.communityPosts || 0) + 1 } : null));
   };
 
@@ -273,6 +277,7 @@ export const CommunityPage: React.FC = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           {[
             { id: 'all', label: 'All Discussions', icon: MessageSquare },
+            { id: 'general', label: 'General & Advice', icon: Sparkles },
             { id: 'interview_experience', label: 'Interview Loops', icon: Briefcase },
             { id: 'question_help', label: 'Problem Help', icon: HelpCircle },
             { id: 'compensation', label: 'Offers & Compensation', icon: DollarSign },
@@ -325,6 +330,7 @@ export const CommunityPage: React.FC = () => {
               className="bg-[#0E1217] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-primary cursor-pointer"
             >
               <option value="all">All Companies</option>
+              <option value="general">General / Non-Company</option>
               <option value="google">Google</option>
               <option value="meta">Meta</option>
               <option value="amazon">Amazon</option>
@@ -403,16 +409,37 @@ export const CommunityPage: React.FC = () => {
             ) : posts.length === 0 ? (
               <div className="py-16 text-center space-y-3 bg-[#0E1217] rounded-2xl border border-white/[0.08]">
                 <MessageSquare className="w-8 h-8 text-textMuted mx-auto" />
-                <p className="text-sm font-semibold text-white">No discussions found</p>
-                <p className="text-xs text-textSecondary max-w-sm mx-auto">
-                  Be the first engineer to share an interview experience or ask a question for this topic!
+                <p className="text-sm font-semibold text-white">
+                  {activeTab !== 'all' || selectedCompany !== 'all' || searchQuery.trim()
+                    ? 'No discussions match your filters'
+                    : 'No discussions found'}
                 </p>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-4 py-2 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-purple-600 transition-colors cursor-pointer"
-                >
-                  Create First Discussion
-                </button>
+                <p className="text-xs text-textSecondary max-w-sm mx-auto">
+                  {activeTab !== 'all' || selectedCompany !== 'all' || searchQuery.trim()
+                    ? 'Try clearing category or company filters to see all community posts.'
+                    : 'Be the first engineer to share an interview experience or ask a question!'}
+                </p>
+                <div className="flex items-center justify-center gap-2 pt-2">
+                  {(activeTab !== 'all' || selectedCompany !== 'all' || searchQuery.trim()) && (
+                    <button
+                      onClick={() => {
+                        sounds.playClick();
+                        setActiveTab('all');
+                        setSelectedCompany('all');
+                        setSearchQuery('');
+                      }}
+                      className="px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-white font-semibold text-xs border border-white/[0.08] transition-colors cursor-pointer"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-4 py-2 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-purple-600 transition-colors cursor-pointer"
+                  >
+                    Create First Discussion
+                  </button>
+                </div>
               </div>
             ) : (
               posts.map((post) => {
@@ -428,12 +455,12 @@ export const CommunityPage: React.FC = () => {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-xs uppercase font-mono">
-                          {post.authorName.charAt(0)}
+                          {(post.authorName || 'E').charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-xs text-white">
-                              {post.authorName}
+                              {post.authorName || 'Community Engineer'}
                             </span>
                             {post.authorTier === 'pro' && (
                               <span className="px-1.5 py-0.2 rounded bg-amber-400/10 text-amber-300 border border-amber-400/20 text-[9px] font-bold">
