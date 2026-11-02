@@ -8,3 +8,5 @@ Allow: /
 # Google Search Engine Crawler
 User-agent: Googlebot
 Allow: /
+
+Sitemap: https://cheatcode.lasers.app/sitemap.xml

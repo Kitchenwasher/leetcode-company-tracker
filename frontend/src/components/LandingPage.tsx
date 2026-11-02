@@ -103,7 +103,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             <a href="#features" className="hover:text-primary transition-colors">Why Cheat Code</a>
             <a href="#companies" className="hover:text-primary transition-colors">Companies</a>
             <a href="#how-it-works" className="hover:text-primary transition-colors">Pipeline</a>
-            <a href="#cta" className="hover:text-primary transition-colors">Get Started</a>
+            <a href="/about" className="hover:text-primary transition-colors">About Us</a>
+            <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
           </nav>
 
           {/* Right Action Links */}
@@ -715,6 +716,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
               Dashboard
             </button>
             <span>•</span>
+            <a href="/about" className="text-textSecondary hover:text-primary transition-colors">
+              About Us
+            </a>
+            <span>•</span>
+            <a href="/contact" className="text-textSecondary hover:text-primary transition-colors">
+              Contact
+            </a>
+            <span>•</span>
             <a href="#companies" className="text-textSecondary hover:text-primary transition-colors">
               Companies
             </a>
@@ -737,6 +746,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             <span>•</span>
             <span>All rights reserved</span>
           </div>
+        </div>
+
+        {/* Legal & Trademark Disclaimer Bar */}
+        <div className="max-w-7xl mx-auto mt-6 pt-4 border-t border-white/[0.04] text-[11px] text-zinc-500 leading-relaxed text-center sm:text-left">
+          <p>
+            <strong>Disclaimer:</strong> LeetCode is a registered trademark of LeetCode LLC. All company names, logos, and trademarks (including Google, Meta, Amazon, Microsoft, Apple, Netflix, and others) are the property of their respective trademark owners. Cheat Code is an independent educational platform created by independent developers to help engineers prepare for technical interviews and is not affiliated with, endorsed by, maintained, or sponsored by LeetCode LLC or any referenced companies.
+          </p>
         </div>
       </footer>
     </div>

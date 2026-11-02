@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, ArrowLeft, FileText, Lock, Eye, CheckCircle2 } from 'lucide-react';
+import { Shield, ArrowLeft, FileText, Lock, Eye, CheckCircle2, AlertTriangle, Users, Mail } from 'lucide-react';
 import { openGoogleConsentSettings } from '../utils/consent';
 
 interface LegalPageProps {
@@ -30,12 +30,26 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
           </span>
         </div>
 
-        <button
-          onClick={() => navigate('/')}
-          className="text-xs font-medium text-zinc-400 hover:text-primary transition-colors cursor-pointer"
-        >
-          Home
-        </button>
+        <div className="flex items-center gap-3 text-xs">
+          <button
+            onClick={() => navigate('/about')}
+            className="text-zinc-400 hover:text-white transition-colors cursor-pointer hidden sm:inline-block"
+          >
+            About
+          </button>
+          <button
+            onClick={() => navigate('/contact')}
+            className="text-zinc-400 hover:text-white transition-colors cursor-pointer hidden sm:inline-block"
+          >
+            Contact
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            className="font-medium text-zinc-400 hover:text-primary transition-colors cursor-pointer"
+          >
+            Home
+          </button>
+        </div>
       </header>
 
       {/* Main Document Content */}
@@ -45,7 +59,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
             <div className="space-y-3 border-b border-white/[0.08] pb-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-mono">
                 <Shield className="w-3.5 h-3.5" />
-                <span>GDPR &amp; AdSense Compliant</span>
+                <span>GDPR, CCPA &amp; Google AdSense Compliant</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                 Privacy Policy
@@ -57,7 +71,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
 
             <section className="space-y-4 text-zinc-300 text-sm sm:text-base leading-relaxed">
               <p>
-                At <strong>Cheat Code</strong> ("we", "us", or "our"), accessible from our website, the privacy of our visitors and students is of paramount importance. This Privacy Policy document outlines the types of personal and technical information that is recorded and collected by Cheat Code, and how we use and protect it.
+                At <strong>Cheat Code</strong> ("we", "us", or "our"), accessible from our website, the privacy of our visitors and students is of paramount importance. This Privacy Policy document outlines the types of personal and technical information that is recorded and collected by Cheat Code, and how we use, protect, and process it in compliance with global standards including the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA/CPRA).
               </p>
 
               <h2 className="text-xl font-bold text-white pt-4 flex items-center gap-2">
@@ -121,9 +135,9 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
                 When you create an account or practice on Cheat Code, we collect the minimum necessary data to synchronize your progress:
               </p>
               <ul className="list-disc list-inside space-y-1 text-zinc-400 pl-2">
-                <li>Account details (name, email address, hashed credentials, or OAuth token).</li>
-                <li>Practice telemetry (solved questions, daily streaks, mock interview scores).</li>
-                <li>Technical logs (browser type, timestamp, IP address for security & rate limiting).</li>
+                <li>Account details (name, email address, hashed credentials, or OAuth profile identifier).</li>
+                <li>Practice telemetry (solved questions, daily streaks, spaced repetition review intervals, mock interview scores).</li>
+                <li>Technical logs (browser type, timestamp, IP address for security rate limiting and fraud prevention).</li>
               </ul>
 
               <h2 className="text-xl font-bold text-white pt-4 flex items-center gap-2">
@@ -131,15 +145,24 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
                 <span>3. How We Use Your Information</span>
               </h2>
               <p>
-                The information we collect is used solely to provide, operate, and maintain our interview preparation features, analyze student usage patterns to index relevant interview questions, and prevent malicious access. We never sell your personal data to third parties.
+                The information we collect is used solely to provide, operate, and maintain our interview preparation features, analyze user patterns to index relevant interview questions, and prevent malicious access. We never sell your personal data to third parties.
+              </p>
+
+              <h2 className="text-xl font-bold text-white pt-4 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-primary" />
+                <span>4. GDPR &amp; CCPA Data Rights</span>
+              </h2>
+              <p>
+                Under applicable global privacy laws, you possess the right to access, rectify, or request complete deletion of your personal account data at any time. To exercise these rights, please contact our privacy compliance team.
               </p>
 
               <h2 className="text-xl font-bold text-white pt-4">
-                4. Contact Information
+                5. Contact Information
               </h2>
               <p>
                 If you have questions about our Privacy Policy or wish to request data deletion, contact our administrative team at{' '}
-                <span className="text-primary font-mono">support@cheatcode.dev</span>.
+                <a href="mailto:support@cheatcode.dev" className="text-primary font-mono hover:underline">support@cheatcode.dev</a>{' '}
+                or visit our <a href="/contact" className="text-primary hover:underline">Contact Page</a>.
               </p>
             </section>
           </article>
@@ -164,36 +187,64 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
               </p>
 
               <h2 className="text-xl font-bold text-white pt-4">
-                1. Educational Use &amp; Helping Tool
+                1. Educational Purpose &amp; Platform Mission
               </h2>
               <p>
-                Cheat Code is an educational and preparation tool designed to help students, developers, and engineers practice coding and prepare for technical interviews at technology companies. All question patterns are indexed from publicly reported interview candidate experiences.
+                Cheat Code is an educational and preparation platform designed to help students, developers, and engineers practice coding and prepare for technical interviews at technology companies. All question patterns and topic categories are compiled and categorized from publicly reported candidate experiences to assist in algorithmic mastery.
               </p>
 
+              <h2 className="text-xl font-bold text-white pt-4 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-400" />
+                <span>2. Trademark &amp; Fair Use Disclaimer</span>
+              </h2>
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs sm:text-sm text-zinc-300 space-y-2">
+                <p>
+                  <strong>LeetCode</strong> is a registered trademark of LeetCode LLC. Company names, logos, and trademarks (including Google, Meta, Amazon, Apple, Microsoft, Netflix, and others) are the property of their respective trademark owners.
+                </p>
+                <p>
+                  Cheat Code is an independent preparation platform created by independent developers and is <strong>not endorsed by, directly affiliated with, maintained, authorized, or sponsored by LeetCode LLC</strong> or any of the technology companies listed on the platform. All references are made strictly for identification and fair-use educational guidance.
+                </p>
+              </div>
+
               <h2 className="text-xl font-bold text-white pt-4">
-                2. User Accounts &amp; Conduct
+                3. User Accounts &amp; Conduct
               </h2>
               <p>
                 You are responsible for maintaining the confidentiality of your account credentials. You agree not to abuse, reverse engineer, or launch automated scraping against our application servers.
               </p>
 
               <h2 className="text-xl font-bold text-white pt-4">
-                3. Third-Party Services &amp; Advertising
+                4. Third-Party Services &amp; Advertising
               </h2>
               <p>
-                Our platform displays third-party advertisements served by Google AdSense to support the free tier. We are not responsible for the content or products of external advertiser websites.
+                Our platform displays third-party advertisements served by Google AdSense to support the free tier. We are not responsible for the content, privacy practices, or products of external advertiser websites.
               </p>
 
               <h2 className="text-xl font-bold text-white pt-4">
-                4. Contact &amp; Governance
+                5. Contact &amp; Governance
               </h2>
               <p>
                 For questions regarding these Terms, contact our team at{' '}
-                <span className="text-primary font-mono">legal@cheatcode.dev</span>.
+                <a href="mailto:legal@cheatcode.dev" className="text-primary font-mono hover:underline">legal@cheatcode.dev</a>{' '}
+                or visit our <a href="/contact" className="text-primary hover:underline">Contact Page</a>.
               </p>
             </section>
           </article>
         )}
+
+        {/* Footer Navigation */}
+        <footer className="pt-6 border-t border-white/[0.08] flex items-center justify-between text-xs text-zinc-500">
+          <p>© 2026 Cheat Code. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <a href="/about" className="hover:text-primary transition-colors">About Us</a>
+            <span>•</span>
+            <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
+            <span>•</span>
+            <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+            <span>•</span>
+            <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+          </div>
+        </footer>
       </main>
     </div>
   );

@@ -501,6 +501,15 @@ export const AppSidebarLayout: React.FC<AppSidebarLayoutProps> = ({
                 <p className="text-[11px] text-zinc-400 font-sans mt-0.5">
                   659 Companies • 3,399 Questions
                 </p>
+                <div className="flex items-center gap-1.5 pt-1 text-[10px] text-zinc-500 font-sans flex-wrap">
+                  <a href="/about" className="hover:text-primary transition-colors">About</a>
+                  <span>•</span>
+                  <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+                  <span>•</span>
+                  <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+                  <span>•</span>
+                  <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
+                </div>
               </div>
             </div>
           </div>

@@ -92,7 +92,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({
       {isRealAdSense && numericSlotId ? (
         <div className="w-full overflow-hidden rounded-2xl bg-[#0B0F15] border border-white/[0.08] p-2 flex flex-col items-center justify-center">
           <div className="w-full flex items-center justify-between text-[10px] text-zinc-500 pb-1 px-1">
-            <span className="font-mono text-[9px] uppercase tracking-wider font-semibold">AD</span>
+            <span className="font-mono text-[9px] uppercase tracking-wider font-semibold text-zinc-500">Advertisement</span>
             <button
               onClick={handleUpgradeClick}
               className="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 font-medium cursor-pointer"
